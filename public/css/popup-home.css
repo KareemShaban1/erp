@@ -1,0 +1,81 @@
+.popup{
+    position: fixed;
+    top:50%;
+    left: 50%;
+    transform:translate(-50%,-50%);
+    display: block;
+}
+.contentBox{
+    position: relative;
+    width: max-content;
+    height:max-content;
+    background:#fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.contentBox .content{
+    position: relative;
+    height: max-content;
+    width: max-content;
+    justify-content: center;
+    align-items: center;
+
+}
+.close{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 30px;
+    height: 30px;
+    background:black url("../img/close-button.png");
+    background-repeat: no-repeat;
+    background-size:26px;
+    background-position: center;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index:10;
+    opacity:3;
+}
+
+.closex{
+    position: absolute;
+    top: 20px;
+    width: 30px;
+    height: 30px;
+    background:black url("../img/close-button.png");
+    background-repeat: no-repeat;
+    background-size:26px;
+    background-position: center;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index:10;
+    opacity:3;
+}
+
+x{
+        left: 20px;
+
+}
+@media(max-width : 767px){
+    .popup{
+    position: fixed;
+    top:70%;
+    left: 50%;
+    transform:translate(-50%,-50%);
+    
+    }
+    .contentBox{
+        width:max-content;
+        height: max-content;
+        flex-direction: column;
+
+    }
+    .contentBox .content{
+        height: max-content;
+        text-align:center;
+        padding: 20px;
+        padding-top: 0;
+
+    }
+}

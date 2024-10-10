@@ -1,0 +1,4 @@
+[15-Jun-2022 14:40:19 UTC] PHP Fatal error:  Uncaught Error: Class 'Illuminate\Database\Eloquent\Model' not found in /home/newidea/public_html/pos_1/app/AccountType.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/newidea/public_html/pos_1/app/AccountType.php on line 7
