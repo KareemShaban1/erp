@@ -3,12 +3,12 @@
 namespace Modules\Manufacturing\Http\Controllers;
 
 use App\BusinessLocation;
-use App\Transaction;
+use App\Models\Transaction;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
-use App\Variation;
+use App\Models\Variation;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

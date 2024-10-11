@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
-use App\Contact;
+use App\Models\Contact;
 use App\Utils\ContactUtil;
 use Illuminate\Support\Facades\DB;
 use App\Utils\TransactionUtil;

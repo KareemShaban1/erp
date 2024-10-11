@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Entities;
 
-use App\Category;
+use App\Models\Category;
 
 class ProjectCategory extends Category
 {

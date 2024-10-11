@@ -26,7 +26,7 @@ class EssentialsLeave extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\User::class);
+        return $this->belongsTo(\App\Models\User::class);
     }
 
     public function leave_type()
@@ -36,6 +36,6 @@ class EssentialsLeave extends Model
 
     public function changed_by_user()
     {
-        return $this->belongsTo(\App\User::class, 'changed_by');
+        return $this->belongsTo(\App\Models\User::class, 'changed_by');
     }
 }

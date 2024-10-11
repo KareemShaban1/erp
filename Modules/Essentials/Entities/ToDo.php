@@ -23,12 +23,12 @@ class ToDo extends Model
 
     public function users()
     {
-        return $this->belongsToMany(\App\User::class, 'essentials_todos_users', 'todo_id', 'user_id');
+        return $this->belongsToMany(\App\Models\User::class, 'essentials_todos_users', 'todo_id', 'user_id');
     }
 
     public function assigned_by()
     {
-        return $this->belongsTo(\App\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     public function comments()

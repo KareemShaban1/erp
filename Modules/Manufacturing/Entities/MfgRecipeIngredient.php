@@ -18,7 +18,7 @@ class MfgRecipeIngredient extends Model
      */
     public function variation()
     {
-        return $this->belongsTo(\App\Variation::class, 'variation_id');
+        return $this->belongsTo(\App\Models\Variation::class, 'variation_id');
     }
 
     /**
@@ -26,7 +26,7 @@ class MfgRecipeIngredient extends Model
      */
     public function sub_unit()
     {
-        return $this->belongsTo(\App\Unit::class, 'sub_unit_id');
+        return $this->belongsTo(\App\Models\Unit::class, 'sub_unit_id');
     }
 
     /**

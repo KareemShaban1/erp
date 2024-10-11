@@ -2,9 +2,9 @@
 
 namespace Modules\Crm\Http\Controllers;
 
-use App\Contact;
+use App\Models\Contact;
 use App\Http\Controllers\Controller;
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Carbon\Carbon;
@@ -15,7 +15,7 @@ use Modules\Crm\Entities\CrmContact;
 use Modules\Crm\Entities\Schedule;
 use Yajra\DataTables\Facades\DataTables;
 use Modules\Crm\Utils\CrmUtil;
-use App\Transaction;
+use App\Models\Transaction;
 
 class ScheduleController extends Controller
 {

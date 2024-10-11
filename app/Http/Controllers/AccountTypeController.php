@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\AccountType;
+use App\Models\AccountType;
 use Illuminate\Http\Request;
 
 class AccountTypeController extends Controller
@@ -72,7 +72,7 @@ class AccountTypeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\AccountType  $accountType
+     * @param  \App\Models\AccountType  $accountType
      * @return \Illuminate\Http\Response
      */
     public function show(AccountType $accountType)
@@ -83,7 +83,7 @@ class AccountTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\AccountType  $accountType
+     * @param  \App\Models\AccountType  $accountType
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -109,7 +109,7 @@ class AccountTypeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\AccountType  $accountType
+     * @param  \App\Models\AccountType  $accountType
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -151,7 +151,7 @@ class AccountTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\AccountType  $accountType
+     * @param  \App\Models\AccountType  $accountType
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

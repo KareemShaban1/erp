@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\TaxRate;
+use App\Models\TaxRate;
 use App\GroupSubTax;
 use Datatables;
 

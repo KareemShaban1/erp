@@ -8,7 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
 use Modules\Connector\Transformers\BusinessResource;
-use App\Account;
+use App\Models\Account;
 use App\Business;
 use App\Utils\TransactionUtil;
 use App\Utils\BusinessUtil;

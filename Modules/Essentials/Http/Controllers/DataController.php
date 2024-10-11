@@ -2,8 +2,8 @@
 
 namespace Modules\Essentials\Http\Controllers;
 
-use App\Category;
-use App\User;
+use App\Models\Category;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Illuminate\Routing\Controller;

@@ -2,12 +2,12 @@
 namespace Modules\Woocommerce\Utils;
 
 use App\Business;
-use App\Category;
-use App\Contact;
+use App\Models\Category;
+use App\Models\Contact;
 use App\Exceptions\PurchaseSellMismatch;
-use App\Product;
-use App\TaxRate;
-use App\Transaction;
+use App\Models\Product;
+use App\Models\TaxRate;
+use App\Models\Transaction;
 use App\Utils\ProductUtil;
 
 use App\Utils\TransactionUtil;
@@ -15,8 +15,8 @@ use App\Utils\TransactionUtil;
 use App\Utils\Util;
 use App\Utils\ContactUtil;
 
-use App\VariationLocationDetails;
-use App\VariationTemplate;
+use App\Models\VariationLocationDetails;
+use App\Models\VariationTemplate;
 use Automattic\WooCommerce\Client;
 
 use DB;

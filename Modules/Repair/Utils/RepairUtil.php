@@ -10,10 +10,10 @@ use App\Charts\CommonChart;
 use App\Utils\Util;
 use Modules\Repair\Entities\RepairStatus;
 use Spatie\Activitylog\Models\Activity;
-use App\Transaction;
-use App\Brands;
+use App\Models\Transaction;
+use App\Models\Brands;
 use Modules\Repair\Entities\DeviceModel;
-use App\Category;
+use App\Models\Category;
 use Modules\Repair\Entities\JobSheet;
 use Modules\Repair\Notifications\RepairStatusUpdated;
 

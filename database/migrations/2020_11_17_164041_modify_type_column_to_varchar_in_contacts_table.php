@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Contact;
+use App\Models\Contact;
 
 class ModifyTypeColumnToVarcharInContactsTable extends Migration
 {

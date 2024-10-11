@@ -6,9 +6,9 @@ use Modules\Crm\Entities\CrmContact;
 use Modules\Crm\Entities\Schedule;
 use Carbon\Carbon;
 use DB;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Transaction;
+use App\Models\Transaction;
 
 class CrmUtil extends Util
 {

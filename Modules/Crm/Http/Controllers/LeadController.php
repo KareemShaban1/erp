@@ -2,8 +2,8 @@
 
 namespace Modules\Crm\Http\Controllers;
 
-use App\Category;
-use App\User;
+use App\Models\Category;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Modules\Crm\Utils\CrmUtil;
-use App\Contact;
+use App\Models\Contact;
 
 class LeadController extends Controller
 {

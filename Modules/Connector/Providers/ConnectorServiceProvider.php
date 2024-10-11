@@ -41,7 +41,7 @@ class ConnectorServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerFactories();
+        // $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         $this->registerMiddleware($this->app['router']);
@@ -51,7 +51,6 @@ class ConnectorServiceProvider extends ServiceProvider
             InstallCommand::class,
             ClientCommand::class,
             KeysCommand::class,
-            GenerateDocumentation::class
         ]);
     }
 

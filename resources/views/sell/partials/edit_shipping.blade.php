@@ -149,7 +149,7 @@
                         {{-- params for media upload --}}
 					    <input type="hidden" id="media_upload_url" value="{{route('attach.medias.to.model')}}">
 					    <input type="hidden" id="model_id" value="{{$transaction->id}}">
-					    <input type="hidden" id="model_type" value="App\Transaction">
+					    <input type="hidden" id="model_type" value="App\Models\Transaction">
 					    <input type="hidden" id="model_media_type" value="shipping_document">
                     </div>
 		        </div>

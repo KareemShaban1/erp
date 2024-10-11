@@ -8,7 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
 use App\Utils\Util;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 /**

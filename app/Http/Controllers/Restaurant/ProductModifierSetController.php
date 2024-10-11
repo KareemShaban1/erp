@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Restaurant;
 
-use App\Product;
-use App\Variation;
+use App\Models\Product;
+use App\Models\Variation;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

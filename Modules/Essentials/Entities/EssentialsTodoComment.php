@@ -15,7 +15,7 @@ class EssentialsTodoComment extends Model
 
     public function added_by()
     {
-        return $this->belongsTo(\App\User::class, 'comment_by');
+        return $this->belongsTo(\App\Models\User::class, 'comment_by');
     }
 
     public function media()

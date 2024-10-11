@@ -4,15 +4,15 @@ namespace Modules\Woocommerce\Http\Controllers;
 
 use App\Business;
 use App\BusinessLocation;
-use App\Category;
+use App\Models\Category;
 use App\Media;
-use App\Product;
-use App\SellingPriceGroup;
+use App\Models\Product;
+use App\Models\SellingPriceGroup;
 use App\System;
-use App\TaxRate;
+use App\Models\TaxRate;
 use App\Utils\ModuleUtil;
-use App\Variation;
-use App\VariationTemplate;
+use App\Models\Variation;
+use App\Models\VariationTemplate;
 use DB;
 use Illuminate\Http\Request;
 

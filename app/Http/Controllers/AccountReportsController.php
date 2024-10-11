@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Account;
+use App\Models\Account;
 
-use App\AccountTransaction;
-use App\TransactionPayment;
+use App\Models\AccountTransaction;
+use App\Models\TransactionPayment;
 use App\Utils\TransactionUtil;
 use DB;
 

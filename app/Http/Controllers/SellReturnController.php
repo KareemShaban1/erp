@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\BusinessLocation;
-use App\Transaction;
-use App\Contact;
-use App\User;
+use App\Models\Transaction;
+use App\Models\Contact;
+use App\Models\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ContactUtil;
 
@@ -15,7 +15,7 @@ use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use App\TransactionSellLine;
+use App\Models\TransactionSellLine;
 use App\Events\TransactionPaymentDeleted;
 use Spatie\Activitylog\Models\Activity;
 

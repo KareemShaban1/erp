@@ -126,8 +126,8 @@
                         <div class="tab-pane" id="documents_and_notes_tab">
                             <!-- model id like project_id, user_id -->
                             <input type="hidden" name="notable_id" id="notable_id" value="{{$user->id}}">
-                            <!-- model name like App\User -->
-                            <input type="hidden" name="notable_type" id="notable_type" value="App\User">
+                            <!-- model name like App\Models\User -->
+                            <input type="hidden" name="notable_type" id="notable_type" value="App\Models\User">
                             <div class="document_note_body">
                             </div>
                         </div>

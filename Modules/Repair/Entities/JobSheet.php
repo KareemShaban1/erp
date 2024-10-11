@@ -3,7 +3,7 @@
 namespace Modules\Repair\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Variation;
+use App\Models\Variation;
 
 class JobSheet extends Model
 {
@@ -36,7 +36,7 @@ class JobSheet extends Model
      */
     public function customer()
     {
-        return $this->belongsTo('App\Contact', 'contact_id');
+        return $this->belongsTo('App\Models\Contact', 'contact_id');
     }
     
     /**
@@ -44,7 +44,7 @@ class JobSheet extends Model
      */
     public function createdBy()
     {
-        return $this->belongsTo('App\User', 'created_by');
+        return $this->belongsTo('App\Models\User', 'created_by');
     }
 
     /**
@@ -52,7 +52,7 @@ class JobSheet extends Model
      */
     public function technician()
     {
-        return $this->belongsTo('App\User', 'service_staff');
+        return $this->belongsTo('App\Models\User', 'service_staff');
     }
 
     /**
@@ -68,7 +68,7 @@ class JobSheet extends Model
      */
     public function Device()
     {
-        return $this->belongsTo('App\Category', 'device_id');
+        return $this->belongsTo('App\Models\Category', 'device_id');
     }
 
     /**
@@ -76,7 +76,7 @@ class JobSheet extends Model
      */
     public function Brand()
     {
-        return $this->belongsTo('App\Brands', 'brand_id');
+        return $this->belongsTo('App\Models\Brands', 'brand_id');
     }
 
     /**
@@ -100,7 +100,7 @@ class JobSheet extends Model
      */
     public function invoices()
     {
-        return $this->hasMany('App\Transaction', 'repair_job_sheet_id');
+        return $this->hasMany('App\Models\Transaction', 'repair_job_sheet_id');
     }
 
     public function media()

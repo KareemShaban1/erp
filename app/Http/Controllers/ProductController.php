@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Brands;
+use App\Models\Brands;
 use App\Business;
 use App\BusinessLocation;
-use App\Category;
+use App\Models\Category;
 use App\Media;
-use App\Product;
-use App\ProductVariation;
-use App\PurchaseLine;
-use App\SellingPriceGroup;
-use App\TaxRate;
-use App\Unit;
+use App\Models\Product;
+use App\Models\ProductVariation;
+use App\Models\PurchaseLine;
+use App\Models\SellingPriceGroup;
+use App\Models\TaxRate;
+use App\Models\Unit;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
-use App\Variation;
-use App\VariationGroupPrice;
-use App\VariationLocationDetails;
-use App\VariationTemplate;
-use App\Warranty;
+use App\Models\Variation;
+use App\Models\VariationGroupPrice;
+use App\Models\VariationLocationDetails;
+use App\Models\VariationTemplate;
+use App\Models\Warranty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -560,7 +560,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -846,7 +846,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
@@ -1428,7 +1428,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function view($id)
@@ -1733,7 +1733,7 @@ class ProductController extends Controller
     /**
      * Activates the specified resource from storage.
      *
-     * @param  \App\Product  $product
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function activate($id)

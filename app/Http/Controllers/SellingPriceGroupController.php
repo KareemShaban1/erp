@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\SellingPriceGroup;
+use App\Models\SellingPriceGroup;
 use App\Utils\Util;
-use App\Variation;
-use App\VariationGroupPrice;
+use App\Models\Variation;
+use App\Models\VariationGroupPrice;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
@@ -120,7 +120,7 @@ class SellingPriceGroupController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\SellingPriceGroup  $sellingPriceGroup
+     * @param  \App\Models\SellingPriceGroup  $sellingPriceGroup
      * @return \Illuminate\Http\Response
      */
     public function show(SellingPriceGroup $sellingPriceGroup)
@@ -131,7 +131,7 @@ class SellingPriceGroupController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\SellingPriceGroup  $sellingPriceGroup
+     * @param  \App\Models\SellingPriceGroup  $sellingPriceGroup
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -153,7 +153,7 @@ class SellingPriceGroupController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\SellingPriceGroup  $sellingPriceGroup
+     * @param  \App\Models\SellingPriceGroup  $sellingPriceGroup
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -190,7 +190,7 @@ class SellingPriceGroupController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\SellingPriceGroup  $sellingPriceGroup
+     * @param  \App\Models\SellingPriceGroup  $sellingPriceGroup
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

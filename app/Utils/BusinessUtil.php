@@ -2,18 +2,18 @@
 
 namespace App\Utils;
 
-use App\Barcode;
+use App\Models\Barcode;
 
 use App\Business;
 use App\BusinessLocation;
-use App\Contact;
+use App\Models\Contact;
 use App\Currency;
 use App\InvoiceLayout;
 use App\InvoiceScheme;
 use App\NotificationTemplate;
 use App\Printer;
-use App\Unit;
-use App\User;
+use App\Models\Unit;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 

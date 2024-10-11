@@ -1,7 +1,7 @@
 <?php
 namespace Modules\Project\Utils;
 
-use App\User;
+use App\Models\User;
 use App\Utils\Util;
 use Modules\Project\Entities\Project;
 use Modules\Project\Notifications\NewProjectAssignedNotification;

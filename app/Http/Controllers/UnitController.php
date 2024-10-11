@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Unit;
-use App\Product;
+use App\Models\Unit;
+use App\Models\Product;
 
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;

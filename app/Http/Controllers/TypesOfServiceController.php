@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\BusinessLocation;
-use App\SellingPriceGroup;
+use App\Models\SellingPriceGroup;
 use App\TypesOfService;
 use App\Utils\Util;
 use Illuminate\Http\Request;

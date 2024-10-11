@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Entities;
 
-use App\User;
+use App\Models\User;
 
 class ProjectUser extends User
 {

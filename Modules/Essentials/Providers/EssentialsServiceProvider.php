@@ -28,7 +28,7 @@ class EssentialsServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerFactories();
+        // $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         view::composer(['essentials::layouts.partials.header_part',
@@ -129,20 +129,29 @@ class EssentialsServiceProvider extends ServiceProvider
      *
      * @return void
      */
+    // public function registerViews()
+    // {
+    //     $viewPath = resource_path('views/modules/essentials');
+
+    //     $sourcePath = __DIR__.'/../Resources/views';
+
+    //     $this->publishes([
+    //         $sourcePath => $viewPath
+    //     ], 'views');
+
+    //     $this->loadViewsFrom(array_merge(array_map(function ($path) {
+    //         return $path . '/modules/essentials';
+    //     }, \Config::get('view.paths')), [$sourcePath]), 'essentials');
+
+    // }
+
     public function registerViews()
-    {
-        $viewPath = resource_path('views/modules/essentials');
+{
+    $sourcePath = __DIR__.'/../Resources/views';
 
-        $sourcePath = __DIR__.'/../Resources/views';
+    $this->loadViewsFrom($sourcePath, 'essentials');
+}
 
-        $this->publishes([
-            $sourcePath => $viewPath
-        ], 'views');
-
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
-            return $path . '/modules/essentials';
-        }, \Config::get('view.paths')), [$sourcePath]), 'essentials');
-    }
 
     /**
      * Register translations.

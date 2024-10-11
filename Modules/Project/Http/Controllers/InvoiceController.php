@@ -2,9 +2,9 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\Contact;
+use App\Models\Contact;
 use App\InvoiceScheme;
-use App\TaxRate;
+use App\Models\TaxRate;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use App\Utils\Util;

@@ -8,8 +8,8 @@ use Illuminate\Routing\Controller;
 use Modules\Essentials\Entities\EssentialsLeave;
 use Modules\Essentials\Entities\EssentialsHoliday;
 use Modules\Essentials\Entities\EssentialsAttendance;
-use App\User;
-use App\Category;
+use App\Models\User;
+use App\Models\Category;
 use App\Utils\ModuleUtil;
 
 class DashboardController extends Controller

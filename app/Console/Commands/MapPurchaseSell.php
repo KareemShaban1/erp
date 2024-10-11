@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Business;
-use App\Transaction;
-use App\TransactionSellLinesPurchaseLines;
-use App\PurchaseLine;
+use App\Models\Transaction;
+use App\Models\TransactionSellLinesPurchaseLines;
+use App\Models\PurchaseLine;
 
 use Illuminate\Console\Command;
 

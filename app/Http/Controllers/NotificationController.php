@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use \Notification;
 
-use App\Contact;
+use App\Models\Contact;
 use App\Notifications\CustomerNotification;
 use App\Notifications\SupplierNotification;
 use App\NotificationTemplate;
 use App\Restaurant\Booking;
 
-use App\Transaction;
+use App\Models\Transaction;
 use App\Utils\NotificationUtil;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;

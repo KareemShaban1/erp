@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\BusinessLocation;
 
-use App\PurchaseLine;
-use App\Transaction;
-use App\TransactionSellLinesPurchaseLines;
+use App\Models\PurchaseLine;
+use App\Models\Transaction;
+use App\Models\TransactionSellLinesPurchaseLines;
 use App\Utils\ModuleUtil;
 
 use App\Utils\ProductUtil;

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use App\Business;
-use App\User;
+use App\Models\User;
 
 use Modules\Superadmin\Notifications\SuperadminCommunicator;
 use Modules\Superadmin\Entities\SuperadminCommunicatorLog;

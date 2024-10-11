@@ -32,6 +32,6 @@ class KnowledgeBase extends Model
 
     public function users()
     {
-        return $this->belongsToMany(\App\User::class, 'essentials_kb_users','kb_id', 'user_id');
+        return $this->belongsToMany(\App\Models\User::class, 'essentials_kb_users','kb_id', 'user_id');
     }
 }

@@ -9,8 +9,8 @@ use Modules\Connector\Http\Controllers\Api\ApiController;
 use Illuminate\Support\Facades\Auth;
 use App\Utils\ModuleUtil;
 use Illuminate\Support\Facades\DB;
-use App\Contact;
-use App\User;
+use App\Models\Contact;
+use App\Models\User;
 
 /**
  * @group CRM

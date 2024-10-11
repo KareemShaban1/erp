@@ -2,8 +2,8 @@
 
 namespace Modules\Essentials\Http\Controllers;
 
-use App\Transaction;
-use App\User;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use DB;
 use Illuminate\Http\Request;
@@ -12,13 +12,13 @@ use Illuminate\Routing\Controller;
 use Modules\Essentials\Notifications\PayrollNotification;
 use Modules\Essentials\Utils\EssentialsUtil;
 use Yajra\DataTables\Facades\DataTables;
-use App\Category;
+use App\Models\Category;
 use App\Utils\Util;
 use Modules\Essentials\Entities\EssentialsLeave;
 use App\Utils\TransactionUtil;
 use Illuminate\Support\Facades\View;
 use Modules\Essentials\Entities\PayrollGroup;
-use App\TransactionPayment;
+use App\Models\TransactionPayment;
 use App\Events\TransactionPaymentAdded;
 
 class PayrollController extends Controller

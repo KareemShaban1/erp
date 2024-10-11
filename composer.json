@@ -19,7 +19,7 @@
         "giggsey/libphonenumber-for-php": "^8.12",
         "knox/pesapal": "^1.3",
         "laravel/framework": "8.0",
-        "laravel/passport": "*",
+        "laravel/passport": "^10.0",
         "laravel/tinker": "^2.0",
         "laravelcollective/html": "*",
         "maatwebsite/excel": "^3.1.8",
@@ -38,7 +38,8 @@
         "stripe/stripe-php": "^9.0",
         "unicodeveloper/laravel-paystack": "*",
         "yajra/laravel-datatables-oracle": "^9.0",
-        "laravel/fortify": "^1.7"
+        "laravel/fortify": "^1.7",
+        "lcobucci/jwt": "^4.0"
 
     },
     "require-dev": {

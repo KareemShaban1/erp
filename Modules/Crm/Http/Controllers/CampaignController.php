@@ -15,7 +15,7 @@ use Modules\Crm\Entities\CrmContact;
 use Modules\Crm\Notifications\SendCampaignNotification;
 use Notification;
 use Yajra\DataTables\Facades\DataTables;
-use App\Transaction;
+use App\Models\Transaction;
 
 class CampaignController extends Controller
 {

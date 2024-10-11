@@ -4,7 +4,7 @@ namespace App\Utils;
 
 use App\CashRegister;
 use App\CashRegisterTransaction;
-use App\Transaction;
+use App\Models\Transaction;
 
 use DB;
 

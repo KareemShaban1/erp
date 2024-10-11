@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Routing\Controller;
@@ -12,7 +12,7 @@ use Modules\Project\Entities\Project;
 use Modules\Project\Entities\ProjectTask;
 use Modules\Project\Entities\ProjectTransaction;
 use Modules\Project\Utils\ProjectUtil;
-use App\TaxRate;
+use App\Models\TaxRate;
 
 class DataController extends Controller
 {

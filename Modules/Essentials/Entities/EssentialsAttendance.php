@@ -15,7 +15,7 @@ class EssentialsAttendance extends Model
 
     public function employee()
     {
-        return $this->belongsTo(\App\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
     public function shift()

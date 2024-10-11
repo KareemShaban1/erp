@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Entities;
 
-use App\Transaction;
+use App\Models\Transaction;
 
 class ProjectTransaction extends Transaction
 {

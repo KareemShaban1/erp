@@ -9,8 +9,8 @@ use Modules\Crm\Entities\CrmCallLog;
 use Yajra\DataTables\Facades\DataTables;
 use DB;
 use Carbon\CarbonInterval;
-use App\Contact;
-use App\User;
+use App\Models\Contact;
+use App\Models\User;
 use App\Utils\Util;
 
 class CallLogController extends Controller

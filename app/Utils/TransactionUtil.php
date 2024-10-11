@@ -2,10 +2,10 @@
 
 namespace App\Utils;
 
-use App\AccountTransaction;
+use App\Models\AccountTransaction;
 use App\Business;
 use App\BusinessLocation;
-use App\Contact;
+use App\Models\Contact;
 use App\Currency;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentDeleted;
@@ -13,16 +13,16 @@ use App\Events\TransactionPaymentUpdated;
 use App\Exceptions\PurchaseSellMismatch;
 use App\Exceptions\AdvanceBalanceNotAvailable;
 use App\InvoiceScheme;
-use App\Product;
-use App\PurchaseLine;
+use App\Models\Product;
+use App\Models\PurchaseLine;
 use App\Restaurant\ResTable;
-use App\TaxRate;
-use App\Transaction;
-use App\TransactionPayment;
-use App\TransactionSellLine;
-use App\TransactionSellLinesPurchaseLines;
-use App\Variation;
-use App\VariationLocationDetails;
+use App\Models\TaxRate;
+use App\Models\Transaction;
+use App\Models\TransactionPayment;
+use App\Models\TransactionSellLine;
+use App\Models\TransactionSellLinesPurchaseLines;
+use App\Models\Variation;
+use App\Models\VariationLocationDetails;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Utils\ModuleUtil;
@@ -1499,7 +1499,7 @@ class TransactionUtil extends Util
             if (isset($il->module_info['service_staff']['show_service_staff'])) {
                 $output['service_staff_label'] = !empty($il->module_info['service_staff']['service_staff_label']) ? $il->module_info['service_staff']['service_staff_label'] : '';
                 if (!empty($transaction->res_waiter_id)) {
-                    $waiter = \App\User::find($transaction->res_waiter_id);
+                    $waiter = \App\Models\User::find($transaction->res_waiter_id);
                 }
                 
                 //res_table_id
@@ -1522,7 +1522,7 @@ class TransactionUtil extends Util
                 $output['repair_warranty_label'] = $il->module_info['repair']['repair_warranty_label'];
                 $output['repair_warranty'] = '';
                 if (!empty($transaction->repair_warranty_id)) {
-                    $repair_warranty = \App\Warranty::find($transaction->repair_warranty_id);
+                    $repair_warranty = \App\Models\Warranty::find($transaction->repair_warranty_id);
                     $output['repair_warranty'] = $repair_warranty->name;
                 }
             }
@@ -1569,7 +1569,7 @@ class TransactionUtil extends Util
 
             if (!empty($il->module_info['repair']['show_device'])) {
                 $output['device_label'] = $il->module_info['repair']['device_label'];
-                $device = \App\Category::find($transaction->repair_device_id);
+                $device = \App\Models\Category::find($transaction->repair_device_id);
 
                 $output['repair_device'] = '';
                 if (!empty($device)) {
@@ -1579,7 +1579,7 @@ class TransactionUtil extends Util
 
             if (!empty($il->module_info['repair']['show_brand'])) {
                 $output['brand_label'] = $il->module_info['repair']['brand_label'];
-                $brand = \App\Brands::find($transaction->repair_brand_id);
+                $brand = \App\Models\Brands::find($transaction->repair_brand_id);
                 $output['repair_brand'] = '';
                 if (!empty($brand)) {
                     $output['repair_brand'] = $brand->name;

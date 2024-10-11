@@ -2,7 +2,7 @@
 
 namespace Modules\Crm\Entities;
 
-use App\Contact;
+use App\Models\Contact;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,7 +20,7 @@ class CrmContact extends Contact
     */
     public function leadUsers()
     {
-        return $this->belongsToMany('App\User', 'crm_lead_users', 'contact_id', 'user_id');
+        return $this->belongsToMany('App\Models\User', 'crm_lead_users', 'contact_id', 'user_id');
     }
 
     /**
@@ -28,7 +28,7 @@ class CrmContact extends Contact
      */
     public function Source()
     {
-        return $this->belongsTo('App\Category', 'crm_source');
+        return $this->belongsTo('App\Models\Category', 'crm_source');
     }
 
     /**
@@ -36,7 +36,7 @@ class CrmContact extends Contact
      */
     public function lifeStage()
     {
-        return $this->belongsTo('App\Category', 'crm_life_stage');
+        return $this->belongsTo('App\Models\Category', 'crm_life_stage');
     }
 
     /**

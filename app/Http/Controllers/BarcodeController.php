@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Barcode;
+use App\Models\Barcode;
 use Illuminate\Http\Request;
 use Datatables;
 
@@ -120,7 +120,7 @@ class BarcodeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Barcode  $barcode
+     * @param  \App\Models\Barcode  $barcode
      * @return \Illuminate\Http\Response
      */
     public function show(Barcode $barcode)

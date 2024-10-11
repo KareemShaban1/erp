@@ -3,12 +3,12 @@
 namespace Modules\Superadmin\Http\Controllers;
 
 use App\Business;
-use App\Product;
-use App\Transaction;
-use App\User;
+use App\Models\Product;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
-use App\VariationLocationDetails;
+use App\Models\VariationLocationDetails;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;

@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Business;
 
 use App\BusinessLocation;
-use App\Product;
-use App\Transaction;
+use App\Models\Product;
+use App\Models\Transaction;
 use App\Utils\ProductUtil;
-use App\Variation;
+use App\Models\Variation;
 use DB;
 use Excel;
 use Illuminate\Http\Request;

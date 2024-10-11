@@ -25,6 +25,6 @@ class InvoiceLine extends Model
     */
     public function tax()
     {
-        return $this->belongsTo(\App\TaxRate::class, 'tax_rate_id');
+        return $this->belongsTo(\App\Models\TaxRate::class, 'tax_rate_id');
     }
 }

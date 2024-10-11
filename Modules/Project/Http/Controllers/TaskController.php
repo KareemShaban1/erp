@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Carbon\Carbon;

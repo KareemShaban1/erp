@@ -2,7 +2,7 @@
 
 namespace Modules\Crm\Http\Middleware;
 
-use App\Contact;
+use App\Models\Contact;
 use Closure;
 use Illuminate\Http\Request;
 use Menu;

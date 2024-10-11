@@ -18,6 +18,6 @@ class EssentialsMessage extends Model
     */
     public function sender()
     {
-        return $this->belongsTo(\App\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 }

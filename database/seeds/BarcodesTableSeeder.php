@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Barcode;
+use App\Models\Barcode;
 
 class BarcodesTableSeeder extends Seeder
 {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Warranty;
+use App\Models\Warranty;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -80,7 +80,7 @@ class WarrantyController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Warranty  $warranty
+     * @param  \App\Models\Warranty  $warranty
      * @return \Illuminate\Http\Response
      */
     public function show(Warranty $warranty)
@@ -91,7 +91,7 @@ class WarrantyController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Warranty  $warranty
+     * @param  \App\Models\Warranty  $warranty
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -110,7 +110,7 @@ class WarrantyController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Warranty  $warranty
+     * @param  \App\Models\Warranty  $warranty
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -143,7 +143,7 @@ class WarrantyController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Warranty  $warranty
+     * @param  \App\Models\Warranty  $warranty
      * @return \Illuminate\Http\Response
      */
     public function destroy(Warranty $warranty)

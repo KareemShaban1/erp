@@ -27,6 +27,6 @@ class ProjectTaskComment extends Model
 
     public function commentedBy()
     {
-        return $this->belongsTo(\App\User::class, 'commented_by');
+        return $this->belongsTo(\App\Models\User::class, 'commented_by');
     }
 }

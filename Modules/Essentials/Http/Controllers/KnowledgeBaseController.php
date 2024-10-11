@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Modules\Essentials\Entities\KnowledgeBase;
 use App\Utils\ModuleUtil;
-use App\User;
+use App\Models\User;
 
 class KnowledgeBaseController extends Controller
 {

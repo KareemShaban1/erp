@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Restaurant;
 
-use App\Product;
+use App\Models\Product;
 
 use App\Utils\ProductUtil;
 use Illuminate\Http\Request;

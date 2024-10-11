@@ -186,7 +186,7 @@
                     @if(isset($project->settings['enable_notes_documents']) && $project->settings['enable_notes_documents'])
                         <!-- model id like project_id, user_id -->
                         <input type="hidden" name="notable_id" id="notable_id" value="{{$project->id}}">
-                        <!-- model name like App\User -->
+                        <!-- model name like App\Models\User -->
                         <input type="hidden" name="notable_type" id="notable_type" value="Modules\Project\Entities\Project">
                         <div class="tab-pane document_note_body
                             @if($tab_view == 'documents_and_notes')

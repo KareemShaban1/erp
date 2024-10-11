@@ -6,18 +6,18 @@ use App\BusinessLocation;
 
 use App\Charts\CommonChart;
 use App\Currency;
-use App\Transaction;
+use App\Models\Transaction;
 use App\Utils\BusinessUtil;
 
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
-use App\VariationLocationDetails;
+use App\Models\VariationLocationDetails;
 use Datatables;
 use DB;
 use Illuminate\Http\Request;
 use App\Utils\Util;
 use App\Utils\RestaurantUtil;
-use App\User;
+use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
 use App\Media;
 

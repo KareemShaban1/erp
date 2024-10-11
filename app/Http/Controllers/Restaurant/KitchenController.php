@@ -6,8 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 
-use App\Transaction;
-use App\TransactionSellLine;
+use App\Models\Transaction;
+use App\Models\TransactionSellLine;
 
 use App\Utils\Util;
 

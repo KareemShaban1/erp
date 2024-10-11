@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Brands;
+use App\Models\Brands;
 use App\Business;
 use App\BusinessLocation;
-use App\Category;
-use App\Product;
-use App\TaxRate;
-use App\Transaction;
-use App\Unit;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\TaxRate;
+use App\Models\Transaction;
+use App\Models\Unit;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
-use App\Variation;
-use App\VariationValueTemplate;
+use App\Models\Variation;
+use App\Models\VariationValueTemplate;
 use DB;
 use Excel;
 use Illuminate\Http\Request;

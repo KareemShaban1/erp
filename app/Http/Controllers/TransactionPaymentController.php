@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Contact;
+use App\Models\Contact;
 
 use App\Events\TransactionPaymentAdded;
 
 use App\Events\TransactionPaymentUpdated;
-use App\Transaction;
-use App\TransactionPayment;
+use App\Models\Transaction;
+use App\Models\TransactionPayment;
 
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;

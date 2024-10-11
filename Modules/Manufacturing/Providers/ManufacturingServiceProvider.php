@@ -3,7 +3,7 @@
 namespace Modules\Manufacturing\Providers;
 
 use App\Utils\ModuleUtil;
-use Illuminate\Database\Eloquent\Factory;
+// use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,7 +26,7 @@ class ManufacturingServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerFactories();
+        // $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         //TODO:Remove
@@ -110,12 +110,12 @@ class ManufacturingServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerFactories()
-    {
-        if (! app()->environment('production')) {
-            app(Factory::class)->load(__DIR__ . '/../Database/factories');
-        }
-    }
+    // public function registerFactories()
+    // {
+    //     if (! app()->environment('production')) {
+    //         app(Factory::class)->load(__DIR__ . '/../Database/factories');
+    //     }
+    // }
 
     /**
      * Get the services provided by the provider.

@@ -5,11 +5,11 @@ namespace Modules\Crm\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use App\User;
+use App\Models\User;
 use Modules\Crm\Entities\Schedule;
 use DB;
 use Yajra\DataTables\Facades\DataTables;
-use App\Contact;
+use App\Models\Contact;
 use App\Utils\Util;
 
 class ReportController extends Controller

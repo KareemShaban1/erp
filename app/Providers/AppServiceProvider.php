@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Utils\ModuleUtil;
+use Lcobucci\JWT\Configuration;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -214,6 +215,12 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        $this->app->singleton(Configuration::class, function () {
+            return Configuration::forSymmetricSigner(
+                new \Lcobucci\JWT\Signer\Hmac\Sha256(),
+                \Lcobucci\JWT\Signer\Key\InMemory::plainText(config('passport.secret'))
+            );
+        });
     }
 
     /**

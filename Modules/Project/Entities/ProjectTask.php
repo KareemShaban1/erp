@@ -32,7 +32,7 @@ class ProjectTask extends Model
      */
     public function members()
     {
-        return $this->belongsToMany('App\User', 'pjt_project_task_members', 'project_task_id', 'user_id');
+        return $this->belongsToMany('App\Models\User', 'pjt_project_task_members', 'project_task_id', 'user_id');
     }
 
     /**
@@ -40,7 +40,7 @@ class ProjectTask extends Model
      */
     public function createdBy()
     {
-        return $this->belongsTo('App\User', 'created_by');
+        return $this->belongsTo('App\Models\User', 'created_by');
     }
 
     /**

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\VariationTemplate;
-use App\VariationValueTemplate;
-use App\ProductVariation;
-use App\Variation;
+use App\Models\VariationTemplate;
+use App\Models\VariationValueTemplate;
+use App\Models\ProductVariation;
+use App\Models\Variation;
 
 use Illuminate\Http\Request;
 
@@ -106,7 +106,7 @@ class VariationTemplateController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\VariationTemplate  $variationTemplate
+     * @param  \App\Models\VariationTemplate  $variationTemplate
      * @return \Illuminate\Http\Response
      */
     public function show(VariationTemplate $variationTemplate)

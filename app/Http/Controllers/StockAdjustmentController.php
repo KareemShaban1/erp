@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\BusinessLocation;
 
-use App\PurchaseLine;
+use App\Models\PurchaseLine;
 
-use App\Transaction;
+use App\Models\Transaction;
 use App\Utils\ModuleUtil;
 
 use App\Utils\ProductUtil;
@@ -281,7 +281,7 @@ class StockAdjustmentController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Transaction  $stockAdjustment
+     * @param  \App\Models\Transaction  $stockAdjustment
      * @return \Illuminate\Http\Response
      */
     public function edit(Transaction $stockAdjustment)
@@ -293,7 +293,7 @@ class StockAdjustmentController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Transaction  $stockAdjustment
+     * @param  \App\Models\Transaction  $stockAdjustment
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Transaction $stockAdjustment)

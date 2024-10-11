@@ -5,9 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-use App\Transaction;
-use App\Contact;
-use App\User;
+use App\Models\Transaction;
+use App\Models\Contact;
+use App\Models\User;
 
 use App\Utils\TransactionUtil;
 use App\Utils\ProductUtil;

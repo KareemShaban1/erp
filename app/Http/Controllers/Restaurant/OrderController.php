@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 
-use App\Transaction;
-use App\User;
-use App\TransactionSellLine;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Models\TransactionSellLine;
 
 use App\Utils\Util;
 use App\Utils\RestaurantUtil;

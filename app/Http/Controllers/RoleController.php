@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\SellingPriceGroup;
+use App\Models\SellingPriceGroup;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;

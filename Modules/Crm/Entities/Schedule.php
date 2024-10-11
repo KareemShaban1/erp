@@ -35,7 +35,7 @@ class Schedule extends Model
     */
     public function users()
     {
-        return $this->belongsToMany('App\User', 'crm_schedule_users', 'schedule_id', 'user_id');
+        return $this->belongsToMany('App\Models\User', 'crm_schedule_users', 'schedule_id', 'user_id');
     }
 
     /**
@@ -43,7 +43,7 @@ class Schedule extends Model
     */
     public function invoices()
     {
-        return $this->belongsToMany('App\Transaction', 'crm_followup_invoices', 'follow_up_id', 'transaction_id');
+        return $this->belongsToMany('App\Models\Transaction', 'crm_followup_invoices', 'follow_up_id', 'transaction_id');
     }
 
     /**
@@ -51,12 +51,12 @@ class Schedule extends Model
      */
     public function createdBy()
     {
-        return $this->belongsTo('App\User', 'created_by');
+        return $this->belongsTo('App\Models\User', 'created_by');
     }
 
     public function customer()
     {
-        return $this->belongsTo(\App\Contact::class, 'contact_id');
+        return $this->belongsTo(\App\Models\Contact::class, 'contact_id');
     }
 
     public function scheduleLog()

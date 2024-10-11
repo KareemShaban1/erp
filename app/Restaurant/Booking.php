@@ -17,7 +17,7 @@ class Booking extends Model
 
     public function customer()
     {
-        return $this->belongsTo(\App\Contact::class, 'contact_id');
+        return $this->belongsTo(\App\Models\Contact::class, 'contact_id');
     }
 
     public function table()
@@ -27,12 +27,12 @@ class Booking extends Model
 
     public function correspondent()
     {
-        return $this->belongsTo(\App\User::class, 'correspondent_id');
+        return $this->belongsTo(\App\Models\User::class, 'correspondent_id');
     }
 
     public function waiter()
     {
-        return $this->belongsTo(\App\User::class, 'waiter_id');
+        return $this->belongsTo(\App\Models\User::class, 'waiter_id');
     }
 
     public function location()

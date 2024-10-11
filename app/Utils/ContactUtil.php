@@ -2,9 +2,9 @@
 
 namespace App\Utils;
 
-use App\Contact;
+use App\Models\Contact;
 use App\Utils\TransactionUtil;
-use App\Transaction;
+use App\Models\Transaction;
 use DB;
 
 class ContactUtil extends Util

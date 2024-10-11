@@ -2,7 +2,7 @@
 
 namespace Modules\Essentials\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use DB;
 use Illuminate\Http\Request;

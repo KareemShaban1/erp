@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\BusinessLocation;
-use App\Contact;
+use App\Models\Contact;
 use App\System;
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use DB;
 use Illuminate\Http\Request;

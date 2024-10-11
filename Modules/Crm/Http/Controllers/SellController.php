@@ -2,9 +2,9 @@
 
 namespace Modules\Crm\Http\Controllers;
 
-use App\Contact;
+use App\Models\Contact;
 use App\Http\Controllers\Controller;
-use App\Transaction;
+use App\Models\Transaction;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;

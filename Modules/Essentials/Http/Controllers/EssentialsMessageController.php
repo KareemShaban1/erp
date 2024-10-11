@@ -3,7 +3,7 @@
 namespace Modules\Essentials\Http\Controllers;
 
 use App\BusinessLocation;
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 
 

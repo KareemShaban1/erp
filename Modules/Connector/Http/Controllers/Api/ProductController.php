@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\ProductResource;
 use Modules\Connector\Transformers\VariationResource;
 use Modules\Connector\Transformers\CommonResource;
-use App\Product;
-use App\Variation;
-use App\SellingPriceGroup;
+use App\Models\Product;
+use App\Models\Variation;
+use App\Models\SellingPriceGroup;
 
 /**
  * @group Product management

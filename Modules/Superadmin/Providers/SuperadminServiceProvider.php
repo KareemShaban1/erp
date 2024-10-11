@@ -29,7 +29,7 @@ class SuperadminServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerFactories();
+        // $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         view::composer('superadmin::layouts.partials.active_subscription', function ($view) {

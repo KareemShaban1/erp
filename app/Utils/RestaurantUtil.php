@@ -5,10 +5,10 @@ use Illuminate\Support\Facades\DB;
 
 use Spatie\Permission\Models\Role;
 
-use App\Transaction;
+use App\Models\Transaction;
 use App\BusinessLocation;
-use App\User;
-use App\TransactionSellLine;
+use App\Models\User;
+use App\Models\TransactionSellLine;
 use App\Restaurant\Booking;
 
 class RestaurantUtil extends Util

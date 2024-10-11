@@ -9,14 +9,14 @@ use DB;
 use App\Utils\BusinessUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
-use App\Variation;
-use App\Product;
-use App\TaxRate;
-use App\Transaction;
-use App\Contact;
+use App\Models\Variation;
+use App\Models\Product;
+use App\Models\TaxRate;
+use App\Models\Transaction;
+use App\Models\Contact;
 use App\Utils\ModuleUtil;
 use App\TypesOfService;
-use App\Unit;
+use App\Models\Unit;
 
 class ImportSalesController extends Controller
 {

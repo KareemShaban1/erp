@@ -2,11 +2,11 @@
 
 namespace Modules\Repair\Http\Controllers;
 
-use App\Brands;
-use App\Category;
-use App\Transaction;
+use App\Models\Brands;
+use App\Models\Category;
+use App\Models\Transaction;
 use App\Utils\ModuleUtil;
-use App\Warranty;
+use App\Models\Warranty;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

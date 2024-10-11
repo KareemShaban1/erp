@@ -109,7 +109,7 @@ class WooCommerceSyncOrder extends Command
      */
     private function notify($user_id)
     {
-        $user = \App\User::find($user_id);
+        $user = \App\Models\User::find($user_id);
 
         $user->notify(new SyncOrdersNotification());
     }

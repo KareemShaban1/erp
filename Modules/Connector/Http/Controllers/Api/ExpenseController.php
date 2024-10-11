@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Utils\TransactionUtil;
 use Modules\Connector\Transformers\ExpenseResource;
 use DB;
-use App\Transaction;
+use App\Models\Transaction;
 
 /**
  * @group Expense management

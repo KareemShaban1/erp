@@ -3,12 +3,12 @@
 namespace App\Utils;
 
 use \Module;
-use App\Account;
+use App\Models\Account;
 use App\BusinessLocation;
-use App\Product;
+use App\Models\Product;
 use App\System;
-use App\Transaction;
-use App\User;
+use App\Models\Transaction;
+use App\Models\User;
 use Composer\Semver\Comparator;
 
 class ModuleUtil extends Util

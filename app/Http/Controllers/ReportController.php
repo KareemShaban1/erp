@@ -2,36 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Brands;
+use App\Models\Brands;
 use App\BusinessLocation;
 use App\CashRegister;
-use App\Category;
+use App\Models\Category;
 
 use App\Charts\CommonChart;
-use App\Contact;
+use App\Models\Contact;
 
-use App\CustomerGroup;
+use App\Models\CustomerGroup;
 use App\ExpenseCategory;
-use App\Product;
-use App\PurchaseLine;
+use App\Models\Product;
+use App\Models\PurchaseLine;
 use App\Restaurant\ResTable;
-use App\SellingPriceGroup;
-use App\Transaction;
-use App\TransactionPayment;
-use App\TransactionSellLine;
-use App\TransactionSellLinesPurchaseLines;
-use App\Unit;
-use App\User;
+use App\Models\SellingPriceGroup;
+use App\Models\Transaction;
+use App\Models\TransactionPayment;
+use App\Models\TransactionSellLine;
+use App\Models\TransactionSellLinesPurchaseLines;
+use App\Models\Unit;
+use App\Models\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
-use App\Variation;
-use App\VariationLocationDetails;
+use App\Models\Variation;
+use App\Models\VariationLocationDetails;
 use Datatables;
 use DB;
 use Illuminate\Http\Request;
-use App\TaxRate;
+use App\Models\TaxRate;
 use Spatie\Activitylog\Models\Activity;
 
 class ReportController extends Controller
@@ -3496,12 +3496,12 @@ class ReportController extends Controller
             $subject_type = request()->subject_type;
             if (!empty($subject_type)) {
                 if ($subject_type == 'contact') {
-                    $activities->where('subject_type', 'App\Contact');
+                    $activities->where('subject_type', 'App\Models\Contact');
                 } else if($subject_type == 'user') {
-                    $activities->where('subject_type', 'App\User');
+                    $activities->where('subject_type', 'App\Models\User');
                 } else if(in_array($subject_type, ['sell', 'purchase', 
                     'sales_order', 'purchase_order', 'sell_return', 'purchase_return', 'sell_transfer', 'expense', 'purchase_order'])) {
-                    $activities->where('subject_type', 'App\Transaction');
+                    $activities->where('subject_type', 'App\Models\Transaction');
                     $activities->whereHasMorph('subject', Transaction::class, function($q) use($subject_type){
                         $q->where('type', $subject_type);
                     });
@@ -3518,13 +3518,13 @@ class ReportController extends Controller
                             ->editColumn('created_at', '{{@format_datetime($created_at)}}')
                             ->addColumn('subject_type', function($row) use($transaction_types) {
                                     $subject_type = '';
-                                    if ($row->subject_type == 'App\Contact') {
+                                    if ($row->subject_type == 'App\Models\Contact') {
                                         $subject_type = __('contact.contact');
-                                    } else if ($row->subject_type == 'App\User') {
+                                    } else if ($row->subject_type == 'App\Models\User') {
                                         $subject_type = __('report.user');
-                                    } else if ($row->subject_type == 'App\Transaction' && !empty($row->subject->type)) {
+                                    } else if ($row->subject_type == 'App\Models\Transaction' && !empty($row->subject->type)) {
                                         $subject_type = isset($transaction_types[$row->subject->type]) ? $transaction_types[$row->subject->type] : '';
-                                    } elseif (($row->subject_type == 'App\TransactionPayment')) {
+                                    } elseif (($row->subject_type == 'App\Models\TransactionPayment')) {
                                        $subject_type = __('lang_v1.payment');
                                     }
                                 return $subject_type;
@@ -3537,7 +3537,7 @@ class ReportController extends Controller
                                 if (!empty($row->subject->invoice_no)) {
                                     $html .= __('sale.invoice_no') . ': ' . $row->subject->invoice_no . '<br>';
                                 }
-                                if($row->subject_type == 'App\Transaction' && !empty($row->subject) && in_array($row->subject->type, ['sell', 'purchase'])) {
+                                if($row->subject_type == 'App\Models\Transaction' && !empty($row->subject) && in_array($row->subject->type, ['sell', 'purchase'])) {
                                     $html .= view('sale_pos.partials.activity_row', ['activity' => $row, 'statuses' => $statuses, 'shipping_statuses' => $shipping_statuses])->render();
                                 } else {
                                     $update_note = $row->getExtraProperty('update_note');

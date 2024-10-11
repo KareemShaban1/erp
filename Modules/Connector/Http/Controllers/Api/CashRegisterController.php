@@ -9,7 +9,7 @@ use App\CashRegister;
 use Modules\Connector\Transformers\CommonResource;
 use Illuminate\Support\Facades\Auth;
 use App\CashRegisterTransaction;
-use App\Transaction;
+use App\Models\Transaction;
 
 /**
  * @group Cash register management

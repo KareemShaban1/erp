@@ -2,7 +2,7 @@
 
 namespace Modules\Crm\Http\Controllers;
 
-use App\Contact;
+use App\Models\Contact;
 use App\Http\Controllers\Controller;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;

@@ -23,7 +23,7 @@ class EssentialsAllowanceAndDeduction extends Model
 
     public function employees()
     {
-        return $this->belongsToMany(\App\User::class, 'essentials_user_allowance_and_deductions', 'allowance_deduction_id', 'user_id');
+        return $this->belongsToMany(\App\Models\User::class, 'essentials_user_allowance_and_deductions', 'allowance_deduction_id', 'user_id');
     }
 
     public static function forDropdown($business_id)

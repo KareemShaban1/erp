@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Account;
+use App\Models\Account;
 use App\BusinessLocation;
 use App\InvoiceLayout;
 use App\InvoiceScheme;
-use App\SellingPriceGroup;
+use App\Models\SellingPriceGroup;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;

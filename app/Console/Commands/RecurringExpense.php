@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Transaction;
-use App\User;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Utils\TransactionUtil;
 use App\Utils\NotificationUtil;
 use Illuminate\Support\Facades\DB;

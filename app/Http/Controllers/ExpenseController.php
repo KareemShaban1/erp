@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Account;
+use App\Models\Account;
 
-use App\AccountTransaction;
+use App\Models\AccountTransaction;
 use App\BusinessLocation;
 use App\ExpenseCategory;
-use App\TaxRate;
-use App\Transaction;
-use App\User;
+use App\Models\TaxRate;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use DB;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
-use App\Contact;
+use App\Models\Contact;
 use App\Utils\CashRegisterUtil;
 
 class ExpenseController extends Controller

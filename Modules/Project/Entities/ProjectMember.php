@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Entities;
 
-use App\User;
+use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 

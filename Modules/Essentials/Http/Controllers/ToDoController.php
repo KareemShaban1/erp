@@ -3,7 +3,7 @@
 namespace Modules\Essentials\Http\Controllers;
 
 use App\Media;
-use App\User;
+use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;

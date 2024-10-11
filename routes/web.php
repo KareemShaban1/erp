@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 // use Carbon\Carbon;
-use App\Transaction;
+use App\Models\Transaction;
 
 
 /*
