@@ -3,16 +3,16 @@
 namespace App\Utils;
 
 use App\Models\AccountTransaction;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
-use App\Currency;
+use App\Models\Currency;
 use App\Events\TransactionPaymentAdded;
 use App\Events\TransactionPaymentDeleted;
 use App\Events\TransactionPaymentUpdated;
 use App\Exceptions\PurchaseSellMismatch;
 use App\Exceptions\AdvanceBalanceNotAvailable;
-use App\InvoiceScheme;
+use App\Models\InvoiceScheme;
 use App\Models\Product;
 use App\Models\PurchaseLine;
 use App\Restaurant\ResTable;
@@ -1579,7 +1579,7 @@ class TransactionUtil extends Util
 
             if (!empty($il->module_info['repair']['show_brand'])) {
                 $output['brand_label'] = $il->module_info['repair']['brand_label'];
-                $brand = \App\Models\Brands::find($transaction->repair_brand_id);
+                $brand = \App\Models\Brand::find($transaction->repair_brand_id);
                 $output['repair_brand'] = '';
                 if (!empty($brand)) {
                     $output['repair_brand'] = $brand->name;

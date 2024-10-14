@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\InvoiceScheme;
-use App\InvoiceLayout;
+use App\Models\InvoiceScheme;
+use App\Models\InvoiceLayout;
 use Illuminate\Http\Request;
 use Datatables;
 

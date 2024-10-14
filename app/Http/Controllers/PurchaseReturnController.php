@@ -10,7 +10,7 @@ use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use Spatie\Activitylog\Models\Activity;
 
 class PurchaseReturnController extends Controller

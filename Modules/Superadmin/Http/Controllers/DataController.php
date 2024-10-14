@@ -3,7 +3,7 @@
 namespace Modules\Superadmin\Http\Controllers;
 
 use \Notification;
-use App\System;
+use App\Models\System;
 use App\Utils\Util;
 use Illuminate\Routing\Controller;
 use Menu;

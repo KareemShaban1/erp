@@ -3,13 +3,13 @@
 namespace Modules\Repair\Http\Controllers;
 
 use App\Models\Barcode;
-use App\Models\Brands;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Brand;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
-use App\Media;
-use App\NotificationTemplate;
+use App\Models\Media;
+use App\Models\NotificationTemplate;
 use App\Models\SellingPriceGroup;
 use App\Models\TaxRate;
 use App\Models\Transaction;
@@ -492,7 +492,7 @@ class RepairController extends Controller
         $repair_statuses = RepairStatus::getRepairSatuses($business_id);
         $warranties = Warranty::forDropdown($business_id);
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
 
         $service_staff = [];
         if ($this->productUtil->isModuleEnabled('service_staff')) {
@@ -798,7 +798,7 @@ class RepairController extends Controller
 
         $warranties = Warranty::forDropdown($business_id);
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
 
         $waiters = [];
         if ($this->productUtil->isModuleEnabled('service_staff')) {

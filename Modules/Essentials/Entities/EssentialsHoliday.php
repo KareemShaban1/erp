@@ -15,6 +15,6 @@ class EssentialsHoliday extends Model
 
     public function location()
     {
-        return $this->belongsTo(\App\BusinessLocation::class, 'location_id');
+        return $this->belongsTo(\App\Models\BusinessLocation::class, 'location_id');
     }
 }

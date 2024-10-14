@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
 use App\Models\PurchaseLine;
@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 use Spatie\Activitylog\Models\Activity;
-use App\Media;
+use App\Models\Media;
 
 class PurchaseOrderController extends Controller
 {

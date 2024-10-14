@@ -16,6 +16,17 @@ class Product extends Model
     protected $appends = ['image_url'];
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name','business_id','type','unit_id','sub_unit_ids','brand_id',
+    'category_id','sub_category_id','tax','tax_type','enable_stock','alert_quantity','sku',
+    'barcode_type','expiry_period','expiry_period_type','enable_sr_no','weight',
+    'product_custom_field1','product_custom_field2','product_custom_field3','product_custom_field4',
+    'image','product_description','created_by','warranty_id','is_inactive','not_for_selling'];
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -56,7 +67,7 @@ class Product extends Model
 
     public function product_variations()
     {
-        return $this->hasMany(\App\ProductVariation::class);
+        return $this->hasMany(\App\Models\ProductVariation::class);
     }
     
     /**
@@ -64,9 +75,9 @@ class Product extends Model
      */
     public function brand()
     {
-        return $this->belongsTo(\App\Models\Brands::class);
+        return $this->belongsTo(\App\Models\Brand::class);
     }
-    
+
     /**
     * Get the unit associated with the product.
     */
@@ -128,7 +139,7 @@ class Product extends Model
     {
         return $this->hasMany(\App\Models\PurchaseLine::class);
     }
-
+ 
     /**
      * Scope a query to only include active products.
      *
@@ -173,9 +184,22 @@ class Product extends Model
         return $query->where('not_for_selling', 1);
     }
 
+    
+         /**
+     * Scope a query to only include main categories.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBusinessId($query)
+    {
+        return $query->where('products.business_id', 273);
+    }
+
+
     public function product_locations()
     {
-        return $this->belongsToMany(\App\BusinessLocation::class, 'product_locations', 'product_id', 'location_id');
+        return $this->belongsToMany(\App\Models\BusinessLocation::class, 'product_locations', 'product_id', 'location_id');
     }
 
     /**
@@ -203,6 +227,8 @@ class Product extends Model
 
     public function media()
     {
-        return $this->morphMany(\App\Media::class, 'model');
+        return $this->morphMany(\App\Models\Media::class, 'model');
     }
+
+
 }

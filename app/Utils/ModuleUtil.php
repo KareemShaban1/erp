@@ -4,9 +4,9 @@ namespace App\Utils;
 
 use \Module;
 use App\Models\Account;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Product;
-use App\System;
+use App\Models\System;
 use App\Models\Transaction;
 use App\Models\User;
 use Composer\Semver\Comparator;

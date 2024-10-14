@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\DocumentAndNote;
+use App\Models\DocumentAndNote;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;

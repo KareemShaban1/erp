@@ -3,7 +3,7 @@
 namespace App\Utils;
 
 use App\Models\TaxRate;
-use App\GroupSubTax;
+use App\Models\GroupSubTax;
 
 class TaxUtil extends Util
 {

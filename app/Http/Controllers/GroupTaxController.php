@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TaxRate;
-use App\GroupSubTax;
+use App\Models\GroupSubTax;
 use Datatables;
 
 use Illuminate\Http\Request;

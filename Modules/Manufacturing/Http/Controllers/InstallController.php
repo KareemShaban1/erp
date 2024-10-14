@@ -2,7 +2,7 @@
 
 namespace Modules\Manufacturing\Http\Controllers;
 
-use App\System;
+use App\Models\System;
 use Composer\Semver\Comparator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

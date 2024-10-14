@@ -2,7 +2,7 @@
 
 namespace Modules\Crm\Http\Controllers;
 
-use App\Business;
+use App\Models\Business;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Modules\Crm\Utils\CrmUtil;

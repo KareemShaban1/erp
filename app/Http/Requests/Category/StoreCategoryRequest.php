@@ -19,16 +19,28 @@ class StoreCategoryRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            //
-            'parent_id' => 'nullable|exists:categories,id',
             'name' => 'required|string|max:255',
+            'business_id' => 'required|exists:business,id',
+            'short_code' => 'nullable|string|max:50',
+            'parent_id' => 'nullable|integer|exists:categories,id',
+            'category_type' => 'nullable|string|max:50',
             'description' => 'nullable|string',
-            'featured' => 'boolean',
-            'active' => 'boolean',
-            'image'=>'required'
+            'slug' => 'nullable|string|unique:categories,slug|max:255',
+            // 'created_by' => 'required|exists:users,id',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'The category name is required.',
+            'business_id.required' => 'The business ID is required.',
+            'business_id.exists' => 'The selected business does not exist.',
+            'parent_id.exists' => 'The selected parent category does not exist.',
+            'slug.unique' => 'The slug must be unique.',
         ];
     }
 }

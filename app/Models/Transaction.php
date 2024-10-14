@@ -184,12 +184,12 @@ class Transaction extends Model
 
     public function location()
     {
-        return $this->belongsTo(\App\BusinessLocation::class, 'location_id');
+        return $this->belongsTo(\App\Models\BusinessLocation::class, 'location_id');
     }
 
     public function business()
     {
-        return $this->belongsTo(\App\Business::class, 'business_id');
+        return $this->belongsTo(\App\Models\Business::class, 'business_id');
     }
 
     public function tax()
@@ -199,7 +199,7 @@ class Transaction extends Model
 
     public function stock_adjustment_lines()
     {
-        return $this->hasMany(\App\StockAdjustmentLine::class);
+        return $this->hasMany(\App\Models\StockAdjustmentLine::class);
     }
 
     public function sales_person()
@@ -249,7 +249,7 @@ class Transaction extends Model
 
     public function types_of_service()
     {
-        return $this->belongsTo(\App\TypesOfService::class, 'types_of_service_id');
+        return $this->belongsTo(\App\Models\TypesOfService::class, 'types_of_service_id');
     }
 
     /**
@@ -364,12 +364,12 @@ class Transaction extends Model
 
     public function cash_register_payments()
     {
-        return $this->hasMany(\App\CashRegisterTransaction::class);
+        return $this->hasMany(\App\Models\CashRegisterTransaction::class);
     }
 
     public function media()
     {
-        return $this->morphMany(\App\Media::class, 'model');
+        return $this->morphMany(\App\Models\Media::class, 'model');
     }
 
     public function transaction_for()

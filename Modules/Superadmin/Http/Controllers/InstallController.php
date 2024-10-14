@@ -2,7 +2,7 @@
 
 namespace Modules\Superadmin\Http\Controllers;
 
-use App\System;
+use App\Models\System;
 use Composer\Semver\Comparator;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;

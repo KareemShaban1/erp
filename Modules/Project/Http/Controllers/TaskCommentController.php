@@ -2,7 +2,7 @@
 
 namespace Modules\Project\Http\Controllers;
 
-use App\Media;
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

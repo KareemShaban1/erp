@@ -37,12 +37,12 @@ class Booking extends Model
 
     public function location()
     {
-        return $this->belongsTo(\App\BusinessLocation::class, 'location_id');
+        return $this->belongsTo(\App\Models\BusinessLocation::class, 'location_id');
     }
 
     public function business()
     {
-        return $this->belongsTo(\App\Business::class, 'business_id');
+        return $this->belongsTo(\App\Models\Business::class, 'business_id');
     }
 
     public static function createBooking($input)

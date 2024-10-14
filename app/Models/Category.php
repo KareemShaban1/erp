@@ -115,10 +115,32 @@ class Category extends Model
         return $query->where('parent_id', 0);
     }
 
+     /**
+     * Scope a query to only include main categories.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeBusinessId($query)
     {
         return $query->where('business_id', 273);
     }
 
+       /**
+     * Scope a query to only include main categories.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeProductType($query)
+    {
+        return $query->where('category_type', 'product');
+    }
+
+
+    public function parent_category()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
 
 }

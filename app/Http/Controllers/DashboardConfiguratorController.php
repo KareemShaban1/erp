@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\DashboardConfiguration;
+use App\Models\DashboardConfiguration;
 
 class DashboardConfiguratorController extends Controller
 {    

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\DocumentAndNote;
-use App\Media;
+use App\Models\DocumentAndNote;
+use App\Models\Media;
 use App\Models\User;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;

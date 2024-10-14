@@ -11,8 +11,8 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Yajra\DataTables\Facades\DataTables;
-use App\Media;
-use App\BusinessLocation;
+use App\Models\Media;
+use App\Models\BusinessLocation;
 use App\Utils\ModuleUtil;
 
 class AccountController extends Controller

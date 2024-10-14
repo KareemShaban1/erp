@@ -3,7 +3,7 @@
 namespace Modules\Superadmin\Http\Controllers;
 
 use \Notification;
-use App\System;
+use App\Models\System;
 use Illuminate\Routing\Controller;
 use Modules\Superadmin\Entities\Subscription;
 use Modules\Superadmin\Notifications\NewSubscriptionNotification;

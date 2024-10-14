@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
 use Modules\Connector\Transformers\BusinessResource;
 use App\Models\Account;
-use App\Business;
+use App\Models\Business;
 use App\Utils\TransactionUtil;
 use App\Utils\BusinessUtil;
 use App\Utils\ProductUtil;

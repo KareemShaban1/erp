@@ -2,10 +2,10 @@
 
 namespace App\Utils;
 
-use App\Business;
-use App\BusinessLocation;
-use App\Discount;
-use App\Media;
+use App\Models\Business;
+use App\Models\BusinessLocation;
+use App\Models\Discount;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductRack;
 use App\Models\ProductVariation;

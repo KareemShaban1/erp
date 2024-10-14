@@ -2,7 +2,7 @@
 
 namespace Modules\Repair\Http\Controllers;
 
-use App\Models\Brands;
+use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Utils\ModuleUtil;
@@ -120,7 +120,7 @@ class DeviceModelController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $brands = Brands::forDropdown($business_id, false, true);
+        $brands = Brand::forDropdown($business_id, false, true);
         $devices = Category::forDropdown($business_id, 'device');
 
         return view('repair::device_model.create')
@@ -190,7 +190,7 @@ class DeviceModelController extends Controller
         $model = DeviceModel::where('business_id', $business_id)
                     ->findOrFail($id);
 
-        $brands = Brands::forDropdown($business_id, false, true);
+        $brands = Brand::forDropdown($business_id, false, true);
         $devices = Category::forDropdown($business_id, 'device');
 
         return view('repair::device_model.edit')

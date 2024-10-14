@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Restaurant;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
 use App\Restaurant\Booking;

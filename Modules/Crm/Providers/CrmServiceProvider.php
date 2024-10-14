@@ -4,7 +4,6 @@ namespace Modules\Crm\Providers;
 
 use App\Utils\ModuleUtil;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Utils\Util;

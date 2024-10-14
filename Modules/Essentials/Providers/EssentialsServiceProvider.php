@@ -3,7 +3,6 @@
 namespace Modules\Essentials\Providers;
 
 use App\Utils\ModuleUtil;
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;

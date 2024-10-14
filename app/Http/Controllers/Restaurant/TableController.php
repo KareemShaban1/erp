@@ -8,7 +8,7 @@ use Illuminate\Routing\Controller;
 use Datatables;
 
 use App\Restaurant\ResTable;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 
 class TableController extends Controller
 {

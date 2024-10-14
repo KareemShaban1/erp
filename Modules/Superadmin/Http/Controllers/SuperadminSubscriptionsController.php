@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Utils\BusinessUtil;
 
-use App\System;
+use App\Models\System;
 
 class SuperadminSubscriptionsController extends BaseController
 {

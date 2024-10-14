@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\BusinessLocation;
-use App\Printer;
-use App\InvoiceLayout;
-use App\InvoiceScheme;
+use App\Models\BusinessLocation;
+use App\Models\Printer;
+use App\Models\InvoiceLayout;
+use App\Models\InvoiceScheme;
 
 use Illuminate\Http\Request;
 

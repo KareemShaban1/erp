@@ -74,7 +74,7 @@ $(document).ready(function() {
         });
     });
 
-    //Brands table
+    //Brand table
     var brands_table = $('#brands_table').DataTable({
         processing: true,
         serverSide: true,

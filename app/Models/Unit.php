@@ -56,4 +56,16 @@ class Unit extends Model
     {
         return $this->belongsTo(\App\Models\Unit::class, 'base_unit_id');
     }
+
+         /**
+     * Scope a query to only include main categories.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBusinessId($query)
+    {
+        return $query->where('business_id', 273);
+    }
+
 }

@@ -6,11 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Models\Product;
-use App\Business;
-use App\Discount;
+use App\Models\Business;
+use App\Models\Discount;
 use App\Models\SellingPriceGroup;
 use App\Utils\ProductUtil;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Utils\ModuleUtil;
 use App\Models\Category;
 

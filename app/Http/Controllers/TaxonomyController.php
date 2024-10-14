@@ -41,7 +41,7 @@ class TaxonomyController extends Controller
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
 
-            $category = Category::where('business_id', $business_id)
+            $category = Category::with('parent_category')->where('business_id', $business_id)
                             ->where('category_type', $category_type)
                             ->select(['name', 'short_code', 'description', 'id', 'parent_id']);
 
@@ -61,6 +61,10 @@ class TaxonomyController extends Controller
                     } else {
                         return $row->name;
                     }
+                })
+                ->addColumn('main_category', function ($row) {
+                    // Show the parent category's name, or N/A if no parent
+                    return $row->parent_category ? $row->parent_category->name : '';
                 })
                 ->removeColumn('id')
                 ->removeColumn('parent_id')

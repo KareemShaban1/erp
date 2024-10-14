@@ -3,7 +3,7 @@
 namespace Modules\Project\Http\Controllers;
 
 use App\Models\Contact;
-use App\InvoiceScheme;
+use App\Models\InvoiceScheme;
 use App\Models\TaxRate;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
@@ -16,7 +16,7 @@ use Modules\Project\Entities\InvoiceLine;
 use Modules\Project\Entities\Project;
 use Modules\Project\Entities\ProjectTransaction;
 use Yajra\DataTables\Facades\DataTables;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 class InvoiceController extends Controller
 {
     /**

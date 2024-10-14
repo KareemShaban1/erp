@@ -1,6 +1,6 @@
 <?php
 
-use App\CashRegister;
+use App\Models\CashRegister;
 use Illuminate\Database\Migrations\Migration;
 
 class CloseAllActiveRegisters extends Migration

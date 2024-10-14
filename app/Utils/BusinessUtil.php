@@ -4,14 +4,14 @@ namespace App\Utils;
 
 use App\Models\Barcode;
 
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
-use App\Currency;
-use App\InvoiceLayout;
-use App\InvoiceScheme;
-use App\NotificationTemplate;
-use App\Printer;
+use App\Models\Currency;
+use App\Models\InvoiceLayout;
+use App\Models\InvoiceScheme;
+use App\Models\NotificationTemplate;
+use App\Models\Printer;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;

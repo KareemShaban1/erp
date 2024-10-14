@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Models\Contact;
-use App\Models\Brands;
-use App\BusinessLocation;
-use App\Business;
+use App\Models\Brand;
+use App\Models\BusinessLocation;
+use App\Models\Business;
 use App\Models\Category;
 use Modules\Repair\Entities\DeviceModel;
 use Modules\Repair\Entities\RepairStatus;
@@ -22,7 +22,7 @@ use App\Utils\ModuleUtil;
 use App\Models\CustomerGroup;
 use App\Utils\ContactUtil;
 use App\Utils\ProductUtil;
-use App\Media;
+use App\Models\Media;
 use Spatie\Activitylog\Models\Activity;
 
 class JobSheetController extends Controller
@@ -311,7 +311,7 @@ class JobSheetController extends Controller
 
         $repair_statuses = RepairStatus::getRepairSatuses($business_id);
         $device_models = DeviceModel::forDropdown($business_id);
-        $brands = Brands::forDropdown($business_id, false, true);
+        $brands = Brand::forDropdown($business_id, false, true);
         $devices = Category::forDropdown($business_id, 'device');
         $repair_settings = $this->repairUtil->getRepairSettings($business_id);
         $business_locations = BusinessLocation::forDropdown($business_id);
@@ -488,7 +488,7 @@ class JobSheetController extends Controller
 
         $repair_statuses = RepairStatus::getRepairSatuses($business_id);
         $device_models = DeviceModel::forDropdown($business_id);
-        $brands = Brands::forDropdown($business_id, false, true);
+        $brands = Brand::forDropdown($business_id, false, true);
         $devices = Category::forDropdown($business_id, 'device');
         $repair_settings = $this->repairUtil->getRepairSettings($business_id);
         $types = Contact::getContactTypes();

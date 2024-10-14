@@ -2,7 +2,7 @@
 
 namespace Modules\Superadmin\Http\Controllers;
 
-use App\System;
+use App\Models\System;
 use App\Utils\BusinessUtil;
 
 use App\Utils\ModuleUtil;

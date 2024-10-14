@@ -1,7 +1,7 @@
 <?php
 namespace Modules\Manufacturing\Utils;
 
-use App\Business;
+use App\Models\Business;
 use App\Models\Transaction;
 use App\Models\TransactionSellLinesPurchaseLines;
 use App\Utils\Util;

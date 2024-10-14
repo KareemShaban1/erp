@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\InvoiceLayout;
+use App\Models\InvoiceLayout;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Validator;
@@ -122,7 +122,7 @@ class InvoiceLayoutController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\InvoiceLayout  $invoiceLayout
+     * @param  \App\Models\InvoiceLayout  $invoiceLayout
      * @return \Illuminate\Http\Response
      */
     public function show(InvoiceLayout $invoiceLayout)
@@ -133,7 +133,7 @@ class InvoiceLayoutController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\InvoiceLayout  $invoiceLayout
+     * @param  \App\Models\InvoiceLayout  $invoiceLayout
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -158,7 +158,7 @@ class InvoiceLayoutController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\InvoiceLayout  $invoiceLayout
+     * @param  \App\Models\InvoiceLayout  $invoiceLayout
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)

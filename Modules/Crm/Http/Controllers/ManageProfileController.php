@@ -4,7 +4,7 @@
 namespace Modules\Crm\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Media;
+use App\Models\Media;
 use App\Models\User;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;

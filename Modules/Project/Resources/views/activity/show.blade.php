@@ -51,7 +51,7 @@
 					{{$icon_color[$activity->description]}}"></i>
 			@elseif($activity->subject_type == 'Modules\Project\Entities\ProjectTask')
 				<i class="fa fa-tasks {{$icon_color[$activity->description]}}"></i>
-			@elseif($activity->subject_type == 'App\DocumentAndNote')
+			@elseif($activity->subject_type == 'App\Models\DocumentAndNote')
 				<i class="fas fa fa-images {{$icon_color[$activity->description]}}"></i>
 			@elseif($activity->subject_type == 'Modules\Project\Entities\ProjectTimeLog')
 				<i class="fas fa fa-clock {{$icon_color[$activity->description]}}"></i>
@@ -79,7 +79,7 @@
 							'name' => $activity->causer->user_full_name ,
 							'description' => $activity->description
 						])
-					@elseif($activity->subject_type == 'App\DocumentAndNote')
+					@elseif($activity->subject_type == 'App\Models\DocumentAndNote')
 						
 						@lang('project::lang.project_note_activity', [
 							'name' => $activity->causer->user_full_name ,
@@ -151,7 +151,7 @@
 							@endif
 						@endif
 
-					@elseif($activity->subject_type == 'App\DocumentAndNote')
+					@elseif($activity->subject_type == 'App\Models\DocumentAndNote')
 
 						@if($activity->description == 'created')
 							

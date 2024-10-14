@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Support\Facades\Auth;
 use App\Utils\BusinessUtil;
 
-use App\Business;
+use App\Models\Business;
 
 class SetSessionData
 {

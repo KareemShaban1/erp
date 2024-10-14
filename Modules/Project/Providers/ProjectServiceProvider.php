@@ -3,7 +3,6 @@
 namespace Modules\Project\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Facades\View;
 use App\Utils\Util;
 

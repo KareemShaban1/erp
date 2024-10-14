@@ -83,7 +83,7 @@
                 });
             });
 
-            //Brands table
+            //Brand table
             var modifier_table = $('#modifier_table').DataTable({
                     processing: true,
                     serverSide: true,

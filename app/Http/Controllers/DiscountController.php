@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brands;
-use App\BusinessLocation;
+use App\Models\Brand;
+use App\Models\BusinessLocation;
 use App\Models\Category;
-use App\Discount;
+use App\Models\Discount;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -114,7 +114,7 @@ class DiscountController extends Controller
                             ->where('parent_id', 0)
                             ->pluck('name', 'id');
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
 
         $locations = BusinessLocation::forDropdown($business_id);
 
@@ -181,7 +181,7 @@ class DiscountController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Discount  $discount
+     * @param  \App\Models\Discount  $discount
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -204,7 +204,7 @@ class DiscountController extends Controller
                             ->where('parent_id', 0)
                             ->pluck('name', 'id');
 
-            $brands = Brands::forDropdown($business_id);
+            $brands = Brand::forDropdown($business_id);
 
             $locations = BusinessLocation::forDropdown($business_id);
 
@@ -225,7 +225,7 @@ class DiscountController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Discount  $discount
+     * @param  \App\Models\Discount  $discount
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -281,7 +281,7 @@ class DiscountController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Discount  $discount
+     * @param  \App\Models\Discount  $discount
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)

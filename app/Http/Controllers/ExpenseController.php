@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Account;
 
 use App\Models\AccountTransaction;
-use App\BusinessLocation;
-use App\ExpenseCategory;
+use App\Models\BusinessLocation;
+use App\Models\ExpenseCategory;
 use App\Models\TaxRate;
 use App\Models\Transaction;
 use App\Models\User;

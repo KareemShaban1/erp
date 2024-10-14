@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Business;
-use App\Currency;
+use App\Models\Business;
+use App\Models\Currency;
 use App\Notifications\TestEmailNotification;
-use App\System;
+use App\Models\System;
 use App\Models\TaxRate;
 use App\Models\Unit;
 use App\Models\User;

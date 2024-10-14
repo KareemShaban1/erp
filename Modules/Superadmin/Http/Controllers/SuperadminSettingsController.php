@@ -2,7 +2,7 @@
 
 namespace Modules\Superadmin\Http\Controllers;
 
-use App\System;
+use App\Models\System;
 use App\Utils\BusinessUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

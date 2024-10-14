@@ -38,7 +38,7 @@ class ToDo extends Model
 
     public function media()
     {
-        return $this->morphMany(\App\Media::class, 'model');
+        return $this->morphMany(\App\Models\Media::class, 'model');
     }
 
     public static function getTaskStatus()

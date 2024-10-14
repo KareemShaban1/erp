@@ -3,15 +3,15 @@
 namespace Modules\Repair\Utils;
 
 use \Notification;
-use App\Business;
+use App\Models\Business;
 use DB;
-use App\NotificationTemplate;
+use App\Models\NotificationTemplate;
 use App\Charts\CommonChart;
 use App\Utils\Util;
 use Modules\Repair\Entities\RepairStatus;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\Transaction;
-use App\Models\Brands;
+use App\Models\Brand;
 use Modules\Repair\Entities\DeviceModel;
 use App\Models\Category;
 use Modules\Repair\Entities\JobSheet;
@@ -259,7 +259,7 @@ class RepairUtil extends Util
         return $job_sheets_by_service_staff;
     }
 
-    public function getTrendingRepairBrands($business_id)
+    public function getTrendingRepairBrand($business_id)
     {
         $job_sheets = JobSheet::leftJoin('brands',
                             'repair_job_sheets.brand_id',

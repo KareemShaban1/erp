@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\BusinessLocation;
-use App\CashRegister;
+use App\Models\BusinessLocation;
+use App\Models\CashRegister;
 use App\Utils\CashRegisterUtil;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
@@ -104,7 +104,7 @@ class CashRegisterController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\CashRegister  $cashRegister
+     * @param  \App\Models\CashRegister  $cashRegister
      * @return \Illuminate\Http\Response
      */
     public function show($id)

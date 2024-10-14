@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brands;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Brand;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Category;
-use App\Media;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\PurchaseLine;
@@ -295,7 +295,7 @@ class ProductController extends Controller
 
         $categories = Category::forDropdown($business_id, 'product');
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
 
         $units = Unit::forDropdown($business_id);
 
@@ -350,7 +350,7 @@ class ProductController extends Controller
 
         $categories = Category::forDropdown($business_id, 'product');
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::forDropdown($business_id, true);
 
         $tax_dropdown = TaxRate::forBusinessDropdown($business_id, true, true);
@@ -589,7 +589,7 @@ class ProductController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         
         $tax_dropdown = TaxRate::forBusinessDropdown($business_id, true, true);
         $taxes = $tax_dropdown['tax_rates'];
@@ -1284,7 +1284,7 @@ class ProductController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::forDropdown($business_id, true);
 
         $tax_dropdown = TaxRate::forBusinessDropdown($business_id, true, true);
@@ -1929,7 +1929,7 @@ class ProductController extends Controller
                 }
             }
 
-            $brands = Brands::forDropdown($business_id);
+            $brands = Brand::forDropdown($business_id);
 
             $tax_dropdown = TaxRate::forBusinessDropdown($business_id, true, true);
             $taxes = $tax_dropdown['tax_rates'];
@@ -2058,7 +2058,7 @@ class ProductController extends Controller
             }
         }
 
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
 
         $tax_dropdown = TaxRate::forBusinessDropdown($business_id, true, true);
         $taxes = $tax_dropdown['tax_rates'];

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brands;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Brand;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\TaxRate;
@@ -269,7 +269,7 @@ class ImportProductsController extends Controller
                     //Check if brand exists else create new
                     $brand_name = trim($value[1]);
                     if (!empty($brand_name)) {
-                        $brand = Brands::firstOrCreate(
+                        $brand = Brand::firstOrCreate(
                             ['business_id' => $business_id, 'name' => $brand_name],
                             ['created_by' => $user_id]
                         );

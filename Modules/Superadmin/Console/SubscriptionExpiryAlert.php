@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-use App\System;
+use App\Models\System;
 use Modules\Superadmin\Entities\Subscription;
 use Modules\Superadmin\Notifications\SendSubscriptionExpiryAlert;
 

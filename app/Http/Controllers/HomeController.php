@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 
 use App\Charts\CommonChart;
-use App\Currency;
+use App\Models\Currency;
 use App\Models\Transaction;
 use App\Utils\BusinessUtil;
 
@@ -19,7 +19,7 @@ use App\Utils\Util;
 use App\Utils\RestaurantUtil;
 use App\Models\User;
 use Illuminate\Notifications\DatabaseNotification;
-use App\Media;
+use App\Models\Media;
 
 class HomeController extends Controller
 {

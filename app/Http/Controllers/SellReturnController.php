@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Transaction;
 use App\Models\Contact;
 use App\Models\User;

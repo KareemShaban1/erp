@@ -27,19 +27,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\Brands;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Brand;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
-use App\Media;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\SellingPriceGroup;
 use App\Models\TaxRate;
 use App\Models\Transaction;
 use App\Models\TransactionSellLine;
-use App\TypesOfService;
+use App\Models\TypesOfService;
 use App\Models\User;
 use App\Utils\BusinessUtil;
 use App\Utils\CashRegisterUtil;
@@ -50,13 +50,13 @@ use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use App\Models\Variation;
 use App\Models\Warranty;
-use App\InvoiceLayout;
+use App\Models\InvoiceLayout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
-use App\InvoiceScheme;
+use App\Models\InvoiceScheme;
 use App\SalesOrderController;
 use Razorpay\Api\Api;
 use App\Models\TransactionPayment;
@@ -209,7 +209,7 @@ class SellPosController extends Controller
 
         //If brands, category are enabled then send else false.
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
-        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
+        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brand::forDropdown($business_id)
                     ->prepend(__('lang_v1.all_brands'), 'all') : false;
 
         $change_return = $this->dummyPaymentLine;
@@ -931,7 +931,7 @@ class SellPosController extends Controller
 
         //If brands, category are enabled then send else false.
         $categories = (request()->session()->get('business.enable_category') == 1) ? Category::catAndSubCategories($business_id) : false;
-        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brands::forDropdown($business_id)
+        $brands = (request()->session()->get('business.enable_brand') == 1) ? Brand::forDropdown($business_id)
                     ->prepend(__('lang_v1.all_brands'), 'all') : false;
 
         $change_return = $this->dummyPaymentLine;

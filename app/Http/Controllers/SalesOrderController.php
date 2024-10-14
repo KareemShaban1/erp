@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\Transaction;
 use App\Utils\TransactionUtil;

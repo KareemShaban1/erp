@@ -46,7 +46,7 @@ class User extends Authenticatable
      */
     public function business()
     {
-        return $this->belongsTo(\App\Business::class);
+        return $this->belongsTo(\App\Models\Business::class);
     }
 
     public function scopeUser($query)
@@ -69,7 +69,7 @@ class User extends Authenticatable
      */
     public function documentsAndnote()
     {
-        return $this->morphMany('App\DocumentAndNote', 'notable');
+        return $this->morphMany('App\Models\DocumentAndNote', 'notable');
     }
 
     /**
@@ -278,7 +278,7 @@ class User extends Authenticatable
 
     public function media()
     {
-        return $this->morphOne(\App\Media::class, 'model');
+        return $this->morphOne(\App\Models\Media::class, 'model');
     }
 
     /**

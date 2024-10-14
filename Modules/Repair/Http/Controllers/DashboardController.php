@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $job_sheets_by_status = $this->repairUtil->getRepairByStatus($business_id);
         $job_sheets_by_service_staff = $this->repairUtil->getRepairByServiceStaff($business_id);
-        $trending_brand_chart = $this->repairUtil->getTrendingRepairBrands($business_id);
+        $trending_brand_chart = $this->repairUtil->getTrendingRepairBrand($business_id);
         $trending_devices_chart = $this->repairUtil->getTrendingDevices($business_id);
         $trending_dm_chart = $this->repairUtil->getTrendingDeviceModels($business_id);
         

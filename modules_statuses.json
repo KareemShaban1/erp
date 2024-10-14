@@ -5,5 +5,7 @@
     "Manufacturing": true,
     "Superadmin": true,
     "Repair": true,
-    "Project": true
+    "Project": true,
+    "ProductCatalogue": true,
+    "Woocommerce": true
 }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
-use App\System;
+use App\Models\System;
 use App\Models\User;
 use App\Utils\ModuleUtil;
 use DB;

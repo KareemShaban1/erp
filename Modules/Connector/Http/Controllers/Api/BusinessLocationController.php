@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Modules\Connector\Transformers\BusinessLocationResource;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 
 /**
  * @group Business Location management

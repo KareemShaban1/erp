@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brands;
+use App\Models\Brand;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -40,7 +40,7 @@ class BrandController extends Controller
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
 
-            $brands = Brands::where('business_id', $business_id)
+            $brands = Brand::where('business_id', $business_id)
                         ->select(['name', 'description', 'id']);
 
             return Datatables::of($brands)
@@ -106,7 +106,7 @@ class BrandController extends Controller
                 $input['use_for_repair'] = !empty($request->input('use_for_repair')) ? 1 : 0;
             }
 
-            $brand = Brands::create($input);
+            $brand = Brand::create($input);
             $output = ['success' => true,
                             'data' => $brand,
                             'msg' => __("brand.added_success")
@@ -147,7 +147,7 @@ class BrandController extends Controller
 
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
-            $brand = Brands::where('business_id', $business_id)->find($id);
+            $brand = Brand::where('business_id', $business_id)->find($id);
 
             $is_repair_installed = $this->moduleUtil->isModuleInstalled('Repair');
 
@@ -174,7 +174,7 @@ class BrandController extends Controller
                 $input = $request->only(['name', 'description']);
                 $business_id = $request->session()->get('user.business_id');
 
-                $brand = Brands::where('business_id', $business_id)->findOrFail($id);
+                $brand = Brand::where('business_id', $business_id)->findOrFail($id);
                 $brand->name = $input['name'];
                 $brand->description = $input['description'];
 
@@ -215,7 +215,7 @@ class BrandController extends Controller
             try {
                 $business_id = request()->user()->business_id;
 
-                $brand = Brands::where('business_id', $business_id)->findOrFail($id);
+                $brand = Brand::where('business_id', $business_id)->findOrFail($id);
                 $brand->delete();
 
                 $output = ['success' => true,
@@ -233,14 +233,14 @@ class BrandController extends Controller
         }
     }
 
-    public function getBrandsApi()
+    public function getBrandApi()
     {
         try {
             $api_token = request()->header('API-TOKEN');
 
             $api_settings = $this->moduleUtil->getApiSettings($api_token);
             
-            $brands = Brands::where('business_id', $api_settings->business_id)
+            $brands = Brand::where('business_id', $api_settings->business_id)
                                 ->get();
         } catch (\Exception $e) {
             \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());

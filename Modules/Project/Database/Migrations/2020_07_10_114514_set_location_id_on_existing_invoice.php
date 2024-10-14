@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use Modules\Project\Entities\ProjectTransaction;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 class SetLocationIdOnExistingInvoice extends Migration
 {
     /**

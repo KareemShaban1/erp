@@ -2,7 +2,7 @@
 
 namespace Modules\Crm\Console;
 
-use App\Business;
+use App\Models\Business;
 use App\Models\User;
 use App\Utils\NotificationUtil;
 

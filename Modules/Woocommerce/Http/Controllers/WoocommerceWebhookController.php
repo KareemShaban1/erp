@@ -2,7 +2,7 @@
 
 namespace Modules\Woocommerce\Http\Controllers;
 
-use App\Business;
+use App\Models\Business;
 use App\Models\Transaction;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;

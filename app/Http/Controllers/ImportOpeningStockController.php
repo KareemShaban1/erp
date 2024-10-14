@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Business;
+use App\Models\Business;
 
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Utils\ProductUtil;

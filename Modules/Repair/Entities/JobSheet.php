@@ -76,7 +76,7 @@ class JobSheet extends Model
      */
     public function Brand()
     {
-        return $this->belongsTo('App\Models\Brands', 'brand_id');
+        return $this->belongsTo('App\Models\Brand', 'brand_id');
     }
 
     /**
@@ -92,7 +92,7 @@ class JobSheet extends Model
      */
     public function businessLocation()
     {
-        return $this->belongsTo('App\BusinessLocation', 'location_id');
+        return $this->belongsTo('App\Models\BusinessLocation', 'location_id');
     }
 
     /**
@@ -105,7 +105,7 @@ class JobSheet extends Model
 
     public function media()
     {
-        return $this->morphMany(\App\Media::class, 'model');
+        return $this->morphMany(\App\Models\Media::class, 'model');
     }
 
     public function getPartsUsed()

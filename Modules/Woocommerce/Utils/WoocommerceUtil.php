@@ -1,7 +1,7 @@
 <?php
 namespace Modules\Woocommerce\Utils;
 
-use App\Business;
+use App\Models\Business;
 use App\Models\Category;
 use App\Models\Contact;
 use App\Exceptions\PurchaseSellMismatch;

@@ -11,7 +11,7 @@ return [
     |
     */
 
-    'brands' => 'Brands',
+    'brands' => 'Brand',
     'manage_your_brands' => 'Manage your brands',
     'all_your_brands' => 'All your brands',
     'note' => 'Note',

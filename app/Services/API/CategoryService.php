@@ -2,8 +2,8 @@
 
 namespace App\Services\API;
 
-use App\Http\Resources\CategoryCollection;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\Category\CategoryCollection;
+use App\Http\Resources\Category\CategoryResource;
 use App\Models\Category;
 use App\Services\BaseService;
 use App\Traits\HelperTrait;
@@ -22,13 +22,12 @@ class CategoryService extends BaseService
 
         try {
 
-            $query = Category::with('sub_categories')->businessId();
+            $query = Category::with('sub_categories')->businessId()->productType();
 
             $query = $this->withTrashed($query, $request);
 
             $categories = $this->withPagination($query, $request);
 
-            // return $categories;
             return (new CategoryCollection($categories))
             ->withFullData(!($request->full_data == 'false'));
 
@@ -41,7 +40,7 @@ class CategoryService extends BaseService
     public function show($id) {
 
         try {
-            $category = Category::find($id);
+            $category = Category::businessId()->find($id);
 
             if(!$category) {
                 return null;

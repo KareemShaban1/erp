@@ -2,13 +2,13 @@
 
 namespace Modules\Woocommerce\Http\Controllers;
 
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Category;
-use App\Media;
+use App\Models\Media;
 use App\Models\Product;
 use App\Models\SellingPriceGroup;
-use App\System;
+use App\Models\System;
 use App\Models\TaxRate;
 use App\Utils\ModuleUtil;
 use App\Models\Variation;

@@ -3,8 +3,8 @@
 namespace Modules\Superadmin\Http\Controllers;
 
 use Modules\Superadmin\Entities\Subscription;
-use App\Business;
-use App\System;
+use App\Models\Business;
+use App\Models\System;
 use \Carbon;
 use Charts;
 use Illuminate\Support\Facades\DB;

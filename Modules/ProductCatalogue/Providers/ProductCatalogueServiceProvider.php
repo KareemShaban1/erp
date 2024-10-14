@@ -3,7 +3,6 @@
 namespace Modules\ProductCatalogue\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Factory;
 
 class ProductCatalogueServiceProvider extends ServiceProvider
 {
@@ -17,7 +16,7 @@ class ProductCatalogueServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
-        $this->registerFactories();
+        // $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }
 

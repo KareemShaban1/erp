@@ -5,10 +5,10 @@ namespace Modules\Connector\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use App\CashRegister;
+use App\Models\CashRegister;
 use Modules\Connector\Transformers\CommonResource;
 use Illuminate\Support\Facades\Auth;
-use App\CashRegisterTransaction;
+use App\Models\CashRegisterTransaction;
 use App\Models\Transaction;
 
 /**

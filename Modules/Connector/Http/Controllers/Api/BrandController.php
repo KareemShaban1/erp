@@ -8,7 +8,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
 
-use App\Models\Brands;
+use App\Models\Brand;
 
 /**
  * @group Brand management
@@ -51,7 +51,7 @@ class BrandController extends ApiController
 
         $business_id = $user->business_id;
         
-        $brands = Brands::where('business_id', $business_id)
+        $brands = Brand::where('business_id', $business_id)
                         ->get();
 
         return CommonResource::collection($brands);
@@ -83,7 +83,7 @@ class BrandController extends ApiController
         $business_id = $user->business_id;
         $brand_ids = explode(',', $brand_ids);
 
-        $brands = Brands::where('business_id', $business_id)
+        $brands = Brand::where('business_id', $business_id)
                         ->whereIn('id', $brand_ids)
                         ->get();
 

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Business;
+use App\Models\Business;
 use App\Models\Transaction;
 use App\Models\TransactionSellLinesPurchaseLines;
 use App\Models\PurchaseLine;

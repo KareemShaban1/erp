@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
-use App\InvoiceScheme;
+use App\Models\InvoiceScheme;
 use App\Models\SellingPriceGroup;
 use App\Models\TaxRate;
 use App\Models\Transaction;
 use App\Models\TransactionSellLine;
-use App\TypesOfService;
+use App\Models\TypesOfService;
 use App\Models\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ContactUtil;
@@ -24,7 +24,7 @@ use DB;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Product;
-use App\Media;
+use App\Models\Media;
 use Spatie\Activitylog\Models\Activity;
 
 class SellController extends Controller

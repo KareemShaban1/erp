@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brands;
-use App\BusinessLocation;
-use App\CashRegister;
+use App\Models\Brand;
+use App\Models\BusinessLocation;
+use App\Models\CashRegister;
 use App\Models\Category;
 
 use App\Charts\CommonChart;
 use App\Models\Contact;
 
 use App\Models\CustomerGroup;
-use App\ExpenseCategory;
+use App\Models\ExpenseCategory;
 use App\Models\Product;
 use App\Models\PurchaseLine;
 use App\Restaurant\ResTable;
@@ -434,7 +434,7 @@ class ReportController extends Controller
         }
 
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::where('business_id', $business_id)
                             ->pluck('short_name', 'id');
         $business_locations = BusinessLocation::forDropdown($business_id, true);
@@ -789,7 +789,7 @@ class ReportController extends Controller
             ->dataset(__('report.total_unit_sold'), 'column', $values);
 
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::where('business_id', $business_id)
                             ->pluck('short_name', 'id');
         $business_locations = BusinessLocation::forDropdown($business_id, true);
@@ -1347,7 +1347,7 @@ class ReportController extends Controller
         }
 
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::where('business_id', $business_id)
                             ->pluck('short_name', 'id');
         $business_locations = BusinessLocation::forDropdown($business_id, true);
@@ -1784,7 +1784,7 @@ class ReportController extends Controller
         $business_locations = BusinessLocation::forDropdown($business_id);
         $customers = Contact::customersDropdown($business_id);
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $customer_group = CustomerGroup::forDropdown($business_id, false, true);
 
         return view('report.product_sell_report')
@@ -2075,7 +2075,7 @@ class ReportController extends Controller
         }
 
         $categories = Category::forDropdown($business_id, 'product');
-        $brands = Brands::forDropdown($business_id);
+        $brands = Brand::forDropdown($business_id);
         $units = Unit::where('business_id', $business_id)
                             ->pluck('short_name', 'id');
         $business_locations = BusinessLocation::forDropdown($business_id, true);

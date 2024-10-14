@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Composer\Semver\Comparator;
 
-use App\System;
+use App\Models\System;
 
 class InstallController extends Controller
 {

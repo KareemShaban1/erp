@@ -2,11 +2,11 @@
 
 namespace App\Utils;
 
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\Product;
-use App\ReferenceCount;
+use App\Models\ReferenceCount;
 use App\Models\Transaction;
 use App\Models\TransactionSellLine;
 use App\Models\Unit;
@@ -17,7 +17,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
-use App\System;
+use App\Models\System;
 use Config;
 
 class Util

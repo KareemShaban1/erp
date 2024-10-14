@@ -2,9 +2,8 @@
 
 namespace Modules\Superadmin\Providers;
 
-use App\System;
+use App\Models\System;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Modules\Superadmin\Entities\Subscription;

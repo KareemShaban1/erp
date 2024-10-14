@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Excel;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use DB;
 use App\Utils\BusinessUtil;
 use App\Utils\ProductUtil;
@@ -15,7 +15,7 @@ use App\Models\TaxRate;
 use App\Models\Transaction;
 use App\Models\Contact;
 use App\Utils\ModuleUtil;
-use App\TypesOfService;
+use App\Models\TypesOfService;
 use App\Models\Unit;
 
 class ImportSalesController extends Controller

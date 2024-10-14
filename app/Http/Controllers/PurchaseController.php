@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountTransaction;
-use App\Business;
-use App\BusinessLocation;
+use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
 use App\Models\Product;

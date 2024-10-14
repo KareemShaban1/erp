@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 use Modules\Woocommerce\Utils\WoocommerceUtil;
-use App\Business;
+use App\Models\Business;
 use DB;
 
 class WoocommerceSyncProducts extends Command

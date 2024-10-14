@@ -98,7 +98,7 @@ return [
     'total_unit_repaired' => 'Total unit repaired',
     'trending_devices' => 'Top Trending Devices',
     'trending_device_models' => 'Top Trending Device Models',
-    'trending_brands' => 'Top Trending Brands',
+    'trending_brands' => 'Top Trending Brand',
     'no_report_found' => 'No data found, please add repair!',
     'job_sheets' => 'Job Sheets',
     'all_job_sheets' => 'All job sheets',

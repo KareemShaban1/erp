@@ -97,7 +97,7 @@ LANG = {
     'filter_by_date': 'Filter by date',
     'form_will_get_reset': 'All added products will be removed.',
     'tour_step3_content_modified': 'Add Multiple Locations, Tax Rates, Invoice Settings for your shop.',
-    'tour_step5_content_modified': 'Add Products - Simple or Variable Products <br> Create Variations for variable products <br> Create Units, Brands and Categories <br> Print labels',
+    'tour_step5_content_modified': 'Add Products - Simple or Variable Products <br> Create Variations for variable products <br> Create Units, Brand and Categories <br> Print labels',
     'pos_max_qty_error': 'Only :max_val :unit_name available',
     'lot_max_qty_error': 'Only :max_val :unit_name available in the selected Lot',
     'email_taken': 'This Email has already been taken.',

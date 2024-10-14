@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 
 use App\Models\Transaction;
-use App\BusinessLocation;
+use App\Models\BusinessLocation;
 use App\Models\User;
 use App\Models\TransactionSellLine;
 use App\Restaurant\Booking;

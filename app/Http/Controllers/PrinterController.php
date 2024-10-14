@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Printer;
+use App\Models\Printer;
 use Datatables;
 use Illuminate\Http\Request;
 

@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Modules\Connector\Transformers\CommonResource;
-use App\Business;
+use App\Models\Business;
 use App\Utils\ModuleUtil;
 
 /**

@@ -79,7 +79,7 @@ class Project extends Model
      */
     public function documentsAndnote()
     {
-        return $this->morphMany('App\DocumentAndNote', 'notable');
+        return $this->morphMany('App\Models\DocumentAndNote', 'notable');
     }
 
     /**

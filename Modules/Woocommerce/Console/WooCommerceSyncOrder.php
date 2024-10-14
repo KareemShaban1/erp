@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
 
-use App\Business;
+use App\Models\Business;
 use Modules\Woocommerce\Utils\WoocommerceUtil;
 
 use Modules\Woocommerce\Notifications\SyncOrdersNotification;
