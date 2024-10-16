@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\BusinessLocationController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
+use App\Http\Controllers\Api\WarrantyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,5 +31,8 @@ Route::get('units', [UnitController::class, 'index']);
 
 Route::get('products', [ProductController::class, 'index']);
 
+Route::get('warranties', [WarrantyController::class, 'index']);
+
+Route::get('business_locations', [BusinessLocationController::class, 'index']);
 
 Route::post('user/login', [AuthController::class, 'userLogin']);

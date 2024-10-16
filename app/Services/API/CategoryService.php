@@ -22,7 +22,7 @@ class CategoryService extends BaseService
 
         try {
 
-            $query = Category::with('sub_categories')->businessId()->productType();
+            $query = Category::with('sub_categories')->productType()->latest();
 
             $query = $this->withTrashed($query, $request);
 

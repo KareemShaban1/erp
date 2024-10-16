@@ -15,25 +15,25 @@ class BrandService extends BaseService
 {
     use UploadFileTrait, HelperTrait;
     /**
-     * Get all categories with filters and pagination for DataTables.
+     * Get all brands with filters and pagination for DataTables.
      */
     public function list(Request $request)
     {
 
         try {
 
-            $query = Brand::businessId();
+            $query = Brand::query();
 
             $query = $this->withTrashed($query, $request);
 
-            $categories = $this->withPagination($query, $request);
+            $brands = $this->withPagination($query, $request);
 
-            return (new BrandCollection($categories))
+            return (new BrandCollection($brands))
             ->withFullData(!($request->full_data == 'false'));
 
 
         } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while listing categories'));
+            return $this->handleException($e, __('message.Error happened while listing brands'));
         }
     }
 
@@ -157,7 +157,7 @@ class BrandService extends BaseService
 
             return $ids;
         } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting categories'));
+            return $this->handleException($e, __('message.Error happened while deleting brands'));
         }
     }
 }

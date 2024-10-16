@@ -678,16 +678,16 @@ $(document).ready(function() {
             },
         ],
     });
-    $(document).on('click', '#add_variation_values', function() {
-        var html =
-            '<div class="form-group"><div class="col-sm-7 col-sm-offset-3"><input type="text" name="variation_values[]" class="form-control" required></div><div class="col-sm-2"><button type="button" class="btn btn-danger delete_variation_value">-</button></div></div>';
-        $('#variation_values').append(html);
-    });
-    $(document).on('click', '.delete_variation_value', function() {
-        $(this)
-            .closest('.form-group')
-            .remove();
-    });
+    // $(document).on('click', '#add_variation_values', function() {
+    //     var html =
+    //         '<div class="form-group"><div class="col-sm-7 col-sm-offset-3"><input type="text" name="variation_values[]" class="form-control" required></div><div class="col-sm-2"><button type="button" class="btn btn-danger delete_variation_value">-</button></div></div>';
+    //     $('#variation_values').append(html);
+    // });
+    // $(document).on('click', '.delete_variation_value', function() {
+    //     $(this)
+    //         .closest('.form-group')
+    //         .remove();
+    // });
     $(document).on('submit', 'form#variation_add_form', function(e) {
         e.preventDefault();
         var form = $(this);

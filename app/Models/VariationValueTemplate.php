@@ -12,6 +12,13 @@ class VariationValueTemplate extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name','code'];
     /**
      * Get the variation that owns the attribute.
      */

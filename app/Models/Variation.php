@@ -24,6 +24,9 @@ class Variation extends Model
     protected $casts = [
         'combo_variations' => 'array',
     ];
+
+    protected $appends = ['code'];
+
     
     public function product_variation()
     {
@@ -33,6 +36,11 @@ class Variation extends Model
     public function product()
     {
         return $this->belongsTo(\App\Models\Product::class, 'product_id');
+    }
+
+    public function variation_value()
+    {
+        return $this->belongsTo(\App\Models\VariationValueTemplate::class,'variation_value_id');
     }
 
     /**
@@ -73,5 +81,21 @@ class Variation extends Model
         $name .= ' (' . $this->sub_sku . ')';
 
         return $name;
+    }
+
+
+     /**
+     * Accessor for the code attribute.
+     *
+     * @return string|null
+     */
+    public function getCodeAttribute()
+    {
+        // Check if the variation value exists and its name matches
+        if ($this->variation_value && $this->variation_value->name === $this->name) {
+            return $this->variation_value->code; // Return the code if conditions are met
+        }
+
+        return null; // Return null if the condition is not met
     }
 }

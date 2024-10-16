@@ -15,15 +15,14 @@ class ProductService extends BaseService
 {
     use UploadFileTrait, HelperTrait;
     /**
-     * Get all categories with filters and pagination for DataTables.
+     * Get all products with filters and pagination for DataTables.
      */
     public function list(Request $request)
     {
         try {
             $query = Product::
             with(['media','brand:id,name','category:id,name','unit:actual_name,short_name','warranty:name,duration,duration_type'])
-            ->where('products.type', '!=', 'modifier')
-            ->businessId()->productForSales();
+            ->where('products.type', '!=', 'modifier')->businessId()->productForSales()->latest();
 
             // $query = Product::select(
             //     'products.*',
@@ -39,8 +38,8 @@ class ProductService extends BaseService
             // ->with(['media'])
             // ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
             // ->join('units', 'products.unit_id', '=', 'units.id')
-            // ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
-            // ->leftJoin('categories as c2', 'products.sub_category_id', '=', 'c2.id')
+            // ->leftJoin('products as c1', 'products.category_id', '=', 'c1.id')
+            // ->leftJoin('products as c2', 'products.sub_category_id', '=', 'c2.id')
             // ->leftJoin('tax_rates', 'products.tax', '=', 'tax_rates.id')
             // ->join('variations as v', 'v.product_id', '=', 'products.id')
             // ->leftJoin('variation_location_details as vld', 'vld.variation_id', '=', 'v.id')
@@ -184,7 +183,7 @@ class ProductService extends BaseService
 
             return $ids;
         } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting categories'));
+            return $this->handleException($e, __('message.Error happened while deleting products'));
         }
     }
 }

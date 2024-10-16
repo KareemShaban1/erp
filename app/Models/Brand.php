@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\BusinessIdScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,6 +23,14 @@ class Brand extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new BusinessIdScope);
+       
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -56,8 +65,4 @@ class Brand extends Model
         return $brands;
     }
 
-    public function scopeBusinessId($query)
-    {
-        return $query->where('business_id', 273);
-    }
 }

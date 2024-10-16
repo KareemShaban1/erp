@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\BusinessIdScope;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,12 +24,55 @@ class Category extends Model
      */
     protected $guarded = ['id'];
 
+
+    protected $appends = ['image_url'];
+
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = ['name','business_id','short_code','parent_id','category_type','description','slug'];
+    protected $fillable = ['name','business_id','short_code','parent_id','category_type','description','slug','image','created_by'];
+
+
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new BusinessIdScope);
+    }
+
+    /**
+     * Get the category image.
+     *
+     * @return string
+     */
+    public function getImageUrlAttribute()
+    {
+        // dd($this->image);
+        if (!empty($this->image)) {
+            $image_url = asset('/uploads/img/' . rawurlencode($this->image));
+        } else {
+            $image_url = asset('/img/default.png');
+        }
+        return $image_url;
+    }
+
+    /**
+    * Get the products image path.
+    *
+    * @return string
+    */
+    public function getImagePathAttribute()
+    {
+        if (!empty($this->image)) {
+            $image_path = public_path('uploads') . '/' . config('constants.product_img_path') . '/' . $this->image;
+        } else {
+            $image_path = null;
+        }
+        return $image_path;
+    }
+
 
     /**
      * Combines Category and sub-category
@@ -115,17 +159,7 @@ class Category extends Model
         return $query->where('parent_id', 0);
     }
 
-     /**
-     * Scope a query to only include main categories.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeBusinessId($query)
-    {
-        return $query->where('business_id', 273);
-    }
-
+    
        /**
      * Scope a query to only include main categories.
      *

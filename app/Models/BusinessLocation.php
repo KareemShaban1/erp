@@ -6,6 +6,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SellingPriceGroup;
 use App\Models\Variation;
+use App\Scopes\BusinessIdScope;
 
 class BusinessLocation extends Model
 {
@@ -16,6 +17,26 @@ class BusinessLocation extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['business_id','location_id','name','landmark','country','state',
+    'city','zip_code','invoice_scheme_id','invoice_layout_id','sale_invoice_layout_id',
+    'selling_price_group_id','print_receipt_on_invoice','receipt_printer_type','printer_id',
+    'mobile','alternate_number','email','website','featured_products','is_active',
+    'default_payment_accounts','custom_field1','custom_field2','custom_field3','custom_field14'];
+
+
+    
+    protected static function booted()
+    {
+        static::addGlobalScope(new BusinessIdScope);
+       
+    }
+
 
     /**
      * The attributes that should be cast to native types.

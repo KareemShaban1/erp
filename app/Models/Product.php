@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\BusinessIdScope;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -34,6 +35,13 @@ class Product extends Model
     protected $casts = [
         'sub_unit_ids' => 'array',
     ];
+
+
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope(new BusinessIdScope);
+       
+    // }
     
     /**
      * Get the products image.
@@ -151,6 +159,17 @@ class Product extends Model
         return $query->where('products.is_inactive', 0);
     }
 
+     /**
+     * Scope a query to only include active products.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBusinessId($query)
+    {
+        return $query->where('products.business_id', 273);
+    }
+
     /**
      * Scope a query to only include inactive products.
      *
@@ -185,17 +204,6 @@ class Product extends Model
     }
 
     
-         /**
-     * Scope a query to only include main categories.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeBusinessId($query)
-    {
-        return $query->where('products.business_id', 273);
-    }
-
 
     public function product_locations()
     {

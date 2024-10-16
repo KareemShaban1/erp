@@ -15,25 +15,25 @@ class UnitService extends BaseService
 {
     use UploadFileTrait, HelperTrait;
     /**
-     * Get all categories with filters and pagination for DataTables.
+     * Get all units with filters and pagination for DataTables.
      */
     public function list(Request $request)
     {
 
         try {
 
-            $query = Unit::businessId();
+            $query = Unit::query();
 
             $query = $this->withTrashed($query, $request);
 
-            $categories = $this->withPagination($query, $request);
+            $units = $this->withPagination($query, $request);
 
-            return (new UnitCollection($categories))
+            return (new UnitCollection($units))
             ->withFullData(!($request->full_data == 'false'));
 
 
         } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while listing categories'));
+            return $this->handleException($e, __('message.Error happened while listing units'));
         }
     }
 
@@ -157,7 +157,7 @@ class UnitService extends BaseService
 
             return $ids;
         } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting categories'));
+            return $this->handleException($e, __('message.Error happened while deleting units'));
         }
     }
 }

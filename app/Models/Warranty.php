@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\BusinessIdScope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,6 +14,19 @@ class Warranty extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name','business_id','duration','duration_type'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new BusinessIdScope);
+       
+    }
 
     public static function forDropdown($business_id)
     {

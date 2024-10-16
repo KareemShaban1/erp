@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Utils\ModuleUtil;
+use App\Utils\ProductUtil;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -15,15 +16,20 @@ class TaxonomyController extends Controller
      */
     protected $moduleUtil;
 
+    protected $productUtil;
+
+
     /**
      * Constructor
      *
      * @param ProductUtils $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil)
+    public function __construct(ModuleUtil $moduleUtil , ProductUtil $productUtil)
     {
         $this->moduleUtil = $moduleUtil;
+        $this->productUtil = $productUtil;
+
     }
 
     /**
@@ -43,7 +49,7 @@ class TaxonomyController extends Controller
 
             $category = Category::with('parent_category')->where('business_id', $business_id)
                             ->where('category_type', $category_type)
-                            ->select(['name', 'short_code', 'description', 'id', 'parent_id']);
+                            ->select(['name', 'short_code', 'description', 'id', 'parent_id','image']);
 
             return Datatables::of($category)
                 ->addColumn(
@@ -66,9 +72,12 @@ class TaxonomyController extends Controller
                     // Show the parent category's name, or N/A if no parent
                     return $row->parent_category ? $row->parent_category->name : '';
                 })
+                ->editColumn('image', function ($row) {
+                    return '<div style="display: flex;"><img src="' . $row->image_url . '" alt="Product image" class="product-thumbnail-small"></div>';
+                })
                 ->removeColumn('id')
                 ->removeColumn('parent_id')
-                ->rawColumns(['action'])
+                ->rawColumns(['action','image'])
                 ->make(true);
         }
 
@@ -132,6 +141,8 @@ class TaxonomyController extends Controller
             $input['business_id'] = $request->session()->get('user.business_id');
             $input['created_by'] = $request->session()->get('user.id');
 
+            $input['image'] = $this->productUtil->uploadFile($request, 'image', config('constants.product_img_path'), 'image');
+
             $category = Category::create($input);
             $output = ['success' => true,
                             'data' => $category,
@@ -139,6 +150,8 @@ class TaxonomyController extends Controller
                         ];
         } catch (\Exception $e) {
             \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
+
+            dd($e);
             
             $output = ['success' => false,
                             'msg' => __("messages.something_went_wrong")
@@ -222,6 +235,22 @@ class TaxonomyController extends Controller
                 } else {
                     $category->parent_id = 0;
                 }
+
+                $file_name = $this->productUtil->uploadFile($request, 'image', config('constants.product_img_path'), 'image');
+                if (!empty($file_name)) {
+    
+                    //If previous image found then remove
+                    if (!empty($category->image_path) && file_exists($category->image_path)) {
+                        unlink($category->image_path);
+                    }
+                    
+                    $category->image = $file_name;
+                    // //If product image is updated update woocommerce media id
+                    // if (!empty($product->woocommerce_media_id)) {
+                    //     $category->woocommerce_media_id = null;
+                    // }
+                }
+    
                 $category->save();
 
                 $output = ['success' => true,

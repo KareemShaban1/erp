@@ -69,39 +69,48 @@ class VariationTemplateController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) 
     {
         try {
-            $input = $request->only(['name']);
+            $input = $request->only(['name', 'code']);
             $input['business_id'] = $request->session()->get('user.business_id');
             $variation = VariationTemplate::create($input);
             
-            //craete variation values
+            // Create variation values
             if (!empty($request->input('variation_values'))) {
                 $values = $request->input('variation_values');
                 $data = [];
+                
                 foreach ($values as $value) {
-                    if (!empty($value)) {
-                        $data[] = [ 'name' => $value];
+                    if (!empty($value['value'])) {
+                        $data[] = [
+                            'name' => $value['value'],
+                            'code' => $value['code'] ?? null
+                        ];
                     }
                 }
-                $variation->values()->createMany($data);
+    
+                // Check if there's data to insert
+                if (!empty($data)) {
+                    $variation->values()->createMany($data);
+                }
             }
             
             $output = ['success' => true,
-                            'data' => $variation,
-                            'msg' => 'Variation added succesfully'
-                        ];
+                       'data' => $variation,
+                       'msg' => 'Variation added successfully'
+                      ];
         } catch (\Exception $e) {
             \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
             
             $output = ['success' => false,
-                            'msg' => 'Something went wrong, please try again'
-                        ];
+                       'msg' => 'Something went wrong, please try again'
+                      ];
         }
-
+    
         return $output;
     }
+    
 
     /**
      * Display the specified resource.
@@ -140,64 +149,86 @@ class VariationTemplateController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        if (request()->ajax()) {
-            try {
-                $input = $request->only(['name']);
-                $business_id = $request->session()->get('user.business_id');
+{
+    if (request()->ajax()) {
+        try {
+            // Retrieve the variation name from the request
+            $input = $request->only(['name']);
+            $business_id = $request->session()->get('user.business_id');
 
-                $variation = VariationTemplate::where('business_id', $business_id)->findOrFail($id);
+            // Find the variation associated with the current business
+            $variation = VariationTemplate::where('business_id', $business_id)->findOrFail($id);
 
-                if ($variation->name != $input['name']) {
-                    $variation->name = $input['name'];
-                    $variation->save();
+            // If the variation name has changed, update it
+            if ($variation->name != $input['name']) {
+                $variation->name = $input['name'];
+                $variation->save();
 
-                    ProductVariation::where('variation_template_id', $variation->id)
-                                ->update(['name' => $variation->name]);
-                }
-                
-                //update variation
-                $data = [];
-                if (!empty($request->input('edit_variation_values'))) {
-                    $values = $request->input('edit_variation_values');
-                    foreach ($values as $key => $value) {
-                        if (!empty($value)) {
-                            $variation_val = VariationValueTemplate::find($key);
-
-                            if ($variation_val->name != $value) {
-                                $variation_val->name = $value;
-                                $data[] = $variation_val;
-                                Variation::where('variation_value_id', $key)
-                                    ->update(['name' => $value]);
-                            }
-                        }
-                    }
-                    $variation->values()->saveMany($data);
-                }
-                if (!empty($request->input('variation_values'))) {
-                    $values = $request->input('variation_values');
-                    foreach ($values as $value) {
-                        if (!empty($value)) {
-                            $data[] = new VariationValueTemplate([ 'name' => $value]);
-                        }
-                    }
-                }
-                $variation->values()->saveMany($data);
-
-                $output = ['success' => true,
-                            'msg' => 'Variation updated succesfully'
-                            ];
-            } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-                $output = ['success' => false,
-                            'msg' => 'Something went wrong, please try again'
-                        ];
+                // Also update the name in ProductVariation table
+                ProductVariation::where('variation_template_id', $variation->id)
+                            ->update(['name' => $variation->name]);
             }
 
-            return $output;
+            $data = [];
+
+            // Update existing variation values
+            if (!empty($request->input('edit_variation_values'))) {
+                $values = $request->input('edit_variation_values');
+                foreach ($values as $key => $value) {
+                    if (!empty($value)) {
+                        $variation_val = VariationValueTemplate::find($key);
+
+                        // Update only if there is a change in name or code
+                        if ($variation_val->name != $value['name'] || $variation_val->code != $value['code']) {
+                            $variation_val->name = $value['name'];
+                            $variation_val->code = $value['code'];
+                            $data[] = $variation_val;
+
+                            // Update associated Variation records
+                            Variation::where('variation_value_id', $key)
+                                ->update(['name' => $value['name']]);
+                        }
+                    }
+                }
+
+                // Save updated variation values
+                $variation->values()->saveMany($data);
+            }
+
+            // Add new variation values if provided
+            if (!empty($request->input('variation_values'))) {
+                $new_values = $request->input('variation_values');
+                foreach ($new_values as $value) {
+                    if (!empty($value)) {
+                        $data[] = new VariationValueTemplate([
+                            'name' => $value['name'], 
+                            'code' => $value['code']
+                        ]);
+                    }
+                }
+
+                // Save new variation values
+                $variation->values()->saveMany($data);
+            }
+
+            // Return success message
+            $output = [
+                'success' => true,
+                'msg' => 'Variation updated successfully'
+            ];
+        } catch (\Exception $e) {
+            // Log error and return failure message
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+            dd($e);
+            $output = [
+                'success' => false,
+                'msg' => 'Something went wrong, please try again'
+            ];
         }
+
+        return $output;
     }
+}
 
     /**
      * Remove the specified resource from storage.

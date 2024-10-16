@@ -76,7 +76,6 @@ class ProductController extends Controller
                 ->leftJoin('variation_location_details as vld', 'vld.variation_id', '=', 'v.id')
                 ->where('products.business_id', $business_id)
                 ->where('products.type', '!=', 'modifier');
-
             //Filter by location
             $location_id = request()->get('location_id', null);
             $permitted_locations = auth()->user()->permitted_locations();
@@ -117,12 +116,13 @@ class ProductController extends Controller
                 'products.product_custom_field2',
                 'products.product_custom_field3',
                 'products.product_custom_field4',
+                'products.created_at',
                 DB::raw('SUM(vld.qty_available) as current_stock'),
                 DB::raw('MAX(v.sell_price_inc_tax) as max_price'),
                 DB::raw('MIN(v.sell_price_inc_tax) as min_price'),
                 DB::raw('MAX(v.dpp_inc_tax) as max_purchase_price'),
                 DB::raw('MIN(v.dpp_inc_tax) as min_purchase_price')
-                );
+                )->latest();
 
             //if woocomerce enabled add field to query
             if ($is_woocommerce) {
