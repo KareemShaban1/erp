@@ -158,7 +158,7 @@ return [
 "port_help" => "تعمل معظم الطابعات على منفذ 9100",
 "combination_of_taxes" => "مزيج من عدة ضرائب",
 "product_purchase_report" => "تقرير مشتريات المنتجات",
-"unit_perchase_price" => "سعر شراء الوحدة",
+"unit_purchase_price" => "سعر شراء الوحدة",
 "search_product" => "بحث عن منتج",
 "product_sell_report" => "تقرير مبيعات المنتجات",
 "unit_sale_price" => "سعر بيع الوحدة",

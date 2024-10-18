@@ -23,9 +23,10 @@ class BusinessLocationCollection extends ResourceCollection
      */
     public function toArray($request): array
     {
-        return $this->collection
-            // ->map->withFullData($this->withFullData)
-            ->map->toArray($request)
-            ->all();
+         // Wrap each item in the collection with BusinessLocation Resource
+         return $this->collection->map(function ($businessLocation) use ($request) {
+            // Pass the withFullData flag to the BusinessLocation Resource
+            return (new BusinessLocationResource($businessLocation))->withFullData($this->withFullData)->toArray($request);
+        })->all();
     }
 }

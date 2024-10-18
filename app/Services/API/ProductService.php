@@ -21,32 +21,12 @@ class ProductService extends BaseService
     {
         try {
             $query = Product::
-            with(['media','brand:id,name','category:id,name','unit:actual_name,short_name','warranty:name,duration,duration_type'])
-            ->where('products.type', '!=', 'modifier')->businessId()->productForSales()->latest();
-
-            // $query = Product::select(
-            //     'products.*',
-            //     'products.business_id',
-            //     'brands.name as brand_name',
-            //     'units.actual_name as unit_name',
-            //     'c1.name as category_name',
-            //     'c2.name as sub_category_name',
-            //     'tax_rates.amount as tax_rate',
-            //     'v.*',
-            //     'vld.*'
-            // )
-            // ->with(['media'])
-            // ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
-            // ->join('units', 'products.unit_id', '=', 'units.id')
-            // ->leftJoin('products as c1', 'products.category_id', '=', 'c1.id')
-            // ->leftJoin('products as c2', 'products.sub_category_id', '=', 'c2.id')
-            // ->leftJoin('tax_rates', 'products.tax', '=', 'tax_rates.id')
-            // ->join('variations as v', 'v.product_id', '=', 'products.id')
-            // ->leftJoin('variation_location_details as vld', 'vld.variation_id', '=', 'v.id')
-            // ->where('products.type', '!=', 'modifier')
-            // ->where('products.business_id', 273)
-            // ->where('products.name', '!=', 'DUMMY')
-            // ->whereNotNull('products.business_id');
+            with(['media','unit:id,actual_name,short_name','brand:id,name','category:id,name',
+            'sub_category:id,name',
+            'warranty:id,name,duration,duration_type'])
+            ->where('products.type', '!=', 'modifier')
+            ->businessId()->productForSales()
+            ->latest();
     
             $query = $this->withTrashed($query, $request);
     

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Brand;
+namespace App\Http\Resources\Variation;
 
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class BrandCollection extends ResourceCollection
+class VariationCollection extends ResourceCollection
 {
     private bool $withFullData = true;
 
@@ -23,10 +23,10 @@ class BrandCollection extends ResourceCollection
      */
     public function toArray($request): array
     {
-        // Wrap each item in the collection with BrandResource
-        return $this->collection->map(function ($brand) use ($request) {
-            // Pass the withFullData flag to the BrandResource
-            return (new BrandResource($brand))->withFullData($this->withFullData)->toArray($request);
+        // Wrap each item in the collection with VariationResource
+        return $this->collection->map(function ($variation) use ($request) {
+            // Pass the withFullData flag to the VariationResource
+            return (new VariationResource($variation))->withFullData($this->withFullData)->toArray($request);
         })->all();
     }
 }

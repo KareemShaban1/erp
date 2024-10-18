@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Resources\Brand;
+namespace App\Http\Resources\VariationLocationDetails;
 
+use App\Http\Resources\BusinessLocation\BusinessLocationCollection;
+use App\Http\Resources\BusinessLocation\BusinessLocationResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BrandResource extends JsonResource
+class VariationLocationDetailsResource extends JsonResource
 {
     protected bool $withFullData = true;
 
@@ -21,17 +23,12 @@ class BrandResource extends JsonResource
      */
     public function toArray($request)
     {
+
+        // 'product_id','product_variation_id','variation_id','location_id','qty_available'
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            $this->mergeWhen($this->withFullData, function () {
-                return [
-           'description' => $this->description,
-           
-                ];
-            }),
-            'created_at' => $this->created_at,
-            'deleted_at' => $this->deleted_at,
+            'qty_available' => $this->qty_available,
+            'location' =>  (new BusinessLocationResource($this->location))->withFullData(true),
         ];
 
 

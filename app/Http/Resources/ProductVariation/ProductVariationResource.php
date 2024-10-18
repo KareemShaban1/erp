@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Brand;
+namespace App\Http\Resources\ProductVariation;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BrandResource extends JsonResource
+class ProductVariationResource extends JsonResource
 {
     protected bool $withFullData = true;
 
@@ -21,17 +21,17 @@ class BrandResource extends JsonResource
      */
     public function toArray($request)
     {
+        // 'variation_template_id','name','product_id','is_dummy'
         return [
             'id' => $this->id,
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-           'description' => $this->description,
-           
+                    'created_at' => $this->created_at,
+                    'deleted_at' => $this->deleted_at,
                 ];
             }),
-            'created_at' => $this->created_at,
-            'deleted_at' => $this->deleted_at,
+
         ];
 
 

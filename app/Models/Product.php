@@ -77,6 +77,11 @@ class Product extends Model
     {
         return $this->hasMany(\App\Models\ProductVariation::class);
     }
+
+    public function product_variation_locations()
+    {
+        return $this->hasMany(\App\Models\VariationLocationDetails::class,'product_id')->with('location');
+    }
     
     /**
      * Get the brand associated with the product.
@@ -121,8 +126,9 @@ class Product extends Model
      */
     public function variations()
     {
-        return $this->hasMany(\App\Models\Variation::class);
+        return $this->hasMany(\App\Models\Variation::class)->with('variation_location_details');
     }
+
 
     /**
      * If product type is modifier get products associated with it.
@@ -237,6 +243,32 @@ class Product extends Model
     {
         return $this->morphMany(\App\Models\Media::class, 'model');
     }
+
+
+    public function getCurrentStockAttribute()
+{
+    return $this->variations->sum('variation_location_details.qty_available');
+}
+
+public function getMaxPriceAttribute()
+{
+    return $this->variations->max('sell_price_inc_tax');
+}
+
+public function getMinPriceAttribute()
+{
+    return $this->variations->min('sell_price_inc_tax');
+}
+
+public function getMaxPurchasePriceAttribute()
+{
+    return $this->variations->max('dpp_inc_tax');
+}
+
+public function getMinPurchasePriceAttribute()
+{
+    return $this->variations->min('dpp_inc_tax');
+}
 
 
 }

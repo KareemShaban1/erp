@@ -1,5 +1,5 @@
 @php 
-    $colspan = 15;
+    $colspan = 11;
     $custom_labels = json_decode(session('business.custom_labels'), true);
 @endphp
 <table class="table table-bordered table-striped ajax_view hide-footer" id="product_table">
@@ -14,7 +14,7 @@
                 @php 
                     $colspan++;
                 @endphp
-                <th>@lang('lang_v1.unit_perchase_price')</th>
+                <th>@lang('lang_v1.unit_purchase_price')</th>
             @endcan
             @can('access_default_selling_price')
                 @php 
@@ -28,10 +28,10 @@
             <th>@lang('product.brand')</th>
             <th>@lang('product.tax')</th>
             <th>@lang('product.sku')</th>
-            <th>{{ $custom_labels['product']['custom_field_1'] ?? __('lang_v1.product_custom_field1') }}</th>
+            <!-- <th>{{ $custom_labels['product']['custom_field_1'] ?? __('lang_v1.product_custom_field1') }}</th>
             <th>{{ $custom_labels['product']['custom_field_2'] ?? __('lang_v1.product_custom_field2') }}</th>
             <th>{{ $custom_labels['product']['custom_field_3'] ?? __('lang_v1.product_custom_field3') }}</th>
-            <th>{{ $custom_labels['product']['custom_field_4'] ?? __('lang_v1.product_custom_field4') }}</th>
+            <th>{{ $custom_labels['product']['custom_field_4'] ?? __('lang_v1.product_custom_field4') }}</th> -->
         </tr>
     </thead>
     <tfoot>

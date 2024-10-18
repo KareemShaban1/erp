@@ -15,6 +15,15 @@ class Variation extends Model
      * @var array
      */
     protected $guarded = ['id'];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name','product_id','sub_sku','product_variation_id','woocommerce_variation_id',
+    'variation_value_id','default_purchase_price','dpp_inc_tax','profit_percent','default_sell_price',
+    'sell_price_inc_tax','combo_variations'];
     
     /**
      * The attributes that should be cast to native types.

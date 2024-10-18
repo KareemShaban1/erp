@@ -12,7 +12,12 @@ class ProductVariation extends Model
      * @var array
      */
     protected $guarded = ['id'];
-    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['variation_template_id','name','product_id','is_dummy'];
     public function variations()
     {
         return $this->hasMany(\App\Models\Variation::class);

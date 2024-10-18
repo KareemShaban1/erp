@@ -1,10 +1,10 @@
 <?php
 
-namespace  App\Http\Requests\Product;
+namespace  App\Http\Requests\ProductVariation;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreProductRequest extends FormRequest
+class StoreProductVariationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,14 +22,14 @@ class StoreProductRequest extends FormRequest
     public function rules()
     {
         return [
-
+         
         ];
     }
 
     public function messages()
     {
         return [
-          
+           
         ];
     }
 }

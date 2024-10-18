@@ -26,11 +26,17 @@ class BusinessLocationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-           'description' => $this->description,
+                'landmark' => $this->landmark,
+                'country' => $this->country,
+                'state' => $this->state,
+                'city' => $this->city,
+                'zip_code' => $this->zip_code,
+                'mobile' => $this->mobile,
+                'alternate_number' => $this->alternate_number,
+                'email' => $this->email,
+                'website' => $this->website,
                 ];
             }),
-            'created_at' => $this->created_at,
-            'deleted_at' => $this->deleted_at,
         ];
 
 

@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Http\Resources\Variation\VariationCollection;
+use App\Http\Resources\Variation\VariationResource;
+use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -44,25 +47,34 @@ class ProductResource extends JsonResource
 
         // Conditionally merge the full data if the flag is set to true
         if ($this->withFullData) {
+            $variations = $this->variations;
+
+            $current_stock = $variations->sum(function ($variation) {
+                return $variation->variation_location_details->sum('qty_available');
+            });
             $data = array_merge($data, [
-                'description' => $this->description,
+                'description' => $this->product_description,
                 'type' => $this->type,
                 'business_id'=> $this->business_id,
                 'brand' => $this->brand ?? null,
-                'unit' => $this->unit->actual_name ?? null,
+                'unit' => $this->unit ?? null,
                 'category' => $this->category ?? null,
                 'warranty' => $this->warranty ?? null,
                 'sub_category' => $this->sub_category->name ?? null,
                 'tax' => $this->product_tax->amount ?? null,
                 'selling_price'=>$this->variations[0]->default_sell_price,
+                'current_stock' => $current_stock,
+                // 'max_price' => $this->max_price,
+                // 'min_price' => $this->min_price,
+                // 'max_purchase_price' => $this->max_purchase_price,
+                // 'min_purchase_price' => $this->min_purchase_price,
                 'media' => $this->media,
                 'image_url' => $this->image_url,
                 'image_path' => $this->image_path,
-                'variations' => $this->variations,
-                'product_variations'=>$this->product_variations,
-                // 'purchase_lines'=>$this->purchase_lines,
-                'created_at' => $this->created_at, 
-                'deleted_at' => $this->deleted_at,
+                // 'variations_locations'=>(new VariationLocationDetailsCollection($this->product_variation_locations))->withFullData(true),
+                'variations' => (new VariationCollection($this->variations))->withFullData(true),
+                // 'created_at' => $this->created_at, 
+                // 'deleted_at' => $this->deleted_at,
             ]);
         }
 
