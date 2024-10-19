@@ -24,7 +24,7 @@ class ProductController extends Controller
     /**
      * Display a listing of the categories.
      */
-    public function index(Request $request , $category_id)
+    public function index(Request $request , $category_id = null)
     {
         $categories = $this->service->list($request,$category_id);
 
