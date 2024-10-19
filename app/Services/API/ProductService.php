@@ -17,31 +17,45 @@ class ProductService extends BaseService
     /**
      * Get all products with filters and pagination for DataTables.
      */
-    public function list(Request $request)
+    public function list(Request $request, $category_id = null)
     {
         try {
-            $query = Product::
-            with(['media','unit:id,actual_name,short_name','brand:id,name','category:id,name',
-            'sub_category:id,name',
-            'warranty:id,name,duration,duration_type'])
-            ->where('products.type', '!=', 'modifier')
-            ->businessId()->productForSales()
-            ->latest();
+            // Initialize the query with necessary relationships
+            $query = Product::with([
+                    'media', 
+                    'unit:id,actual_name,short_name',
+                    'brand:id,name',
+                    'category:id,name',
+                    'sub_category:id,name',
+                    'warranty:id,name,duration,duration_type'
+                ])
+                ->where('products.type', '!=', 'modifier')
+                ->businessId()
+                ->productForSales()
+                ->latest();
     
+
+            // Check if a category_id is passed and apply the filter
+            if (!empty($category_id)) {
+                $query = $query->where('category_id', $category_id);
+            }
+    
+            // Apply withTrashed logic if needed
             $query = $this->withTrashed($query, $request);
     
             // Apply pagination or fetch the data
             $products = $this->withPagination($query, $request);
-
     
             // Wrap the data in ProductCollection and apply withFullData() here
             return (new ProductCollection($products))
                 ->withFullData(!($request->full_data == 'false'));
     
         } catch (\Exception $e) {
+            // Handle any exception that might occur
             return $this->handleException($e, __('message.Error happened while listing products'));
         }
     }
+    
 
     public function show($id) {
 
@@ -53,6 +67,27 @@ class ProductService extends BaseService
             }
             return $product;
 
+
+        } catch (\Exception $e) {
+            return $this->handleException($e, __('message.Error happened while showing Product'));
+        }
+    }
+
+
+    public function categoryProducts($request, $id) {
+
+        try {
+            $query = Product::businessId()->where('category_id',$id);
+
+            $query = $this->withTrashed($query, $request);
+    
+            // Apply pagination or fetch the data
+            $products = $this->withPagination($query, $request);
+
+    
+            // Wrap the data in ProductCollection and apply withFullData() here
+            return (new ProductCollection($products))
+                ->withFullData(!($request->full_data == 'false'));
 
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while showing Product'));

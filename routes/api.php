@@ -29,7 +29,8 @@ Route::get('brands', [BrandController::class, 'index']);
 
 Route::get('units', [UnitController::class, 'index']);
 
-Route::get('products', [ProductController::class, 'index']);
+Route::get('products/{category_id?}', [ProductController::class, 'index']);
+Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
 
 Route::get('warranties', [WarrantyController::class, 'index']);
 

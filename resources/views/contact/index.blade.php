@@ -118,7 +118,7 @@
                         @php
                             $custom_labels = json_decode(session('business.custom_labels'), true);
                         @endphp
-                        <th>
+                        <!-- <th>
                             {{ $custom_labels['contact']['custom_field_1'] ?? __('lang_v1.contact_custom_field1') }}
                         </th>
                         <th>
@@ -147,7 +147,7 @@
                         </th>
                         <th>
                             {{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}
-                        </th>
+                        </th> -->
                     </tr>
                 </thead>
                 <tfoot>
@@ -174,16 +174,7 @@
                         </td>
                         <td class="footer_contact_due"></td>
                         <td class="footer_contact_return_due"></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+
                     </tr>
                 </tfoot>
             </table>

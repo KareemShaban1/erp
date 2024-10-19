@@ -51,7 +51,7 @@ class ProductResource extends JsonResource
 
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
-            });
+            }); 
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'type' => $this->type,
@@ -62,7 +62,7 @@ class ProductResource extends JsonResource
                 'warranty' => $this->warranty ?? null,
                 'sub_category' => $this->sub_category->name ?? null,
                 'tax' => $this->product_tax->amount ?? null,
-                'selling_price'=>$this->variations[0]->default_sell_price,
+                // 'selling_price'=>$this->variations[0]->default_sell_price,
                 'current_stock' => $current_stock,
                 // 'max_price' => $this->max_price,
                 // 'min_price' => $this->min_price,
@@ -71,7 +71,6 @@ class ProductResource extends JsonResource
                 'media' => $this->media,
                 'image_url' => $this->image_url,
                 'image_path' => $this->image_path,
-                // 'variations_locations'=>(new VariationLocationDetailsCollection($this->product_variation_locations))->withFullData(true),
                 'variations' => (new VariationCollection($this->variations))->withFullData(true),
                 // 'created_at' => $this->created_at, 
                 // 'deleted_at' => $this->deleted_at,

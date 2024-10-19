@@ -24,9 +24,9 @@ class ProductController extends Controller
     /**
      * Display a listing of the categories.
      */
-    public function index(Request $request)
+    public function index(Request $request , $category_id)
     {
-        $categories = $this->service->list($request);
+        $categories = $this->service->list($request,$category_id);
 
         if ($categories instanceof JsonResponse) {
             return $categories;
@@ -45,13 +45,13 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
             $data = $request->validated();
-            $Product = $this->service->store( $data);
+            $product = $this->service->store( $data);
 
-            if ($Product instanceof JsonResponse) {
-                return $Product;
+            if ($product instanceof JsonResponse) {
+                return $product;
             }
 
-            return $this->returnJSON($Product, __('message.Product has been created successfully'));
+            return $this->returnJSON($product, __('message.Product has been created successfully'));
     }
 
     /**
@@ -60,28 +60,44 @@ class ProductController extends Controller
     public function show($id)
     {
 
-        $Product = $this->service->show($id);
+        $product = $this->service->show($id);
 
-        if ($Product instanceof JsonResponse) {
-            return $Product;
+        if ($product instanceof JsonResponse) {
+            return $product;
         }
 
-        return $this->returnJSON($Product, __('message.Product has been created successfully'));
+        return $this->returnJSON($product, __('message.Product has been created successfully'));
+
+    }
+
+     /**
+     * Display the specified Product.
+     */
+    public function categoryProducts(Request $request,$id)
+    {
+
+        $product = $this->service->categoryProducts( $request ,$id);
+
+        if ($product instanceof JsonResponse) {
+            return $product;
+        }
+
+        return $this->returnJSON($product, __('message.Product has been created successfully'));
 
     }
 
     /**
      * Update the specified Product in storage.
      */
-    public function update(UpdateProductRequest $request, Product $Product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-            $Product = $this->service->update($request,$Product);
+            $product = $this->service->update($request,$product);
 
-            if ($Product instanceof JsonResponse) {
-                return $Product;
+            if ($product instanceof JsonResponse) {
+                return $product;
             }
 
-            return $this->returnJSON($Product, __('message.Product has been updated successfully'));
+            return $this->returnJSON($product, __('message.Product has been updated successfully'));
 
     }
 
@@ -90,35 +106,35 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $Product = $this->service->destroy($id);
+        $product = $this->service->destroy($id);
 
-        if ($Product instanceof JsonResponse) {
-            return $Product;
+        if ($product instanceof JsonResponse) {
+            return $product;
         }
 
-        return $this->returnJSON($Product, __('message.Product has been deleted successfully'));
+        return $this->returnJSON($product, __('message.Product has been deleted successfully'));
     }
 
     public function restore($id)
     {
-        $Product = $this->service->restore($id);
+        $product = $this->service->restore($id);
 
-        if ($Product instanceof JsonResponse) {
-            return $Product;
+        if ($product instanceof JsonResponse) {
+            return $product;
         }
 
-        return $this->returnJSON($Product, __('message.Product has been restored successfully'));
+        return $this->returnJSON($product, __('message.Product has been restored successfully'));
     }
 
     public function forceDelete($id)
     {
-        $Product = $this->service->forceDelete($id);
+        $product = $this->service->forceDelete($id);
 
-        if ($Product instanceof JsonResponse) {
-            return $Product;
+        if ($product instanceof JsonResponse) {
+            return $product;
         }
 
-        return $this->returnJSON($Product, __('message.Product has been force deleted successfully'));
+        return $this->returnJSON($product, __('message.Product has been force deleted successfully'));
     }
 
     public function bulkDelete(Request $request)
@@ -130,12 +146,12 @@ class ProductController extends Controller
         ]);
 
 
-        $Product = $this->service->bulkDelete($request->ids);
+        $product = $this->service->bulkDelete($request->ids);
 
-        if ($Product instanceof JsonResponse) {
-            return $Product;
+        if ($product instanceof JsonResponse) {
+            return $product;
         }
 
-        return $this->returnJSON($Product, __('message.Product has been deleted successfully.'));
+        return $this->returnJSON($product, __('message.Product has been deleted successfully.'));
     }
 }
