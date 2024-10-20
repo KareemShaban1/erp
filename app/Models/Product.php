@@ -126,7 +126,7 @@ class Product extends Model
      */
     public function variations()
     {
-        return $this->hasMany(\App\Models\Variation::class)->with('variation_location_details');
+        return $this->hasMany(\App\Models\Variation::class)->with('variation_location_details','variation_value');
     }
 
 

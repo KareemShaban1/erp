@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Http\Resources\Media\MediaCollection;
 use App\Http\Resources\Variation\VariationCollection;
 use App\Http\Resources\Variation\VariationResource;
 use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
@@ -68,9 +69,8 @@ class ProductResource extends JsonResource
                 // 'min_price' => $this->min_price,
                 // 'max_purchase_price' => $this->max_purchase_price,
                 // 'min_purchase_price' => $this->min_purchase_price,
-                'media' => $this->media,
                 'image_url' => $this->image_url,
-                'image_path' => $this->image_path,
+                'media' => (new MediaCollection($this->media))->withFullData(false),
                 'variations' => (new VariationCollection($this->variations))->withFullData(true),
                 // 'created_at' => $this->created_at, 
                 // 'deleted_at' => $this->deleted_at,
