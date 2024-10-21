@@ -49,6 +49,10 @@ return [
         'customer' => [
             'driver' => 'session',
             'provider' => 'contacts',
+        ],
+        'client' => [
+            'driver' => 'passport',
+            'provider' => 'clients',
         ]
     ],
 
@@ -78,6 +82,11 @@ return [
         'contacts' => [
             'driver' => 'eloquent',
             'model' => App\Models\Contact::class,
+        ],
+
+        'clients' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Client::class,
         ]
 
         // 'users' => [

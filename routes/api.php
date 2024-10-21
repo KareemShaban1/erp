@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\BusinessLocationController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
@@ -35,5 +36,10 @@ Route::get('category_products/{id}', [ProductController::class, 'categoryProduct
 Route::get('warranties', [WarrantyController::class, 'index']);
 
 Route::get('business_locations', [BusinessLocationController::class, 'index']);
+
+Route::get('cart_get_items', [CartController::class, 'index']);
+
+Route::post('client/register', [AuthController::class, 'clientRegister']);
+Route::post('client/login', [AuthController::class, 'clientLogin']);
 
 Route::post('user/login', [AuthController::class, 'userLogin']);

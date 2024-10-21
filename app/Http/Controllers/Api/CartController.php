@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\API\CartService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -21,7 +22,16 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = $this->cartService->getCartItems();
-        return response()->json(['cart_items' => $cartItems], 200);
+        if ($cartItems instanceof JsonResponse) {
+          return $cartItems;
+      }
+
+      return $cartItems->additional([
+          'code' => 200,
+          'status' => 'success',
+          'message' =>  __('message.Cart Items have been retrieved successfully'),
+      ]);
+//         return response()->json(['cart_items' => $cartItems], 200);
     }
 
     /**

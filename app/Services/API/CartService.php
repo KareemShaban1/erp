@@ -2,19 +2,31 @@
 
 namespace App\Services\API;
 
+use App\Http\Resources\Cart\CartCollection;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Variant;
 use Illuminate\Support\Facades\Auth;
+use App\Services\BaseService;
 
-class CartService
+class CartService extends BaseService
 {
     /**
      * Get all cart items for the authenticated user.
      */
     public function getCartItems()
     {
-        return Cart::where('user_id', Auth::id())->with(['product', 'variant'])->get();
+          try {
+
+                    $carts = Cart::where('client_id', Auth::id())->with(['product', 'variant'])->get();
+        
+                    return (new CartCollection($carts))
+                    ->withFullData(true);
+        
+        
+                } catch (\Exception $e) {
+                    return $this->handleException($e, __('message.Error happened while listing categories'));
+                }
     }
 
     /**
@@ -24,7 +36,7 @@ class CartService
     {
         $product = Product::findOrFail($productId);
 
-        $cartItem = Cart::where('user_id', Auth::id())
+        $cartItem = Cart::where('client_id', Auth::id())
             ->where('product_id', $productId)
             ->where('variant_id', $variantId)
             ->first();
@@ -35,7 +47,7 @@ class CartService
         } else {
             // Add new item to the cart
             $cartItem = Cart::create([
-                'user_id' => Auth::id(),
+                'client_id' => Auth::id(),
                 'product_id' => $productId,
                 'variant_id' => $variantId,
                 'quantity' => $quantity,
@@ -52,7 +64,7 @@ class CartService
      */
     public function updateCartItem($cartId, $quantity)
     {
-        $cartItem = Cart::where('user_id', Auth::id())->findOrFail($cartId);
+        $cartItem = Cart::where('client_id', Auth::id())->findOrFail($cartId);
         $cartItem->quantity = $quantity;
         $cartItem->save();
 
@@ -64,7 +76,7 @@ class CartService
      */
     public function removeCartItem($cartId)
     {
-        $cartItem = Cart::where('user_id', Auth::id())->findOrFail($cartId);
+        $cartItem = Cart::where('client_id', Auth::id())->findOrFail($cartId);
         $cartItem->delete();
 
         return $cartItem;
@@ -75,7 +87,7 @@ class CartService
      */
     public function clearCart()
     {
-        Cart::where('user_id', Auth::id())->delete();
+        Cart::where('client_id', Auth::id())->delete();
         return true;
     }
 }

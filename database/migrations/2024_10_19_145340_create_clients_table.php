@@ -15,6 +15,12 @@ class CreateClientsTable extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            $table->unsignedInteger('contact_id')->nullable();
+            $table->foreign('contact_id')->references('id')->on('contacts')->nullOnDelete();
+            $table->string('email_address')->unique();
+            $table->string('location');
+            $table->string('password');
+            $table->string('client_type');
             $table->timestamps();
         });
     }

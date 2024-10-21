@@ -65,6 +65,11 @@ class Contact extends Authenticatable
         return $query;
     }
 
+    public function scopeTypeCustomer($query)
+    {
+        return $query->where('contacts.type', 'customer');
+    }
+
     /**
      * Get all of the contacts's notes & documents.
      */
