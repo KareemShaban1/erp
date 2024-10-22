@@ -37,8 +37,12 @@ Route::get('warranties', [WarrantyController::class, 'index']);
 
 Route::get('business_locations', [BusinessLocationController::class, 'index']);
 
-Route::get('cart_get_items', [CartController::class, 'index']);
 
+Route::middleware('auth:sanctum-client')->group(function () {
+          Route::get('cart_get_items', [CartController::class, 'index']);
+          Route::post('add_to_cart', [CartController::class, 'store']);
+      });
+      
 Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin']);
 

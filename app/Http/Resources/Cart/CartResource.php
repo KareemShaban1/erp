@@ -32,6 +32,7 @@ class CartResource extends JsonResource
                     'variation' => (new VariationResource( $this->variation))->withFullData(true),
                     'quantity'=>$this->quantity,
                     'price'=>$this->price,
+                    'total'=>$this->total,
                     'discount'=>$this->discount,
                 ];
             }),

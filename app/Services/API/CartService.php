@@ -5,7 +5,7 @@ namespace App\Services\API;
 use App\Http\Resources\Cart\CartCollection;
 use App\Models\Cart;
 use App\Models\Product;
-use App\Models\Variant;
+use App\Models\Variation;
 use Illuminate\Support\Facades\Auth;
 use App\Services\BaseService;
 
@@ -18,7 +18,7 @@ class CartService extends BaseService
     {
           try {
 
-                    $carts = Cart::where('client_id', Auth::id())->with(['product', 'variant'])->get();
+                    $carts = Cart::where('client_id', Auth::id())->with(['product', 'variation','client'])->get();
         
                     return (new CartCollection($carts))
                     ->withFullData(true);
@@ -34,30 +34,39 @@ class CartService extends BaseService
      */
     public function addToCart($productId, $variantId, $quantity)
     {
+        // Fetch the product and variant
         $product = Product::findOrFail($productId);
-
+        $variation = Variation::findOrFail($variantId);
+    
+        // Check if the item already exists in the cart
         $cartItem = Cart::where('client_id', Auth::id())
             ->where('product_id', $productId)
-            ->where('variant_id', $variantId)
+            ->where('variation_id', $variantId)
             ->first();
-
+    
         if ($cartItem) {
             // Update quantity if the item already exists
             $cartItem->quantity += $quantity;
         } else {
-            // Add new item to the cart
+            // Create a new cart item
             $cartItem = Cart::create([
                 'client_id' => Auth::id(),
                 'product_id' => $productId,
-                'variant_id' => $variantId,
+                'variation_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $product->price,
+                'price' => $variation->default_sell_price,
             ]);
         }
-
+    
+        // Calculate total price (quantity * price)
+        $cartItem->total = $cartItem->quantity * $cartItem->price;
+    
+        // Save the cart item with the updated total
         $cartItem->save();
+    
         return $cartItem;
     }
+    
 
     /**
      * Update the quantity of an item in the cart.

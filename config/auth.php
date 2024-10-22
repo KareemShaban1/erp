@@ -50,10 +50,10 @@ return [
             'driver' => 'session',
             'provider' => 'contacts',
         ],
-        'client' => [
-            'driver' => 'passport',
-            'provider' => 'clients',
-        ]
+        'sanctum-client' => [
+        'driver' => 'sanctum',
+        'provider' => 'clients',
+        ],
     ],
 
     /*

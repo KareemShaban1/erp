@@ -23,7 +23,7 @@ class CreateCartsTable extends Migration
             $table->unsignedSmallInteger('quantity')->default(1);
             $table->unsignedBigInteger('price')->default(0);
             $table->unsignedBigInteger('discount')->nullable();
-            // $table->string('status')->default('active'); // Could be active, checked_out, abandoned
+            $table->unsignedBigInteger('total')->default(0);
 
             $table->timestamps();
         });

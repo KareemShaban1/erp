@@ -14,7 +14,7 @@ class Cart extends Model
      *
      * @var array
      */
-    protected $fillable = ['client_id','product_id','variation_id','quantity','price','discount'];
+    protected $fillable = ['client_id','product_id','variation_id','quantity','price','discount','total'];
 
     public function client(){
         return $this->belongsTo(Contact::class)->typeCustomer();
