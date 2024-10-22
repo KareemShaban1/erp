@@ -51,6 +51,10 @@ class CartController extends Controller
             $request->quantity
         );
 
+        if ($cartItem instanceof JsonResponse) {
+            return $cartItem;
+        }
+
         return $this->returnJSON($cartItem, __('message.Cart Item has been created successfully'));
 
     }
@@ -66,6 +70,9 @@ class CartController extends Controller
 
         $cartItem = $this->cartService->updateCartItem($id, $request->quantity);
 
+        if ($cartItem instanceof JsonResponse) {
+            return $cartItem;
+        }
         
         return $this->returnJSON($cartItem, __('message.Cart Item has been updated successfully'));
     }
@@ -77,6 +84,10 @@ class CartController extends Controller
     {
         $cartItem = $this->cartService->removeCartItem($id);
 
+        if ($cartItem instanceof JsonResponse) {
+            return $cartItem;
+        }
+
         return $this->returnJSON($cartItem, __('message.Cart Item has been deleted successfully'));
     }
 
@@ -85,7 +96,11 @@ class CartController extends Controller
      */
     public function clear()
     {
-        $this->cartService->clearCart();
+        $cartItem = $this->cartService->clearCart();
+
+        if ($cartItem instanceof JsonResponse) {
+            return $cartItem;
+        }
 
         return $this->returnJSON(null, __('message.Cart Item has been cleared successfully'));
     }

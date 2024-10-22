@@ -34,24 +34,41 @@ class CartService extends BaseService
      */
     public function addToCart($productId, $variantId, $quantity)
     {
-        // Fetch the product and variant
+        // Fetch the product and variation
         $product = Product::findOrFail($productId);
         $variation = Variation::findOrFail($variantId);
-
-
+    
+        // Calculate the current stock available
+        $current_stock = $variation->variation_location_details->sum('qty_available');
+    
+        // Check if the requested quantity exceeds available stock
+        if ($quantity > $current_stock) {
+            return response()->json([
+                'code' => 400,
+                'status' => 'failed',
+                'message' => __('message.Quantity exceeds available stock'),
+                'data' => null
+            ], 400);
+        }
+    
         // Check if the item already exists in the cart
         $cartItem = Cart::where('client_id', Auth::id())
             ->where('product_id', $productId)
             ->where('variation_id', $variantId)
             ->first();
-
-            if ($quantity > $variation->variation_location_details->qty_available) {
-                return response()->json(['error' => 'Quantity exceeds available stock'], 400);
-            }
-            
-
+    
         if ($cartItem) {
-            // Update quantity if the item already exists
+            // If the new quantity after adding exceeds available stock, return an error
+            if ($cartItem->quantity + $quantity > $current_stock) {
+                return response()->json([
+                    'code' => 400,
+                    'status' => 'failed',
+                    'message' => __('message.Quantity exceeds available stock'),
+                    'data' => null
+                ], 400);
+            }
+    
+            // Update quantity if the item already exists in the cart
             $cartItem->quantity += $quantity;
         } else {
             // Create a new cart item
@@ -63,21 +80,20 @@ class CartService extends BaseService
                 'price' => $variation->default_sell_price,
             ]);
         }
-
+    
         // Calculate total price (quantity * price)
         if ($cartItem->discount) {
             $cartItem->total = ($cartItem->quantity * $cartItem->price) - $cartItem->discount;
         } else {
             $cartItem->total = $cartItem->quantity * $cartItem->price;
         }
-        
-
+    
         // Save the cart item with the updated total
         $cartItem->save();
-
+    
         return $cartItem;
     }
-
+    
 
     /**
      * Update the quantity of an item in the cart.
@@ -88,7 +104,23 @@ class CartService extends BaseService
             $cartItem = Cart::where('client_id', Auth::id())->findOrFail($cartId);
 
             if ($quantity < 1) {
-                return response()->json(['error' => 'Quantity must be at least 1'], 400);
+                return response()->json([
+                    'code' => 400,
+                    'status' => 'failed',
+                    'message' => __('message.Quantity must be at least 1'),
+                    'data' => null
+                ], 400);
+            }
+
+            $current_stock = $cartItem->variation->variation_location_details->sum('qty_available');
+
+            if ($quantity > $current_stock) {
+                return response()->json([
+                    'code' => 400,
+                    'status' => 'failed',
+                    'message' => __('message.Quantity exceeds available stock'),
+                    'data' => null
+                ], 400);
             }
 
             // Update the quantity
