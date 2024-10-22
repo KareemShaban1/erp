@@ -41,8 +41,12 @@ Route::get('business_locations', [BusinessLocationController::class, 'index']);
 Route::middleware('auth:sanctum-client')->group(function () {
           Route::get('cart_get_items', [CartController::class, 'index']);
           Route::post('add_to_cart', [CartController::class, 'store']);
+          Route::post('update_cart/{id}', [CartController::class, 'update']);
+          Route::delete('delete_cart/{id}', [CartController::class, 'destroy']);
+          Route::delete('clear_cart', [CartController::class, 'clear']);
+
       });
-      
+
 Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin']);
 

@@ -51,7 +51,8 @@ class CartController extends Controller
             $request->quantity
         );
 
-        return response()->json(['cart_item' => $cartItem], 201);
+        return $this->returnJSON($cartItem, __('message.Cart Item has been created successfully'));
+
     }
 
     /**
@@ -60,12 +61,13 @@ class CartController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1', 
         ]);
 
         $cartItem = $this->cartService->updateCartItem($id, $request->quantity);
 
-        return response()->json(['cart_item' => $cartItem], 200);
+        
+        return $this->returnJSON($cartItem, __('message.Cart Item has been updated successfully'));
     }
 
     /**
@@ -75,7 +77,7 @@ class CartController extends Controller
     {
         $cartItem = $this->cartService->removeCartItem($id);
 
-        return response()->json(['message' => 'Item removed successfully.'], 200);
+        return $this->returnJSON($cartItem, __('message.Cart Item has been deleted successfully'));
     }
 
     /**
@@ -85,6 +87,6 @@ class CartController extends Controller
     {
         $this->cartService->clearCart();
 
-        return response()->json(['message' => 'Cart cleared successfully.'], 200);
+        return $this->returnJSON(null, __('message.Cart Item has been cleared successfully'));
     }
 }
