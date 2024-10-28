@@ -26,12 +26,11 @@ class BrandResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-           'description' => $this->description,
-           
+                    'description' => $this->description,
+                    'created_at' => $this->created_at,
+                    'deleted_at' => $this->deleted_at,
                 ];
             }),
-            'created_at' => $this->created_at,
-            'deleted_at' => $this->deleted_at,
         ];
 
 

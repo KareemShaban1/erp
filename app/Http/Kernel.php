@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'authh' => \App\Http\Middleware\IsInstalled::class,
         'EcomApi' => \App\Http\Middleware\EcomApi::class,
         'AdminSidebarMenu' => \App\Http\Middleware\AdminSidebarMenu::class,
+        'ApplicationSidebarMenu' => \App\Http\Middleware\ApplicationSidebarMenu::class,
         'superadmin' => \App\Http\Middleware\Superadmin::class,
         'CheckUserLogin' => \App\Http\Middleware\CheckUserLogin::class,        
     ];

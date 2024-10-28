@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\ApplicationDashboard\BannerController;
+use App\Http\Controllers\ApplicationDashboard\CategoryController;
+use App\Http\Controllers\ApplicationDashboard\HomeController;
+use App\Http\Controllers\ApplicationDashboard\OrderController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +25,9 @@ use App\Models\Transaction;
 if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
     error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 }
+
+
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
 
 
@@ -81,6 +88,9 @@ Route::middleware(['setData'])->group(function () {
 
     // Auth::routes();
 
+  
+
+
     Route::get('/business/register', 'BusinessController@getRegister')->name('business.getRegister');
     Route::post('/business/register', 'BusinessController@postRegister')->name('business.postRegister');
     Route::post('/business/register/check-username', 'BusinessController@postCheckUsername')->name('business.postCheckUsername');
@@ -97,49 +107,12 @@ Route::middleware(['setData'])->group(function () {
         ->name('confirm_payment');
 });
 
-//Routes for authenticated users only
-Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
-    Route::get('/home', 'HomeController@index')->name('home');
-    Route::get('/home/get-totals', 'HomeController@getTotals');
-    Route::get('/home/product-stock-alert', 'HomeController@getProductStockAlert');
-    Route::get('/home/purchase-payment-dues', 'HomeController@getPurchasePaymentDues');
-    Route::get('/home/sales-payment-dues', 'HomeController@getSalesPaymentDues');
-    Route::post('/attach-medias-to-model', 'HomeController@attachMediasToGivenModel')->name('attach.medias.to.model');
-    Route::get('/calendar', 'HomeController@getCalendar')->name('calendar');
-    
-    Route::post('/test-email', 'BusinessController@testEmailConfiguration');
-    Route::post('/test-sms', 'BusinessController@testSmsConfiguration');
-    Route::get('/business/settings', 'BusinessController@getBusinessSettings')->name('business.getBusinessSettings');
-    Route::post('/business/update', 'BusinessController@postBusinessSettings')->name('business.postBusinessSettings');
-    Route::get('/user/profile', 'UserController@getProfile')->name('user.getProfile');
-    Route::post('/user/update', 'UserController@updateProfile')->name('user.updateProfile');
-    Route::post('/user/update-password', 'UserController@updatePassword')->name('user.updatePassword');
+Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'ApplicationSidebarMenu', 'CheckUserLogin'])->group(function () {
 
-    Route::resource('brands', 'BrandController');
-    
-    Route::resource('payment-account', 'PaymentAccountController');
+Route::get('applicationDashboard/home', [HomeController::class,'index'])
+->name('application.home');
 
-    Route::resource('tax-rates', 'TaxRateController');
-
-    Route::resource('units', 'UnitController');
-
-    Route::get('/contacts/payments/{contact_id}', 'ContactController@getContactPayments');
-    Route::get('/get-contact-due/{contact_id}', 'ContactController@getContactDue');
-    Route::get('/contacts/map', 'ContactController@contactMap');
-    Route::get('/contacts/update-status/{id}', 'ContactController@updateStatus');
-    Route::get('/contacts/stock-report/{supplier_id}', 'ContactController@getSupplierStockReport');
-    Route::get('/contacts/ledger', 'ContactController@getLedger');
-    Route::post('/contacts/send-ledger', 'ContactController@sendLedger');
-    Route::get('/contacts/import', 'ContactController@getImportContacts')->name('contacts.import');
-    Route::post('/contacts/import', 'ContactController@postImportContacts');
-    Route::post('/contacts/check-contacts-id', 'ContactController@checkContactId');
-    Route::get('/contacts/customers', 'ContactController@getCustomers');
-    Route::resource('contacts', 'ContactController');
-
-    Route::get('taxonomies-ajax-index-page', 'TaxonomyController@getTaxonomyIndexPage');
-    Route::resource('taxonomies', 'TaxonomyController');
-
-    Route::resource('variation-templates', 'VariationTemplateController');
+    Route::resource('products', 'ProductController');
 
     Route::get('/products/stock-history/{id}', 'ProductController@productStockHistory');
     Route::get('/delete-media/{media_id}', 'ProductController@deleteMedia');
@@ -168,8 +141,95 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/products/save_quick_product', 'ProductController@saveQuickProduct');
     Route::get('/products/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
     Route::post('/products/toggle-woocommerce-sync', 'ProductController@toggleWooCommerceSync');
+
+    Route::get('taxonomies-ajax-index-page', 'TaxonomyController@getTaxonomyIndexPage');
+    Route::resource('taxonomies', 'TaxonomyController');
+
+    Route::resource('brands', 'BrandController');
+
+    Route::resource('units', 'UnitController');
+
+    Route::resource('variation-templates', 'VariationTemplateController');
+
+        //Print Labels
+        Route::get('/labels/show', 'LabelsController@show');
+        Route::get('/labels/add-product-row', 'LabelsController@addProductRow');
+        Route::get('/labels/preview', 'LabelsController@preview');
+
+            //Import products
+    Route::get('/import-products', 'ImportProductsController@index');
+    Route::post('/import-products/store', 'ImportProductsController@store');
+
+
+    //Import opening stock
+    Route::get('/import-opening-stock', 'ImportOpeningStockController@index');
+    Route::post('/import-opening-stock/store', 'ImportOpeningStockController@store');
+
+    Route::get('selling-price-group/activate-deactivate/{id}', 'SellingPriceGroupController@activateDeactivate');
+    Route::get('export-selling-price-group', 'SellingPriceGroupController@export');
+    Route::post('import-selling-price-group', 'SellingPriceGroupController@import');
+
+    Route::resource('selling-price-group', 'SellingPriceGroupController');
+
+    Route::resource('warranties', 'WarrantyController');
+
+    // Route::resource('orders', OrderController::class);
+
+    Route::get('orders', [OrderController::class,'index'])->name('orders.index');
+    Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
+    Route::get('orders/edit/{id}', [OrderController::class,'edit'])->name('orders.edit');
+
+    Route::post('/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
+    Route::post('/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
+
+    // Route::get('banners', [BannerController::class,'index'])->name('banners.index');
+    // Route::get('banners/create', [BannerController::class,'create'])->name('banners.create');
+    // Route::post('banners/store', [BannerController::class,'store'])->name('banners.store');
+
+
+    Route::resource('banners', 'ApplicationDashboard\BannerController');
+
+
+});
+
+//Routes for authenticated users only
+Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
+    Route::get('/home', 'HomeController@index')->name('home');
+    Route::get('/home/get-totals', 'HomeController@getTotals');
+    Route::get('/home/product-stock-alert', 'HomeController@getProductStockAlert');
+    Route::get('/home/purchase-payment-dues', 'HomeController@getPurchasePaymentDues');
+    Route::get('/home/sales-payment-dues', 'HomeController@getSalesPaymentDues');
+    Route::post('/attach-medias-to-model', 'HomeController@attachMediasToGivenModel')->name('attach.medias.to.model');
+    Route::get('/calendar', 'HomeController@getCalendar')->name('calendar');
     
-    Route::resource('products', 'ProductController');
+    Route::post('/test-email', 'BusinessController@testEmailConfiguration');
+    Route::post('/test-sms', 'BusinessController@testSmsConfiguration');
+    Route::get('/business/settings', 'BusinessController@getBusinessSettings')->name('business.getBusinessSettings');
+    Route::post('/business/update', 'BusinessController@postBusinessSettings')->name('business.postBusinessSettings');
+    Route::get('/user/profile', 'UserController@getProfile')->name('user.getProfile');
+    Route::post('/user/update', 'UserController@updateProfile')->name('user.updateProfile');
+    Route::post('/user/update-password', 'UserController@updatePassword')->name('user.updatePassword');
+
+    
+    Route::resource('payment-account', 'PaymentAccountController');
+
+    Route::resource('tax-rates', 'TaxRateController');
+
+    Route::get('/contacts/payments/{contact_id}', 'ContactController@getContactPayments');
+    Route::get('/get-contact-due/{contact_id}', 'ContactController@getContactDue');
+    Route::get('/contacts/map', 'ContactController@contactMap');
+    Route::get('/contacts/update-status/{id}', 'ContactController@updateStatus');
+    Route::get('/contacts/stock-report/{supplier_id}', 'ContactController@getSupplierStockReport');
+    Route::get('/contacts/ledger', 'ContactController@getLedger');
+    Route::post('/contacts/send-ledger', 'ContactController@sendLedger');
+    Route::get('/contacts/import', 'ContactController@getImportContacts')->name('contacts.import');
+    Route::post('/contacts/import', 'ContactController@postImportContacts');
+    Route::post('/contacts/check-contacts-id', 'ContactController@checkContactId');
+    Route::get('/contacts/customers', 'ContactController@getCustomers');
+    Route::resource('contacts', 'ContactController');
+
+
+
 
     Route::post('/purchases/update-status', 'PurchaseController@updateStatus');
     Route::get('/purchases/get_products', 'PurchaseController@getProducts');
@@ -215,10 +275,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/invoice-schemes/set_default/{id}', 'InvoiceSchemeController@setDefault');
     Route::resource('invoice-schemes', 'InvoiceSchemeController');
 
-    //Print Labels
-    Route::get('/labels/show', 'LabelsController@show');
-    Route::get('/labels/add-product-row', 'LabelsController@addProductRow');
-    Route::get('/labels/preview', 'LabelsController@preview');
+      //Customer Groups
+      Route::resource('customer-group', 'CustomerGroupController');
+
 
     //Reports...
     Route::get('/reports/get-stock-by-sell-price', 'ReportController@getStockBySellingPrice');
@@ -303,9 +362,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/cash-register/close-register', 'CashRegisterController@postCloseRegister');
     Route::resource('cash-register', 'CashRegisterController');
 
-    //Import products
-    Route::get('/import-products', 'ImportProductsController@index');
-    Route::post('/import-products/store', 'ImportProductsController@store');
+
 
     //Sales Commission Agent
     Route::resource('sales-commission-agents', 'SalesCommissionAgentController');
@@ -318,12 +375,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/opening-stock/add/{product_id}', 'OpeningStockController@add');
     Route::post('/opening-stock/save', 'OpeningStockController@save');
 
-    //Customer Groups
-    Route::resource('customer-group', 'CustomerGroupController');
-
-    //Import opening stock
-    Route::get('/import-opening-stock', 'ImportOpeningStockController@index');
-    Route::post('/import-opening-stock/store', 'ImportOpeningStockController@store');
 
     //Sell return
     Route::resource('sell-return', 'SellReturnController');
@@ -338,11 +389,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         'index', 'create', 'store'
     ]]);
 
-    Route::get('selling-price-group/activate-deactivate/{id}', 'SellingPriceGroupController@activateDeactivate');
-    Route::get('export-selling-price-group', 'SellingPriceGroupController@export');
-    Route::post('import-selling-price-group', 'SellingPriceGroupController@import');
-
-    Route::resource('selling-price-group', 'SellingPriceGroupController');
+ 
 
     Route::resource('notification-templates', 'NotificationTemplateController')->only(['index', 'store']);
     Route::get('notification/get-template/{transaction_id}/{template_for}', 'NotificationController@getTemplate');
@@ -415,7 +462,6 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('upload-module', 'Install\ModulesController@uploadModule');
     Route::resource('manage-modules', 'Install\ModulesController')
         ->only(['index', 'destroy', 'update']);
-    Route::resource('warranties', 'WarrantyController');
 
     Route::resource('dashboard-configurator', 'DashboardConfiguratorController')
     ->only(['edit', 'update']);

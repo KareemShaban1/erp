@@ -83,11 +83,11 @@ class DiscountController extends Controller
                     return $name;
                 })
                 ->editColumn('starts_at', function ($row) {
-                    $starts_at = !empty($row->starts_at) ? $this->commonUtil->format_date($row->starts_at->toDateTimeString(), true) : '';
+                    $starts_at = !empty($row->starts_at) ? $this->commonUtil->format_date($row->starts_at, true) : '';
                     return $starts_at;
                 })
                 ->editColumn('ends_at', function ($row) {
-                    $ends_at = !empty($row->ends_at) ? $this->commonUtil->format_date($row->ends_at->toDateTimeString(), true) : '';
+                    $ends_at = !empty($row->ends_at) ? $this->commonUtil->format_date($row->ends_at, true) : '';
                     return $ends_at;
                 })
                 ->editColumn('discount_amount', '{{@num_format($discount_amount)}} @if($discount_type == "percentage") % @endif')

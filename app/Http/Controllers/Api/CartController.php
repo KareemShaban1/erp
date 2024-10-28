@@ -31,7 +31,6 @@ class CartController extends Controller
           'status' => 'success',
           'message' =>  __('message.Cart Items have been retrieved successfully'),
       ]);
-//         return response()->json(['cart_items' => $cartItems], 200);
     }
 
     /**

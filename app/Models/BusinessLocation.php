@@ -185,4 +185,10 @@ class BusinessLocation extends Model
 
         return $address;
     }
+
+
+    public function discounts()
+    {
+        return $this->hasMany(\App\Models\Discount::class,'location_id');
+    }
 }

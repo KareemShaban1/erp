@@ -70,7 +70,7 @@ class HomeController extends Controller
         }
         // return dd($popup_post);
         if (!auth()->user()->can('dashboard.data')) {
-            return view('home.index',compact('popup_post'));
+            return view('applicationDashboard.pages.home.index',compact('popup_post'));
         }
 
         $fy = $this->businessUtil->getCurrentFinancialYear($business_id);

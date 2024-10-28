@@ -89,7 +89,8 @@ class AuthController extends Controller
             ],
             'mobile' => 'required|string|max:20',
             'location' => 'nullable|string|max:255',
-            'business_id'=>'required|numeric|exists:business_locations,id'
+            'business_id'=>'required|numeric|exists:business,id',
+            'business_location_id'=>'required|numeric|exists:business_locations,id'
         ]);
     
         if ($validator->fails()) {
@@ -112,6 +113,7 @@ class AuthController extends Controller
             'email_address' => $request->email,
             'password' => Hash::make($request->password),
             'location' => $request->location,
+            'business_location_id' => $request->business_location_id,
             'client_type' => 'application',
         ]);
     

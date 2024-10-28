@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Scopes\BusinessIdScope;
+use App\Traits\Filter;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use Filter;
     /**
      * The attributes that aren't mass assignable.
      *
@@ -26,6 +28,8 @@ class Product extends Model
     'barcode_type','expiry_period','expiry_period_type','enable_sr_no','weight',
     'product_custom_field1','product_custom_field2','product_custom_field3','product_custom_field4',
     'image','product_description','created_by','warranty_id','is_inactive','not_for_selling'];
+
+
 
     /**
      * The attributes that should be cast to native types.

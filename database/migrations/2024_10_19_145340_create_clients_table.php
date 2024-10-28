@@ -17,6 +17,8 @@ class CreateClientsTable extends Migration
             $table->id();
             $table->unsignedInteger('contact_id')->nullable();
             $table->foreign('contact_id')->references('id')->on('contacts')->nullOnDelete();
+            $table->unsignedInteger('business_location_id');
+            $table->foreign('business_location_id')->references('id')->on('business_locations')->cascadeOnDelete();
             $table->string('email_address')->unique();
             $table->string('location');
             $table->string('password');

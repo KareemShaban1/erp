@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Variation;
 
+use App\Http\Resources\Discount\DiscountCollection;
 use App\Http\Resources\Media\MediaCollection;
 use App\Http\Resources\ProductVariation\ProductVariationResource;
 use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
@@ -30,12 +31,12 @@ class VariationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                'default_purchase_price' => $this->default_purchase_price,
-                'dpp_inc_tax' => $this->dpp_inc_tax,
-                'profit_percent' => $this->profit_percent,
+                // 'default_purchase_price' => $this->default_purchase_price,
+                // 'dpp_inc_tax' => $this->dpp_inc_tax,
+                // 'profit_percent' => $this->profit_percent,
                 'default_sell_price' => $this->default_sell_price,
                 'sell_price_inc_tax' => $this->sell_price_inc_tax,
-                'combo_variations' => $this->combo_variations,
+                // 'combo_variations' => $this->combo_variations,
                 'variation_template'=>(new ProductVariationResource($this->product_variation))->withFullData(false),
                 'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),
                 'media' => (new MediaCollection($this->media))->withFullData(false),

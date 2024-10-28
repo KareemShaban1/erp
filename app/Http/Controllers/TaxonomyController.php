@@ -150,8 +150,6 @@ class TaxonomyController extends Controller
                         ];
         } catch (\Exception $e) {
             \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-
-            dd($e);
             
             $output = ['success' => false,
                             'msg' => __("messages.something_went_wrong")

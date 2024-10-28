@@ -86,6 +86,8 @@ class Variation extends Model
     {
         return $this->morphMany(\App\Models\Media::class, 'model');
     }
+    
+
 
     public function getFullNameAttribute()
     {

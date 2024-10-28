@@ -2,7 +2,10 @@
 
 namespace App\Http\Resources\Product;
 
+use App\Http\Resources\Brand\BrandResource;
+use App\Http\Resources\Category\CategoryResource;
 use App\Http\Resources\Media\MediaCollection;
+use App\Http\Resources\Unit\UnitResource;
 use App\Http\Resources\Variation\VariationCollection;
 use App\Http\Resources\Variation\VariationResource;
 use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
@@ -57,23 +60,15 @@ class ProductResource extends JsonResource
                 'description' => $this->product_description,
                 'type' => $this->type,
                 'business_id'=> $this->business_id,
-                'brand' => $this->brand ?? null,
-                'unit' => $this->unit ?? null,
-                'category' => $this->category ?? null,
-                'warranty' => $this->warranty ?? null,
-                'sub_category' => $this->sub_category->name ?? null,
+                'brand' =>  (new BrandResource($this->brand))->withFullData(false),
+                // 'category' => (new CategoryResource($this->category))->withFullData(false),
+                // 'warranty' => $this->warranty ?? null,
+                // 'sub_category' => $this->sub_category->name ?? null,
                 'tax' => $this->product_tax->amount ?? null,
-                // 'selling_price'=>$this->variations[0]->default_sell_price,
                 'current_stock' => $current_stock,
-                // 'max_price' => $this->max_price,
-                // 'min_price' => $this->min_price,
-                // 'max_purchase_price' => $this->max_purchase_price,
-                // 'min_purchase_price' => $this->min_purchase_price,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
                 'variations' => (new VariationCollection($this->variations))->withFullData(true),
-                // 'created_at' => $this->created_at, 
-                // 'deleted_at' => $this->deleted_at,
             ]);
         }
 

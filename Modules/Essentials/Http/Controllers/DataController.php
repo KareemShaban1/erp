@@ -277,12 +277,12 @@ class DataController extends Controller
 
         if ($is_essentials_enabled) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
-                // $menu->url(
-                //         action('\Modules\Essentials\Http\Controllers\DashboardController@hrmDashboard'),
-                //         __('essentials::lang.hrm'),
-                //         ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
-                //     )
-                // ->order(87);
+                $menu->url(
+                        action('\Modules\Essentials\Http\Controllers\DashboardController@hrmDashboard'),
+                        __('essentials::lang.hrm'),
+                        ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
+                    )
+                ->order(87);
                     
                 // $menu->url(
                 //     action('\Modules\Essentials\Http\Controllers\ToDoController@index'),

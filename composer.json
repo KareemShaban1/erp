@@ -32,6 +32,7 @@
         "nwidart/laravel-menus": "^7.0",
         "nwidart/laravel-modules": "8.0",
         "pusher/pusher-php-server": "^4.1",
+        "rap2hpoutre/laravel-log-viewer": "^2.4",
         "razorpay/razorpay": "2.*",
         "spatie/flysystem-dropbox": "^1.0",
         "spatie/laravel-activitylog": "^3.2",

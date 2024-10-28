@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\BusinessLocation;
 
+use App\Http\Resources\Discount\DiscountCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,15 +27,16 @@ class BusinessLocationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                'landmark' => $this->landmark,
-                'country' => $this->country,
-                'state' => $this->state,
-                'city' => $this->city,
-                'zip_code' => $this->zip_code,
-                'mobile' => $this->mobile,
-                'alternate_number' => $this->alternate_number,
-                'email' => $this->email,
-                'website' => $this->website,
+                // 'landmark' => $this->landmark,
+                // 'country' => $this->country,
+                // 'state' => $this->state,
+                // 'city' => $this->city,
+                // 'zip_code' => $this->zip_code,
+                // 'mobile' => $this->mobile,
+                // 'alternate_number' => $this->alternate_number,
+                // 'email' => $this->email,
+                // 'website' => $this->website,
+                'discounts'=>(new DiscountCollection($this->discounts))->withFullData(true),
                 ];
             }),
         ];

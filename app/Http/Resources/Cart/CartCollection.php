@@ -2,31 +2,44 @@
 
 namespace App\Http\Resources\Cart;
 
-
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class CartCollection extends ResourceCollection
 {
-    private bool $withFullData = true;
+    public $withFullData = false;
+    public $totals = ['total_price' => 0, 'total_discount' => 0];
+    public $locationMessage = null;
 
-    public function withFullData($withFullData): self
+    public function withFullData($fullData)
     {
-        $this->withFullData = $withFullData;
+        $this->withFullData = $fullData;
         return $this;
     }
 
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @param mixed $request
-     * @return array
-     */
+    public function setTotals($totalPrice, $totalDiscount)
+    {
+        $this->totals = ['total_price' => $totalPrice, 'total_discount' => $totalDiscount];
+        return $this;
+    }
+
+    public function setLocationMessage($message)
+    {
+        $this->locationMessage = $message;
+        return $this;
+    }
+
     public function toArray($request): array
     {
-        // Wrap each item in the collection with CartResource
-        return $this->collection->map(function ($Cart) use ($request) {
-            // Pass the withFullData flag to the CartResource
-            return (new CartResource($Cart))->withFullData($this->withFullData)->toArray($request);
-        })->all();
+        return [
+            'data' => $this->collection->map(function ($cart) use ($request) {
+                return (new CartResource($cart))
+                    ->withFullData($this->withFullData)
+                    ->toArray($request);
+            })->all(),
+            'full_data' => $this->withFullData,
+            'totals' => $this->totals,
+            'location_message' => $this->locationMessage,
+        ];
     }
 }
+

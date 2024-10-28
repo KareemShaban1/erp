@@ -34,10 +34,14 @@ class ProductService extends BaseService
                 ->productForSales()
                 ->latest();
     
-
             // Check if a category_id is passed and apply the filter
             if (!empty($category_id)) {
-                $query = $query->where('category_id', $category_id);
+                $query->where('category_id', $category_id);
+            }
+    
+            // Add search by product name if provided in the request
+            if ($request->filled('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%');
             }
     
             // Apply withTrashed logic if needed

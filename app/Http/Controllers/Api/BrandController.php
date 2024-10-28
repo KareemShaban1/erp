@@ -45,13 +45,13 @@ class BrandController extends Controller
     public function store(StoreBrandRequest $request)
     {
             $data = $request->validated();
-            $Brand = $this->service->store( $data);
+            $brand = $this->service->store( $data);
 
-            if ($Brand instanceof JsonResponse) {
-                return $Brand;
+            if ($brand instanceof JsonResponse) {
+                return $brand;
             }
 
-            return $this->returnJSON($Brand, __('message.Brand has been created successfully'));
+            return $this->returnJSON($brand, __('message.Brand has been created successfully'));
     }
 
     /**
@@ -60,28 +60,28 @@ class BrandController extends Controller
     public function show($id)
     {
 
-        $Brand = $this->service->show($id);
+        $brand = $this->service->show($id);
 
-        if ($Brand instanceof JsonResponse) {
-            return $Brand;
+        if ($brand instanceof JsonResponse) {
+            return $brand;
         }
 
-        return $this->returnJSON($Brand, __('message.Brand has been created successfully'));
+        return $this->returnJSON($brand, __('message.Brand has been created successfully'));
 
     }
 
     /**
      * Update the specified Brand in storage.
      */
-    public function update(UpdateBrandRequest $request, Brand $Brand)
+    public function update(UpdateBrandRequest $request, Brand $brand)
     {
-            $Brand = $this->service->update($request,$Brand);
+            $brand = $this->service->update($request,$brand);
 
-            if ($Brand instanceof JsonResponse) {
-                return $Brand;
+            if ($brand instanceof JsonResponse) {
+                return $brand;
             }
 
-            return $this->returnJSON($Brand, __('message.Brand has been updated successfully'));
+            return $this->returnJSON($brand, __('message.Brand has been updated successfully'));
 
     }
 
@@ -90,35 +90,35 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        $Brand = $this->service->destroy($id);
+        $brand = $this->service->destroy($id);
 
-        if ($Brand instanceof JsonResponse) {
-            return $Brand;
+        if ($brand instanceof JsonResponse) {
+            return $brand;
         }
 
-        return $this->returnJSON($Brand, __('message.Brand has been deleted successfully'));
+        return $this->returnJSON($brand, __('message.Brand has been deleted successfully'));
     }
 
     public function restore($id)
     {
-        $Brand = $this->service->restore($id);
+        $brand = $this->service->restore($id);
 
-        if ($Brand instanceof JsonResponse) {
-            return $Brand;
+        if ($brand instanceof JsonResponse) {
+            return $brand;
         }
 
-        return $this->returnJSON($Brand, __('message.Brand has been restored successfully'));
+        return $this->returnJSON($brand, __('message.Brand has been restored successfully'));
     }
 
     public function forceDelete($id)
     {
-        $Brand = $this->service->forceDelete($id);
+        $brand = $this->service->forceDelete($id);
 
-        if ($Brand instanceof JsonResponse) {
-            return $Brand;
+        if ($brand instanceof JsonResponse) {
+            return $brand;
         }
 
-        return $this->returnJSON($Brand, __('message.Brand has been force deleted successfully'));
+        return $this->returnJSON($brand, __('message.Brand has been force deleted successfully'));
     }
 
     public function bulkDelete(Request $request)
@@ -130,12 +130,12 @@ class BrandController extends Controller
         ]);
 
 
-        $Brand = $this->service->bulkDelete($request->ids);
+        $brand = $this->service->bulkDelete($request->ids);
 
-        if ($Brand instanceof JsonResponse) {
-            return $Brand;
+        if ($brand instanceof JsonResponse) {
+            return $brand;
         }
 
-        return $this->returnJSON($Brand, __('message.Brand has been deleted successfully.'));
+        return $this->returnJSON($brand, __('message.Brand has been deleted successfully.'));
     }
 }

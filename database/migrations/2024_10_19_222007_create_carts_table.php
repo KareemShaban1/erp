@@ -21,10 +21,10 @@ class CreateCartsTable extends Migration
             $table->unsignedInteger('variation_id')->nullable(); // Matches the type of 'id' in 'variations'
             $table->foreign('variation_id')->references('id')->on('variations')->nullOnDelete();
             $table->unsignedSmallInteger('quantity')->default(1);
-            $table->unsignedBigInteger('price')->default(0);
-            $table->unsignedBigInteger('discount')->nullable();
-            $table->unsignedBigInteger('total')->default(0);
-
+            $table->decimal('price', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->nullable();
+            $table->decimal('sub_total', 10, 2)->default(0);
+            $table->decimal('total', 10, 2)->default(0);
             $table->timestamps();
         });
     }

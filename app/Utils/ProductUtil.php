@@ -419,6 +419,38 @@ class ProductUtil extends Util
         return true;
     }
 
+
+
+//     public function decreaseProductQuantity($product_id, $variation_id, $location_id, $quantity, $oldQuantity = null)
+// {
+//     // Fetch the existing record
+//     $record = VariationLocationDetails::where('product_id', $product_id)
+//         ->where('variation_id', $variation_id)
+//         ->where('location_id', $location_id)
+//         ->first();
+
+//     if ($record) {
+//         $record->qty_available -= $quantity;
+//         $record->save();
+        
+//     } else {
+//     }
+// }
+
+
+
+
+    public function getProductQuantity($product_id, $variation_id, $location_id)
+{
+    $details = VariationLocationDetails::where('product_id', $product_id)
+                ->where('variation_id', $variation_id)
+                ->where('location_id', $location_id)
+                ->first();
+
+    return $details ? $details->qty_available : 0;
+}
+
+
     /**
      * Decrease the product quantity of combo sub-products
      *

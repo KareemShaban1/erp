@@ -40,12 +40,12 @@ class BrandService extends BaseService
     public function show($id) {
 
         try {
-            $Brand = Brand::businessId()->find($id);
+            $brand = Brand::businessId()->find($id);
 
-            if(!$Brand) {
+            if(!$brand) {
                 return null;
             }
-            return $Brand;
+            return $brand;
 
 
         } catch (\Exception $e) {
@@ -62,14 +62,14 @@ class BrandService extends BaseService
         try {
 
         // First, create the Brand without the image
-        $Brand = Brand::create($data);
+        $brand = Brand::create($data);
 
         // Handle the main image and gallery uploads in a single helper function
-            // $this->handleImages($request, 'image', 'Brand', $Brand->id, $fileUploader);
-            // $this->handleImages($request, 'gallery', 'Brand', $Brand->id, $fileUploader);
+            // $this->handleImages($request, 'image', 'Brand', $brand->id, $fileUploader);
+            // $this->handleImages($request, 'gallery', 'Brand', $brand->id, $fileUploader);
 
         // Return the created Brand
-        return new BrandResource($Brand);
+        return new BrandResource($brand);
 
 
     } catch (\Exception $e) {
@@ -80,7 +80,7 @@ class BrandService extends BaseService
     /**
      * Update the specified Brand.
      */
-    public function update($request,$Brand)
+    public function update($request,$brand)
     {
 
         try {
@@ -88,9 +88,9 @@ class BrandService extends BaseService
         // Validate the request data
         $data = $request->validated();
 
-        $Brand->update($data);
+        $brand->update($data);
 
-        return new BrandResource($Brand);
+        return new BrandResource($brand);
 
 
     } catch (\Exception $e) {
@@ -102,13 +102,13 @@ class BrandService extends BaseService
     {
         try {
 
-            $Brand = Brand::find($id);
+            $brand = Brand::find($id);
 
-            if(!$Brand) {
+            if(!$brand) {
                 return null;
             }
-            $Brand->delete();
-            return $Brand;
+            $brand->delete();
+            return $brand;
 
 
         } catch (\Exception $e) {
@@ -119,9 +119,9 @@ class BrandService extends BaseService
     public function restore($id)
     {
         try {
-            $Brand = Brand::withTrashed()->findOrFail($id);
-            $Brand->restore();
-            return new BrandResource($Brand);
+            $brand = Brand::withTrashed()->findOrFail($id);
+            $brand->restore();
+            return new BrandResource($brand);
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while restoring Brand'));
         }
@@ -130,10 +130,10 @@ class BrandService extends BaseService
     public function forceDelete($id)
     {
         try {
-            $Brand = Brand::withTrashed()
+            $brand = Brand::withTrashed()
                 ->findOrFail($id);
 
-            $Brand->forceDelete();
+            $brand->forceDelete();
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while force deleting Brand'));
         }

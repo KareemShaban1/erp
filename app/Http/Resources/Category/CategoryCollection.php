@@ -23,9 +23,10 @@ class CategoryCollection extends ResourceCollection
      */
     public function toArray($request): array
     {
-        return $this->collection
-            // ->map->withFullData($this->withFullData)
-            ->map->toArray($request)
-            ->all();
+         // Wrap each item in the collection with categoryResource
+         return $this->collection->map(function ($category) use ($request) {
+            // Pass the withFullData flag to the categoryResource
+            return (new CategoryResource($category))->withFullData($this->withFullData)->toArray($request);
+        })->all();
     }
 }

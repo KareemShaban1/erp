@@ -17,5 +17,13 @@ class Client  extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = ['contact_id','email_address','password','location','client_type'];
+    protected $fillable = ['contact_id','business_location_id','email_address','password','location','client_type'];
+
+    public function business_location(){
+        return $this->belongsTo(BusinessLocation::class);
+    }
+
+    public function contact(){
+        return $this->belongsTo(Contact::class);
+    }
 }
