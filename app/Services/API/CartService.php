@@ -28,7 +28,7 @@ class CartService extends BaseService
 
              // Check if cart is empty
         if ($carts->isEmpty()) {
-            return $this->returnJSON(null, __('message.Cart is empty'));
+            return $this->returnJSON([], __('message.Cart is empty'));
         }
 
         $totalPrice = 0;
