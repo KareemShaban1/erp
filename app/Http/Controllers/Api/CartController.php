@@ -54,6 +54,7 @@ class CartController extends Controller
             return $cartItem;
         }
 
+       
         return $this->returnJSON($cartItem, __('message.Cart Item has been created successfully'));
 
     }
@@ -72,8 +73,14 @@ class CartController extends Controller
         if ($cartItem instanceof JsonResponse) {
             return $cartItem;
         }
+
+        return $cartItem->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' =>  __('message.Cart Items have been retrieved successfully'),
+        ]);
         
-        return $this->returnJSON($cartItem, __('message.Cart Item has been updated successfully'));
+        // return $this->returnJSON($cartItem, __('message.Cart Item has been updated successfully'));
     }
 
     /**

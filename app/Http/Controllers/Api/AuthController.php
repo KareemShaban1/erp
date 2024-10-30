@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\User;
@@ -74,36 +75,42 @@ class AuthController extends Controller
 
     public function clientRegister(Request $request)
     {
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email_address' => [
-                'required',
-                'email',
-                'max:255',
-                'unique:clients'
-            ],
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-            ],
-            'mobile' => 'required|string|max:20',
-            'location' => 'nullable|string|max:255',
-            'business_id'=>'required|numeric|exists:business,id',
-            'business_location_id'=>'required|numeric|exists:business_locations,id'
-        ]);
+         // Validation
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email_address' => [
+            'required',
+            'email',
+            'max:255',
+            'unique:clients'
+        ],
+        'password' => [
+            'required',
+            'string',
+            'min:8',
+        ],
+        'mobile' => 'required|string|max:20',
+        'location' => 'nullable|string|max:255',
+        'business_id' => 'required|numeric|exists:business,id',
+        'business_location_id' => 'required|numeric|exists:business_locations,id'
+    ]);
+
+    if ($validator->fails()) {
+        // Get the first error message
+        $firstError = $validator->errors()->first();
+        return response()->json(['message' => $firstError], 422);
+    }
+
+
+        $business_location = Business::where('id',$request->business_location_id)->first();
     
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-    
+        // business need to changed
         // Create contact information
         $contactInfo = Contact::create([
             'name' => $request->name,
             'mobile' => $request->mobile,
             'created_by'=>1,
-            'business_id' => $request->business_id,
+            'business_id' => $business_location->business_id ?? 1,
             'type' => 'client',
             'contact_status'=>'not_active'
         ]);
@@ -140,7 +147,9 @@ class AuthController extends Controller
         ]);
     
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            // Get the first error message
+            $firstError = $validator->errors()->first();
+            return response()->json(['message' => $firstError], 422);
         }
     
         // Find the client by email

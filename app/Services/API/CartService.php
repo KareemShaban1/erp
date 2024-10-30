@@ -179,7 +179,9 @@ class CartService extends BaseService
             // Save the updated cart item
             $cartItem->save();
 
-            return new CartResource($cartItem);
+            return $this->getCartItems();
+
+            // return new CartResource($cartItem);
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error occurred while updating cart item'));
         }
