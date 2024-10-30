@@ -40,7 +40,7 @@ class Variation extends Model
         'combo_variations' => 'array',
     ];
 
-    protected $appends = ['code'];
+    protected $appends = ['code','total_qty_available'];
 
     
     public function product_variation()
@@ -115,4 +115,10 @@ class Variation extends Model
 
         return null; // Return null if the condition is not met
     }
+
+    public function getTotalQtyAvailableAttribute()
+{
+    // Sum the qty_available of all related VariationLocationDetails records
+    return $this->variation_location_details()->sum('qty_available');
+}
 }

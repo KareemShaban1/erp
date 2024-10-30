@@ -77,10 +77,11 @@ class AuthController extends Controller
         // Validation
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => [
+            'email_address' => [
                 'required',
                 'email',
                 'max:255',
+                'unique:clients'
             ],
             'password' => [
                 'required',
@@ -110,7 +111,7 @@ class AuthController extends Controller
         // Create Client
         $client = Client::create([
             'contact_id'=> $contactInfo->id,
-            'email_address' => $request->email,
+            'email_address' => $request->email_address,
             'password' => Hash::make($request->password),
             'location' => $request->location,
             'business_location_id' => $request->business_location_id,
@@ -134,7 +135,7 @@ class AuthController extends Controller
     {
         // Validation
         $validator = Validator::make($request->all(), [
-            'email_address' => 'required|string|email',
+            'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
     

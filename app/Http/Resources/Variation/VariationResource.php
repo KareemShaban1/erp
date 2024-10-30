@@ -31,20 +31,15 @@ class VariationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                // 'default_purchase_price' => $this->default_purchase_price,
-                // 'dpp_inc_tax' => $this->dpp_inc_tax,
-                // 'profit_percent' => $this->profit_percent,
+                'total_qty_available'=>$this->total_qty_available,
                 'default_sell_price' => $this->default_sell_price,
                 'sell_price_inc_tax' => $this->sell_price_inc_tax,
-                // 'combo_variations' => $this->combo_variations,
                 'variation_template'=>(new ProductVariationResource($this->product_variation))->withFullData(false),
                 'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),
                 'media' => (new MediaCollection($this->media))->withFullData(false),
                 'locations'=>(new VariationLocationDetailsCollection($this->variation_location_details))->withFullData(true),
                 ];
             }),
-            // 'created_at' => $this->created_at,
-            // 'deleted_at' => $this->deleted_at,
         ];
 
 

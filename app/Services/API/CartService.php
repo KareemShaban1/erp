@@ -3,6 +3,7 @@
 namespace App\Services\API;
 
 use App\Http\Resources\Cart\CartCollection;
+use App\Http\Resources\Cart\CartResource;
 use App\Models\Cart;
 use App\Models\Client;
 use App\Models\Product;
@@ -178,7 +179,7 @@ class CartService extends BaseService
             // Save the updated cart item
             $cartItem->save();
 
-            return $cartItem;
+            return new CartResource($cartItem);
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error occurred while updating cart item'));
         }
