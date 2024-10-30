@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Services\API\BrandService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BrandController extends Controller
 {
@@ -26,13 +27,15 @@ class BrandController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = $this->service->list($request);
+        Log::info('Reached CartController index method');
 
-        if ($categories instanceof JsonResponse) {
-            return $categories;
+        $brands = $this->service->list($request);
+
+        if ($brands instanceof JsonResponse) {
+            return $brands;
         }
 
-        return $categories->additional([
+        return $brands->additional([
             'code' => 200,
             'status' => 'success',
             'message' =>  __('message.Categories have been retrieved successfully'),

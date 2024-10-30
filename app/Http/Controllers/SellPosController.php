@@ -397,7 +397,7 @@ class SellPosController extends Controller
 
                 if (!empty($request->input('invoice_scheme_id'))) {
                     $input['invoice_scheme_id'] = $request->input('invoice_scheme_id');
-                }
+                } 
 
                 //Types of service
                 if ($this->moduleUtil->isModuleEnabled('types_of_service')) {
@@ -434,12 +434,14 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
+                // make transaction
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
                 
 
+                // create or update transaction sell lines
                 $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
                 
                 if (!$is_direct_sale) {

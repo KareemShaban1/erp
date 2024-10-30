@@ -498,7 +498,7 @@ Route::middleware(['EcomApi'])->prefix('api/ecom')->group(function () {
 
 //common route
 Route::middleware(['auth'])->group(function () {
-    Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+    // Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
 });
 
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])->group(function () {

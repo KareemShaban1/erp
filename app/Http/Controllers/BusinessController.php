@@ -343,8 +343,6 @@ class BusinessController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // return dd($settings_details);
-
         
         try {
             $notAllowed = $this->businessUtil->notAllowedInDemo();

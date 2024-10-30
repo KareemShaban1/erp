@@ -89,8 +89,6 @@ class User extends Authenticatable
                     'language' => !empty($details['language']) ? $details['language'] : 'en'
                 ]);
                 
-                dd($user);
-
         return $user;
     }
 

@@ -12,3 +12,21 @@
 
 
 - response 
+
+
+----- data in sell 
+- contact_id , sell_price_group
+
+-- transaction required data
+- business_id , status , transaction_date, created_by , is_quotation (0) , total_before_tax (0.0000)
+  tax_amount (0.0000) , rp_redeemed (0), rp_redeemed_amount (0.0000) , shipping_charges (0.0000)
+  is_export (0) , round_off_amount (0.0000) , final_total (0.0000) , is_direct_sale (0), is_suspend(0)
+  exchange_rate (1.000) , repair_updates_notif (0) , mfg_production_cost (0.0000) , mfg_is_final(0),
+  essentials_duration , essentials_amount_per_unit_duration(0.0000) , is_created_from_api (0) , rp_earned(0)
+  is_recurring(0)
+
+-- transaction sell lines
+-  transaction_id , product_id , variation_id , quantity(0.0000) , mfg_waste_percent(0.0000) ,
+   quantity_returned quantity(0.0000) , unit_price_before_discount quantity(0.0000), 
+   unit_price (null) , line_discount_type (null) (fixed , percentage) ,
+   line_discount_amount (0.0000) , unit_price_inc_tax ,item_tax , so_quantity_invoiced(0.0000)

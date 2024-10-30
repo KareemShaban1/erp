@@ -94,7 +94,7 @@
 
 				{!! Form::hidden('default_price_group', null, ['id' => 'default_price_group']) !!}
 
-				@if(in_array('types_of_service', $enabled_modules) && !empty($types_of_service))
+				<!-- @if(in_array('types_of_service', $enabled_modules) && !empty($types_of_service))
 					<div class="col-md-4 col-sm-6">
 						<div class="form-group">
 							<div class="input-group">
@@ -123,7 +123,7 @@
 				            </label><button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link"><i class="fa fa-external-link"></i></button>@show_tooltip(__('lang_v1.recurring_invoice_help'))
 						</div>
 					</div>
-				@endif
+				@endif -->
 				<div class="clearfix"></div>
 				<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
 					<div class="form-group">

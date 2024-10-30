@@ -5,6 +5,7 @@ namespace App\Scopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Support\Facades\Auth;
 
 class BusinessIdScope implements Scope
 {
@@ -17,6 +18,11 @@ class BusinessIdScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $builder->where('business_id', 273);
+        if (Auth::check() && Auth::user() instanceof \App\Models\Client) {
+            $business_id = Auth::user()->contact->business_id ?? null;
+            if ($business_id) {
+                $builder->where('business_id', $business_id);
+            }
+        }
     }
 }

@@ -21,12 +21,21 @@
 
       <!-- Navbar Right Menu -->
       <div class="navbar-custom-menu">
+      <!-- <button  type="button" data-href="{{ action('ApplicationDashboard\HomeController@index')}}" class="btn btn-warning btn-flat pull-left m-8 btn-sm mt-10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            لوحة تحكم التطبيق
+          </button> -->
+
+          <a href="{{ action('ApplicationDashboard\HomeController@index')}}"  data-toggle="tooltip" data-placement="bottom" class="btn btn-warning btn-flat pull-left m-8 btn-sm mt-10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            لوحة تحكم التطبيق
+          </a>
 
         @if(Module::has('Essentials'))
           @includeIf('essentials::layouts.partials.header_part')
         @endif
+        
 
         <div class="btn-group">
+      
           <button id="header_shortcut_dropdown" type="button" class="btn btn-success dropdown-toggle btn-flat pull-left m-8 btn-sm mt-10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-plus-circle fa-lg"></i>
           </button>

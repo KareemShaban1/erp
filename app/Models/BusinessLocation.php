@@ -191,4 +191,8 @@ class BusinessLocation extends Model
     {
         return $this->hasMany(\App\Models\Discount::class,'location_id');
     }
+
+    public function business(){
+        return $this->belongsTo(Business::class,'business_id');
+    }
 }

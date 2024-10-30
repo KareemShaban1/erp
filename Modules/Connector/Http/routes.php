@@ -10,7 +10,7 @@ Route::group(['middleware' => ['web', 'SetSessionData', 'auth', 'language', 'tim
 
 Route::group(['middleware' => ['auth:api', 'timezone'], 'prefix' => 'connector/api', 'namespace' => 'Modules\Connector\Http\Controllers\Api'], function()
 {
-	Route::resource('business-location', 'BusinessLocationController', ['only' => ['index', 'show']]);
+	// Route::resource('business-location', 'BusinessLocationController', ['only' => ['index', 'show']]);
 
 	Route::resource('contactapi', 'ContactController', ['only' => ['index', 'show', 'store', 'update']]);
 
@@ -35,7 +35,7 @@ Route::group(['middleware' => ['auth:api', 'timezone'], 'prefix' => 'connector/a
     Route::get('user/loggedin', 'UserController@loggedin');
 	Route::resource('user', 'UserController', ['only' => ['index', 'show']]);
 
-	Route::resource('types-of-service', 'TypesOfServiceController', ['only' => ['index', 'show']]);
+	// Route::resource('types-of-service', 'TypesOfServiceController', ['only' => ['index', 'show']]);
 
 	Route::get('payment-accounts', 'CommonResourceController@getPaymentAccounts');
 
@@ -52,7 +52,7 @@ Route::group(['middleware' => ['auth:api', 'timezone'], 'prefix' => 'connector/a
 	Route::resource('expense', 'ExpenseController', ['only' => ['index', 'store', 'show', 'update']]);
 	Route::get('expense-refund', 'ExpenseController@listExpenseRefund');
 
-	Route::resource('cash-register', 'CashRegisterController', ['only' => ['index', 'store', 'show', 'update']]);
+	// Route::resource('cash-register', 'CashRegisterController', ['only' => ['index', 'store', 'show', 'update']]);
 
 	Route::get('business-details', 'CommonResourceController@getBusinessDetails');
 
@@ -73,9 +73,7 @@ Route::group(['middleware' => ['auth:api', 'timezone'], 'prefix' => 'connector/a
 
 Route::group(['middleware' => ['auth:api', 'timezone'], 'prefix' => 'connector/api/crm', 'namespace' => 'Modules\Connector\Http\Controllers\Api\Crm'], function(){
 	
-    Route::resource('follow-ups', 'FollowUpController', ['only' => ['index', 'store', 'show', 'update']]);
 
-    Route::get('follow-up-resources', 'FollowUpController@getFollowUpResources');
 
     Route::get('leads', 'FollowUpController@getLeads');
 

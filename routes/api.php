@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\BusinessLocationController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
@@ -28,7 +29,6 @@ Route::get('categories', [CategoryController::class, 'index']);
 Route::patch('categories/{id}/restore', [CategoryController::class , 'restore']);
 Route::delete('categories/{id}/force-delete', [CategoryController::class , 'forceDelete']);
 
-Route::get('brands', [BrandController::class, 'index']);
 
 Route::get('units', [UnitController::class, 'index']);
 
@@ -49,6 +49,10 @@ Route::middleware('auth:sanctum-client')->group(function () {
       });
 
       Route::middleware('auth:sanctum-client')->group(function () {
+
+        Route::get('brands', [BrandController::class, 'index']);
+
+
         Route::get('orders', [OrderController::class, 'index']);
         Route::get('orders/{id}', [OrderController::class, 'show']);
         Route::post('orders', [OrderController::class, 'store']);
@@ -56,9 +60,14 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
         Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
 
+        Route::get('clients', [ClientController::class, 'index']);
+        Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
     });
 
     Route::get('banners', [BannerController::class, 'index']);
+
+  
+
 
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);

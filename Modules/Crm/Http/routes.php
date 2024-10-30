@@ -9,7 +9,7 @@ Route::group(['middleware' => ['web', 'authh', 'SetSessionData', 'auth', 'langua
     Route::get('contact-sells', 'SellController@getSellList');
     Route::get('contact-ledger', 'LedgerController@index');
     Route::get('contact-get-ledger', 'LedgerController@getLedger');
-    Route::resource('bookings', 'ContactBookingController');
+    // Route::resource('bookings', 'ContactBookingController');
 });
 
 Route::group(['middleware' => ['web', 'authh', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'], 'namespace' => 'Modules\Crm\Http\Controllers', 'prefix' => 'crm'], function () {

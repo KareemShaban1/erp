@@ -168,6 +168,7 @@ class OrderService extends BaseService
         }
     }
 
+    // transfer quantity between locations using TransferProductJob
     protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
     {
         // Dispatch the job with a 10-minute delay

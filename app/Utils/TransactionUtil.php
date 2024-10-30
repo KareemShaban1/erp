@@ -299,9 +299,6 @@ class TransactionUtil extends Util
             } else {
                 $products_modified_combo[] = $product;
 
-                // dd($product);
-
-
 
                 //calculate unit price and unit price before discount
                 $uf_unit_price = $uf_data ? $this->num_uf($product['unit_price']) : $product['unit_price'];
