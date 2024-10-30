@@ -4,6 +4,7 @@ use App\Http\Controllers\ApplicationDashboard\BannerController;
 use App\Http\Controllers\ApplicationDashboard\CategoryController;
 use App\Http\Controllers\ApplicationDashboard\HomeController;
 use App\Http\Controllers\ApplicationDashboard\OrderController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -498,7 +499,10 @@ Route::middleware(['EcomApi'])->prefix('api/ecom')->group(function () {
 
 //common route
 Route::middleware(['auth'])->group(function () {
-    // Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+    Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+
+    // Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+    // ->name('logout');
 });
 
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])->group(function () {
