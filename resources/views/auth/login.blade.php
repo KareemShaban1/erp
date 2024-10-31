@@ -32,7 +32,7 @@
                         }
                     }
                 @endphp
-                <input id="email" type="text" class="form-control" name="email" value="{{ $email }}" required autofocus placeholder="@lang('lang_v1.email')">
+                <input id="email" type="text" class="form-control" name="email" value="{{ $email }}" required autofocus placeholder="@lang('lang_v1.email_address')">
                 <span class="fa fa-user form-control-feedback"></span>
                 @if ($errors->has('email'))
                     <span class="help-block">

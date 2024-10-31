@@ -12,7 +12,7 @@
 
 <!-- Main content -->
 <section class="content">
-    @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.all_your_banners')])
+    @component('components.widget', ['class' => 'box-primary'])
     @can('lang_v1.create')
         @slot('tool')
         <div class="box-tools">

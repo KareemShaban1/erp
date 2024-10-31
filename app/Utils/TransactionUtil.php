@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Utils\ModuleUtil;
 use App\Utils\BusinessUtil;
+use Illuminate\Support\Facades\Log;
 
 class TransactionUtil extends Util
 {
@@ -47,6 +48,7 @@ class TransactionUtil extends Util
         $invoice_no = !empty($input['invoice_no']) ? $input['invoice_no'] : $this->getInvoiceNumber($business_id, $input['status'], $input['location_id'], $invoice_scheme_id, $sale_type);
 
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
+        Log::info( $invoice_total);
         $transaction = Transaction::create([
             'business_id' => $business_id,
             'location_id' => $input['location_id'],
@@ -326,7 +328,7 @@ class TransactionUtil extends Util
                     'unit_price' => $unit_price,
                     'line_discount_type' => !empty($product['line_discount_type']) ? $product['line_discount_type'] : null,
                     'line_discount_amount' => !empty($product['line_discount_amount']) ? $uf_data ? $this->num_uf($product['line_discount_amount']) : $product['line_discount_amount'] : 0,
-                    'item_tax' =>  $uf_item_tax / $multiplier,
+                    'item _tax' =>  $uf_item_tax / $multiplier,
                     'tax_id' => $product['tax_id'],
                     'unit_price_inc_tax' =>  $uf_unit_price_inc_tax / $multiplier,
                     'sell_line_note' => !empty($product['sell_line_note']) ? $product['sell_line_note'] : '',
@@ -2850,6 +2852,7 @@ class TransactionUtil extends Util
      */
     public function mapPurchaseSell($business, $transaction_lines, $mapping_type = 'purchase', $check_expiry = true, $purchase_line_id = null)
     {
+        Log::info($transaction_lines);
         if (empty($transaction_lines)) {
             return false;
         }
@@ -2961,6 +2964,8 @@ class TransactionUtil extends Util
                             ->update(['quantity_adjusted' => $row->quantity_adjusted + $qty_allocated]);
                     }
                 } elseif ($mapping_type == 'purchase') {
+                    Log::info($qty_allocated);
+                    Log::info($row);
                     //Mapping of purchase
                     if ($qty_allocated != 0) {
                         $purchase_sell_map[] = ['sell_line_id' => $line->id,

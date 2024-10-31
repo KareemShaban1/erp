@@ -118,19 +118,13 @@ class TransferProductJob implements ShouldQueue
                 );
 
 
-                Log::info($product['product_id'],);
-                Log::info($product['variation_id']);
-                Log::info($purchaseTransfer->location_id);
-                Log::info($oldQuantity);
-                Log::info($this->orderItem->quantity);
-
                 // Perform the final decrease at destination location based on quantity difference
-                $productUtil->decreaseProductQuantity(
-                    $product['product_id'],
-                    $product['variation_id'],
-                    $purchaseTransfer->location_id,
-                    $this->orderItem->quantity,
-                );
+                // $productUtil->decreaseProductQuantity(
+                //     $product['product_id'],
+                //     $product['variation_id'],
+                //     $purchaseTransfer->location_id,
+                //     $this->orderItem->quantity,
+                // );
                 
 
             }

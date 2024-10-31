@@ -33,6 +33,7 @@ class CartService extends BaseService
 
         $totalPrice = 0;
         $totalDiscount = 0;
+        $totalAfterDiscount = 0;
         $multiLocationMessage = false;
 
         foreach ($carts as $cart) {
@@ -50,12 +51,14 @@ class CartService extends BaseService
 
             $totalPrice += ($price * $quantity);
             $totalDiscount += ($discount * $quantity);
+            $totalAfterDiscount += (($price - $discount) * $quantity);
+
         }
 
         // Create response with CartCollection and additional data
         $cartCollection = (new CartCollection($carts))
             ->withFullData(true)
-            ->setTotals($totalPrice, $totalDiscount);
+            ->setTotals($totalPrice, $totalDiscount,$totalAfterDiscount);
 
         // Add multi-location message if applicable
         if ($multiLocationMessage) {

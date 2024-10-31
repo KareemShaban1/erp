@@ -29,7 +29,7 @@ class ApplicationSidebarMenu
 
             $is_admin = auth()->user()->hasRole('Admin#' . session('business.id')) ? true : false;
             //Home
-            $menu->url(action('HomeController@index'), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
+            $menu->url(action('ApplicationDashboard\HomeController@index'), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
 
        
 
@@ -117,22 +117,39 @@ class ApplicationSidebarMenu
                             ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'warranties']
                         );
 
-                        $sub->url(
-                            action('ApplicationDashboard\OrderController@index'),
-                            __('lang_v1.orders'),
-                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'orders']
-                        );
 
-                        $sub->url(
-                            action('ApplicationDashboard\BannerController@index'),
-                            __('lang_v1.banners'),
-                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
-                        );
+                       
                     },
                     ['icon' => 'fa fas fa-cubes', 'id' => 'tour_step5']
                 )->order(20);
             }
 
+
+            $menu->dropdown(
+                __('sale.banners'),
+                function ($sub) {
+
+                    $sub->url(
+                        action('ApplicationDashboard\BannerController@index'),
+                        __('lang_v1.banners'),
+                        ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
+                    );
+                },
+                ['icon' => 'fa fas fa-cubes'])->order(21);
+
+
+                $menu->dropdown(
+                    __('sale.orders'),
+                    function ($sub) {
+    
+                      
+                        $sub->url(
+                            action('ApplicationDashboard\OrderController@index'),
+                            __('lang_v1.orders'),
+                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'orders']
+                        );
+                    },
+                    ['icon' => 'fa fas fa-cubes'])->order(22);
          
 
         

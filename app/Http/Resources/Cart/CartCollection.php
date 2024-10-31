@@ -16,9 +16,13 @@ class CartCollection extends ResourceCollection
         return $this;
     }
 
-    public function setTotals($totalPrice, $totalDiscount)
+    public function setTotals($totalPrice, $totalDiscount,$totalAfterDiscount)
     {
-        $this->totals = ['total_price' => $totalPrice, 'total_discount' => $totalDiscount];
+        $this->totals = [
+            'total_price' => $totalPrice, 
+            'total_discount' => $totalDiscount,
+            'total_after_discount' => $totalAfterDiscount
+    ];
         return $this;
     }
 
