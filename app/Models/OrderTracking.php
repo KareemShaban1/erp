@@ -14,7 +14,7 @@ class OrderTracking extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_id','pending_at','processing_at','shipped_at','canceled_at','declined_at'];
+    protected $fillable = ['order_id','pending_at','processing_at','shipped_at','canceled_at','completed_at'];
 
     public function order(){
         return $this->belongsTo(Order::class);

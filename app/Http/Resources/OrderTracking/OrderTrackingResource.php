@@ -25,11 +25,14 @@ class OrderTrackingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'order_uuid' => $this->order_uuid,
-            'number' => $this->number,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                  
+                  'order_id'=>$this->order_id,
+                  'pending_at'=>$this->pending_at,
+                  'processing_at'=>$this->processing_at,
+                  'shipped_at'=>$this->shipped_at,
+                  'completed_at'=>$this->completed_at,
+                  'canceled_at'=>$this->canceled_at,
                 ];
             }),
         ];
