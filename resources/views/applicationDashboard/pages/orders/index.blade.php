@@ -76,13 +76,25 @@
             { data: 'payment_method', name: 'payment_method' },
             {
                 data: 'order_status', name: 'order_status', render: function (data, type, row) {
+                    let badgeClass;
+        switch(data) {
+            case 'pending': badgeClass = 'badge btn-warning'; break;
+            case 'processing': badgeClass = 'badge btn-info'; break;
+            case 'shipped': badgeClass = 'badge btn-primary'; break;
+            case 'completed': badgeClass = 'badge btn-success'; break;
+            case 'canceled': badgeClass = 'badge btn-danger'; break;
+            default: badgeClass = 'badge badge-secondary'; // For any other statuses
+        }
+                    
                     return `
+                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                    
             <select class="form-control change-order-status" data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
                 <option value="canceled" ${data === 'canceled' ? 'selected' : ''}>Canceled</option>
-                <option value="declined" ${data === 'declined' ? 'selected' : ''}>Declined</option>
             </select>`;
                 }
             },
@@ -117,7 +129,8 @@
             },
             success: function (response) {
                 if (response.success) {
-                    alert(response.message);
+                    toastr.success(response.message);
+                    // alert(response.message);
                     orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
                 } else {
                     alert('Failed to update order status.');

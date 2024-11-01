@@ -19,7 +19,7 @@ class CreateOrderTrackingsTable extends Migration
             $table->dateTime('pending_at')->nullable();
             $table->dateTime('processing_at')->nullable();
             $table->dateTime('shipped_at')->nullable();
-            $table->dateTime('canceled_at')->nullable();
+            $table->dateTime('cancelled_at')->nullable();
             $table->dateTime('declined_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

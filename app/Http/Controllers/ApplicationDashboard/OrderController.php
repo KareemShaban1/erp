@@ -117,7 +117,7 @@ class OrderController extends Controller
     {
 
         $orders = Order::with('client')
-            ->where('order_status', 'canceled')
+            ->where('order_status', 'cancelled')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
 
         return Datatables::of($orders)
@@ -163,11 +163,11 @@ class OrderController extends Controller
             case 'shipped':
                 $orderTracking->shipped_at = now();
                 break;
-            case 'canceled':
+            case 'cancelled':
                 $orderTracking->canceled_at = now();
                 break;
-            case 'declined':
-                $orderTracking->declined_at = now();
+            case 'completed':
+                $orderTracking->completed_at = now();
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
