@@ -31,8 +31,8 @@ class VariationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                    'total_qty_available' => intval($this->total_qty_available),
-                    'default_sell_price' => $this->default_sell_price,
+                'total_qty_available' => intval($this->total_qty_available),
+                'default_sell_price' => $this->default_sell_price,
                 'sell_price_inc_tax' => $this->sell_price_inc_tax,
                 'variation_template'=>(new ProductVariationResource($this->product_variation))->withFullData(false),
                 'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),

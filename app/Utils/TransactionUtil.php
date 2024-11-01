@@ -48,7 +48,6 @@ class TransactionUtil extends Util
         $invoice_no = !empty($input['invoice_no']) ? $input['invoice_no'] : $this->getInvoiceNumber($business_id, $input['status'], $input['location_id'], $invoice_scheme_id, $sale_type);
 
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
-        Log::info( $invoice_total);
         $transaction = Transaction::create([
             'business_id' => $business_id,
             'location_id' => $input['location_id'],
@@ -2852,7 +2851,7 @@ class TransactionUtil extends Util
      */
     public function mapPurchaseSell($business, $transaction_lines, $mapping_type = 'purchase', $check_expiry = true, $purchase_line_id = null)
     {
-        Log::info($transaction_lines);
+        // Log::info($transaction_lines);
         if (empty($transaction_lines)) {
             return false;
         }
@@ -2894,6 +2893,7 @@ class TransactionUtil extends Util
                 ->where('PL.product_id', $line->product_id)
                 ->where('PL.variation_id', $line->variation_id);
 
+                Log::info($query->get());
             //If product expiry is enabled then check for on expiry conditions
             if ($stop_selling_expired && empty($purchase_line_id)) {
                 $stop_before = request()->session()->get('business')['stop_selling_before'];
@@ -2931,6 +2931,7 @@ class TransactionUtil extends Util
                 'transactions.invoice_no'
                     )->get();
 
+
             $purchase_sell_map = [];
 
             //Iterate over the rows, assign the purchase line to sell lines.
@@ -2938,6 +2939,8 @@ class TransactionUtil extends Util
             foreach ($rows as $k => $row) {
                 $qty_allocated = 0;
 
+                // Log::info($qty_selling );
+                // Log::info( $line->quantity);
                 //Check if qty_available is more or equal
                 if ($qty_selling <= $row->quantity_available) {
                     $qty_allocated = $qty_selling;
@@ -2964,8 +2967,8 @@ class TransactionUtil extends Util
                             ->update(['quantity_adjusted' => $row->quantity_adjusted + $qty_allocated]);
                     }
                 } elseif ($mapping_type == 'purchase') {
-                    Log::info($qty_allocated);
-                    Log::info($row);
+                    // Log::info($qty_allocated);
+                    // Log::info($row);
                     //Mapping of purchase
                     if ($qty_allocated != 0) {
                         $purchase_sell_map[] = ['sell_line_id' => $line->id,

@@ -1355,6 +1355,8 @@ return [
 "post_popup" => "منشور الصفحة الرئيسة" ,
 "disable_post_popup" => "تعطيل منشور الرئيسية" ,
 "time_post_popup" => "وقت المنشور بالثوانى",
+
+
 "orders"=>'الطلبات',
 "manage_your_orders"=>"أدارة طلباتك",
 "all_your_orders"=>"كل طلباتك",
@@ -1367,6 +1369,17 @@ return [
 "sub_total"=>"المجموع الفرعي",
 "total"=>"الأجمالى",
 
+"all_orders" => "كل الطلبات ",
+"pending_orders" => "الطلبات المعلقة",
+"processing_orders" => "الطلبات قيد المعالجة",
+"shipped_orders" => "الطلبات المشحونة",
+"completed_orders" => "الطلبات المكتملة",
+"canceled_orders" => "الطلبات الملغاة",
+
+"products"=>"المنتجات",
+""=>"",
+""=>"",
+// 
 
 "banners"=>"لافتات",
 "manage_your_banners"=>"إدارة اللافتات الخاصة بك",

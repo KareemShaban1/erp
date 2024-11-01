@@ -89,8 +89,6 @@ class CartService extends BaseService
         // Calculate the current stock available
         $current_stock = $variation->variation_location_details->sum('qty_available');
 
-        // dd($current_stock);
-
         // Check if the requested quantity exceeds available stock
         if ($quantity > $current_stock) {
             return response()->json([

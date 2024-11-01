@@ -31,23 +31,115 @@ class OrderController extends Controller
 
     public function index()
     {
-        if (request()->ajax()) {
-            $business_id = request()->session()->get('user.business_id');
+        $status = request()->get('status');
 
+        $statuses = ['all', 'pending', 'processing', 'shipped', 'canceled', 'completed'];
 
-            $orders = Order::with('client')
-                ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
-            return Datatables::of($orders)
-                ->addColumn('client_contact_name', function ($order) {
-                    return optional($order->client->contact)->name ?? 'N/A'; // Use optional() to handle null values gracefully
-                })
-                ->make(true);
+        if (empty($status) || !in_array($status, $statuses)) {
+            return redirect()->back();
         }
+
+        if (request()->ajax()) {
+            if ($status == 'pending') {
+                return $this->pendingOrders();
+            } elseif ($status == 'processing') {
+                return $this->processingOrders();
+            } elseif ($status == 'processing') {
+                return $this->processingOrders();
+            } elseif ($status == 'shipped') {
+                return $this->shippedOrders();
+            } elseif ($status == 'canceled') {
+                return $this->canceledOrders();
+            } elseif ($status == 'completed') {
+                return $this->completedOrders();
+            } elseif ($status == 'all') {
+                return $this->allOrders();
+            }
+        }
+
 
         return view('applicationDashboard.pages.orders.index');
     }
 
+    public function allOrders()
+    {
+        $orders = Order::with('client')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
+    public function pendingOrders()
+    {
+        $orders = Order::with('client')
+            ->where('order_status', 'pending')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
+
+    public function processingOrders()
+    {
+
+        $orders = Order::with('client')
+            ->where('order_status', 'processing')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
+
+    public function shippedOrders()
+    {
+
+        $orders = Order::with('client')
+            ->where('order_status', 'shipped')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
+
+    public function canceledOrders()
+    {
+
+        $orders = Order::with('client')
+            ->where('order_status', 'canceled')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
+
+    public function completedOrders()
+    {
+
+        $orders = Order::with('client')
+            ->where('order_status', 'completed')
+            ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
+
+        return Datatables::of($orders)
+            ->addColumn('client_contact_name', function ($order) {
+                return optional($order->client->contact)->name ?? 'N/A';
+            })
+            ->make(true);
+    }
 
     public function changeOrderStatus($orderId)
     {

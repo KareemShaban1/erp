@@ -176,7 +176,14 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     // Route::resource('orders', OrderController::class);
 
-    Route::get('orders', [OrderController::class,'index'])->name('orders.index');
+    // Route::get('orders', [OrderController::class,'index'])->name('orders.index');
+    // // Route::get('orders/{status?}', [OrderController::class, 'index'])->name('orders.index');
+    
+
+    Route::resource('orders', 'ApplicationDashboard\OrderController');
+
+
+    // processing
     Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
     Route::get('orders/edit/{id}', [OrderController::class,'edit'])->name('orders.edit');
 

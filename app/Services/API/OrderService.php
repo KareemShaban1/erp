@@ -255,6 +255,7 @@ class OrderService extends BaseService
 
             $transaction = $this->transactionUtil->createSellTransaction($business_id, $transactionData, $invoice_total, $user_id);
 
+            // Log::info($transaction);
             // Create or update sell lines using $carts instead of $input['products']
             $products = $carts->map(function ($cart) {
                 return [
@@ -263,31 +264,38 @@ class OrderService extends BaseService
                     'quantity' => $cart->quantity,
                     'price' => $cart->price,
                     'discount' => $cart->discount,
+                    'enable_stock'=>1
                 ];
             })->toArray();
 
-            $this->transactionUtil->createOrUpdateSellLines($transaction, $products, $client->business_location_id);
+            $sellLines =  $this->transactionUtil->createOrUpdateSellLines($transaction, $products, $client->business_location_id);
+
+            Log::info($sellLines);
 
             if (!$transaction->is_suspend && !empty($transactionData['payment']) && !$is_direct_sale) {
                 $this->transactionUtil->createOrUpdatePaymentLines($transaction, $transactionData['payment']);
             }
 
             if ($transactionData['status'] == 'final') {
-                // foreach ($products as $product) {
-                //     $decrease_qty = $this->productUtil->num_uf($product['quantity']);
-                //     if (!empty($product['base_unit_multiplier'])) {
-                //         $decrease_qty = $decrease_qty * $product['base_unit_multiplier'];
-                //     }
+                foreach ($products as $product) {
+                    $decrease_qty = $this->productUtil->num_uf($product['quantity']);
+                    if (!empty($product['base_unit_multiplier'])) {
+                        $decrease_qty = $decrease_qty * $product['base_unit_multiplier'];
+                    }
 
-                //     if ($product['enable_stock']) {
-                //         $this->productUtil->decreaseProductQuantity(
-                //             $product['product_id'],
-                //             $product['variation_id'],
-                //             $client->business_location_id,
-                //             $decrease_qty
-                //         );
-                //     }
-                // }
+                   
+                    if ($product['enable_stock']) {
+                        Log::info($products);
+                        Log::info($decrease_qty);
+                        Log::info($client->business_location_id);
+                        $this->productUtil->decreaseProductQuantity(
+                            $product['product_id'],
+                            $product['variation_id'],
+                            $client->business_location_id,
+                            $decrease_qty
+                        );
+                    }
+                }
 
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
                 $transaction->payment_status = $payment_status;

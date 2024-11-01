@@ -115,6 +115,7 @@ class ConnectorServiceProvider extends ServiceProvider
         }, \Config::get('view.paths')), [$sourcePath]), 'connector');
     }
 
+
     /**
      * Register translations.
      *
