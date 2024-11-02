@@ -196,7 +196,9 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     [OrderCancellationController::class, 'changeOrderCancellationStatus']);
 
 
-    Route::resource('banners', 'ApplicationDashboard\BannerController');
+    // Route::resource('banners', 'ApplicationDashboard\BannerController');
+
+    Route::get('banners', [BannerController::class,'index']);
 
 
 });
