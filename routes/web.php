@@ -185,7 +185,7 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     // processing
     Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
-    Route::get('orders/edit/{id}', [OrderController::class,'edit'])->name('orders.edit');
+    // Route::get('orders/{id}', [OrderController::class,'edit'])->name('orders.edit');
 
     Route::post('/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
     Route::post('/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
@@ -507,7 +507,7 @@ Route::middleware(['EcomApi'])->prefix('api/ecom')->group(function () {
 
 //common route
 Route::middleware(['auth'])->group(function () {
-    Route::get('/logout', 'Auth\LoginController@logout')->name('logout');
+    Route::get('/logout', 'Auth\LoginController@logout')->name('auth.logout');
 
     // Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
     // ->name('logout');
