@@ -33,7 +33,10 @@ class OrderController extends Controller
     {
         $status = request()->get('status');
 
-        $statuses = ['all', 'pending', 'processing', 'shipped', 'canceled', 'completed'];
+        $start_date = request()->get('start_date');
+        $end_date = request()->get('end_date');
+
+        $statuses = ['all', 'pending', 'processing', 'shipped', 'cancelled', 'completed'];
 
         if (empty($status) || !in_array($status, $statuses)) {
             return redirect()->back();
@@ -44,12 +47,10 @@ class OrderController extends Controller
                 return $this->pendingOrders();
             } elseif ($status == 'processing') {
                 return $this->processingOrders();
-            } elseif ($status == 'processing') {
-                return $this->processingOrders();
-            } elseif ($status == 'shipped') {
+            }  elseif ($status == 'shipped') {
                 return $this->shippedOrders();
-            } elseif ($status == 'canceled') {
-                return $this->canceledOrders();
+            } elseif ($status == 'cancelled') {
+                return $this->cancelledOrders();
             } elseif ($status == 'completed') {
                 return $this->completedOrders();
             } elseif ($status == 'all') {
@@ -65,81 +66,106 @@ class OrderController extends Controller
     {
         $orders = Order::with('client')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        // Apply date filter if start_date and end_date are provided
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
+    
     public function pendingOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'pending')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-
+    
+    // Repeat the date filter logic for other status-based methods
+    
     public function processingOrders()
     {
-
         $orders = Order::with('client')
             ->where('order_status', 'processing')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-
+    
     public function shippedOrders()
     {
-
         $orders = Order::with('client')
             ->where('order_status', 'shipped')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-
+    
     public function canceledOrders()
     {
-
         $orders = Order::with('client')
             ->where('order_status', 'cancelled')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-
+    
     public function completedOrders()
     {
-
         $orders = Order::with('client')
             ->where('order_status', 'completed')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-
+    
+        if (request()->has(['start_date', 'end_date'])) {
+            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        }
+    
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
+    
 
     public function changeOrderStatus($orderId)
     {

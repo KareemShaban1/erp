@@ -19,7 +19,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.filters', ['title' => __('report.filters'), 'class' => 'hide'])
-    @if($type == 'customer')
+    @if($type == 'customer' || $type == 'client')
         <div class="col-md-3">
             <div class="form-group">
                 <label>
@@ -96,7 +96,7 @@
                             <th>@lang('contact.mobile')</th>
                             <th>@lang('contact.total_purchase_due')</th>
                             <th>@lang('lang_v1.total_purchase_return_due')</th>
-                        @elseif( $type == 'customer')
+                        @elseif( $type == 'customer' || $type == 'client')
                             <th>@lang('business.business_name')</th>
                             <th>@lang('user.name')</th>
                             <th>@lang('business.email')</th>
@@ -150,7 +150,7 @@
                         </th> -->
                     </tr>
                 </thead>
-                <tfoot>
+                <!-- <tfoot>
                     <tr class="bg-gray font-17 text-center footer-total">
                         <td></td>
                         <td></td>
@@ -161,7 +161,7 @@
                         <td
                             @if($type == 'supplier')
                                 colspan="6"
-                            @elseif( $type == 'customer')
+                            @elseif( $type == 'customer' || $type == 'client')
                                 @if($reward_enabled)
                                     colspan="9"
                                 @else
@@ -176,15 +176,15 @@
                         <td class="footer_contact_return_due"></td>
 
                     </tr>
-                </tfoot>
+                </tfoot> -->
             </table>
         @endif
     @endcomponent
 
-    <div class="modal fade contact_modal" tabindex="-1" role="dialog" 
+    <div class="modal fade contact_modal" tabindex="-1" role="dialog"
     	aria-labelledby="gridSystemModalLabel">
     </div>
-    <div class="modal fade pay_contact_due_modal" tabindex="-1" role="dialog" 
+    <div class="modal fade pay_contact_due_modal" tabindex="-1" role="dialog"
         aria-labelledby="gridSystemModalLabel">
     </div>
 
@@ -192,7 +192,9 @@
 <!-- /.content -->
 @stop
 @section('javascript')
+
 @if(!empty($api_key))
+
 <script>
   // This example adds a search box to a map, using the Google Place Autocomplete
   // feature. People can enter geographical searches. The search box will return a
@@ -281,13 +283,117 @@
     });
   }
 
-</script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{$api_key}}&libraries=places"
-     async defer></script>
-<script type="text/javascript">
-    $(document).on('shown.bs.modal', '.contact_modal', function(e) {
-        initAutocomplete();
+  function initMap(lat, lng) {
+    const mapElement = document.getElementById('map');
+    const inputElement = document.getElementById('shipping_address');
+
+    if (!mapElement || !inputElement) {
+        console.warn("Map or input element not found.");
+        return;
+    }
+
+    // Log the initial latitude and longitude
+    console.log(`Initializing map at Latitude: ${lat}, Longitude: ${lng}`);
+    
+    const defaultLocation = { lat: lat, lng: lng };
+
+    // Initialize the map with the provided location
+    const map = new google.maps.Map(mapElement, {
+        zoom: 8,
+        center: defaultLocation,
     });
+
+    // Draggable marker at the initial location
+    let marker = new google.maps.Marker({
+        position: defaultLocation,
+        map: map,
+        draggable: true,
+    });
+
+    // Try to set user location from geolocation if available
+    // if (navigator.geolocation) {
+    //     navigator.geolocation.getCurrentPosition(
+    //         (position) => {
+    //             const userLocation = {
+    //                 lat: position.coords.latitude,
+    //                 lng: position.coords.longitude
+    //             };
+                
+    //             // Update both map center and marker position at once
+    //             console.log(`User location found: Latitude: ${userLocation.lat}, Longitude: ${userLocation.lng}`);
+    //             map.setCenter(userLocation);
+    //             marker.setPosition(userLocation);
+    //         },
+    //         (error) => {
+    //             console.warn("Geolocation permission denied. Using provided location.", error);
+    //         },
+    //         { enableHighAccuracy: true } // Request high accuracy if available
+    //     );
+    // } else {
+    //     console.warn("Geolocation not supported. Using provided location.");
+    // }
+
+    // Update latitude and longitude fields when the marker is dragged
+    google.maps.event.addListener(marker, 'position_changed', function () {
+        document.getElementById('latitude').value = marker.getPosition().lat();
+        document.getElementById('longitude').value = marker.getPosition().lng();
+    });
+
+    // Move the marker on map click
+    google.maps.event.addListener(map, 'click', function (event) {
+        marker.setPosition(event.latLng);
+    });
+
+    // Setup search box
+    const searchBox = new google.maps.places.SearchBox(inputElement);
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(inputElement);
+
+    // Adjust bounds based on search results
+    map.addListener('bounds_changed', function () {
+        searchBox.setBounds(map.getBounds());
+    });
+
+    let markers = [];
+    searchBox.addListener('places_changed', function () {
+        const places = searchBox.getPlaces();
+
+        if (!places.length) return;
+
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        const bounds = new google.maps.LatLngBounds();
+        places.forEach(place => {
+            if (!place.geometry) return;
+
+            const newMarker = new google.maps.Marker({
+                map: map,
+                position: place.geometry.location,
+            });
+            markers.push(newMarker);
+
+            if (place.geometry.viewport) {
+                bounds.union(place.geometry.viewport);
+            } else {
+                bounds.extend(place.geometry.location);
+            }
+        });
+        map.fitBounds(bounds);
+    });
+}
 </script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{$api_key}}&libraries=places" async defer></script>
+<script type="text/javascript">
+   $(document).on('shown.bs.modal', '.contact_modal', function(e) {
+    // Get the latitude and longitude from the form inputs
+    const clientLatitude = parseFloat(document.getElementById('latitude').value) || 30.4669; // Fallback
+    const clientLongitude = parseFloat(document.getElementById('longitude').value) || 31.1842; // Fallback
+    
+    console.log(`Client Latitude: ${clientLatitude}, Client Longitude: ${clientLongitude}`);
+    initMap(clientLatitude, clientLongitude);
+});
+</script>
+
 @endif
 @endsection

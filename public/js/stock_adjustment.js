@@ -6,7 +6,7 @@ $(document).ready(function() {
             .autocomplete({
                 source: function(request, response) {
                     $.getJSON(
-                        '/products/list',
+                        '/getProducts',
                         { location_id: $('#location_id').val(), term: request.term },
                         response
                     );

@@ -25,6 +25,17 @@
                             data-container=".orders_modal">
                             <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
         </div>
+        <div class="row">
+    <div class="col-md-3">
+        <input type="date" id="start_date" class="form-control" placeholder="Start Date">
+    </div>
+    <div class="col-md-3">
+        <input type="date" id="end_date" class="form-control" placeholder="End Date">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-primary" id="filter_date">Filter</button>
+    </div>
+</div>
         @endslot
     @endcan
     @can('lang_v1.view')
@@ -57,11 +68,20 @@
 @stop
 @section('javascript')
 <script>
-    //Brand table
+        $('#filter_date').click(function() {
+        orders_table.ajax.reload(); // Reload DataTable with the new date filters
+    });
+    //Orders table
     var orders_table = $('#orders_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '/orders',
+        ajax: {
+            url: '/orders',
+            data: function (d) {
+                d.start_date = $('#start_date').val();
+                d.end_date = $('#end_date').val();
+            }
+        },
         columnDefs: [
             {
                 targets: 2,

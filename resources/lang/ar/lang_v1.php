@@ -1376,6 +1376,13 @@ return [
 "completed_orders" => "الطلبات المكتملة",
 "canceled_orders" => "الطلبات الملغاة",
 
+"order_cancellations" => "الطلبات الملغاه",
+"all_order_cancellations" => "كل الطلبات الملغاه ",
+"requested_order_cancellations" => " الطلبات الملغاه المطلوبة",
+"approved_order_cancellations" => "الطلبات الملغاه المقبولة",
+"rejected_order_cancellations" => "الطلبات الملغاه المرفوضه",
+"order_cancellation_status" => "حالة الطلبات الملغاه",
+
 "products"=>"المنتجات",
 ""=>"",
 ""=>"",
@@ -1386,8 +1393,8 @@ return [
 "all_your_banners"=>"لافتاتك",
 "active"=>"نشط",
 "actions"=>"العمليات",
-""=>"",
-""=>"",
+"edit"=>"تعديل",
+"delete"=>"حذف",
 ""=>"",
 ""=>"",
 ];

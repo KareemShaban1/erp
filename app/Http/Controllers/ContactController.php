@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\BusinessLocation;
+use App\Models\Client;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
 use App\Notifications\CustomerNotification;
@@ -20,6 +21,7 @@ use Excel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\TransactionPayment;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Models\Activity;
 
 class ContactController extends Controller
@@ -58,8 +60,9 @@ class ContactController extends Controller
     public function index()
     {
         $type = request()->get('type');
+        
 
-        $types = ['supplier', 'customer'];
+        $types = ['supplier', 'customer','client'];
 
         if (empty($type) || !in_array($type, $types)) {
             return redirect()->back();
@@ -70,6 +73,8 @@ class ContactController extends Controller
                 return $this->indexSupplier();
             } elseif ($type == 'customer') {
                 return $this->indexCustomer();
+            } elseif ($type == 'client') {
+                return $this->indexClient();
             } else {
                 die("Not Found");
             }
@@ -475,6 +480,236 @@ class ContactController extends Controller
                         ->make(true);
     }
 
+
+     /**
+     * Returns the database object for customer
+     *
+     * @return \Illuminate\Http\Response
+     */
+    private function indexClient()
+    {
+        if (!auth()->user()->can('customer.view') && !auth()->user()->can('customer.view_own')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+
+        $is_admin = $this->contactUtil->is_admin(auth()->user());
+
+        $query = $this->contactUtil->getContactQuery($business_id, 'client');
+
+        if (request()->has('has_sell_due')) {
+           $query->havingRaw('(total_invoice - invoice_received) > 0');
+        }
+
+        if (request()->has('has_sell_return')) {
+           $query->havingRaw('total_sell_return > 0');
+        }
+
+        if (request()->has('has_advance_balance')) {
+           $query->where('balance', '>', 0);
+        }
+
+        if (request()->has('has_opening_balance')) {
+           $query->havingRaw('opening_balance > 0');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_one_month')) {
+            $from_transaction_date = \Carbon::now()->subDays(30)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_three_month')) {
+            $from_transaction_date = \Carbon::now()->subMonths(3)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_six_month')) {
+            $from_transaction_date = \Carbon::now()->subMonths(6)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_one_year')) {
+            $from_transaction_date = \Carbon::now()->subYear()->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        $contacts = Datatables::of($query)
+            ->addColumn('address', '{{implode(", ", array_filter([$address_line_1, $address_line_2, $city, $state, $country, $zip_code]))}}')
+            ->addColumn(
+                'due',
+                '<span class="contact_due" data-orig-value="{{$total_invoice - $invoice_received}}" data-highlight=true>@format_currency($total_invoice - $invoice_received)</span>'
+            )
+            ->addColumn(
+                'return_due',
+                '<span class="return_due" data-orig-value="{{$total_sell_return - $sell_return_paid}}" data-highlight=false>@format_currency($total_sell_return - $sell_return_paid)</span>'
+            )
+            ->addColumn(
+                'action',
+                function ($row) {
+                    $html = '<div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
+                        data-toggle="dropdown" aria-expanded="false">' .
+                        __("messages.actions") .
+                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
+                    $html .= '<li><a href="' . action('TransactionPaymentController@getPayContactDue', [$row->id]) . '?type=sell" class="pay_sale_due"><i class="fas fa-money-bill-alt" aria-hidden="true"></i>' . __("lang_v1.pay") . '</a></li>';
+                    $return_due = $row->total_sell_return - $row->sell_return_paid;
+                    if ($return_due > 0) {
+                        $html .= '<li><a href="' . action('TransactionPaymentController@getPayContactDue', [$row->id]) . '?type=sell_return" class="pay_purchase_due"><i class="fas fa-money-bill-alt" aria-hidden="true"></i>' . __("lang_v1.pay_sell_return_due") . '</a></li>';
+                    }
+                    
+                    if (auth()->user()->can('customer.view') || auth()->user()->can('customer.view_own')) {
+                        $html .= '<li><a href="' . action('ContactController@show', [$row->id]) . '"><i class="fas fa-eye" aria-hidden="true"></i>' . __("messages.view") . '</a></li>';
+                    }
+                    if (auth()->user()->can('customer.update')) {
+                        $html .= '<li><a href="' . action('ContactController@edit', [$row->id]) . '" class="edit_contact_button"><i class="glyphicon glyphicon-edit"></i>' .  __("messages.edit") . '</a></li>';
+                    }
+                    if (!$row->is_default && auth()->user()->can('customer.delete')) {
+                        $html .= '<li><a href="' . action('ContactController@destroy', [$row->id]) . '" class="delete_contact_button"><i class="glyphicon glyphicon-trash"></i>' . __("messages.delete") . '</a></li>';
+                    }
+
+                    if (auth()->user()->can('customer.update')) {
+                        $html .= '<li><a href="' . action('ContactController@updateStatus', [$row->id]) . '"class="update_contact_status"><i class="fas fa-power-off"></i>';
+
+                        if ($row->contact_status == "active") {
+                            $html .= __("messages.deactivate");
+                        } else {
+                            $html .= __("messages.activate");
+                        }
+
+                        $html .= "</a></li>";
+                    }
+
+                    $html .= '<li class="divider"></li>';
+                    if (auth()->user()->can('customer.view')) {
+                        $html .= '
+                                <li>
+                                    <a href="' . action('ContactController@show', [$row->id]). '?view=ledger">
+                                        <i class="fas fa-scroll" aria-hidden="true"></i>
+                                        ' . __("lang_v1.ledger") . '
+                                    </a>
+                                </li>';
+
+                        if (in_array($row->type, ["both", "supplier"])) {
+                            $html .= '<li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=purchase">
+                                    <i class="fas fa-arrow-circle-down" aria-hidden="true"></i>
+                                    ' . __("purchase.purchases") . '
+                                </a>
+                            </li>
+                            <li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=stock_report">
+                                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                                    ' . __("report.stock_report") . '
+                                </a>
+                            </li>';
+                        }
+
+                        if (in_array($row->type, ["both", "customer"])) {
+                            $html .=  '<li>
+                                <a href="' . action('ContactController@show', [$row->id]). '?view=sales">
+                                    <i class="fas fa-arrow-circle-up" aria-hidden="true"></i>
+                                    ' . __("sale.sells") . '
+                                </a>
+                            </li>';
+                        }
+
+                        $html .= '<li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=documents_and_notes">
+                                    <i class="fas fa-paperclip" aria-hidden="true"></i>
+                                     ' . __("lang_v1.documents_and_notes") . '
+                                </a>
+                            </li>';
+                    }
+                    $html .= '</ul></div>';
+
+                    return $html;
+                }
+            )
+            ->editColumn('opening_balance', function ($row) {
+                $html = '<span data-orig-value="' . $row->opening_balance . '">' . $this->transactionUtil->num_f($row->opening_balance, true) . '</span>';
+
+                return $html;
+            })
+            ->editColumn('balance', function ($row) {
+                $html = '<span data-orig-value="' . $row->balance . '">' . $this->transactionUtil->num_f($row->balance, true) . '</span>';
+
+                return $html;
+            })
+            ->editColumn('credit_limit', function ($row) {
+                $html = __('lang_v1.no_limit');
+                if (!is_null($row->credit_limit)) {
+                    $html = '<span data-orig-value="' . $row->credit_limit . '">' . $this->transactionUtil->num_f($row->credit_limit, true) . '</span>';
+                }
+
+                return $html;
+            })
+            ->editColumn('pay_term', '
+                @if(!empty($pay_term_type) && !empty($pay_term_number))
+                    {{$pay_term_number}}
+                    @lang("lang_v1.".$pay_term_type)
+                @endif
+            ')
+            ->editColumn('name', function ($row) {
+                $name = $row->name;
+                if ($row->contact_status == 'inactive') {
+                    $name = $row->name . ' <small class="label pull-right bg-red no-print">' . __("lang_v1.inactive") . '</small>';
+                }
+
+                if (!empty($row->converted_by)) {
+                    $name .= '<span class="label bg-info label-round no-print" data-toggle="tooltip" title="Converted from leads"><i class="fas fa-sync-alt"></i></span>';
+                }
+                return $name;
+            })
+            ->editColumn('email', function ($row) {
+                if($row->type == 'client'){
+                    $email = $row->client->email_address;
+                return $email;
+                }else {
+                    return $row->email;
+                }
+                
+            })
+            ->editColumn('total_rp', '{{$total_rp ?? 0}}')
+            ->editColumn('created_at', '{{@format_date($created_at)}}')
+            ->removeColumn('total_invoice')
+            ->removeColumn('opening_balance_paid')
+            ->removeColumn('invoice_received')
+            ->removeColumn('state')
+            ->removeColumn('country')
+            ->removeColumn('city')
+            ->removeColumn('type')
+            ->removeColumn('id')
+            ->removeColumn('is_default')
+            ->removeColumn('total_sell_return')
+            ->removeColumn('sell_return_paid')
+            ->filterColumn('address', function ($query, $keyword) {
+                $query->where( function($q) use ($keyword){
+                    $q->where('address_line_1', 'like', "%{$keyword}%")
+                    ->orWhere('address_line_2', 'like', "%{$keyword}%")
+                    ->orWhere('city', 'like', "%{$keyword}%")
+                    ->orWhere('state', 'like', "%{$keyword}%")
+                    ->orWhere('country', 'like', "%{$keyword}%")
+                    ->orWhere('zip_code', 'like', "%{$keyword}%")
+                    ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
+                });
+            });
+        $reward_enabled = (request()->session()->get('business.enable_rp') == 1) ? true : false;
+        if (!$reward_enabled) {
+            $contacts->removeColumn('total_rp');
+        }
+        return $contacts->rawColumns(['action', 'opening_balance', 'credit_limit', 'pay_term', 'due', 'return_due', 'name', 'balance'])
+                        ->make(true);
+    }
+
     public function getContactDue($contact_id)
     {
         if (request()->ajax()) {
@@ -518,6 +753,9 @@ class ContactController extends Controller
         if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
             $types['customer'] = __('report.customer');
         }
+        if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
+            $types['client'] = __('report.client');
+        }
         if (auth()->user()->can('supplier.create') && auth()->user()->can('customer.create') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own')) {
             $types['both'] = __('lang_v1.both_supplier_customer');
         }
@@ -525,87 +763,128 @@ class ContactController extends Controller
         $customer_groups = CustomerGroup::forDropdown($business_id);
         $selected_type = request()->type;
 
+        $business_locations = BusinessLocation::forDropdown($business_id, true);
+
+
         $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
         
         return view('contact.create')
-            ->with(compact('types', 'customer_groups', 'selected_type', 'module_form_parts'));
+            ->with(compact('types', 
+            'business_locations','customer_groups', 'selected_type', 'module_form_parts'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        if (!auth()->user()->can('supplier.create') && !auth()->user()->can('customer.create') && !auth()->user()->can('customer.view_own') && !auth()->user()->can('supplier.view_own')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        try {
-            $business_id = $request->session()->get('user.business_id');
-
-            if (!$this->moduleUtil->isSubscribed($business_id)) {
-                return $this->moduleUtil->expiredResponse();
-            }
-
-            $input = $request->only(['type', 'supplier_business_name',
-                'prefix', 'first_name', 'middle_name', 'last_name', 'tax_number', 'pay_term_number', 'pay_term_type', 'mobile', 'landline', 'alternate_number', 'city', 'state', 'country', 'address_line_1', 'address_line_2', 'customer_group_id', 'zip_code', 'contact_id', 'custom_field1', 'custom_field2', 'custom_field3', 'custom_field4', 'custom_field5', 'custom_field6', 'custom_field7', 'custom_field8', 'custom_field9', 'custom_field10', 'email', 'shipping_address', 'position', 'dob', 'shipping_custom_field_details']);
-
-            $name_array = [];
-
-            if (!empty($input['prefix'])) {
-                $name_array[] = $input['prefix'];
-            }
-            if (!empty($input['first_name'])) {
-                $name_array[] = $input['first_name'];
-            }
-            if (!empty($input['middle_name'])) {
-                $name_array[] = $input['middle_name'];
-            }
-            if (!empty($input['last_name'])) {
-                $name_array[] = $input['last_name'];
-            }
-
-            $input['name'] = trim(implode(' ', $name_array));
-
-            if (!empty($request->input('is_export'))) {
-                $input['is_export'] = true;
-                $input['export_custom_field_1'] = $request->input('export_custom_field_1');
-                $input['export_custom_field_2'] = $request->input('export_custom_field_2');
-                $input['export_custom_field_3'] = $request->input('export_custom_field_3');
-                $input['export_custom_field_4'] = $request->input('export_custom_field_4');
-                $input['export_custom_field_5'] = $request->input('export_custom_field_5');
-                $input['export_custom_field_6'] = $request->input('export_custom_field_6');
-            }
-
-            if (!empty($input['dob'])) {
-                $input['dob'] = $this->commonUtil->uf_date($input['dob']);
-            }
-
-            $input['business_id'] = $business_id;
-            $input['created_by'] = $request->session()->get('user.id');
-
-            $input['credit_limit'] = $request->input('credit_limit') != '' ? $this->commonUtil->num_uf($request->input('credit_limit')) : null;
-            $input['opening_balance'] = $this->commonUtil->num_uf($request->input('opening_balance'));
-            
-            $output = $this->contactUtil->createNewContact($input);
-
-            $this->moduleUtil->getModuleData('after_contact_saved', ['contact' => $output['data'], 'input' => $request->input()]);
-
-            $this->contactUtil->activityLog($output['data'], 'added');
-
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
-                            'msg' =>__("messages.something_went_wrong")
-                        ];
-        }
-
-        return $output;
+/**
+ * Store a newly created resource in storage.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return \Illuminate\Http\Response
+ */
+public function store(Request $request)
+{
+    // Check user permissions
+    if (!auth()->user()->can('supplier.create') && 
+        !auth()->user()->can('customer.create') &&
+        !auth()->user()->can('customer.view_own') &&
+        !auth()->user()->can('supplier.view_own')) {
+        abort(403, 'Unauthorized action.');
     }
+
+    try {
+        $business_id = $request->session()->get('user.business_id');
+
+        // Check if business is subscribed
+        if (!$this->moduleUtil->isSubscribed($business_id)) {
+            return $this->moduleUtil->expiredResponse();
+        }
+
+        // Retrieve validated input fields
+        $input = $request->only([
+            'type', 'supplier_business_name', 'prefix', 'first_name', 
+            'middle_name', 'last_name', 'tax_number', 'pay_term_number', 
+            'pay_term_type', 'mobile', 'landline', 'alternate_number', 
+            'city', 'state', 'country', 'address_line_1', 'address_line_2', 
+            'customer_group_id', 'zip_code', 'contact_id', 'custom_field1', 
+            'custom_field2', 'custom_field3', 'custom_field4', 'custom_field5', 
+            'custom_field6', 'custom_field7', 'custom_field8', 'custom_field9', 
+            'custom_field10', 'email', 'shipping_address', 'position', 'dob', 
+            'shipping_custom_field_details'
+        ]);
+
+        // Build full name
+        $name_array = array_filter([
+            $input['prefix'] ?? null,
+            $input['first_name'] ?? null,
+            $input['middle_name'] ?? null,
+            $input['last_name'] ?? null,
+        ]);
+        $input['name'] = implode(' ', $name_array);
+
+        // Handle export custom fields if 'is_export' is true
+        if ($request->filled('is_export')) {
+            $input['is_export'] = true;
+            foreach (range(1, 6) as $index) {
+                $input["export_custom_field_{$index}"] = $request->input("export_custom_field_{$index}");
+            }
+        }
+
+        // Format date of birth
+        if (!empty($input['dob'])) {
+            $input['dob'] = $this->commonUtil->uf_date($input['dob']);
+        }
+
+        // Set additional fields
+        $input['business_id'] = $business_id;
+        $input['created_by'] = $request->session()->get('user.id');
+        $input['credit_limit'] = $request->input('credit_limit') !== '' ? $this->commonUtil->num_uf($request->input('credit_limit')) : null;
+        $input['opening_balance'] = $this->commonUtil->num_uf($request->input('opening_balance'));
+
+        // Create new contact
+        $output = $this->contactUtil->createNewContact($input);
+
+        // Client-specific data and creation
+        if ($request->input('type') === 'client') {
+            $request->validate([
+                
+                'email_address' => 'required|email|unique:clients,email_address',
+                'password' => 'required|string|min:8',
+                'business_location_id' => 'required|integer',
+                'location' => 'required|string',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric'
+            ]);
+
+            // Prepare client data and create record
+            $clientData = $request->only(['email_address', 'password','location', 'business_location_id', 'latitude', 'longitude']);
+            $client = Client::create([
+                'email_address' => $clientData['email_address'],
+                'password' => Hash::make($clientData['password']),
+                'business_location_id' => $clientData['business_location_id'],
+                'contact_id' => $output['data']->id,
+                'client_type' => 'erp_client',
+                'location' => $clientData['location'] ?? null,
+                'latitude' => $clientData['latitude'] ?? null,
+                'longitude' => $clientData['longitude'] ?? null,
+            ]);
+        }
+
+        // Trigger after-contact-saved actions
+        $this->moduleUtil->getModuleData('after_contact_saved', ['contact' => $output['data'], 'input' => $request->input()]);
+
+        // Log activity
+        $this->contactUtil->activityLog($output['data'], 'added');
+
+    } catch (\Exception $e) {
+        \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+        
+        $output = [
+            'success' => false,
+            'msg' => __("messages.something_went_wrong")
+        ];
+    }
+
+    return $output;
+}
+
 
     /**
      * Display the specified resource.
@@ -683,6 +962,9 @@ class ContactController extends Controller
             if (auth()->user()->can('customer.create')) {
                 $types['customer'] = __('report.customer');
             }
+            if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
+                $types['client'] = __('report.client');
+            }
             if (auth()->user()->can('supplier.create') && auth()->user()->can('customer.create')) {
                 $types['both'] = __('lang_v1.both_supplier_customer');
             }
@@ -704,8 +986,12 @@ class ContactController extends Controller
                 $opening_balance = $this->commonUtil->num_f($opening_balance);
             }
 
+            $business_locations = BusinessLocation::forDropdown($business_id, true);
+
+            $client = Client::where('contact_id',$contact->id)->first();
+
             return view('contact.edit')
-                ->with(compact('contact', 'types', 'customer_groups', 'opening_balance'));
+                ->with(compact('contact','client', 'business_locations','types', 'customer_groups', 'opening_balance'));
         }
     }
 
@@ -721,64 +1007,110 @@ class ContactController extends Controller
         if (!auth()->user()->can('supplier.update') && !auth()->user()->can('customer.update') && !auth()->user()->can('customer.view_own') && !auth()->user()->can('supplier.view_own')) {
             abort(403, 'Unauthorized action.');
         }
-
-        if (request()->ajax()) {
+    
+        if ($request->ajax()) {
             try {
-                $input = $request->only(['type', 'supplier_business_name', 'prefix', 'first_name', 'middle_name', 'last_name', 'tax_number', 'pay_term_number', 'pay_term_type', 'mobile', 'address_line_1', 'address_line_2', 'zip_code', 'dob', 'alternate_number', 'city', 'state', 'country', 'landline', 'customer_group_id', 'contact_id', 'custom_field1', 'custom_field2', 'custom_field3', 'custom_field4', 'custom_field5', 'custom_field6', 'custom_field7', 'custom_field8', 'custom_field9', 'custom_field10', 'email', 'shipping_address', 'position', 'shipping_custom_field_details', 'export_custom_field_1', 'export_custom_field_2', 'export_custom_field_3', 'export_custom_field_4', 'export_custom_field_5',
-                    'export_custom_field_6']);
-
-                $name_array = [];
-
-                if (!empty($input['prefix'])) {
-                    $name_array[] = $input['prefix'];
-                }
-                if (!empty($input['first_name'])) {
-                    $name_array[] = $input['first_name'];
-                }
-                if (!empty($input['middle_name'])) {
-                    $name_array[] = $input['middle_name'];
-                }
-                if (!empty($input['last_name'])) {
-                    $name_array[] = $input['last_name'];
-                }
-
+                // Collect input fields
+                $input = $request->only([
+                    'type', 'supplier_business_name', 'prefix', 'first_name', 'middle_name', 'last_name', 
+                    'tax_number', 'pay_term_number', 'pay_term_type', 'mobile', 'address_line_1', 
+                    'address_line_2', 'zip_code', 'dob', 'alternate_number', 'city', 'state', 
+                    'country', 'landline', 'customer_group_id', 'contact_id', 'custom_field1', 
+                    'custom_field2', 'custom_field3', 'custom_field4', 'custom_field5', 
+                    'custom_field6', 'custom_field7', 'custom_field8', 'custom_field9', 
+                    'custom_field10', 'email', 'shipping_address', 'position', 
+                    'shipping_custom_field_details', 'export_custom_field_1', 
+                    'export_custom_field_2', 'export_custom_field_3', 'export_custom_field_4', 
+                    'export_custom_field_5', 'export_custom_field_6'
+                ]);
+    
+                // Build full name from parts
+                $name_array = array_filter([$input['prefix'], $input['first_name'], $input['middle_name'], $input['last_name']]);
                 $input['name'] = trim(implode(' ', $name_array));
-
+    
                 $input['is_export'] = !empty($request->input('is_export')) ? 1 : 0;
-
+    
+                // Remove export fields if not exporting
                 if (!$input['is_export']) {
-                    unset($input['export_custom_field_1'], $input['export_custom_field_2'], $input['export_custom_field_3'], $input['export_custom_field_4'], $input['export_custom_field_5'], $input['export_custom_field_6']);
+                    unset($input['export_custom_field_1'], $input['export_custom_field_2'], 
+                          $input['export_custom_field_3'], $input['export_custom_field_4'], 
+                          $input['export_custom_field_5'], $input['export_custom_field_6']);
                 }
-
+    
+                // Format date of birth
                 if (!empty($input['dob'])) {
                     $input['dob'] = $this->commonUtil->uf_date($input['dob']);
                 }
-
-                $input['credit_limit'] = $request->input('credit_limit') != '' ? $this->commonUtil->num_uf($request->input('credit_limit')) : null;
-                
+    
+                // Handle credit limit and opening balance
+                $input['credit_limit'] = $request->input('credit_limit') != '' 
+                    ? $this->commonUtil->num_uf($request->input('credit_limit')) 
+                    : null;
+    
                 $business_id = $request->session()->get('user.business_id');
-
                 $input['opening_balance'] = $this->commonUtil->num_uf($request->input('opening_balance'));
-
+    
+                // Check subscription
                 if (!$this->moduleUtil->isSubscribed($business_id)) {
                     return $this->moduleUtil->expiredResponse();
                 }
-
+    
+                // Update contact details
                 $output = $this->contactUtil->updateContact($input, $id, $business_id);
-
+    
+                // Client-specific data and creation
+                if ($request->input('type') === 'client') {
+                    // Adjust validation rules
+                    $request->validate([
+                        'email_address' => 'required|email|unique:clients,email_address,' . $request->client_id, // Exclude current record
+                        'password' => 'nullable|string|min:8', // Make password optional
+                        'business_location_id' => 'required|integer',
+                        'location' => 'nullable|string',
+                        'latitude' => 'nullable|numeric',
+                        'longitude' => 'nullable|numeric'
+                    ]);
+    
+                    // Prepare client data and update record
+                    $clientData = $request->only(['client_id', 'location','email_address', 'password', 'business_location_id', 'latitude', 'longitude']);
+                    $client = Client::findOrFail($clientData['client_id']);
+                    
+                    // Prepare data for client update
+                    $updateData = [
+                        'email_address' => $clientData['email_address'],
+                        'business_location_id' => $clientData['business_location_id'],
+                        'contact_id' => $output['data']->id,
+                        'client_type' => 'erp_client',
+                        'location' => $clientData['location'] ?? null,
+                        'latitude' => $clientData['latitude'] ?? null,
+                        'longitude' => $clientData['longitude'] ?? null,
+                    ];
+    
+                    // Update password only if provided
+                    if (!empty($clientData['password'])) {
+                        $updateData['password'] = Hash::make($clientData['password']);
+                    }
+    
+                    $client->update($updateData);
+                }
+    
+                // Log the activity
                 $this->contactUtil->activityLog($output['data'], 'edited');
-
+    
             } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-                $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
-            }
 
+                \Log::emergency($e);
+                \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+    
+                $output = [
+                    'success' => false,
+                    'msg' => __("messages.something_went_wrong")
+                ];
+            }
+    
             return $output;
         }
     }
+    
 
     /**
      * Remove the specified resource from storage.

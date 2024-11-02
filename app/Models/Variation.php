@@ -86,6 +86,16 @@ class Variation extends Model
     {
         return $this->morphMany(\App\Models\Media::class, 'model');
     }
+
+    /**
+     * Define the discounts relationship.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function discounts()
+    {
+        return $this->belongsToMany(\App\Models\Discount::class, 'discount_variations', 'variation_id', 'discount_id');
+    }
     
 
 

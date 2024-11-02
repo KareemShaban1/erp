@@ -27,14 +27,14 @@
                             </a>
                         </li>
                     @endif
-                    @if(auth()->user()->can('essentials.view_allowance_and_deduction') || auth()->user()->can('essentials.add_allowance_and_deduction'))
+                    <!-- @if(auth()->user()->can('essentials.view_allowance_and_deduction') || auth()->user()->can('essentials.add_allowance_and_deduction')) -->
                         <li>
                             <a href="#pay_component_tab" data-toggle="tab" aria-expanded="true">
                                 <i class="fab fa-gg-circle" aria-hidden="true"></i>
                                 @lang( 'essentials::lang.pay_components' )
                             </a>
                         </li>
-                    @endif
+                    <!-- @endif -->
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="payroll_tab">
@@ -126,7 +126,7 @@
                             </div>
                         </div>
                     @endif
-                    @if(auth()->user()->can('essentials.view_allowance_and_deduction') || auth()->user()->can('essentials.add_allowance_and_deduction'))
+                    <!-- @if(auth()->user()->can('essentials.view_allowance_and_deduction') || auth()->user()->can('essentials.add_allowance_and_deduction')) -->
                         <div class="tab-pane" id="pay_component_tab">
                             <div class="row">
                                 @can('essentials.add_allowance_and_deduction')
@@ -155,7 +155,7 @@
                             </div>
                             <div class="row" id="user_leave_summary"></div>
                         </div>
-                    @endif
+                    <!-- @endif -->
                 </div>
             </div>
         </div>

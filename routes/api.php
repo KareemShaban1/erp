@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BusinessLocationController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\OrderCancellationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
@@ -62,6 +63,12 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::get('clients', [ClientController::class, 'index']);
         Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
+    
+        Route::get('orders-cancellation', [OrderCancellationController::class, 'index']);
+        Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
+        Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
+
+        // getAuthClientOrderCancellations
     });
 
     Route::get('banners', [BannerController::class, 'index']);

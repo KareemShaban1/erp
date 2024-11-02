@@ -101,6 +101,11 @@ class OrderService extends BaseService
                 ->with(['product', 'variation.variation_location_details', 'client'])
                 ->get();
 
+            // Check if cart is empty
+            if ($carts->isEmpty()) {
+                return $this->returnJSON([], __('message.Cart is empty'));
+            }
+
 
             $client = Client::findOrFail(Auth::id());
             $orderTotal = $carts->sum('total');

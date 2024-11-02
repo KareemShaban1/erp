@@ -36,7 +36,8 @@ class DiscountResource extends JsonResource
             return [
                 'variation_id' => $variation->id,
                 'original_price' => $basePrice,
-                'discounted_price' => max($discountedPrice, 0), // Ensures price doesn't go below 0
+                'discount_amount' => $this->discount_amount,
+                'price_after_discount' => max($discountedPrice, 0),
             ];
         })->toArray();
     }
@@ -49,11 +50,11 @@ class DiscountResource extends JsonResource
     {
         return [
             'name' => $this->name,
+            'type' => $this->type,
             'discounted_prices' => $this->calculateDiscountedPrices(),
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'discount_type' => $this->discount_type,
-                    'discount_amount' => $this->discount_amount,
                     'starts_at' => $this->starts_at,
                     'ends_at' => $this->ends_at,
                     'is_active' => $this->is_active,

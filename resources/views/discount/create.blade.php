@@ -35,10 +35,16 @@
           </div>
         </div>
         <div class="clearfix"></div>
-        <div class="col-sm-6">
+        <!-- <div class="col-sm-6">
           <div class="form-group">
             {!! Form::label('location_id', __('sale.location') . ':*') !!}
               {!! Form::select('location_id', $locations, null, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
+          </div>
+        </div> -->
+        <div class="col-sm-6">
+          <div class="form-group">
+            {!! Form::label('type', __('sale.type') . ':*') !!}
+              {!! Form::select('type', ['discount' => __('lang_v1.discount'), 'flash_sale' => __('lang_v1.flash_sale')], null, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
           </div>
         </div>
         <div class="col-md-6">

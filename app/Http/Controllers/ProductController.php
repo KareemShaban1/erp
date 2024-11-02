@@ -57,6 +57,313 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // public function index()
+    // {
+    //     if (!auth()->user()->can('product.view') && !auth()->user()->can('product.create')) {
+    //         abort(403, 'Unauthorized action.');
+    //     }
+    //     $business_id = request()->session()->get('user.business_id');
+    //     $selling_price_group_count = SellingPriceGroup::countSellingPriceGroups($business_id);
+    //     $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
+
+    //     if (request()->ajax()) {
+    //         $query = Product::with(['media', 'variations.variation_location_details'])
+    //             ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
+    //             ->join('units', 'products.unit_id', '=', 'units.id')
+    //             ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
+    //             ->leftJoin('categories as c2', 'products.sub_category_id', '=', 'c2.id')
+    //             ->leftJoin('tax_rates', 'products.tax', '=', 'tax_rates.id')
+    //             ->join('variations as v', 'v.product_id', '=', 'products.id')
+    //             ->leftJoin('variation_location_details as vld', 'vld.variation_id', '=', 'v.id')
+    //             ->where('products.business_id', $business_id)
+    //             ->where('products.type', '!=', 'modifier');
+
+    //         //Filter by location
+    //         $location_id = request()->get('location_id', null);
+    //         $permitted_locations = auth()->user()->permitted_locations();
+
+    //         if (!empty($location_id) && $location_id != 'none') {
+    //             if ($permitted_locations == 'all' || in_array($location_id, $permitted_locations)) {
+    //                 $query->whereHas('product_locations', function ($query) use ($location_id) {
+    //                     $query->where('product_locations.location_id', '=', $location_id);
+    //                 });
+    //             }
+    //         } elseif ($location_id == 'none') {
+    //             $query->doesntHave('product_locations');
+    //         } else {
+    //             if ($permitted_locations != 'all') {
+    //                 $query->whereHas('product_locations', function ($query) use ($permitted_locations) {
+    //                     $query->whereIn('product_locations.location_id', $permitted_locations);
+    //                 });
+    //             } else {
+    //                 $query->with('product_locations');
+    //             }
+    //         }
+
+    //         $products = $query->select(
+    //             'products.id',
+    //             'products.name as product',
+    //             'products.type',
+    //             'c1.name as category',
+    //             'c2.name as sub_category',
+    //             'units.actual_name as unit',
+    //             'brands.name as brand',
+    //             'tax_rates.name as tax',
+    //             'products.sku',
+    //             'products.image',
+    //             'products.enable_stock',
+    //             'products.is_inactive',
+    //             'products.not_for_selling',
+    //             // 'products.product_custom_field1',
+    //             // 'products.product_custom_field2',
+    //             // 'products.product_custom_field3',
+    //             // 'products.product_custom_field4',
+    //             'products.created_at',
+    //             DB::raw('SUM(vld.qty_available) as available_stock'),
+    //             DB::raw('MAX(v.sell_price_inc_tax) as max_price'),
+    //             DB::raw('MIN(v.sell_price_inc_tax) as min_price'),
+    //             DB::raw('MAX(v.dpp_inc_tax) as max_purchase_price'),
+    //             DB::raw('MIN(v.dpp_inc_tax) as min_purchase_price')
+    //             )->latest();
+                
+
+    //         //if woocomerce enabled add field to query
+    //         if ($is_woocommerce) {
+    //             $products->addSelect('woocommerce_disable_sync');
+    //         }
+            
+    //         $products->groupBy('products.id');
+        
+    //         // $products->get()->each(function ($product) {
+    //         //     Log::info($product->variations->sum(function ($variation) {
+    //         //         return $variation->variation_location_details->sum('qty_available');
+    //         //     }) ); // Logs all variations with their loaded relationships
+    //         // });
+            
+    //         // Handle current stock calculation dynamically
+    //         $products->get()->map(function ($product) {
+    //             $variations = $product->variations;
+    //             $product->available_stock = $variations->sum(function ($variation) {
+    //                 return $variation->variation_location_details->sum('qty_available');
+    //             });
+    //             return $product;
+    //         });
+
+
+            
+            
+
+    //         $type = request()->get('type', null);
+    //         if (!empty($type)) {
+    //             $products->where('products.type', $type);
+    //         }
+
+
+
+    //         $category_id = request()->get('category_id', null);
+    //         if (!empty($category_id)) {
+    //             $products->where('products.category_id', $category_id);
+    //         }
+
+    //         $brand_id = request()->get('brand_id', null);
+    //         if (!empty($brand_id)) {
+    //             $products->where('products.brand_id', $brand_id);
+    //         }
+
+    //         $unit_id = request()->get('unit_id', null);
+    //         if (!empty($unit_id)) {
+    //             $products->where('products.unit_id', $unit_id);
+    //         }
+
+    //         $tax_id = request()->get('tax_id', null);
+    //         if (!empty($tax_id)) {
+    //             $products->where('products.tax', $tax_id);
+    //         }
+
+    //         $active_state = request()->get('active_state', null);
+    //         if ($active_state == 'active') {
+    //             $products->Active();
+    //         }
+    //         if ($active_state == 'inactive') {
+    //             $products->Inactive();
+    //         }
+    //         $not_for_selling = request()->get('not_for_selling', null);
+    //         if ($not_for_selling == 'true') {
+    //             $products->ProductNotForSales();
+    //         }
+
+    //         $woocommerce_enabled = request()->get('woocommerce_enabled', 0);
+    //         if ($woocommerce_enabled == 1) {
+    //             $products->where('products.woocommerce_disable_sync', 0);
+    //         }
+
+    //         if (!empty(request()->get('repair_model_id'))) {
+    //             $products->where('products.repair_model_id', request()->get('repair_model_id'));
+    //         }
+
+    //         // dd($products->paginate(2));
+
+
+    //         return Datatables::of($products)
+    //             ->addColumn(
+    //                 'product_locations',
+    //                 function ($row) {
+    //                     return $row->product_locations->implode('name', ', ');
+    //                 }
+    //             )
+    //             ->editColumn('category', '{{$category}} @if(!empty($sub_category))<br/> -- {{$sub_category}}@endif')
+    //             ->addColumn(
+    //                 'action',
+    //                 function ($row) use ($selling_price_group_count) {
+    //                     $html =
+    //                     '<div class="btn-group"><button type="button" class="btn btn-info dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">'. __("messages.actions") . '<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button><ul class="dropdown-menu dropdown-menu-left" role="menu"><li><a href="' . action('LabelsController@show') . '?product_id=' . $row->id . '" data-toggle="tooltip" title="' . __('lang_v1.label_help') . '"><i class="fa fa-barcode"></i> ' . __('barcode.labels') . '</a></li>';
+
+    //                     if (auth()->user()->can('product.view')) {
+    //                         $html .=
+    //                         '<li><a href="' . action('ProductController@view', [$row->id]) . '" class="view-product"><i class="fa fa-eye"></i> ' . __("messages.view") . '</a></li>';
+    //                     }
+
+    //                     if (auth()->user()->can('product.update')) {
+    //                         $html .=
+    //                         '<li><a href="' . action('ProductController@edit', [$row->id]) . '"><i class="glyphicon glyphicon-edit"></i> ' . __("messages.edit") . '</a></li>';
+    //                     }
+
+    //                     if (auth()->user()->can('product.delete')) {
+    //                         $html .=
+    //                         '<li><a href="' . action('ProductController@destroy', [$row->id]) . '" class="delete-product"><i class="fa fa-trash"></i> ' . __("messages.delete") . '</a></li>';
+    //                     }
+
+    //                     if ($row->is_inactive == 1) {
+    //                         $html .=
+    //                         '<li><a href="' . action('ProductController@activate', [$row->id]) . '" class="activate-product"><i class="fas fa-check-circle"></i> ' . __("lang_v1.reactivate") . '</a></li>';
+    //                     }
+
+    //                     $html .= '<li class="divider"></li>';
+
+    //                     if ($row->enable_stock == 1 && auth()->user()->can('product.opening_stock')) {
+    //                         $html .=
+    //                         '<li><a href="#" data-href="' . action('OpeningStockController@add', ['product_id' => $row->id]) . '" class="add-opening-stock"><i class="fa fa-database"></i> ' . __("lang_v1.add_edit_opening_stock") . '</a></li>';
+    //                     }
+
+    //                     if (auth()->user()->can('product.view')) {
+    //                         $html .=
+    //                         '<li><a href="' . action('ProductController@productStockHistory', [$row->id]) . '"><i class="fas fa-history"></i> ' . __("lang_v1.product_stock_history") . '</a></li>';
+    //                     }
+
+    //                     if (auth()->user()->can('product.create')) {
+            
+    //                         if ($selling_price_group_count > 0) {
+    //                             $html .=
+    //                             '<li><a href="' . action('ProductController@addSellingPrices', [$row->id]) . '"><i class="fas fa-money-bill-alt"></i> ' . __("lang_v1.add_selling_price_group_prices") . '</a></li>';
+    //                         }
+
+    //                         $html .=
+    //                             '<li><a href="' . action('ProductController@create', ["d" => $row->id]) . '"><i class="fa fa-copy"></i> ' . __("lang_v1.duplicate_product") . '</a></li>';
+    //                     }
+
+    //                     if (!empty($row->media->first())) {
+
+    //                         $html .=
+    //                             '<li><a href="' . $row->media->first()->display_url . '" download="'.$row->media->first()->display_name.'"><i class="fas fa-download"></i> ' . __("lang_v1.product_brochure") . '</a></li>';
+    //                     }
+
+    //                     $html .= '</ul></div>';
+
+    //                     return $html;
+    //                 }
+    //             )
+    //             ->editColumn('product', function ($row) use ($is_woocommerce) {
+    //                 $product = $row->is_inactive == 1 ? $row->product . ' <span class="label bg-gray">' . __("lang_v1.inactive") .'</span>' : $row->product;
+
+    //                 $product = $row->not_for_selling == 1 ? $product . ' <span class="label bg-gray">' . __("lang_v1.not_for_selling") .
+    //                     '</span>' : $product;
+                    
+    //                 if ($is_woocommerce && !$row->woocommerce_disable_sync) {
+    //                     $product = $product .'<br><i class="fab fa-wordpress"></i>';
+    //                 }
+
+    //                 return $product;
+    //             })
+    //             ->editColumn('image', function ($row) {
+    //                 return '<div style="display: flex;"><img src="' . $row->image_url . '" alt="Product image" class="product-thumbnail-small"></div>';
+    //             })
+    //             ->editColumn('type', '@lang("lang_v1." . $type)')
+    //             ->addColumn('mass_delete', function ($row) {
+    //                 return  '<input type="checkbox" class="row-select" value="' . $row->id .'">' ;
+    //             })
+    //             ->editColumn('current_stock', function($row) {
+    //                 // Check if stock is enabled
+    //                 if ($row->enable_stock == 1) {
+    //                     // Format the current stock value and return it with the unit
+    //                     return number_format($row->available_stock) . ' ' . $row->unit;
+    //                 } else {
+    //                     // If stock is disabled, return '--' with the unit
+    //                     return '-- ' . $row->unit;
+    //                 }
+    //             })                
+    //             ->addColumn(
+    //                 'purchase_price',
+    //                 '<div style="white-space: nowrap;">@format_currency($min_purchase_price) @if($max_purchase_price != $min_purchase_price && $type == "variable") -  @format_currency($max_purchase_price)@endif </div>'
+    //             )
+    //             ->addColumn(
+    //                 'selling_price',
+    //                 '<div style="white-space: nowrap;">@format_currency($min_price) @if($max_price != $min_price && $type == "variable") -  @format_currency($max_price)@endif </div>'
+    //             )
+    //             ->filterColumn('products.sku', function ($query, $keyword) {
+    //                 $query->whereHas('variations', function($q) use($keyword){
+    //                         $q->where('sub_sku', 'like', "%{$keyword}%");
+    //                     })
+    //                 ->orWhere('products.sku', 'like', "%{$keyword}%");
+    //             })
+    //             ->setRowAttr([
+    //                 'data-href' => function ($row) {
+    //                     if (auth()->user()->can("product.view")) {
+    //                         return  action('ProductController@view', [$row->id]) ;
+    //                     } else {
+    //                         return '';
+    //                     }
+    //                 }])
+    //             ->rawColumns(['action', 'image', 'mass_delete', 'product', 'selling_price', 'purchase_price', 'category'])
+    //             ->make(true);
+    //     }
+
+    //     $rack_enabled = (request()->session()->get('business.enable_racks') || request()->session()->get('business.enable_row') || request()->session()->get('business.enable_position'));
+
+    //     $categories = Category::forDropdown($business_id, 'product');
+
+    //     $brands = Brand::forDropdown($business_id);
+
+    //     $units = Unit::forDropdown($business_id);
+
+    //     $tax_dropdown = TaxRate::forBusinessDropdown($business_id, false);
+    //     $taxes = $tax_dropdown['tax_rates'];
+
+    //     $business_locations = BusinessLocation::forDropdown($business_id);
+    //     $business_locations->prepend(__('lang_v1.none'), 'none');
+
+    //     if ($this->moduleUtil->isModuleInstalled('Manufacturing') && (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module'))) {
+    //         $show_manufacturing_data = true;
+    //     } else {
+    //         $show_manufacturing_data = false;
+    //     }
+
+    //     //list product screen filter from module
+    //     $pos_module_data = $this->moduleUtil->getModuleData('get_filters_for_list_product_screen');
+
+    //     return view('product.index')
+    //         ->with(compact(
+    //             'rack_enabled',
+    //             'categories',
+    //             'brands',
+    //             'units',
+    //             'taxes',
+    //             'business_locations',
+    //             'show_manufacturing_data',
+    //             'pos_module_data',
+    //             'is_woocommerce'
+    //         ));
+    // }
+
     public function index()
     {
         if (!auth()->user()->can('product.view') && !auth()->user()->can('product.create')) {
@@ -67,7 +374,7 @@ class ProductController extends Controller
         $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
 
         if (request()->ajax()) {
-            $query = Product::with(['media', 'variations.variation_location_details'])
+            $query = Product::with(['media'])
                 ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
                 ->join('units', 'products.unit_id', '=', 'units.id')
                 ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
@@ -114,18 +421,16 @@ class ProductController extends Controller
                 'products.enable_stock',
                 'products.is_inactive',
                 'products.not_for_selling',
-                // 'products.product_custom_field1',
-                // 'products.product_custom_field2',
-                // 'products.product_custom_field3',
-                // 'products.product_custom_field4',
-                'products.created_at',
-                DB::raw('SUM(vld.qty_available) as available_stock'),
+                'products.product_custom_field1',
+                'products.product_custom_field2',
+                'products.product_custom_field3',
+                'products.product_custom_field4',
+                DB::raw('SUM(vld.qty_available) as current_stock'),
                 DB::raw('MAX(v.sell_price_inc_tax) as max_price'),
                 DB::raw('MIN(v.sell_price_inc_tax) as min_price'),
                 DB::raw('MAX(v.dpp_inc_tax) as max_purchase_price'),
                 DB::raw('MIN(v.dpp_inc_tax) as min_purchase_price')
-                )->latest();
-                
+                );
 
             //if woocomerce enabled add field to query
             if ($is_woocommerce) {
@@ -133,32 +438,11 @@ class ProductController extends Controller
             }
             
             $products->groupBy('products.id');
-        
-            // $products->get()->each(function ($product) {
-            //     Log::info($product->variations->sum(function ($variation) {
-            //         return $variation->variation_location_details->sum('qty_available');
-            //     }) ); // Logs all variations with their loaded relationships
-            // });
-            
-            // Handle current stock calculation dynamically
-            $products->get()->map(function ($product) {
-                $variations = $product->variations;
-                $product->available_stock = $variations->sum(function ($variation) {
-                    return $variation->variation_location_details->sum('qty_available');
-                });
-                return $product;
-            });
-
-
-            
-            
 
             $type = request()->get('type', null);
             if (!empty($type)) {
                 $products->where('products.type', $type);
             }
-
-
 
             $category_id = request()->get('category_id', null);
             if (!empty($category_id)) {
@@ -200,9 +484,6 @@ class ProductController extends Controller
             if (!empty(request()->get('repair_model_id'))) {
                 $products->where('products.repair_model_id', request()->get('repair_model_id'));
             }
-
-            // dd($products->paginate(2));
-
 
             return Datatables::of($products)
                 ->addColumn(
@@ -291,16 +572,7 @@ class ProductController extends Controller
                 ->addColumn('mass_delete', function ($row) {
                     return  '<input type="checkbox" class="row-select" value="' . $row->id .'">' ;
                 })
-                ->editColumn('current_stock', function($row) {
-                    // Check if stock is enabled
-                    if ($row->enable_stock == 1) {
-                        // Format the current stock value and return it with the unit
-                        return number_format($row->available_stock) . ' ' . $row->unit;
-                    } else {
-                        // If stock is disabled, return '--' with the unit
-                        return '-- ' . $row->unit;
-                    }
-                })                
+                ->editColumn('current_stock', '@if($enable_stock == 1) {{@number_format($current_stock)}} @else -- @endif {{$unit}}')
                 ->addColumn(
                     'purchase_price',
                     '<div style="white-space: nowrap;">@format_currency($min_purchase_price) @if($max_purchase_price != $min_purchase_price && $type == "variable") -  @format_currency($max_purchase_price)@endif </div>'

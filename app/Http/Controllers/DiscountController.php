@@ -138,7 +138,7 @@ class DiscountController extends Controller
 
         try {
             $input = $request->only(['name', 'brand_id', 'category_id',
-                'location_id', 'priority', 'discount_type', 'discount_amount', 'spg']);
+                'location_id', 'priority', 'discount_type', 'discount_amount','type', 'spg']);
 
             $business_id = $request->session()->get('user.business_id');
             $input['business_id'] = $business_id;
@@ -197,8 +197,8 @@ class DiscountController extends Controller
                             ->with(['variations', 'variations.product', 'variations.product_variation'])
                             ->find($id);
 
-            $starts_at = $this->commonUtil->format_date($discount->starts_at->toDateTimeString(), true);
-            $ends_at = $this->commonUtil->format_date($discount->ends_at->toDateTimeString(), true);
+            $starts_at = $this->commonUtil->format_date($discount->starts_at, true);
+            $ends_at = $this->commonUtil->format_date($discount->ends_at, true);
 
             $categories = Category::where('business_id', $business_id)
                             ->where('parent_id', 0)

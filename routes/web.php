@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicationDashboard\OrderCancellationController;
 use App\Http\Controllers\ApplicationDashboard\BannerController;
 use App\Http\Controllers\ApplicationDashboard\CategoryController;
 use App\Http\Controllers\ApplicationDashboard\HomeController;
@@ -124,7 +125,7 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::post('/products/save-selling-prices', 'ProductController@saveSellingPrices');
     Route::post('/products/mass-delete', 'ProductController@massDestroy');
     Route::get('/products/view/{id}', 'ProductController@view');
-    Route::get('/products/list', 'ProductController@getProducts');
+    Route::get('/getProducts', 'ProductController@getProducts');
     Route::get('/products/list-no-variation', 'ProductController@getProductsWithoutVariations');
     Route::post('/products/bulk-edit', 'ProductController@bulkEdit');
     Route::post('/products/bulk-update', 'ProductController@bulkUpdate');
@@ -182,7 +183,6 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     Route::resource('orders', 'ApplicationDashboard\OrderController');
 
-
     // processing
     Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
     Route::get('orders/edit/{id}', [OrderController::class,'edit'])->name('orders.edit');
@@ -190,9 +190,10 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::post('/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
     Route::post('/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
 
-    // Route::get('banners', [BannerController::class,'index'])->name('banners.index');
-    // Route::get('banners/create', [BannerController::class,'create'])->name('banners.create');
-    // Route::post('banners/store', [BannerController::class,'store'])->name('banners.store');
+
+    Route::resource('order-cancellations', 'ApplicationDashboard\OrderCancellationController');
+    Route::post('/order-cancellations/{orderCancellationId}/change-status', 
+    [OrderCancellationController::class, 'changeOrderCancellationStatus']);
 
 
     Route::resource('banners', 'ApplicationDashboard\BannerController');

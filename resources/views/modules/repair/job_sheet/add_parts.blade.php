@@ -92,7 +92,7 @@
             .autocomplete({
                 source: function(request, response) {
                     $.getJSON(
-                        '/products/list',
+                        '/getProducts',
                         { term: request.term },
                         response
                     );

@@ -36,7 +36,7 @@ class BusinessLocationResource extends JsonResource
                 // 'alternate_number' => $this->alternate_number,
                 // 'email' => $this->email,
                 // 'website' => $this->website,
-                'discounts'=>(new DiscountCollection($this->discounts))->withFullData(true),
+                // 'discounts'=>(new DiscountCollection($this->discounts))->withFullData(true),
                 ];
             }),
         ];

@@ -34,10 +34,16 @@
               {!! Form::select('category_id', $categories, $discount->category_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'style' => 'width: 100%;']); !!}
           </div>
         </div>
-        <div class="col-sm-6">
+        <!-- <div class="col-sm-6">
           <div class="form-group">
             {!! Form::label('location_id', __('sale.location') . ':*') !!}
               {!! Form::select('location_id', $locations, $discount->location_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
+          </div>
+        </div> -->
+        <div class="col-sm-6">
+          <div class="form-group">
+            {!! Form::label('type', __('sale.type') . ':*') !!}
+              {!! Form::select('type', ['discount' => __('lang_v1.discount'), 'flash_sale' => __('lang_v1.flash_sale')],  $discount->type, ['placeholder' => __('messages.please_select'), 'class' => 'form-control select2', 'required']); !!}
           </div>
         </div>
         <div class="col-md-6">

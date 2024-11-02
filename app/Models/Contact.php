@@ -65,6 +65,17 @@ class Contact extends Authenticatable
         return $query;
     }
 
+
+    public function scopeOnlyClients($query)
+    {
+        $query->whereIn('contacts.type', ['client', 'both']);
+
+        if (auth()->check() && !auth()->user()->can('customer.view') && auth()->user()->can('customer.view_own')) {
+            $query->where('contacts.created_by', auth()->user()->id);
+        }
+        return $query;
+    }
+
     public function scopeTypeCustomer($query)
     {
         return $query->where('contacts.type', 'customer');
@@ -295,5 +306,9 @@ class Contact extends Authenticatable
         }
         
         return implode(' ', $name_array);
+    }
+
+    public function client(){
+        return $this->hasOne(Client::class);
     }
 }

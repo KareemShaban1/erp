@@ -74,6 +74,13 @@ class AdminSidebarMenu
                                 ['icon' => 'fa fas fa-star', 'active' => request()->input('type') == 'supplier']
                             );
                         }
+                        if (auth()->user()->can('supplier.view') || auth()->user()->can('supplier.view_own')) {
+                            $sub->url(
+                                action('ContactController@index', ['type' => 'client']),
+                                __('report.client'),
+                                ['icon' => 'fa fas fa-star', 'active' => request()->input('type') == 'client']
+                            );
+                        }
                         if (auth()->user()->can('customer.view') || auth()->user()->can('customer.view_own')) {
                             $sub->url(
                                 action('ContactController@index', ['type' => 'customer']),

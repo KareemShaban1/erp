@@ -427,6 +427,41 @@ $(document).ready(function() {
             // { data: 'custom_field10', name: 'custom_field10'},
             ]);
     }
+    else if (contact_table_type == 'client') {
+        var columns = [
+            { data: 'action', searchable: false, orderable: false },
+            { data: 'contact_id', name: 'contact_id' },
+            { data: 'supplier_business_name', name: 'supplier_business_name' },
+            { data: 'name', name: 'name' },
+            { data: 'email', name: 'email' },
+            { data: 'tax_number', name: 'tax_number' },
+            { data: 'credit_limit', name: 'credit_limit' },
+            { data: 'pay_term', name: 'pay_term', searchable: false, orderable: false },
+            { data: 'opening_balance', name: 'opening_balance', searchable: false },
+            { data: 'balance', name: 'balance', searchable: false },
+            { data: 'created_at', name: 'contacts.created_at' }
+        ];
+
+        if ($('#rp_col').length) {
+            columns.push({ data: 'total_rp', name: 'total_rp' });
+        }
+        Array.prototype.push.apply(columns, [{ data: 'customer_group', name: 'cg.name' },
+            { data: 'address', name: 'address', orderable: false },
+            { data: 'mobile', name: 'mobile' },
+            { data: 'due', searchable: false, orderable: false },
+            { data: 'return_due', searchable: false, orderable: false },
+            // { data: 'custom_field1', name: 'custom_field1'},
+            // { data: 'custom_field2', name: 'custom_field2'},
+            // { data: 'custom_field3', name: 'custom_field3'},
+            // { data: 'custom_field4', name: 'custom_field4'},
+            // { data: 'custom_field5', name: 'custom_field5'},
+            // { data: 'custom_field6', name: 'custom_field6'},
+            // { data: 'custom_field7', name: 'custom_field7'},
+            // { data: 'custom_field8', name: 'custom_field8'},
+            // { data: 'custom_field9', name: 'custom_field9'},
+            // { data: 'custom_field10', name: 'custom_field10'},
+            ]);
+    }
     
     contact_table = $('#contact_table').DataTable({
         processing: true,
@@ -518,11 +553,17 @@ $(document).ready(function() {
         $('div.lead_additional_div').hide();
 
         if ($('select#contact_type').val() == 'customer') {
-            $('div.supplier_fields').hide();
             $('div.customer_fields').show();
+            $('div.supplier_fields').hide();
+            $('div.client_fields').hide();
+        }else if ($('select#contact_type').val() == 'client') {
+            $('div.client_fields').show();
+            $('div.supplier_fields').hide();
+            $('div.customer_fields').hide();
         } else if ($('select#contact_type').val() == 'supplier') {
             $('div.supplier_fields').show();
             $('div.customer_fields').hide();
+            $('div.client_fields').hide();
         }  else if ($('select#contact_type').val() == 'lead') {
             $('div.supplier_fields').hide();
             $('div.customer_fields').hide();
@@ -538,11 +579,17 @@ $(document).ready(function() {
             if (t == 'supplier') {
                 $('div.supplier_fields').fadeIn();
                 $('div.customer_fields').fadeOut();
+                $('div.client_fields').fadeOut();
             } else if (t == 'both') {
                 $('div.supplier_fields').fadeIn();
                 $('div.customer_fields').fadeIn();
             } else if (t == 'customer') {
                 $('div.customer_fields').fadeIn();
+                $('div.client_fields').fadeOut();
+                $('div.supplier_fields').fadeOut();
+            } else if (t == 'client') {
+                $('div.client_fields').fadeIn();
+                $('div.customer_fields').fadeOut();
                 $('div.supplier_fields').fadeOut();
             } else if (t == 'lead') {
                 $('div.customer_fields').fadeOut();
@@ -557,6 +604,8 @@ $(document).ready(function() {
         $(".contact_modal").find('.select2').each( function(){
             $(this).select2();
         });
+
+
 
         $('form#contact_add_form, form#contact_edit_form')
             .submit(function(e) {
@@ -1278,7 +1327,7 @@ $(document).ready(function() {
             allowClear: true,
             placeholder: '',
             ajax: {
-                url: '/products/list?not_for_selling=true',
+                url: '/getProducts?not_for_selling=true',
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {

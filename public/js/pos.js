@@ -191,7 +191,7 @@ $(document).ready(function() {
                         price_group = $('#price_group').val();
                     }
                     $.getJSON(
-                        '/products/list',
+                        '/getProducts',
                         {
                             price_group: price_group,
                             location_id: $('input#location_id').val(),

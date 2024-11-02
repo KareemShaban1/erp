@@ -62,6 +62,9 @@
                     </p>
                 </div>
             </div>
+
+        
+
             <div class="col-md-4 customer_fields">
                 <div class="form-group">
                   {!! Form::label('customer_group_id', __('lang_v1.customer_group') . ':') !!}
@@ -114,6 +117,8 @@
             </div>
             <div class="clearfix"></div>
         
+
+
             <div class="col-md-3">
                 <div class="form-group">
                     {!! Form::label('mobile', __('contact.mobile') . ':*') !!}
@@ -125,7 +130,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-md-3">
                 <div class="form-group">
                     {!! Form::label('alternate_number', __('contact.alternate_contact_number') . ':') !!}
@@ -159,6 +163,67 @@
                     </div>
                 </div>
             </div>
+
+
+            <div class="client_fields" style="display: none; margin:15px">
+           <div class="row">
+           <div class="col-md-4" >
+                <div class="form-group">
+                    {!! Form::label('email_address', __( 'business.email_address' ) . ':') !!}
+                    {!! Form::email('email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+                <div class="form-group">
+                    {!! Form::label('password', __( 'business.password' ) . ':') !!}
+                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                </div>
+            </div>
+           </div>
+
+           <div class="row">
+           <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('location', __( 'business.location' ) . ':') !!}
+                    {!! Form::text('location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('business_location_id', $business_locations, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
+                </div>
+            </div>
+           </div>
+
+           <div class="row">
+           <div class="col-md-6">
+            <div class="form-group">
+                {!! Form::label('latitude', __('contact.latitude') . ':') !!}
+                {!! Form::text('latitude', null, ['class' => 'form-control', 'id' => 'latitude', 'placeholder' => 'Latitude', 'readonly']); !!}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                {!! Form::label('longitude', __('contact.longitude') . ':') !!}
+                {!! Form::text('longitude', null, ['class' => 'form-control', 'id' => 'longitude', 'placeholder' => 'Longitude', 'readonly']); !!}
+            </div>
+        </div>
+        
+        <div class="col-md-12">
+            <div id="map" style="height: 400px; width: 100%;"></div>
+        </div>
+           </div>
+           </div>
+
             <div class="clearfix"></div>
             <div class="col-sm-4 individual" style="display: none;">
                 <div class="form-group">
@@ -534,3 +599,5 @@
   
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+
+
