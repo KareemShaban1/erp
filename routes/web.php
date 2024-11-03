@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ApplicationDashboard\OrderCancellationController;
 use App\Http\Controllers\ApplicationDashboard\BannerController;
-use App\Http\Controllers\ApplicationDashboard\CategoryController;
 use App\Http\Controllers\ApplicationDashboard\HomeController;
 use App\Http\Controllers\ApplicationDashboard\OrderController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -499,7 +498,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
 Route::middleware(['EcomApi'])->prefix('api/ecom')->group(function () {
     Route::get('products/{id?}', 'ProductController@getProductsApi');
-    Route::get('categories', 'CategoryController@getCategoriesApi');
+    // Route::get('categories', 'CategoryController@getCategoriesApi');
     Route::get('brands', 'BrandController@getBrandApi');
     Route::post('customers', 'ContactController@postCustomersApi');
     Route::get('settings', 'BusinessController@getEcomSettings');
