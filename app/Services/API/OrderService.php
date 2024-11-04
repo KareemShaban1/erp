@@ -97,6 +97,9 @@ class OrderService extends BaseService
     public function store()
     {
         try {
+
+            DB::beginTransaction();
+
             $carts = Cart::where('client_id', Auth::id())
                 ->with(['product', 'variation.variation_location_details', 'client'])
                 ->get();
@@ -114,6 +117,7 @@ class OrderService extends BaseService
                 'client_id' => Auth::id(),
                 'sub_total' => $orderTotal,
                 'total' => $orderTotal,
+                'payment_method'=>'Cash on delivery',
                 'business_location_id' => $client->business_location_id,
             ]);
 
@@ -128,7 +132,7 @@ class OrderService extends BaseService
                     'variation_id' => $cart->variation_id,
                     'quantity' => $cart->quantity,
                     'price' => $cart->price,
-                    'discount' => $cart->discount,
+                    'discount' => $cart->discount ?? 0,
                     'sub_total' => $cart->total,
                 ]);
 
@@ -140,10 +144,13 @@ class OrderService extends BaseService
             $saleResponse = $this->makeSale($order, $client, $carts);
             \Log::info("makeSale method has been called.");
 
+            DB::commit();
+
 
             return new OrderResource($order);
 
         } catch (\Exception $e) {
+            dd($e);
             \Log::error("Error in store method: " . $e->getMessage());
             return $this->handleException($e, __('message.Error happened while storing Order'));
         }
@@ -196,14 +203,96 @@ class OrderService extends BaseService
         }
     }
 
-    protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    /**
+     * Transfers a specified quantity from one location to another.
+     */
+    protected function transferQuantity($order,$orderItem, $client, $fromLocationId, $toLocationId, $quantity)
     {
-        // Dispatch the job with a 10-minute delay
-        TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-            ->delay(now());
+        try {
+            DB::beginTransaction();
+    
+               //Update reference count
+            // $ref_count = $this->productUtil->setAndGetReferenceCount('stock_transfer');
+            $inputData = [
+                'location_id' => $fromLocationId,
+                'ref_no' => '1234',
+                'transaction_date' => now(),
+                'final_total' => $order->total,
+                'type' => 'sell_transfer',
+                'business_id' => $client->contact->business_id,
+                'created_by' => 1,
+                'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
+                'payment_status' => 'paid',
+                'status' => 'final',
+            ];
+    
+            $sellTransfer = Transaction::create($inputData);
+            $inputData['type'] = 'purchase_transfer';
+            $inputData['location_id'] = $toLocationId;
+            $inputData['transfer_parent_id'] = $sellTransfer->id;
+    
+            $purchaseTransfer = Transaction::create($inputData);
+    
+            $products = [
+                [
+                    'product_id' => $orderItem->product_id,
+                    'variation_id' => $orderItem->variation_id,
+                    'quantity' => $quantity,
+                    'unit_price' => $orderItem->price,
+                    'unit_price_inc_tax' => $orderItem->price,
+                    'enable_stock'=>$orderItem->product->enable_stock,
+                    'item_tax'=>0,
+                    'tax_id'=>null,
+                ]
+            ];
 
-        \Log::info("TransferProductJob dispatched for Order: {$order->id}, OrderItem: {$orderItem->id}");
+            $this->transactionUtil->createOrUpdateSellLines($sellTransfer, $products, $fromLocationId);
+            $purchaseTransfer->purchase_lines()->createMany($products);
+
+            $this->cartService->clearCart();
+
+           
+                foreach ($products as $product) {
+                    $this->productUtil->decreaseProductQuantity(
+                        $product['product_id'],
+                        $product['variation_id'],
+                        $sellTransfer->location_id,
+                        $this->productUtil->num_uf($product['quantity'])
+                    );
+
+                    $this->productUtil->updateProductQuantity(
+                        $purchaseTransfer->location_id,
+                        $product['product_id'],
+                        $product['variation_id'],
+                        $product['quantity']
+                    );
+                }
+                
+    
+            DB::commit();
+
+            return new OrderResource($order);
+
+    
+        } catch (\Exception $e) {
+
+            dd("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+            DB::rollBack();
+            \Log::emergency("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+            throw new \Exception('Stock transfer failed: ' . $e->getMessage());
+        }
     }
+    
+
+
+    // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    // {
+    //     // Dispatch the job with a 10-minute delay
+    //     TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    //         ->delay(now());
+
+    //     \Log::info("TransferProductJob dispatched for Order: {$order->id}, OrderItem: {$orderItem->id}");
+    // }
 
 
     protected function makeSale($order, $client, $carts)
@@ -214,6 +303,7 @@ class OrderService extends BaseService
             $transactionData = [
                 "business_id" => $client->contact->business_id,
                 "location_id" => $client->business_location_id,
+                'final_total' => $order->total,
                 "type" => "sell",
                 "status" => "final",
                 "payment_status" => "paid",
@@ -222,6 +312,8 @@ class OrderService extends BaseService
                 "total_before_tax" => $order->total,
                 "tax_amount" => "0.0000",
                 "created_by" => 1,
+                'discount_amount' => 0,
+
             ];
             $cartsArray = $carts->map(function ($cart) {
                 // Calculate the unit price including tax if necessary, adjust based on your tax rules.
@@ -239,7 +331,7 @@ class OrderService extends BaseService
                 'discount_type' => 'fixed', // or 'percentage' based on your discount logic
                 'discount_amount' => 0, // Example fixed discount amount
             ];
-            $tax_id = 1; // Replace with your actual tax ID if applicable
+            $tax_id = 1;
 
             $invoice_total = $this->productUtil->calculateInvoiceTotal($cartsArray, $tax_id, $discount);
 
@@ -269,7 +361,12 @@ class OrderService extends BaseService
                     'quantity' => $cart->quantity,
                     'price' => $cart->price,
                     'discount' => $cart->discount,
-                    'enable_stock'=>1
+                    'enable_stock'=>1,
+                    'unit_price' => $cart->price,
+                    'item_tax'=>0,
+                    'tax_id'=>null,
+                    'unit_price_inc_tax'=>$cart->price,
+
                 ];
             })->toArray();
 
@@ -327,7 +424,7 @@ class OrderService extends BaseService
             ];
 
         } catch (\Exception $e) {
-            \Log::error("Error in makeSale: " . $e->getMessage());
+            \Log::error("Error in makeSale: " . $e->getMessage(). " Line:" . $e->getLine());
             DB::rollBack();
             return $this->handleException($e, __('message.Error happened while making sale'));
         }

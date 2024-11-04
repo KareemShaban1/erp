@@ -55,7 +55,7 @@ class TransactionUtil extends Util
             'status' => $input['status'],
             'sub_status' => !empty($input['sub_status']) ? $input['sub_status'] : null,
             'contact_id' => $input['contact_id'],
-            'delevery_time'=>$input['time_deliver'],
+            'delevery_time'=>$input['time_deliver'] ?? null,
             'customer_group_id' => !empty($input['customer_group_id']) ? $input['customer_group_id'] : null,
             'invoice_no' => $invoice_no,
             'ref_no' => '',
@@ -75,7 +75,7 @@ class TransactionUtil extends Util
             'custom_field_3' => !empty($input['custom_field_3']) ? $input['custom_field_3'] : null,
             'custom_field_4' => !empty($input['custom_field_4']) ? $input['custom_field_4'] : null,
             'is_direct_sale' => !empty($input['is_direct_sale']) ? $input['is_direct_sale'] : 0,
-            'commission_agent' => $input['commission_agent'],
+            'commission_agent' => $input['commission_agent'] ?? null,
             'is_quotation' => isset($input['is_quotation']) ? $input['is_quotation'] : 0,
             'shipping_details' => isset($input['shipping_details']) ? $input['shipping_details'] : null,
             'shipping_address' => isset($input['shipping_address']) ? $input['shipping_address'] : null,
@@ -176,7 +176,7 @@ class TransactionUtil extends Util
             'custom_field_2' => !empty($input['custom_field_2']) ? $input['custom_field_2'] : null,
             'custom_field_3' => !empty($input['custom_field_3']) ? $input['custom_field_3'] : null,
             'custom_field_4' => !empty($input['custom_field_4']) ? $input['custom_field_4'] : null,
-            'commission_agent' => $input['commission_agent'],
+            'commission_agent' => $input['commission_agent'] ?? null,
             'is_quotation' => isset($input['is_quotation']) ? $input['is_quotation'] : 0,
             'sub_status' => !empty($input['sub_status']) ? $input['sub_status'] : null,
             'shipping_details' => isset($input['shipping_details']) ? $input['shipping_details'] : null,
@@ -319,7 +319,7 @@ class TransactionUtil extends Util
                 $uf_item_tax = $uf_data ?$this->num_uf($product['item_tax']) : $product['item_tax'];
                 $uf_unit_price_inc_tax = $uf_data ? $this->num_uf($product['unit_price_inc_tax']) : $product['unit_price_inc_tax'];
                 // dd( $uf_unit_price_inc_tax , $multiplier);
-                $line = [
+                $line = [ 
                     'product_id' => $product['product_id'],
                     'variation_id' => $product['variation_id'],
                     'quantity' =>  $uf_quantity * $multiplier,

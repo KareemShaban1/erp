@@ -139,24 +139,5 @@ class TransferProductJob implements ShouldQueue
     }
 
 
-    public function decreaseProductQuantity($product_id, $variation_id, $location_id, $quantity, $oldQuantity = null)
-{
-    
-    // Fetch current record and decrease the quantity
-    $record = VariationLocationDetails::where('product_id', $product_id)
-        ->where('variation_id', $variation_id)
-        ->where('location_id', $location_id)
-        ->first();
-    
-    if ($record) {
-        $record->qty_available -= $quantity;
-        $record->save();
-        
-        \Log::info("Updated Quantity: {$record->qty_available}");
-    } else {
-        \Log::error("Record not found for Product ID: {$product_id}, Variation ID: {$variation_id}, Location ID: {$location_id}");
-    }
-}
-
     
 }

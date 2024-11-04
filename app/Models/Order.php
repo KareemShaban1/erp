@@ -53,4 +53,8 @@ class Order extends Model
     public function orderRefunds(){
         return $this->hasMany(OrderRefund::class,'order_id','id');
     }
+
+    public function orderCancellation(){
+        return $this->hasOne(OrderCancellation::class,'order_id','id');
+    }
 }
