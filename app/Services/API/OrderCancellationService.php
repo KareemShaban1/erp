@@ -77,29 +77,39 @@ class OrderCancellationService extends BaseService
      * Create a new OrderCancellation.
      */
     public function store($data)
-    {
+{
+    $data['client_id'] = Auth::id(); // Use Auth::id() directly for better readability
+    $data['status'] = 'requested';
+    $data['requested_at'] = now();
 
-        $data['client_id'] = Auth::user()->id;
-        $data['status'] = 'requested';
-        $data['requested_at'] = now();
-        try {
+    try {
+        // Find the order by ID and ensure it exists
+        $order = Order::find($data['order_id']);
+        if (!$order) {
+            return $this->returnJSON(null, __('message.Order not found'), 404);
+        }
 
+        // Check if the order status allows cancellation
+        if (in_array($order->order_status, ['pending', 'processing'])) {
+            // Set order status to 'cancelled' and save
+            $order->order_status = 'cancelled';
+            $order->save();
+        } else {
+            // Return a response indicating the status cannot be changed
+            return $this->returnJSON(null, __('message.Order status is :status, it can\'t be changed', ['status' => $order->order_status]));
+        }
 
-        // First, create the OrderCancellation without the image
-        $OrderCancellation = OrderCancellation::create($data);
+        // Create the OrderCancellation record
+        $orderCancellation = OrderCancellation::create($data);
 
-        $order = Order::where('id', $data['order_id'])->first();
-        $order->status = 'cancelled';
-        $order->save();
-        
-        // Return the created OrderCancellation
-        return new OrderCancellationResource($OrderCancellation);
-
+        // Return the created OrderCancellation as a resource
+        return new OrderCancellationResource($orderCancellation);
 
     } catch (\Exception $e) {
-        return $this->handleException($e, __('message.Error happened while storing OrderCancellation'));
+        // Handle any unexpected exceptions
+        return $this->handleException($e, __('message.Error occurred while storing OrderCancellation'));
     }
-    }
+}
 
     /**
      * Update the specified OrderCancellation.
