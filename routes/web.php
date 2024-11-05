@@ -215,10 +215,10 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     [OrderCancellationController::class, 'changeOrderCancellationStatus']);
 
 
-    // Route::resource('banners', 'ApplicationDashboard\BannerController');
+    Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
 
-    Route::get('applicationDashboard/banners', [BannerController::class,'index']);
-    Route::get('applicationDashboard/banners/create', [BannerController::class,'create']);
+    // Route::get('applicationDashboard/banners', [BannerController::class,'index']);
+    // Route::get('applicationDashboard/banners/create', [BannerController::class,'create']);
 
 
 });
