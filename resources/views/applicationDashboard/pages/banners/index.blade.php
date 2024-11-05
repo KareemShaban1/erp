@@ -53,7 +53,7 @@
     var banners_table = $('#banners_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: 'applicationDashboard/banners',
+        ajax: 'banners',
         columnDefs: [
             {
                 targets: 2,
