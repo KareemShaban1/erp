@@ -53,7 +53,7 @@
     var banners_table = $('#banners_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '/banners',
+        ajax: '{{ action("ApplicationDashboard\BannerController@index") }}', // Laravel action helper
         columnDefs: [
             {
                 targets: 2,
