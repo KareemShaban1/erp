@@ -217,8 +217,8 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     // Route::resource('banners', 'ApplicationDashboard\BannerController');
 
-    Route::get('banners', [BannerController::class,'index']);
-    Route::get('banners/create', [BannerController::class,'create']);
+    Route::get('applicationDashboard/banners', [BannerController::class,'index']);
+    Route::get('applicationDashboard/banners/create', [BannerController::class,'create']);
 
 
 });
