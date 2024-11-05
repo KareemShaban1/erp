@@ -200,14 +200,14 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     // // Route::get('orders/{status?}', [OrderController::class, 'index'])->name('orders.index');
     
 
-    Route::resource('orders', 'ApplicationDashboard\OrderController');
+    Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
 
     // processing
-    Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
+    // Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
     // Route::get('orders/{id}', [OrderController::class,'edit'])->name('orders.edit');
 
-    Route::post('/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
-    Route::post('/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
+    Route::post('applicationDashboard/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
+    Route::post('applicationDashboard/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
 
 
     Route::resource('order-cancellations', 'ApplicationDashboard\OrderCancellationController');
@@ -216,9 +216,6 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
 
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
-
-    // Route::get('applicationDashboard/banners', [BannerController::class,'index']);
-    // Route::get('applicationDashboard/banners/create', [BannerController::class,'create']);
 
 
 });
