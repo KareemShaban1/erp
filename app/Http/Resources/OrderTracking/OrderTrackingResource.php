@@ -32,7 +32,7 @@ class OrderTrackingResource extends JsonResource
                   'processing_at'=>$this->processing_at,
                   'shipped_at'=>$this->shipped_at,
                   'completed_at'=>$this->completed_at,
-                  'canceled_at'=>$this->canceled_at,
+                  'cancelled_at'=>$this->cancelled_at,
                 ];
             }),
         ];
