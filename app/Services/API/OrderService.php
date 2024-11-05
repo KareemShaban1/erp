@@ -2,6 +2,7 @@
 
 namespace App\Services\API;
 
+use App\Http\Resources\Client\ClientResource;
 use App\Http\Resources\Order\OrderCollection;
 use App\Http\Resources\Order\OrderResource;
 use App\Jobs\TransferProductJob;
@@ -407,7 +408,7 @@ class OrderService extends BaseService
                     'accounting_method' => session()->get('business.accounting_method'),
                     'location_id' => $client->business_location_id,
                 ];
-                $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
+                // $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
 
                 // $whatsapp_link = $this->notificationUtil->autoSendNotification($business_id, 'new_sale', $transaction, $transaction->contact);
             }
@@ -524,11 +525,11 @@ class OrderService extends BaseService
 
             // Add multi-location message if applicable
             if ($multiLocationMessage) {
-                return $this->returnJSON(null, __('message.Order will be shipped tomorrow due to multiple locations'));
+                return $this->returnJSON(new ClientResource($client), __('message.Order will be shipped tomorrow due to multiple locations'));
                 ;
             }
 
-            return $this->returnJSON(null, __('message.Order will be shipped today'));
+            return $this->returnJSON(new ClientResource($client), __('message.Order will be shipped today'));
             ;
 
 

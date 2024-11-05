@@ -2939,8 +2939,8 @@ class TransactionUtil extends Util
             foreach ($rows as $k => $row) {
                 $qty_allocated = 0;
 
-                // Log::info($qty_selling );
-                // Log::info( $line->quantity);
+                Log::info($qty_selling );
+                Log::info( $line->quantity);
                 //Check if qty_available is more or equal
                 if ($qty_selling <= $row->quantity_available) {
                     $qty_allocated = $qty_selling;
@@ -2967,8 +2967,6 @@ class TransactionUtil extends Util
                             ->update(['quantity_adjusted' => $row->quantity_adjusted + $qty_allocated]);
                     }
                 } elseif ($mapping_type == 'purchase') {
-                    // Log::info($qty_allocated);
-                    // Log::info($row);
                     //Mapping of purchase
                     if ($qty_allocated != 0) {
                         $purchase_sell_map[] = ['sell_line_id' => $line->id,

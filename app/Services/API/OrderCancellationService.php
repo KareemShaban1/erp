@@ -4,6 +4,7 @@ namespace App\Services\API;
 
 use App\Http\Resources\OrderCancellation\OrderCancellationCollection;
 use App\Http\Resources\OrderCancellation\OrderCancellationResource;
+use App\Models\Order;
 use App\Models\OrderCancellation;
 use App\Services\BaseService;
 use App\Traits\HelperTrait;
@@ -83,8 +84,14 @@ class OrderCancellationService extends BaseService
         $data['requested_at'] = now();
         try {
 
+
         // First, create the OrderCancellation without the image
         $OrderCancellation = OrderCancellation::create($data);
+
+        $order = Order::where('id', $data['order_id'])->first();
+        $order->status = 'cancelled';
+        $order->save();
+        
         // Return the created OrderCancellation
         return new OrderCancellationResource($OrderCancellation);
 
