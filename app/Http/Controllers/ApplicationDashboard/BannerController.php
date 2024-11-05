@@ -43,11 +43,11 @@ class BannerController extends Controller
             ->addColumn(
                 'action',
                 '
-                <button data-href="{{action(\'ApplicationDashboard\BannerController@edit\', [$id])}}" class="btn btn-xs btn-primary edit_banner_button">
+                <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\BannerController@edit\', [$id]) }}" class="btn btn-xs btn-primary edit_banner_button">
                 <i class="glyphicon glyphicon-edit"></i>  @lang("messages.edit")</button>
                     &nbsp;
                 
-                    <button data-href="{{action(\'ApplicationDashboard\BannerController@destroy\', [$id])}}" class="btn btn-xs btn-danger delete_banner_button">
+                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\BannerController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_banner_button">
                     <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
                 '
             )
