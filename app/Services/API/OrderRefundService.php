@@ -28,7 +28,7 @@ class OrderRefundService extends BaseService
             $orderRefunds = $this->withPagination($query, $request);
 
             return (new OrderRefundCollection($orderRefunds))
-            ->withFullData(!($request->full_data == 'true'));
+            ->withFullData(!($request->full_data == 'false'));
 
 
         } catch (\Exception $e) {
