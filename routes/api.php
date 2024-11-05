@@ -9,9 +9,11 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\OrderCancellationController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OrderRefundController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\WarrantyController;
+use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -68,7 +70,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
         Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
 
-        // getAuthClientOrderCancellations
+        Route::get('orders-refunds', [OrderRefundController::class, 'index']);
+        Route::post('orders-refunds', [OrderRefundController::class, 'store']);
+
     });
 
     Route::get('banners', [BannerController::class, 'index']);

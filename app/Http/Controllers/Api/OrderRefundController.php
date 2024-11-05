@@ -4,83 +4,113 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderRefund;
+use App\Services\API\OrderRefundService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OrderRefundController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    protected $service;
+
+    public function __construct(OrderRefundService $service)
     {
-        //
+        $this->service = $service;
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of the categories.
      */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        $orderRefunds = $this->service->list($request);
+
+        if ($orderRefunds instanceof JsonResponse) {
+            return $orderRefunds;
+        }
+
+        return $orderRefunds->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => __('message.Order Cancellation have been retrieved successfully'),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created OrderRefund in storage.
      */
     public function store(Request $request)
     {
-        //
+        // Validate request data with custom rules
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required|string',
+            'order_item_ids' => 'required|array',
+            'order_item_ids.*.order_id' => 'required|exists:orders,id',
+            'order_item_ids.*.order_item_id' => 'required|exists:order_items,id',
+            'order_item_ids.*.quantity' => 'required|integer|min:1',
+        ]);
+    
+        if ($validator->fails()) {
+            // Return the first validation error
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+    
+        // Pass only validated data to the service
+        $validatedData = $validator->validated();
+        $orderRefund = $this->service->store($validatedData);
+    
+        // Check if the service returned a JSON response (for error handling)
+        if ($orderRefund instanceof JsonResponse) {
+            return $orderRefund;
+        }
+    
+        return $this->returnJSON($orderRefund, __('message.OrderRefund has been created successfully'));
     }
+    
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\OrderRefund  $orderRefund
-     * @return \Illuminate\Http\Response
+     * Display the specified OrderRefund.
      */
-    public function show(OrderRefund $orderRefund)
+    public function show($id)
     {
-        //
+
+        $orderRefund = $this->service->show($id);
+
+        if ($orderRefund instanceof JsonResponse) {
+            return $orderRefund;
+        }
+
+        return $this->returnJSON($orderRefund, __('message.OrderRefund has been created successfully'));
+
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\OrderRefund  $orderRefund
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(OrderRefund $orderRefund)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\OrderRefund  $orderRefund
-     * @return \Illuminate\Http\Response
+     * Update the specified OrderRefund in storage.
      */
     public function update(Request $request, OrderRefund $orderRefund)
     {
-        //
+        $orderRefund = $this->service->update($request, $orderRefund);
+
+        if ($orderRefund instanceof JsonResponse) {
+            return $orderRefund;
+        }
+
+        return $this->returnJSON($orderRefund, __('message.OrderRefund has been updated successfully'));
+
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\OrderRefund  $orderRefund
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(OrderRefund $orderRefund)
+    public function destroy($id)
     {
-        //
+        $orderRefund = $this->service->destroy($id);
+
+        if ($orderRefund instanceof JsonResponse) {
+            return $orderRefund;
+        }
+
+        return $this->returnJSON($orderRefund, __('message.OrderRefund has been deleted successfully'));
     }
+
 }
