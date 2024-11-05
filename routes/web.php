@@ -217,7 +217,6 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
 
-
 });
 
 //Routes for authenticated users only
