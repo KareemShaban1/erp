@@ -6,6 +6,7 @@ use App\Http\Resources\OrderCancellation\OrderCancellationCollection;
 use App\Http\Resources\OrderCancellation\OrderCancellationResource;
 use App\Models\Order;
 use App\Models\OrderCancellation;
+use App\Models\OrderTracking;
 use App\Services\BaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
@@ -85,6 +86,7 @@ class OrderCancellationService extends BaseService
     try {
         // Find the order by ID and ensure it exists
         $order = Order::find($data['order_id']);
+        $orderTracking = OrderTracking::where('order_id',$data['order_id'])->first();
         if (!$order) {
             return $this->returnJSON(null, __('message.Order not found'), 404);
         }
@@ -94,6 +96,9 @@ class OrderCancellationService extends BaseService
             // Set order status to 'cancelled' and save
             $order->order_status = 'cancelled';
             $order->save();
+
+            $orderTracking->cancelled_at = now();
+            $orderTracking->save();
         } else {
             // Return a response indicating the status cannot be changed
             return $this->returnJSON(null, __('message.Order status is :status, it can\'t be changed', ['status' => $order->order_status]));
