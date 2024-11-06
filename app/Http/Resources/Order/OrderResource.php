@@ -5,6 +5,7 @@ namespace App\Http\Resources\Order;
 use App\Http\Resources\Client\ClientResource;
 use App\Http\Resources\OrderCancellation\OrderCancellationResource;
 use App\Http\Resources\OrderItem\OrderItemCollection;
+use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use App\Http\Resources\OrderTracking\OrderTrackingCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -41,6 +42,7 @@ class OrderResource extends JsonResource
                     'sub_total' => $this->sub_total,
                     'total' => $this->total,
                     'order_cancellation'=>(new OrderCancellationResource( $this->orderCancellation))->withFullData(true),
+                    'order_refunds'=>(new OrderRefundCollection( $this->orderRefunds))->withFullData(true),
                     'created_at' => $this->created_at,
                 ];
             }),

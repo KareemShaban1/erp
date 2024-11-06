@@ -35,7 +35,6 @@ class OrderCancellationResource extends JsonResource
                     'admin_response' => $this->admin_response,
                     'requested_at' => $this->requested_at,
                     'processed_at' => $this->processed_at,
-
                     'created_at' => $this->created_at,
                 ];
             }),

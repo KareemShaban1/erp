@@ -32,6 +32,7 @@ class OrderRefundResource extends JsonResource
             'id' => $this->id,
             $this->mergeWhen($this->withFullData, function () {
                 return [
+                    'order_id' => $this->order_id,
                     'client_name' => $this->client->contact->name,
                     'order_number' => $this->order->number,
                     'order_item'=> new OrderItemResource($this->order_item),
@@ -41,7 +42,6 @@ class OrderRefundResource extends JsonResource
                     'admin_response' => $this->admin_response,
                     'requested_at' => $this->requested_at,
                     'processed_at' => $this->processed_at,
-
                     'created_at' => $this->created_at,
                 ];
             }),
