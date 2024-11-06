@@ -145,7 +145,7 @@ class ApplicationSidebarMenu
                 function ($sub) {
                     // Link for All Orders (no status)
                     $sub->url(
-                        route('orders.index',['status'=>'all']),
+                        action('ApplicationDashboard\OrderController@index', ['status' => 'all']),
                         __('lang_v1.all_orders'),
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'orders' && !request()->segment(2)]
                     );

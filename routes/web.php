@@ -193,18 +193,10 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::resource('selling-price-group', 'SellingPriceGroupController');
 
     Route::resource('warranties', 'WarrantyController');
-
-    // Route::resource('orders', OrderController::class);
-
-    // Route::get('orders', [OrderController::class,'index'])->name('orders.index');
-    // // Route::get('orders/{status?}', [OrderController::class, 'index'])->name('orders.index');
     
 
     Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
 
-    // processing
-    // Route::get('orders/create', [OrderController::class,'create'])->name('orders.create');
-    // Route::get('orders/{id}', [OrderController::class,'edit'])->name('orders.edit');
 
     Route::post('applicationDashboard/orders/{orderId}/change-order-status', [OrderController::class, 'changeOrderStatus']);
     Route::post('applicationDashboard/orders/{orderId}/change-payment-status', [OrderController::class, 'changePaymentStatus']);
@@ -470,11 +462,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::post('/refresh-orders-list', 'Restaurant\KitchenController@refreshOrdersList');
         Route::post('/refresh-line-orders-list', 'Restaurant\KitchenController@refreshLineOrdersList');
 
-        Route::get('/orders', 'Restaurant\OrderController@index');
-        Route::get('/orders/mark-as-served/{id}', 'Restaurant\OrderController@markAsServed');
-        Route::get('/data/get-pos-details', 'Restaurant\DataController@getPosDetails');
-        Route::get('/orders/mark-line-order-as-served/{id}', 'Restaurant\OrderController@markLineOrderAsServed');
-        Route::get('/print-line-order', 'Restaurant\OrderController@printLineOrder');
+        // // Route::get('/orders', 'Restaurant\OrderController@index');
+        // Route::get('/orders/mark-as-served/{id}', 'Restaurant\OrderController@markAsServed');
+        // Route::get('/data/get-pos-details', 'Restaurant\DataController@getPosDetails');
+        // Route::get('/orders/mark-line-order-as-served/{id}', 'Restaurant\OrderController@markLineOrderAsServed');
+        // Route::get('/print-line-order', 'Restaurant\OrderController@printLineOrder');
     });
 
     Route::get('bookings/get-todays-bookings', 'Restaurant\BookingController@getTodaysBookings');

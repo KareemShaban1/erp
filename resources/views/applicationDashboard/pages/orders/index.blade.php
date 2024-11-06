@@ -25,17 +25,14 @@
                             data-container=".orders_modal">
                             <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
         </div>
-        <div class="row">
-    <div class="col-md-3">
-        <input type="date" id="start_date" class="form-control" placeholder="Start Date">
-    </div>
-    <div class="col-md-3">
-        <input type="date" id="end_date" class="form-control" placeholder="End Date">
-    </div>
-    <div class="col-md-3">
-        <button class="btn btn-primary" id="filter_date">Filter</button>
-    </div>
-</div>
+        @component('components.filters', ['title' => __('report.filters')])
+        <div class="col-md-3">
+            <div class="form-group">
+                {!! Form::label('purchase_list_filter_date_range', __('report.date_range') . ':') !!}
+                {!! Form::text('purchase_list_filter_date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'readonly']); !!}
+            </div>
+        </div>
+    @endcomponent
         @endslot
     @endcan
     @can('lang_v1.view')
@@ -76,10 +73,22 @@
         processing: true,
         serverSide: true,
         ajax: {
-            url: '/orders',
+            url: '{{ action("ApplicationDashboard\OrderController@index") }}',
             data: function (d) {
-                d.start_date = $('#start_date').val();
-                d.end_date = $('#end_date').val();
+                var start = '';
+                var end = '';
+                if ($('#purchase_list_filter_date_range').val()) {
+                    start = $('input#purchase_list_filter_date_range')
+                        .data('daterangepicker')
+                        .startDate.format('YYYY-MM-DD');
+                    end = $('input#purchase_list_filter_date_range')
+                        .data('daterangepicker')
+                        .endDate.format('YYYY-MM-DD');
+                }
+                d.start_date = start;
+                d.end_date = end;
+
+                d = __datatable_ajax_callback(d);
             }
         },
         columnDefs: [
@@ -133,8 +142,25 @@
             { data: 'sub_total', name: 'sub_total' },
             { data: 'total', name: 'total' },
             // other columns as needed
-        ]
+        ],
+    
+        fnDrawCallback: function(oSettings) {
+            __currency_convert_recursively($('#orders_table'));
+        },
     });
+
+    $('#purchase_list_filter_date_range').daterangepicker(
+        dateRangeSettings,
+        function (start, end) {
+            $('#purchase_list_filter_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format));
+            orders_table.ajax.reload();
+        }
+    );
+    $('#purchase_list_filter_date_range').on('cancel.daterangepicker', function(ev, picker) {
+        $('#purchase_list_filter_date_range').val('');
+        orders_table.ajax.reload();
+    });
+
 
     $(document).on('change', '.change-order-status', function () {
         var orderId = $(this).data('order-id');

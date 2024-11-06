@@ -32,44 +32,48 @@ class OrderController extends Controller
     public function index()
     {
         $status = request()->get('status');
-
-        $start_date = request()->get('start_date');
-        $end_date = request()->get('end_date');
-
         $statuses = ['all', 'pending', 'processing', 'shipped', 'cancelled', 'completed'];
-
+    
         if (empty($status) || !in_array($status, $statuses)) {
             return redirect()->back();
         }
-
+    
         if (request()->ajax()) {
+            $startDate = request()->get('start_date');
+            $endDate = request()->get('end_date');
+
+            if (!empty(request()->start_date) && !empty(request()->end_date)) {
+                $start = request()->start_date;
+                $end =  request()->end_date;
+                dd($start,$end);
+            }
+    
             if ($status == 'pending') {
-                return $this->pendingOrders();
+                return $this->pendingOrders($startDate, $endDate);
             } elseif ($status == 'processing') {
-                return $this->processingOrders();
-            }  elseif ($status == 'shipped') {
-                return $this->shippedOrders();
+                return $this->processingOrders($startDate, $endDate);
+            } elseif ($status == 'shipped') {
+                return $this->shippedOrders($startDate, $endDate);
             } elseif ($status == 'cancelled') {
-                return $this->cancelledOrders();
+                return $this->cancelledOrders($startDate, $endDate);
             } elseif ($status == 'completed') {
-                return $this->completedOrders();
+                return $this->completedOrders($startDate, $endDate);
             } elseif ($status == 'all') {
-                return $this->allOrders();
+                return $this->allOrders($startDate, $endDate);
             }
         }
-
-
+    
         return view('applicationDashboard.pages.orders.index');
     }
-
-    public function allOrders()
+    
+    public function allOrders($startDate = null, $endDate = null)
     {
         $orders = Order::with('client')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
     
         // Apply date filter if start_date and end_date are provided
-        if (request()->has(['start_date', 'end_date'])) {
-            $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        if ($startDate && $endDate) {
+            $orders->whereBetween('created_at', [$startDate, $endDate]);
         }
     
         return Datatables::of($orders)
