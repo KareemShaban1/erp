@@ -194,7 +194,7 @@ class OrderController extends Controller
             $orderTracking->shipped_at = now();
             break;
         case 'cancelled':
-            $orderTracking->canceled_at = now();
+            $orderTracking->cancelled_at = now();
             break;
         case 'completed':
             $orderTracking->completed_at = now();
