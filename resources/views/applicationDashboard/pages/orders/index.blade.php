@@ -163,57 +163,54 @@
 
 
     $(document).on('change', '.change-order-status', function () {
-        var orderId = $(this).data('order-id');
-        var status = $(this).val();
+    var orderId = $(this).data('order-id');
+    var status = $(this).val();
 
-        $.ajax({
-            url: `/orders/${orderId}/change-order-status`, // Update this URL to match your route
-            type: 'POST',
-            data: {
-                order_status: status,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    // alert(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                } else {
-                    alert('Failed to update order status.');
-                }
-            },
-            error: function (xhr) {
-                alert('An error occurred: ' + xhr.responseText);
+    $.ajax({
+        url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+        type: 'POST',
+        data: {
+            order_status: status,
+            _token: '{{ csrf_token() }}' // CSRF token for security
+        },
+        success: function (response) {
+            if (response.success) {
+                toastr.success(response.message);
+                orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+            } else {
+                alert('Failed to update order status.');
             }
-        });
+        },
+        error: function (xhr) {
+            alert('An error occurred: ' + xhr.responseText);
+        }
     });
+});
 
+$(document).on('change', '.change-payment-status', function () {
+    var orderId = $(this).data('order-id');
+    var status = $(this).val();
 
-    $(document).on('change', '.change-payment-status', function () {
-        var orderId = $(this).data('order-id');
-        var status = $(this).val();
-
-        $.ajax({
-            url: `/orders/${orderId}/change-payment-status`, // Update this URL to match your route
-            type: 'POST',
-            data: {
-                payment_status: status,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function (response) {
-                if (response.success) {
-                    alert(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                } else {
-                    alert('Failed to update order status.');
-                }
-            },
-            error: function (xhr) {
-                alert('An error occurred: ' + xhr.responseText);
+    $.ajax({
+        url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+        type: 'POST',
+        data: {
+            payment_status: status,
+            _token: '{{ csrf_token() }}' // CSRF token for security
+        },
+        success: function (response) {
+            if (response.success) {
+                alert(response.message);
+                orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+            } else {
+                alert('Failed to update payment status.');
             }
-        });
+        },
+        error: function (xhr) {
+            alert('An error occurred: ' + xhr.responseText);
+        }
     });
-
+});
 
 </script>
 @endsection
