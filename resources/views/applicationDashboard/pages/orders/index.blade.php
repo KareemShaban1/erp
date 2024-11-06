@@ -111,7 +111,7 @@
             case 'processing': badgeClass = 'badge btn-info'; break;
             case 'shipped': badgeClass = 'badge btn-primary'; break;
             case 'completed': badgeClass = 'badge btn-success'; break;
-            case 'canceled': badgeClass = 'badge btn-danger'; break;
+            case 'cancelled': badgeClass = 'badge btn-danger'; break;
             default: badgeClass = 'badge badge-secondary'; // For any other statuses
         }
                     
@@ -123,7 +123,7 @@
                 <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
                 <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="canceled" ${data === 'canceled' ? 'selected' : ''}>Canceled</option>
+                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Canceled</option>
             </select>`;
                 }
             },
