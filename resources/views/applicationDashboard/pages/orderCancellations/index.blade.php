@@ -18,7 +18,7 @@
         <div class="box-tools">
             <!-- Button to add new order_cancellations if needed -->
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-md-3">
                 <input type="date" id="start_date" class="form-control" placeholder="Start Date">
             </div>
@@ -28,7 +28,7 @@
             <div class="col-md-3">
                 <button class="btn btn-primary" id="filter_date">Filter</button>
             </div>
-        </div>
+        </div> -->
         @endslot
     @endcan
     @can('lang_v1.view')
@@ -94,6 +94,7 @@
 @stop
 @section('javascript')
 <script>
+    
         $('#filter_date').click(function() {
         order_cancellations_table.ajax.reload(); // Reload DataTable with the new date filters
     });
@@ -102,7 +103,7 @@
         processing: true,
         serverSide: true,
         ajax: {
-            url: '/order-cancellations',
+            url: '{{ action("ApplicationDashboard\OrderCancellationController@index") }}',
             data: function (d) {
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
@@ -156,13 +157,14 @@
                     `;
                 }
             },
-            { // New column for actions
+            { 
         data: 'id', 
         name: 'actions',
         orderable: false,
         searchable: false,
         render: function (data, type, row) {
-            return `<button class="btn btn-sm btn-primary edit-order-cancellation" data-id="${row.id}">@lang('lang_v1.edit')</button>`;
+            return `<button class="btn btn-sm btn-primary edit-order-cancellation" 
+            data-id="${row.id}">@lang('lang_v1.edit')</button>`;
         }
     }
             // other columns as needed
@@ -174,7 +176,8 @@
         var status = $(this).val();
 
         $.ajax({
-            url: `/order-cancellations/${orderCancellationId}/change-status`, // Update this URL to match your route
+            // url: `/order-cancellations/${orderCancellationId}/change-status`, // Update this URL to match your route
+            url: `{{ action("ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus", ['orderCancellationId' => ':orderCancellationId']) }}`.replace(':orderCancellationId', orderCancellationId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
                 status: status,
@@ -195,12 +198,16 @@
         });
     });
 
+
+
     $(document).on('click', '.edit-order-cancellation', function () {
     var orderCancellationId = $(this).data('id');
+    var url = $(this).data('url');
 
     // Fetch current order cancellation data using AJAX
     $.ajax({
-        url: `/order-cancellations/${orderCancellationId}`,
+        // url: `applicationDashboard/order-cancellations/${orderCancellationId}`,
+        url: `{{ action("ApplicationDashboard\OrderCancellationController@show", ['order_cancellation' => ':order_cancellation']) }}`.replace(':order_cancellation', orderCancellationId), // Replacing the placeholder with the actual orderId
         type: 'GET',
         success: function (data) {
             // Populate form fields with existing data
@@ -227,7 +234,8 @@ $('#editOrderCancellationForm').submit(function (e) {
 
     // Send updated data to the server
     $.ajax({
-        url: `/order-cancellations/${orderCancellationId}`,
+        // url: `/order-cancellations/${orderCancellationId}`,
+        url: `{{ action("ApplicationDashboard\OrderCancellationController@update", ['order_cancellation' => ':order_cancellation']) }}`.replace(':order_cancellation', orderCancellationId), // Replacing the placeholder with the actual orderId
         type: 'PUT',
         data: {
             status: status,

@@ -25,14 +25,14 @@
                             data-container=".orders_modal">
                             <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
         </div>
-        @component('components.filters', ['title' => __('report.filters')])
+        <!-- @component('components.filters', ['title' => __('report.filters')])
         <div class="col-md-3">
             <div class="form-group">
                 {!! Form::label('purchase_list_filter_date_range', __('report.date_range') . ':') !!}
                 {!! Form::text('purchase_list_filter_date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'readonly']); !!}
             </div>
         </div>
-    @endcomponent
+    @endcomponent -->
         @endslot
     @endcan
     @can('lang_v1.view')

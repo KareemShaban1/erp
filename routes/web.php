@@ -202,9 +202,9 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
 
 
-    Route::resource('order-cancellations', 'ApplicationDashboard\OrderCancellationController');
-    Route::post('/order-cancellations/{orderCancellationId}/change-status', 
-    [OrderCancellationController::class, 'changeOrderCancellationStatus']);
+    Route::resource('applicationDashboard/order-cancellations', 'ApplicationDashboard\OrderCancellationController');
+    Route::post('applicationDashboard/order-cancellations/{orderCancellationId}/change-status', 
+    'ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus');
 
 
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
