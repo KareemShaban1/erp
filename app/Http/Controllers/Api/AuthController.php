@@ -139,36 +139,49 @@ class AuthController extends Controller
 
 
     public function clientLogin(Request $request)
-    {
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'email_address' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-    
-        if ($validator->fails()) {
-            // Get the first error message
-            $firstError = $validator->errors()->first();
-            return response()->json(['message' => $firstError], 422);
-        }
-    
-        // Find the client by email
-        $client = Client::where('email_address', $request->email_address)->first();
-    
-        // Check if client exists and if the password is correct
-        if (!$client || !Hash::check($request->password, $client->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-    
-        // Generate Sanctum Token
-        $token = $client->createToken('Personal Access Token')->plainTextToken;
-    
-        // Respond with Client Data and Token
-        return response()->json([
-            'client' => $client,
-            'token' => $token,
-        ], 200);
+{
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'email_address' => 'required|string|email',
+        'password' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        // Get the first error message
+        $firstError = $validator->errors()->first();
+        return response()->json(['message' => $firstError], 422);
     }
+
+    // Find the client by email
+    $client = Client::where('email_address', $request->email_address)->first();
+
+    $client_status = $client->contact->contact_status;
+
+    // Check if client exists
+    if (!$client) {
+        return response()->json(['message' => 'Client not found'], 404);
+    }
+
+    // Check if the client is active
+    if ($client_status == 'inactive') {
+        return response()->json(['message' => 'Client is not active'], 403); // Forbidden for inactive clients
+    }
+
+    // Check if the password is correct
+    if (!Hash::check($request->password, $client->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    // Generate Sanctum Token
+    $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+    // Respond with Client Data and Token
+    return response()->json([
+        'client' => $client,
+        'token' => $token,
+    ], 200);
+}
+
     
 
 }

@@ -207,6 +207,10 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     'ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus');
 
 
+    Route::resource('applicationDashboard/order-refunds', 'ApplicationDashboard\OrderRefundController');
+    Route::post('applicationDashboard/order-refunds/{orderRefundId}/change-status', 
+    'ApplicationDashboard\OrderRefundController@changeOrderRefundStatus');
+
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
 
 });

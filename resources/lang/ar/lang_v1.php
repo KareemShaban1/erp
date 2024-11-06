@@ -1383,9 +1383,18 @@ return [
 "rejected_order_cancellations" => "الطلبات الملغاه المرفوضه",
 "order_cancellation_status" => "حالة الطلبات الملغاه",
 
+"order_refunds"=> "استرجاع الطلبات",
+"all_order_refunds"=> "جميع استرجاعات الطلبات",
+"requested_order_refunds"=> "استرجاع الطلبات المطلوبة",
+"approved_order_refunds"=> "استرجاع الطلبات المعتمدة",
+"rejected_order_refunds"=> "استرجاع الطلبات المرفوضة",
+"order_refund_status"=> "حالة استرجاع الطلب",
+"edit_order_refund"=>"تعديل استرجاع الطلبات",
+
 "products"=>"المنتجات",
-""=>"",
-""=>"",
+
+"close"=>"اغلاق",
+"save_changes"=>"حفظ التغيرات",
 // 
 
 "banners"=>"لافتات",
@@ -1395,6 +1404,22 @@ return [
 "actions"=>"العمليات",
 "edit"=>"تعديل",
 "delete"=>"حذف",
+
+
+"status"=>"الحالة",
+"reason"=>"السبب",
+"admin_response"=>"رد الأدمن",
+"amount"=>"الكمية",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
+""=>"",
 ""=>"",
 ""=>"",
 ];

@@ -68,13 +68,22 @@ class Contact extends Authenticatable
 
     public function scopeOnlyClients($query)
     {
-        $query->whereIn('contacts.type', ['client', 'both']);
 
-        if (auth()->check() && !auth()->user()->can('customer.view') && auth()->user()->can('customer.view_own')) {
-            $query->where('contacts.created_by', auth()->user()->id);
-        }
+        $query->whereIn('contacts.type', ['client', 'both']);
+    
+        // if (auth()->check() && !auth()->user()->can('customer.view') && auth()->user()->can('customer.view_own')) {
+                    // Filter based on the 'created_by' field in the contacts table
+        // $query->where('contacts.created_by', auth()->user()->id);
+        // }
+    
+        // Ensure the contact.id matches client.contact_id
+        $query->whereHas('client', function ($query) {
+            $query->where('contact_id', '=', \DB::raw('contacts.id'));
+        });
+    
         return $query;
     }
+    
 
     public function scopeTypeCustomer($query)
     {
