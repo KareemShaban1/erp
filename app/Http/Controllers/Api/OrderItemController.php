@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
+use App\Services\API\OrderItemService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,7 @@ class OrderItemController extends Controller
 {
     protected $service;
 
-    public function __construct(OrderService $service)
+    public function __construct(OrderItemService $service)
     {
         $this->service = $service;
     }
@@ -37,7 +38,7 @@ class OrderItemController extends Controller
     /**
      * Store a newly created Order in storage.
      */
-    public function store(StoreOrderRequest $request)
+    public function store(Request $request)
     {
             $data = $request->validated();
             $orderItem = $this->service->store( $data);
@@ -68,7 +69,7 @@ class OrderItemController extends Controller
     /**
      * Update the specified Order in storage.
      */
-    public function update(UpdateOrderRequest $request, Order $orderItem)
+    public function update(Request $request, OrderItem $orderItem)
     {
             $orderItem = $this->service->update($request,$orderItem);
 

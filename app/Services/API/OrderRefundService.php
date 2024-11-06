@@ -68,7 +68,7 @@ class OrderRefundService extends BaseService
             $orderRefunds = [];
             foreach ($data['order_item_ids'] as $orderItem) {
                 $refundData = [
-                    'order_id' => $orderItem['order_id'],
+                    'order_id' => $data['order_id'],
                     'order_item_id' => $orderItem['order_item_id'],
                     'amount' => $orderItem['quantity'],
                     'client_id' => $data['client_id'],

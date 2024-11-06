@@ -41,20 +41,26 @@ class OrderRefundController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate request data with custom rules
         $validator = Validator::make($request->all(), [
             'reason' => 'required|string',
+            'order_id' => 'required|exists:orders,id',
             'order_item_ids' => 'required|array',
-            'order_item_ids.*.order_id' => 'required|exists:orders,id',
             'order_item_ids.*.order_item_id' => 'required|exists:order_items,id',
             'order_item_ids.*.quantity' => 'required|integer|min:1',
         ]);
-    
+        
         if ($validator->fails()) {
-            // Return the first validation error
-            return response()->json(['message' => $validator->errors()->first()], 422);
+            // Get the first validation error with field name
+            $errors = $validator->errors()->toArray();
+            $firstErrorField = array_key_first($errors);
+            $firstErrorMessage = $errors[$firstErrorField][0];
+            
+            // Return the error with field name and message in the desired format
+            return response()->json([
+                'message' => "{$firstErrorField}: {$firstErrorMessage}"
+            ], 422);
         }
-    
+        
         // Pass only validated data to the service
         $validatedData = $validator->validated();
         $orderRefund = $this->service->store($validatedData);
