@@ -47,7 +47,7 @@ class Order extends Model
     }
 
     public function orderTracking(){
-        return $this->hasMany(OrderTracking::class,'order_id','id');
+        return $this->hasOne(OrderTracking::class,'order_id','id');
     }
 
     public function orderRefunds(){

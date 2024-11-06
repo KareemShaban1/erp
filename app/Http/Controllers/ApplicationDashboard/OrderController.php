@@ -172,41 +172,43 @@ class OrderController extends Controller
     
 
     public function changeOrderStatus($orderId)
-    {
-        $status = request()->input('order_status'); // Retrieve status from the request
+{
+    $status = request()->input('order_status'); // Retrieve status from the request
 
-        $order = Order::findOrFail($orderId);
-        $order->order_status = $status;
-        $order->save();
+    $order = Order::findOrFail($orderId);
+    $order->order_status = $status;
+    $order->save();
 
-        $orderTracking = new OrderTracking();
-        $orderTracking->order_id = $order->id;
+    // Check if an OrderTracking already exists for the order
+    $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
-        // Set the tracking status timestamp based on the status provided
-        switch ($status) {
-            case 'pending':
-                $orderTracking->pending_at = now();
-                break;
-            case 'processing':
-                $orderTracking->processing_at = now();
-                break;
-            case 'shipped':
-                $orderTracking->shipped_at = now();
-                break;
-            case 'cancelled':
-                $orderTracking->canceled_at = now();
-                break;
-            case 'completed':
-                $orderTracking->completed_at = now();
-                break;
-            default:
-                throw new \InvalidArgumentException("Invalid status: $status");
-        }
-
-        $orderTracking->save();
-
-        return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
+    // Set the tracking status timestamp based on the status provided
+    switch ($status) {
+        case 'pending':
+            $orderTracking->pending_at = now();
+            break;
+        case 'processing':
+            $orderTracking->processing_at = now();
+            break;
+        case 'shipped':
+            $orderTracking->shipped_at = now();
+            break;
+        case 'cancelled':
+            $orderTracking->canceled_at = now();
+            break;
+        case 'completed':
+            $orderTracking->completed_at = now();
+            break;
+        default:
+            throw new \InvalidArgumentException("Invalid status: $status");
     }
+
+    // Save the order tracking record (it will either update or create)
+    $orderTracking->save();
+
+    return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
+}
+
 
     public function changePaymentStatus($orderId)
     {

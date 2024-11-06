@@ -91,7 +91,7 @@ class AuthController extends Controller
         ],
         'mobile' => 'required|string|max:20',
         'location' => 'nullable|string|max:255',
-        'business_id' => 'required|numeric|exists:business,id',
+        // 'business_id' => 'required|numeric|exists:business,id',
         'business_location_id' => 'required|numeric|exists:business_locations,id'
     ]);
 
@@ -102,7 +102,7 @@ class AuthController extends Controller
     }
 
 
-        $business_location = Business::where('id',$request->business_location_id)->first();
+        $business = Business::where('id',$request->business_location_id)->first();
     
         // business need to changed
         // Create contact information
@@ -110,7 +110,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'mobile' => $request->mobile,
             'created_by'=>1,
-            'business_id' => $business_location->business_id ?? 1,
+            'business_id' => $business->id ?? 1,
             'type' => 'client',
             'contact_status'=>'not_active'
         ]);

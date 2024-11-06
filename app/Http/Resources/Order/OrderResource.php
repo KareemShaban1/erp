@@ -7,6 +7,7 @@ use App\Http\Resources\OrderCancellation\OrderCancellationResource;
 use App\Http\Resources\OrderItem\OrderItemCollection;
 use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use App\Http\Resources\OrderTracking\OrderTrackingCollection;
+use App\Http\Resources\OrderTracking\OrderTrackingResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -34,7 +35,7 @@ class OrderResource extends JsonResource
                 return [
                     'client' => (new ClientResource($this->client))->withFullData(true),
                     'order_items'=>(new OrderItemCollection( $this->orderItems))->withFullData(true),
-                    'order_tracking'=>(new OrderTrackingCollection( $this->orderTracking))->withFullData(true),
+                    'order_tracking'=>(new OrderTrackingResource( $this->orderTracking))->withFullData(true),
                     'payment_method' => $this->payment_method,
                     'order_status' => ucfirst($this->order_status),
                     'payment_status' => ucfirst($this->payment_status),
