@@ -308,4 +308,5 @@ return[
 "auto_clockout_time"=>"وقت تسجيل الانصراف",
 "work_duration_hour"=>":duration المدة",
 "total_leaves_days"=>":total_leaves يوم",
+
 ];

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OrderRefundController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\WarrantyController;
+use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use Illuminate\Support\Facades\Route;
 
@@ -73,15 +74,25 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::get('orders-refunds', [OrderRefundController::class, 'index']);
         Route::post('orders-refunds', [OrderRefundController::class, 'store']);
 
+    
+    });
+
+    Route::middleware('auth:sanctum-delivery')->group(function () {
+        Route::get('getNotAssignedOrders', [DeliveryController::class, 'getNotAssignedOrders']);
+
+        Route::get('getAssignedOrders', [DeliveryController::class, 'getAssignedOrders']);
+        Route::post('assignDelivery', [DeliveryController::class, 'assignDelivery']);
+
+        Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
+
     });
 
     Route::get('banners', [BannerController::class, 'index']);
 
-  
-
-
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin']);
+
+Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
 
 Route::post('user/login', [AuthController::class, 'userLogin']);

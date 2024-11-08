@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 class Order extends Model
 {
@@ -41,6 +42,11 @@ class Order extends Model
         return $this->belongsTo(Client::class,'client_id','id');
     }
 
+    public function businessLocation(){
+        return $this->belongsTo(BusinessLocation::class,'business_location_id','id');
+    }
+
+
 
     public function orderItems(){
         return $this->hasMany(OrderItem::class,'order_id','id');
@@ -57,4 +63,23 @@ class Order extends Model
     public function orderCancellation(){
         return $this->hasOne(OrderCancellation::class,'order_id','id');
     }
+
+     // Define relationship with the Delivery model
+     public function deliveries(): BelongsToMany
+     {
+         return $this->belongsToMany(Delivery::class, 'delivery_orders')
+                     ->withPivot('status', 'assigned_at', 'delivered_at')
+                     ->withTimestamps();
+     }
+
+     public function getHasDeliveryAttribute()
+{
+    return $this->deliveries->isNotEmpty();
+}
+
+     public function scopeByBusinessLocation($query, $businessLocationId)
+{
+    return $query->where('business_location_id', $businessLocationId);
+}
+
 }

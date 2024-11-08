@@ -33,21 +33,21 @@ class OrderController extends Controller
     {
         $status = request()->get('status');
         $statuses = ['all', 'pending', 'processing', 'shipped', 'cancelled', 'completed'];
-    
+
         if (empty($status) || !in_array($status, $statuses)) {
             return redirect()->back();
         }
-    
+
         if (request()->ajax()) {
             $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
 
             if (!empty(request()->start_date) && !empty(request()->end_date)) {
                 $start = request()->start_date;
-                $end =  request()->end_date;
-                dd($start,$end);
+                $end = request()->end_date;
+                dd($start, $end);
             }
-    
+
             if ($status == 'pending') {
                 return $this->pendingOrders($startDate, $endDate);
             } elseif ($status == 'processing') {
@@ -62,152 +62,158 @@ class OrderController extends Controller
                 return $this->allOrders($startDate, $endDate);
             }
         }
-    
-        return view('applicationDashboard.pages.orders.index');
+
+        return view('applicationDashboard.pages.orders.index',compact('status'));
     }
-    
+
     public function allOrders($startDate = null, $endDate = null)
     {
-        $orders = Order::with('client')
+        $orders = Order::with(['client','businessLocation'])
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         // Apply date filter if start_date and end_date are provided
         if ($startDate && $endDate) {
             $orders->whereBetween('created_at', [$startDate, $endDate]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
+            ->addColumn('has_delivery', function ($order) {
+                return $order->has_delivery; // Add the delivery status here
+            })
             ->make(true);
     }
-    
+
     public function pendingOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'pending')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         if (request()->has(['start_date', 'end_date'])) {
             $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-    
+
     // Repeat the date filter logic for other status-based methods
-    
+
     public function processingOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'processing')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         if (request()->has(['start_date', 'end_date'])) {
             $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
+            ->addColumn('has_delivery', function ($order) {
+                return $order->has_delivery; // Add the delivery status here
+            })
             ->make(true);
     }
-    
+
     public function shippedOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'shipped')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         if (request()->has(['start_date', 'end_date'])) {
             $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-    
+
     public function canceledOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'cancelled')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         if (request()->has(['start_date', 'end_date'])) {
             $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-    
+
     public function completedOrders()
     {
         $orders = Order::with('client')
             ->where('order_status', 'completed')
             ->select(['id', 'number', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total']);
-    
+
         if (request()->has(['start_date', 'end_date'])) {
             $orders->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
         }
-    
+
         return Datatables::of($orders)
             ->addColumn('client_contact_name', function ($order) {
                 return optional($order->client->contact)->name ?? 'N/A';
             })
             ->make(true);
     }
-    
+
 
     public function changeOrderStatus($orderId)
-{
-    $status = request()->input('order_status'); // Retrieve status from the request
+    {
+        $status = request()->input('order_status');
 
-    $order = Order::findOrFail($orderId);
-    $order->order_status = $status;
-    $order->save();
+        $order = Order::findOrFail($orderId);
+        $order->order_status = $status;
+        $order->save();
 
-    // Check if an OrderTracking already exists for the order
-    $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
+        // Check if an OrderTracking already exists for the order
+        $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
-    // Set the tracking status timestamp based on the status provided
-    switch ($status) {
-        case 'pending':
-            $orderTracking->pending_at = now();
-            break;
-        case 'processing':
-            $orderTracking->processing_at = now();
-            break;
-        case 'shipped':
-            $orderTracking->shipped_at = now();
-            break;
-        case 'cancelled':
-            $orderTracking->cancelled_at = now();
-            break;
-        case 'completed':
-            $orderTracking->completed_at = now();
-            break;
-        default:
-            throw new \InvalidArgumentException("Invalid status: $status");
+        // Set the tracking status timestamp based on the status provided
+        switch ($status) {
+            case 'pending':
+                $orderTracking->pending_at = now();
+                break;
+            case 'processing':
+                $orderTracking->processing_at = now();
+                break;
+            case 'shipped':
+                $orderTracking->shipped_at = now();
+                break;
+            case 'cancelled':
+                $orderTracking->cancelled_at = now();
+                break;
+            case 'completed':
+                $orderTracking->completed_at = now();
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid status: $status");
+        }
+
+        // Save the order tracking record (it will either update or create)
+        $orderTracking->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
     }
-
-    // Save the order tracking record (it will either update or create)
-    $orderTracking->save();
-
-    return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
-}
 
 
     public function changePaymentStatus($orderId)
@@ -221,6 +227,24 @@ class OrderController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
+
+
+    public function getOrderDetails($orderId)
+{
+    $order = Order::with(['client.contact','businessLocation'])->find($orderId);
+
+    if ($order) {
+        return response()->json([
+            'success' => true,
+            'order' => $order
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Order not found.'
+    ]);
+}
 
 
     /**

@@ -153,10 +153,10 @@ class ManageUserController extends Controller
             
             $data['business_id'] = $business_id;
             
-            $user = User::create($data);
+            // $user = User::create($data);
             
             
-            // $user = $this->moduleUtil->createUser($request);
+            $user = $this->moduleUtil->createUser($request);
             
 
             $output = ['success' => 1,

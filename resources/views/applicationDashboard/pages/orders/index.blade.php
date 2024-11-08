@@ -8,10 +8,6 @@
     <h1>@lang('lang_v1.orders')
         <small>@lang('lang_v1.manage_your_orders')</small>
     </h1>
-    <!-- <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-        <li class="active">Here</li>
-    </ol> -->
 </section>
 
 <!-- Main content -->
@@ -21,18 +17,18 @@
         @slot('tool')
         <div class="box-tools">
             <!-- <button type="button" class="btn btn-block btn-primary btn-modal" 
-                            data-href="{{action('ApplicationDashboard\OrderController@create')}}" 
-                            data-container=".orders_modal">
-                            <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
+                                                        data-href="{{action('ApplicationDashboard\OrderController@create')}}" 
+                                                        data-container=".orders_modal">
+                                                        <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
         </div>
         <!-- @component('components.filters', ['title' => __('report.filters')])
-        <div class="col-md-3">
-            <div class="form-group">
-                {!! Form::label('purchase_list_filter_date_range', __('report.date_range') . ':') !!}
-                {!! Form::text('purchase_list_filter_date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'readonly']); !!}
-            </div>
-        </div>
-    @endcomponent -->
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            {!! Form::label('purchase_list_filter_date_range', __('report.date_range') . ':') !!}
+                                            {!! Form::text('purchase_list_filter_date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'readonly']); !!}
+                                        </div>
+                                    </div>
+                                @endcomponent -->
         @endslot
     @endcan
     @can('lang_v1.view')
@@ -49,6 +45,9 @@
                         <th>@lang('lang_v1.shipping_cost')</th>
                         <th>@lang('lang_v1.sub_total')</th>
                         <th>@lang('lang_v1.total')</th>
+                        <th>@lang('lang_v1.assign_delivery')</th>
+                        <th>@lang('lang_v1.actions')</th>
+
                     </tr>
                 </thead>
             </table>
@@ -59,13 +58,136 @@
     <div class="modal fade orders_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
     </div>
 
+    <!-- Delivery Assignment Modal -->
+    <div class="modal fade" id="assignDeliveryModal" tabindex="-1" role="dialog" aria-labelledby="assignDeliveryLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="assignDeliveryLabel">@lang('lang_v1.assign_delivery')</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="assignDeliveryForm">
+                        <input type="hidden" name="order_id" id="order_id">
+                        <div class="form-group">
+                            <label for="delivery_id">@lang('lang_v1.select_delivery')</label>
+                            <select class="form-control" name="delivery_id" id="delivery_id"></select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"
+                        id="saveDeliveryAssignment">@lang('lang_v1.assign')</button>
+                    <button type="button" class="btn btn-secondary"
+                        data-dismiss="modal">@lang('lang_v1.cancel')</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Information Modal -->
+    <div class="modal fade" id="viewOrderInfoModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderInfoLabel">
+        <div class="modal-dialog  modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="viewOrderInfoLabel">@lang('lang_v1.order_details')</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="viewOrderInfoForm">
+                        <input type="hidden" name="order_id" id="view_order_id">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.order_number'):</label>
+                                    <p id="order_number"></p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.business_location'):</label>
+                                    <p id="business_location"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.client'):</label>
+                                    <p id="client_name"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.payment_method'):</label>
+                                    <p id="payment_method"></p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.shipping_cost'):</label>
+                                    <p id="shipping_cost"></p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.sub_total'):</label>
+                                    <p id="sub_total"></p>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.total'):</label>
+                                    <p id=" total">
+                                    </p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.order_status'):</label>
+                                    <p id=" order_status">
+                                    </p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.payment_status'):</label>
+                                    <p id=" payment_status">
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('lang_v1.close')</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 <!-- /.content -->
 
 @stop
 @section('javascript')
 <script>
-        $('#filter_date').click(function() {
+    $('#filter_date').click(function () {
         orders_table.ajax.reload(); // Reload DataTable with the new date filters
     });
     //Orders table
@@ -106,15 +228,15 @@
             {
                 data: 'order_status', name: 'order_status', render: function (data, type, row) {
                     let badgeClass;
-        switch(data) {
-            case 'pending': badgeClass = 'badge btn-warning'; break;
-            case 'processing': badgeClass = 'badge btn-info'; break;
-            case 'shipped': badgeClass = 'badge btn-primary'; break;
-            case 'completed': badgeClass = 'badge btn-success'; break;
-            case 'cancelled': badgeClass = 'badge btn-danger'; break;
-            default: badgeClass = 'badge badge-secondary'; // For any other statuses
-        }
-                    
+                    switch (data) {
+                        case 'pending': badgeClass = 'badge btn-warning'; break;
+                        case 'processing': badgeClass = 'badge btn-info'; break;
+                        case 'shipped': badgeClass = 'badge btn-primary'; break;
+                        case 'completed': badgeClass = 'badge btn-success'; break;
+                        case 'cancelled': badgeClass = 'badge btn-danger'; break;
+                        default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                    }
+
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                     
@@ -127,7 +249,6 @@
             </select>`;
                 }
             },
-            // 'pending','paid','failed'
             {
                 data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
                     return `
@@ -142,9 +263,57 @@
             { data: 'sub_total', name: 'sub_total' },
             { data: 'total', name: 'total' },
             // other columns as needed
+            {
+                data: 'order_status',
+                name: 'order_status',
+                render: function (data, type, row) {
+                    console.log(row)
+                    // Case 1: If the order status is 'processing' and has no delivery assigned
+                    if (data === 'processing' && row.has_delivery === false) {
+                        return `<button class="btn btn-primary assign-delivery-btn" 
+                    data-order-id="${row.id}" 
+                    data-contact-name="${row.client_contact_name
+                            } ">
+                    @lang('lang_v1.assign_delivery')
+                </button > `;
+                    }
+
+                    
+
+                    if (row.has_delivery === true) {
+                        return `<span class="badge badge-success">
+                        @lang('lang_v1.delivery_assigned')
+                    </span>`;
+                    }
+
+                    // Case 3: If the order status is not 'processing', no action needed
+                    // if (data !== 'processing') {
+                    //     return `<span class="badge badge-info">
+                    //                 @lang('lang_v1.status_' + data)
+                    //             </span>`;
+                    // }
+
+                    // Default case: Return empty if none of the above conditions are met
+                    return '';
+                },
+                orderable: false,
+                searchable: false
+            },
+            {
+                data: 'id',
+                name: 'id',
+                render: function (data, type, row) {
+
+                    return `<button class="btn btn-info view-order-info-btn" data-order-id="${row.id}">@lang('lang_v1.view_order_info')</button>`;
+                },
+                orderable: false,
+                searchable: false
+            }
+
+
         ],
-    
-        fnDrawCallback: function(oSettings) {
+
+        fnDrawCallback: function (oSettings) {
             __currency_convert_recursively($('#orders_table'));
         },
     });
@@ -156,61 +325,152 @@
             orders_table.ajax.reload();
         }
     );
-    $('#purchase_list_filter_date_range').on('cancel.daterangepicker', function(ev, picker) {
+    $('#purchase_list_filter_date_range').on('cancel.daterangepicker', function (ev, picker) {
         $('#purchase_list_filter_date_range').val('');
         orders_table.ajax.reload();
     });
 
 
     $(document).on('change', '.change-order-status', function () {
-    var orderId = $(this).data('order-id');
-    var status = $(this).val();
+        var orderId = $(this).data('order-id');
+        var status = $(this).val();
 
-    $.ajax({
-        url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-        type: 'POST',
-        data: {
-            order_status: status,
-            _token: '{{ csrf_token() }}' // CSRF token for security
-        },
-        success: function (response) {
-            if (response.success) {
-                toastr.success(response.message);
-                orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-            } else {
-                alert('Failed to update order status.');
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+            type: 'POST',
+            data: {
+                order_status: status,
+                _token: '{{ csrf_token() }}' // CSRF token for security
+            },
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                } else {
+                    alert('Failed to update order status.');
+                }
+            },
+            error: function (xhr) {
+                alert('An error occurred: ' + xhr.responseText);
             }
-        },
-        error: function (xhr) {
-            alert('An error occurred: ' + xhr.responseText);
-        }
+        });
     });
-});
 
-$(document).on('change', '.change-payment-status', function () {
-    var orderId = $(this).data('order-id');
-    var status = $(this).val();
+    $(document).on('change', '.change-payment-status', function () {
+        var orderId = $(this).data('order-id');
+        var status = $(this).val();
 
-    $.ajax({
-        url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-        type: 'POST',
-        data: {
-            payment_status: status,
-            _token: '{{ csrf_token() }}' // CSRF token for security
-        },
-        success: function (response) {
-            if (response.success) {
-                alert(response.message);
-                orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-            } else {
-                alert('Failed to update payment status.');
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+            type: 'POST',
+            data: {
+                payment_status: status,
+                _token: '{{ csrf_token() }}' // CSRF token for security
+            },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                } else {
+                    alert('Failed to update payment status.');
+                }
+            },
+            error: function (xhr) {
+                alert('An error occurred: ' + xhr.responseText);
             }
-        },
-        error: function (xhr) {
-            alert('An error occurred: ' + xhr.responseText);
-        }
+        });
     });
-});
+
+
+    $(document).on('click', '.assign-delivery-btn', function () {
+        var orderId = $(this).data('order-id');
+        var contactName = $(this).data('contact-name'); // Get the contact name
+
+        $('#order_id').val(orderId);
+
+        // Set the contact name in the modal
+        $('#contact_name_display').text(contactName); // Assume #contact_name_display is the placeholder for contact name
+
+        // Fetch available deliveries
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\DeliveryController@getAvailableDeliveries" , ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            type: 'GET',
+            success: function (response) {
+                console.log(response)
+                if (response.success) {
+                    var deliveryOptions = response.deliveries.map(delivery => {
+                        return `<option value="${delivery.id}">${delivery.name}</option>`;
+                    }).join('');
+                    $('#delivery_id').html(deliveryOptions);
+                    $('#assignDeliveryModal').modal('show');
+                } else {
+                    alert('Failed to fetch deliveries.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching deliveries.');
+            }
+        });
+    });
+
+
+    // Event listener for saving the delivery assignment
+    $('#saveDeliveryAssignment').click(function () {
+        var formData = $('#assignDeliveryForm').serialize();
+
+        $.ajax({
+            url: '{{ action("ApplicationDashboard\DeliveryController@assignDelivery") }}',
+            type: 'POST',
+            data: formData + '&_token={{ csrf_token() }}',
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    orders_table.ajax.reload();
+                    $('#assignDeliveryModal').modal('hide');
+                } else {
+                    alert('Failed to assign delivery.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while assigning delivery.');
+            }
+        });
+    });
+
+    // Event listener for the 'View Order Info' button
+    $(document).on('click', '.view-order-info-btn', function () {
+        var orderId = $(this).data('order-id'); // Get the order ID
+
+        // Fetch the order details
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // Populate the modal with the order details
+                    $('#view_order_id').val(response.order.id);
+                    $('#order_number').text(response.order.number);
+                    $('#business_location').text(response.order.business_location.name);
+                    // businessLocation
+                    $('#client_name').text(response.order.client.contact.name);
+                    $('#payment_method').text(response.order.payment_method);
+                    $('#shipping_cost').text(response.order.shipping_cost);
+                    $('#sub_total').text(response.order.sub_total);
+                    $('#total').text(response.order.total);
+                    $('#order_status').text(response.order.order_status);
+                    $('#payment_status').text(response.order.payment_status);
+
+                    // Show the modal
+                    $('#viewOrderInfoModal').modal('show');
+                } else {
+                    alert('Failed to fetch order details.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the order details.');
+            }
+        });
+    });
 
 </script>
 @endsection

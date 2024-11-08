@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\Client;
 use App\Models\Contact;
+use App\Models\Delivery;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -112,7 +113,7 @@ class AuthController extends Controller
             'created_by'=>1,
             'business_id' => $business->id ?? 1,
             'type' => 'client',
-            'contact_status'=>'not_active'
+            'contact_status'=>'inactive'
         ]);
     
         // Create Client
@@ -178,6 +179,51 @@ class AuthController extends Controller
     // Respond with Client Data and Token
     return response()->json([
         'client' => $client,
+        'token' => $token,
+    ], 200);
+}
+
+
+public function deliveryLogin(Request $request)
+{
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'email_address' => 'required|string|email',
+        'password' => 'required|string',
+    ]);
+
+    if ($validator->fails()) {
+        // Get the first error message
+        $firstError = $validator->errors()->first();
+        return response()->json(['message' => $firstError], 422);
+    }
+
+    // Find the delivery by email
+    $delivery = Delivery::where('email_address', $request->email_address)->first();
+
+    $delivery_status = $delivery->contact->contact_status;
+
+    // Check if delivery exists
+    if (!$delivery) {
+        return response()->json(['message' => 'delivery not found'], 404);
+    }
+
+    // Check if the delivery is active
+    if ($delivery_status == 'inactive') {
+        return response()->json(['message' => 'delivery is not active'], 403); // Forbidden for inactive deliverys
+    }
+
+    // Check if the password is correct
+    if (!Hash::check($request->password, $delivery->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    // Generate Sanctum Token
+    $token = $delivery->createToken('Personal Access Token')->plainTextToken;
+
+    // Respond with delivery Data and Token
+    return response()->json([
+        'delivery' => $delivery,
         'token' => $token,
     ], 200);
 }

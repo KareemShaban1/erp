@@ -1511,65 +1511,115 @@ class Util
         }
     }
 
-    /**
-     * Adds or updates location permissions of a user
-     */
+    // /**
+    //  * Adds or updates location permissions of a user
+    //  */
+    // public function giveLocationPermissions($user, $request)
+    // {
+    //     $permitted_locations = $user->permitted_locations();
+    //     $permissions = $request->input('access_all_locations');
+    //     $location_permissions = $request->input('location_permissions');
+    //     $revoked_permissions = [];
+
+
+    //     //during api call if access_all_locations = 1 then generate location permissions 
+    //     if(($permissions != 'access_all_locations') && $permissions == 1) {
+    //         $permissions = 'access_all_locations';
+    //         $location_ids = $request->input('location_permissions');
+    //         $location_permissions = [];
+    //         if(!empty($location_ids)) {
+    //             foreach($location_ids as $location_id) {
+    //                 $location_permissions[] = 'location.'.$location_id;
+    //             }
+    //         }
+    //     }
+
+    //     //If not access all location then revoke permission
+    //     if ($permitted_locations == 'all' && $permissions != 'access_all_locations') {
+    //         $user->revokePermissionTo('access_all_locations');
+    //     }
+
+    //     //Include location permissions
+    //     if (empty($permissions) && !empty($location_permissions)) {
+    //         $permissions = [];
+    //         foreach ($location_permissions as $location_permission) {
+    //             $permissions[] = $location_permission;
+    //         }
+
+    //         if (is_array($permitted_locations)) {
+    //             foreach ($permitted_locations as $key => $value) {
+    //                 if (!in_array('location.' . $value, $permissions)) {
+    //                     $revoked_permissions[] = 'location.' . $value;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     if (!empty($revoked_permissions)) {
+    //         $user->revokePermissionTo($revoked_permissions);
+    //     }
+
+    //     if (!empty($permissions)) {
+    //         $user->givePermissionTo($permissions);
+    //     } else {
+    //         //if no location permission given revoke previous permissions
+    //         if (!empty($permitted_locations)) {
+    //             $revoked_permissions = [];
+    //             foreach ($permitted_locations as $key => $value) {
+    //                 $revoke_permissions[] = 'location.' . $value;
+    //             }
+
+    //             $user->revokePermissionTo($revoke_permissions);
+    //         }
+    //     }
+    // }
+
     public function giveLocationPermissions($user, $request)
-    {
-        $permitted_locations = $user->permitted_locations();
-        $permissions = $request->input('access_all_locations');
-        $location_permissions = $request->input('location_permissions');
-        $revoked_permissions = [];
+{
+    $permitted_locations = $user->permitted_locations();
+    $permissions = $request->input('access_all_locations') ? 'access_all_locations' : [];
+    $location_permissions = $request->input('location_permissions', []);
+    $revoked_permissions = [];
 
-        //during api call if access_all_locations = 1 then generate location permissions 
-        if(($permissions != 'access_all_locations') && $permissions == 1) {
-            $permissions = 'access_all_locations';
-            $location_ids = $request->input('location_permissions');
-            $location_permissions = [];
-            if(!empty($location_ids)) {
-                foreach($location_ids as $location_id) {
-                    $location_permissions[] = 'location.'.$location_id;
-                }
-            }
+    // If `access_all_locations` is set, grant it, and clear any location-specific permissions
+    if ($permissions === 'access_all_locations') {
+        $user->givePermissionTo('access_all_locations');
+        $location_permissions = []; // Clear location permissions when access_all_locations is granted
+    } else {
+        // Remove `access_all_locations` permission if not explicitly granted
+        $user->revokePermissionTo('access_all_locations');
+        
+        // Generate specific location permissions if any
+        if (!empty($location_permissions)) {
+            $permissions = array_map(function ($location_id) {
+                return 'location.' . $location_id;
+            }, $location_permissions);
         }
+    }
 
-        //If not access all location then revoke permission
-        if ($permitted_locations == 'all' && $permissions != 'access_all_locations') {
-            $user->revokePermissionTo('access_all_locations');
-        }
-
-        //Include location permissions
-        if (empty($permissions) && !empty($location_permissions)) {
-            $permissions = [];
-            foreach ($location_permissions as $location_permission) {
-                $permissions[] = $location_permission;
-            }
-
-            if (is_array($permitted_locations)) {
-                foreach ($permitted_locations as $key => $value) {
-                    if (!in_array('location.' . $value, $permissions)) {
-                        $revoked_permissions[] = 'location.' . $value;
-                    }
-                }
-            }
-        }
-
-        if (!empty($revoked_permissions)) {
-            $user->revokePermissionTo($revoked_permissions);
-        }
-
-        if (!empty($permissions)) {
-            $user->givePermissionTo($permissions);
-        } else {
-            //if no location permission given revoke previous permissions
-            if (!empty($permitted_locations)) {
-                $revoked_permissions = [];
-                foreach ($permitted_locations as $key => $value) {
-                    $revoke_permissions[] = 'location.' . $value;
-                }
-
-                $user->revokePermissionTo($revoke_permissions);
+    // Revoke old permissions if they are not in the current permission list
+    if (is_array($permitted_locations)) {
+        foreach ($permitted_locations as $location_id) {
+            if (!in_array('location.' . $location_id, $permissions)) {
+                $revoked_permissions[] = 'location.' . $location_id;
             }
         }
     }
+
+    // Apply the permissions
+    if (!empty($revoked_permissions)) {
+        $user->revokePermissionTo($revoked_permissions);
+    }
+
+    if (!empty($permissions)) {
+        $user->syncPermissions($permissions);
+    } else {
+        // If no new permissions, revoke all previous ones
+        if (is_array($permitted_locations)) {
+            $revoke_permissions = array_map(fn($loc) => 'location.' . $loc, $permitted_locations);
+            $user->revokePermissionTo($revoke_permissions);
+        }
+    }
+}
+
 }

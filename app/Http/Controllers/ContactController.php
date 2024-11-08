@@ -7,6 +7,7 @@ use App\Models\BusinessLocation;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\CustomerGroup;
+use App\Models\Delivery;
 use App\Notifications\CustomerNotification;
 use App\Models\PurchaseLine;
 use App\Models\Transaction;
@@ -62,7 +63,7 @@ class ContactController extends Controller
         $type = request()->get('type');
         
 
-        $types = ['supplier', 'customer','client'];
+        $types = ['supplier', 'customer','client','delivery'];
 
         if (empty($type) || !in_array($type, $types)) {
             return redirect()->back();
@@ -75,6 +76,8 @@ class ContactController extends Controller
                 return $this->indexCustomer();
             } elseif ($type == 'client') {
                 return $this->indexClient();
+            } elseif ($type == 'delivery') {
+                return $this->indexDelivery();
             } else {
                 die("Not Found");
             }
@@ -710,6 +713,231 @@ class ContactController extends Controller
                         ->make(true);
     }
 
+
+    private function indexDelivery()
+    {
+        if (!auth()->user()->can('customer.view') && !auth()->user()->can('customer.view_own')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+
+        $is_admin = $this->contactUtil->is_admin(auth()->user());
+
+        $query = $this->contactUtil->getContactQuery($business_id, 'delivery');
+
+        if (request()->has('has_sell_due')) {
+           $query->havingRaw('(total_invoice - invoice_received) > 0');
+        }
+
+        if (request()->has('has_sell_return')) {
+           $query->havingRaw('total_sell_return > 0');
+        }
+
+        if (request()->has('has_advance_balance')) {
+           $query->where('balance', '>', 0);
+        }
+
+        if (request()->has('has_opening_balance')) {
+           $query->havingRaw('opening_balance > 0');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_one_month')) {
+            $from_transaction_date = \Carbon::now()->subDays(30)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_three_month')) {
+            $from_transaction_date = \Carbon::now()->subMonths(3)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_six_month')) {
+            $from_transaction_date = \Carbon::now()->subMonths(6)->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        if (!$is_admin && auth()->user()->can('customer_with_no_sell_one_year')) {
+            $from_transaction_date = \Carbon::now()->subYear()->format('Y-m-d');
+            $query->havingRaw("max_transaction_date < '{$from_transaction_date}'")
+                     ->orHavingRaw('transaction_date IS NULL');
+        }
+
+        $contacts = Datatables::of($query)
+            ->addColumn('address', '{{implode(", ", array_filter([$address_line_1, $address_line_2, $city, $state, $country, $zip_code]))}}')
+            ->addColumn(
+                'due',
+                '<span class="contact_due" data-orig-value="{{$total_invoice - $invoice_received}}" data-highlight=true>@format_currency($total_invoice - $invoice_received)</span>'
+            )
+            ->addColumn(
+                'return_due',
+                '<span class="return_due" data-orig-value="{{$total_sell_return - $sell_return_paid}}" data-highlight=false>@format_currency($total_sell_return - $sell_return_paid)</span>'
+            )
+            ->addColumn(
+                'action',
+                function ($row) {
+                    $html = '<div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
+                        data-toggle="dropdown" aria-expanded="false">' .
+                        __("messages.actions") .
+                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
+                    $html .= '<li><a href="' . action('TransactionPaymentController@getPayContactDue', [$row->id]) . '?type=sell" class="pay_sale_due"><i class="fas fa-money-bill-alt" aria-hidden="true"></i>' . __("lang_v1.pay") . '</a></li>';
+                    $return_due = $row->total_sell_return - $row->sell_return_paid;
+                    if ($return_due > 0) {
+                        $html .= '<li><a href="' . action('TransactionPaymentController@getPayContactDue', [$row->id]) . '?type=sell_return" class="pay_purchase_due"><i class="fas fa-money-bill-alt" aria-hidden="true"></i>' . __("lang_v1.pay_sell_return_due") . '</a></li>';
+                    }
+                    
+                    if (auth()->user()->can('customer.view') || auth()->user()->can('customer.view_own')) {
+                        $html .= '<li><a href="' . action('ContactController@show', [$row->id]) . '"><i class="fas fa-eye" aria-hidden="true"></i>' . __("messages.view") . '</a></li>';
+                    }
+                    if (auth()->user()->can('customer.update')) {
+                        $html .= '<li><a href="' . action('ContactController@edit', [$row->id]) . '" class="edit_contact_button"><i class="glyphicon glyphicon-edit"></i>' .  __("messages.edit") . '</a></li>';
+                    }
+                    if (!$row->is_default && auth()->user()->can('customer.delete')) {
+                        $html .= '<li><a href="' . action('ContactController@destroy', [$row->id]) . '" class="delete_contact_button"><i class="glyphicon glyphicon-trash"></i>' . __("messages.delete") . '</a></li>';
+                    }
+
+                    if (auth()->user()->can('customer.update')) {
+                        $html .= '<li><a href="' . action('ContactController@updateStatus', [$row->id]) . '"class="update_contact_status"><i class="fas fa-power-off"></i>';
+
+                        if ($row->contact_status == "active") {
+                            $html .= __("messages.deactivate");
+                        } else {
+                            $html .= __("messages.activate");
+                        }
+
+                        $html .= "</a></li>";
+                    }
+
+                    $html .= '<li class="divider"></li>';
+                    if (auth()->user()->can('customer.view')) {
+                        $html .= '
+                                <li>
+                                    <a href="' . action('ContactController@show', [$row->id]). '?view=ledger">
+                                        <i class="fas fa-scroll" aria-hidden="true"></i>
+                                        ' . __("lang_v1.ledger") . '
+                                    </a>
+                                </li>';
+
+                        if (in_array($row->type, ["both", "supplier"])) {
+                            $html .= '<li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=purchase">
+                                    <i class="fas fa-arrow-circle-down" aria-hidden="true"></i>
+                                    ' . __("purchase.purchases") . '
+                                </a>
+                            </li>
+                            <li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=stock_report">
+                                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                                    ' . __("report.stock_report") . '
+                                </a>
+                            </li>';
+                        }
+
+                        if (in_array($row->type, ["both", "customer"])) {
+                            $html .=  '<li>
+                                <a href="' . action('ContactController@show', [$row->id]). '?view=sales">
+                                    <i class="fas fa-arrow-circle-up" aria-hidden="true"></i>
+                                    ' . __("sale.sells") . '
+                                </a>
+                            </li>';
+                        }
+
+                        $html .= '<li>
+                                <a href="' . action('ContactController@show', [$row->id]) . '?view=documents_and_notes">
+                                    <i class="fas fa-paperclip" aria-hidden="true"></i>
+                                     ' . __("lang_v1.documents_and_notes") . '
+                                </a>
+                            </li>';
+                    }
+                    $html .= '</ul></div>';
+
+                    return $html;
+                }
+            )
+            ->editColumn('opening_balance', function ($row) {
+                $html = '<span data-orig-value="' . $row->opening_balance . '">' . $this->transactionUtil->num_f($row->opening_balance, true) . '</span>';
+
+                return $html;
+            })
+            ->editColumn('balance', function ($row) {
+                $html = '<span data-orig-value="' . $row->balance . '">' . $this->transactionUtil->num_f($row->balance, true) . '</span>';
+
+                return $html;
+            })
+            ->editColumn('credit_limit', function ($row) {
+                $html = __('lang_v1.no_limit');
+                if (!is_null($row->credit_limit)) {
+                    $html = '<span data-orig-value="' . $row->credit_limit . '">' . $this->transactionUtil->num_f($row->credit_limit, true) . '</span>';
+                }
+
+                return $html;
+            })
+            ->editColumn('pay_term', '
+                @if(!empty($pay_term_type) && !empty($pay_term_number))
+                    {{$pay_term_number}}
+                    @lang("lang_v1.".$pay_term_type)
+                @endif
+            ')
+            ->editColumn('name', function ($row) {
+                $name = $row->name;
+                if ($row->contact_status == 'inactive') {
+                    $name = $row->name . ' <small class="label pull-right bg-red no-print">' . __("lang_v1.inactive") . '</small>';
+                }
+
+                if (!empty($row->converted_by)) {
+                    $name .= '<span class="label bg-info label-round no-print" data-toggle="tooltip" title="Converted from leads"><i class="fas fa-sync-alt"></i></span>';
+                }
+                return $name;
+            })
+            ->editColumn('email', function ($row) {
+                if($row->type == 'delivery'){
+                    $email = $row->delivery->email_address;
+                return $email;
+                }else {
+                    return $row->email;
+                }
+                
+            })
+            ->editColumn('total_rp', '{{$total_rp ?? 0}}')
+            ->editColumn('created_at', '{{@format_date($created_at)}}')
+            ->removeColumn('total_invoice')
+            ->removeColumn('opening_balance_paid')
+            ->removeColumn('invoice_received')
+            ->removeColumn('state')
+            ->removeColumn('country')
+            ->removeColumn('city')
+            ->removeColumn('type')
+            ->removeColumn('id')
+            ->removeColumn('is_default')
+            ->removeColumn('total_sell_return')
+            ->removeColumn('sell_return_paid')
+            ->filterColumn('address', function ($query, $keyword) {
+                $query->where( function($q) use ($keyword){
+                    $q->where('address_line_1', 'like', "%{$keyword}%")
+                    ->orWhere('address_line_2', 'like', "%{$keyword}%")
+                    ->orWhere('city', 'like', "%{$keyword}%")
+                    ->orWhere('state', 'like', "%{$keyword}%")
+                    ->orWhere('country', 'like', "%{$keyword}%")
+                    ->orWhere('zip_code', 'like', "%{$keyword}%")
+                    ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
+                });
+            });
+        $reward_enabled = (request()->session()->get('business.enable_rp') == 1) ? true : false;
+        if (!$reward_enabled) {
+            $contacts->removeColumn('total_rp');
+        }
+        return $contacts->rawColumns(['action', 'opening_balance', 'credit_limit', 'pay_term', 'due', 'return_due', 'name', 'balance'])
+                        ->make(true);
+    }
+
     public function getContactDue($contact_id)
     {
         if (request()->ajax()) {
@@ -755,6 +983,9 @@ class ContactController extends Controller
         }
         if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
             $types['client'] = __('report.client');
+        }
+        if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
+            $types['delivery'] = __('report.delivery');
         }
         if (auth()->user()->can('supplier.create') && auth()->user()->can('customer.create') || auth()->user()->can('supplier.view_own') || auth()->user()->can('customer.view_own')) {
             $types['both'] = __('lang_v1.both_supplier_customer');
@@ -867,6 +1098,27 @@ public function store(Request $request)
             ]);
         }
 
+         // Client-specific data and creation
+         if ($request->input('type') === 'delivery') {
+            $request->validate([
+                
+                'email_address' => 'required|email|unique:deliveries,email_address',
+                'password' => 'required|string|min:8',
+                'business_location_id' => 'required|integer',
+                'location' => 'required|string',
+            ]);
+
+            // Prepare delivery data and create record
+            $deliveryData = $request->only(['email_address', 'password','location', 'business_location_id', 'latitude', 'longitude']);
+            $delivery = Delivery::create([
+                'email_address' => $deliveryData['email_address'],
+                'password' => Hash::make($deliveryData['password']),
+                'business_location_id' => $deliveryData['business_location_id'],
+                'contact_id' => $output['data']->id,
+                'location' => $deliveryData['location'] ?? null,
+            ]);
+        }
+
         // Trigger after-contact-saved actions
         $this->moduleUtil->getModuleData('after_contact_saved', ['contact' => $output['data'], 'input' => $request->input()]);
 
@@ -965,6 +1217,9 @@ public function store(Request $request)
             if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
                 $types['client'] = __('report.client');
             }
+            if (auth()->user()->can('customer.create') || auth()->user()->can('customer.view_own')) {
+                $types['delivery'] = __('report.delivery');
+            }
             if (auth()->user()->can('supplier.create') && auth()->user()->can('customer.create')) {
                 $types['both'] = __('lang_v1.both_supplier_customer');
             }
@@ -990,8 +1245,10 @@ public function store(Request $request)
 
             $client = Client::where('contact_id',$contact->id)->first();
 
+            $delivery = Delivery::where('contact_id',$contact->id)->first();
+
             return view('contact.edit')
-                ->with(compact('contact','client', 'business_locations','types', 'customer_groups', 'opening_balance'));
+                ->with(compact('contact','client','delivery', 'business_locations','types', 'customer_groups', 'opening_balance'));
         }
     }
 
@@ -1091,6 +1348,37 @@ public function store(Request $request)
                     }
     
                     $client->update($updateData);
+                }
+
+                // delivery-specific data and creation
+                if ($request->input('type') === 'delivery') {
+                    // Adjust validation rules
+                    $request->validate([
+                        'email_address' => 'required|email|unique:deliveries,email_address,' . $request->client_id, // Exclude current record
+                        'password' => 'nullable|string|min:8', // Make password optional
+                        'business_location_id' => 'required|integer',
+                        'location' => 'nullable|string',
+                    ]);
+    
+                    // Prepare delivery data and update record
+                    $deliveryData = $request->only(['delivery_id', 'location','email_address', 'password', 'business_location_id', 'latitude', 'longitude']);
+                    $delivery = Delivery::findOrFail($deliveryData['delivery_id']);
+                    
+                    // Prepare data for delivery update
+                    $updateData = [
+                        'email_address' => $deliveryData['email_address'],
+                        'business_location_id' => $deliveryData['business_location_id'],
+                        'contact_id' => $output['data']->id,
+                        'location' => $clientData['location'] ?? null,
+
+                    ];
+    
+                    // Update password only if provided
+                    if (!empty($deliveryData['password'])) {
+                        $updateData['password'] = Hash::make($deliveryData['password']);
+                    }
+    
+                    $delivery->update($updateData);
                 }
     
                 // Log the activity

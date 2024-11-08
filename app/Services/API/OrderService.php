@@ -11,6 +11,7 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Transaction;
+use App\Notifications\OrderCreatedNotification;
 use App\Services\BaseService;
 use App\Traits\CheckQuantityTrait;
 use App\Traits\HelperTrait;
@@ -30,6 +31,7 @@ class OrderService extends BaseService
     use UploadFileTrait, HelperTrait, CheckQuantityTrait;
 
     protected $productUtil;
+    protected $moduleUtil;
     protected $transactionUtil;
     protected $contactUtil;
     protected $cartService;
@@ -44,10 +46,12 @@ class OrderService extends BaseService
         ProductUtil $productUtil,
         TransactionUtil $transactionUtil,
         ContactUtil $contactUtil,
+        ModuleUtil $moduleUtil,
         OrderTrackingService $orderTrackingService,
         CartService $cartService
     ) {
         $this->contactUtil = $contactUtil;
+        $this->moduleUtil = $moduleUtil;
         $this->productUtil = $productUtil;
         $this->transactionUtil = $transactionUtil;
         $this->cartService = $cartService;
@@ -141,11 +145,13 @@ class OrderService extends BaseService
 
             }
 
-            \Log::info("makeSale method is about to be called.");
             $saleResponse = $this->makeSale($order, $client, $carts);
-            \Log::info("makeSale method has been called.");
 
             DB::commit();
+
+            $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+
+            \Notification::send($admins, new OrderCreatedNotification($order));
 
 
             return new OrderResource($order);

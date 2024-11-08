@@ -19,7 +19,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.filters', ['title' => __('report.filters'), 'class' => 'hide'])
-    @if($type == 'customer' || $type == 'client')
+    @if($type == 'customer' || $type == 'client' ||  $type == 'delivery')
         <div class="col-md-3">
             <div class="form-group">
                 <label>
@@ -96,7 +96,7 @@
                             <th>@lang('contact.mobile')</th>
                             <th>@lang('contact.total_purchase_due')</th>
                             <th>@lang('lang_v1.total_purchase_return_due')</th>
-                        @elseif( $type == 'customer' || $type == 'client')
+                        @elseif( $type == 'customer' || $type == 'client' || $type == 'delivery')
                             <th>@lang('business.business_name')</th>
                             <th>@lang('user.name')</th>
                             <th>@lang('business.email')</th>

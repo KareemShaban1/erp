@@ -126,6 +126,45 @@
            </div>
            </div>
 
+           <div class="delivery_fields" style="display: none; margin:15px">
+            <input type="hidden" name="delivery_id" value="{{$delivery->id}}">
+           <div class="row">
+           <div class="col-md-4" >
+                <div class="form-group">
+                    {!! Form::label('email', __( 'business.email_address' ) . ':') !!}
+                    {!! Form::email('email_address', $delivery->email_address, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+                <div class="form-group">
+                    {!! Form::label('password', __( 'business.password' ) . ':') !!}
+                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                </div>
+            </div>
+           </div>
+
+           <div class="row">
+           <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('location', __( 'business.location' ) . ':') !!}
+                    {!! Form::text('location', $delivery->location, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('business_location_id', $business_locations, $delivery->business_location_id , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
+                </div>
+            </div>
+           </div>
+           </div>
 
         <div class="col-md-4 customer_fields">
           <div class="form-group">

@@ -196,6 +196,12 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     
 
     Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
+    Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
+
+
+    Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
+
+    Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');
 
 
     Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');

@@ -56,7 +56,8 @@ class DataController extends Controller
             $employee = User::find($data['applied_by']);
 
             if (!empty($employee)) {
-                $msg = __('essentials::lang.new_leave_notification', ['employee' => $employee->user_full_name, 'ref_no' => $data['ref_no']]);
+                $msg = __('essentials::lang.new_leave_notification', 
+                ['employee' => $employee->user_full_name, 'ref_no' => $data['ref_no']]);
 
                 $notification_data = [
                     'msg' => $msg,
@@ -116,7 +117,8 @@ class DataController extends Controller
             $assigned_by = User::find($data['assigned_by']);
 
             if (!empty($assigned_by)) {
-                $msg = __('essentials::lang.new_task_notification', ['assigned_by' => $assigned_by->user_full_name, 'task_id' => $data['task_id']]);
+                $msg = __('essentials::lang.new_task_notification', 
+                ['assigned_by' => $assigned_by->user_full_name, 'task_id' => $data['task_id']]);
 
                 $notification_data = [
                     'msg' => $msg,
@@ -132,7 +134,8 @@ class DataController extends Controller
 
             $comment = EssentialsTodoComment::with(['task', 'added_by'])->find($data['comment_id']);
             if (!empty($comment)) {
-                $msg = __('essentials::lang.new_task_comment_notification', ['added_by' => $comment->added_by->user_full_name, 'task_id' => $comment->task->task_id]);
+                $msg = __('essentials::lang.new_task_comment_notification',
+                 ['added_by' => $comment->added_by->user_full_name, 'task_id' => $comment->task->task_id]);
 
                 $notification_data = [
                     'msg' => $msg,
@@ -149,7 +152,8 @@ class DataController extends Controller
             $uploaded_by = User::find($data['uploaded_by']);
 
             if (!empty($uploaded_by)) {
-                $msg = __('essentials::lang.new_task_document_notification', ['uploaded_by' => $uploaded_by->user_full_name, 'task_id' => $data['task_id']]);
+                $msg = __('essentials::lang.new_task_document_notification', 
+                ['uploaded_by' => $uploaded_by->user_full_name, 'task_id' => $data['task_id']]);
 
                 $notification_data = [
                     'msg' => $msg,
@@ -159,7 +163,21 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        }
+        }elseif ($notification->type ==
+        'App\Notifications\OrderCreatedNotification') {
+        $data = $notification->data;
+
+          $msg = __('lang_v1.new_order_notification', 
+        ['client' => $data['client'], 'order_number' => $data['order_number']]);
+
+        $notification_data = [
+            'msg' => $msg,
+            'icon_class' => 'fa fa-cube bg-green',
+            'link' =>action('ApplicationDashboard\OrderController@index', ['status' => 'all']),
+            'read_at' => $notification->read_at,
+            'created_at' => $notification->created_at->diffForHumans()
+        ];
+    } 
 
         return $notification_data;
     }
@@ -284,12 +302,12 @@ class DataController extends Controller
                     )
                 ->order(87);
                     
-                // $menu->url(
-                //     action('\Modules\Essentials\Http\Controllers\ToDoController@index'),
-                //     __('essentials::lang.essentials'),
-                //     ['icon' => 'fa fas fa-check-circle', 'active' => request()->segment(1) == 'essentials', 'style' => config('app.env') == 'demo' ? 'background-color: #001f3f !important;' : '']
-                // )
-                // ->order(87);
+                $menu->url(
+                    action('\Modules\Essentials\Http\Controllers\ToDoController@index'),
+                    __('essentials::lang.essentials'),
+                    ['icon' => 'fa fas fa-check-circle', 'active' => request()->segment(1) == 'essentials', 'style' => config('app.env') == 'demo' ? 'background-color: #001f3f !important;' : '']
+                )
+                ->order(87);
             });
         }
     }
