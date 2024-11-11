@@ -40,7 +40,8 @@ class DeliveryController extends Controller
 
                             }
 
-                    return new OrderCollection($orders);
+            return $this->returnJSON(new OrderCollection($orders),'Unassigned orders for your location');
+                    // return ;
           }
           public function getAssignedOrders()
           {
@@ -61,7 +62,9 @@ class DeliveryController extends Controller
                         return $this->returnJSON([],'No assigned orders found for you');
                     }
 
-                    return new OrderCollection($assignedOrders);
+                    return $this->returnJSON(new OrderCollection($assignedOrders),'Assigned orders found for you');
+
+                    // return ;
 
           }
 
@@ -93,7 +96,9 @@ class DeliveryController extends Controller
                   return $this->returnJSON([],'No assigned orders found for you');
               }
           
-              return new OrderCollection($assignedOrders);
+              return $this->returnJSON(new OrderCollection($assignedOrders),'All orders found for you');
+
+            //   return ;
           }
           
 
