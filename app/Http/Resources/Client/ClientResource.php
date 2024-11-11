@@ -31,6 +31,8 @@ class ClientResource extends JsonResource
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'location' => $this->location,
+                    'latitude' => $this->latitude,
+                    'longitude' => $this->longitude,
                     'client_type' => $this->client_type,
                     'contact' => (new ContactResource($this->contact))->withFullData(true),
                     'business_location' => (new BusinessLocationResource($this->business_location))->withFullData(true),

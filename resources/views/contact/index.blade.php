@@ -100,16 +100,16 @@
                             <th>@lang('business.business_name')</th>
                             <th>@lang('user.name')</th>
                             <th>@lang('business.email')</th>
-                            <th>@lang('contact.tax_no')</th>
-                            <th>@lang('lang_v1.credit_limit')</th>
-                            <th>@lang('contact.pay_term')</th>
+                            <!-- <th>@lang('contact.tax_no')</th> -->
+                            <!-- <th>@lang('lang_v1.credit_limit')</th> -->
+                            <!-- <th>@lang('contact.pay_term')</th> -->
                             <th>@lang('account.opening_balance')</th>
                             <th>@lang('lang_v1.advance_balance')</th>
                             <th>@lang('lang_v1.added_on')</th>
                             @if($reward_enabled)
                                 <th id="rp_col">{{session('business.rp_name')}}</th>
                             @endif
-                            <th>@lang('lang_v1.customer_group')</th>
+                            <!-- <th>@lang('lang_v1.customer_group')</th> -->
                             <th>@lang('business.address')</th>
                             <th>@lang('contact.mobile')</th>
                             <th>@lang('contact.total_sale_due')</th>

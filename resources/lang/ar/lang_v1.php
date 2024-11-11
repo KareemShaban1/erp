@@ -1418,7 +1418,8 @@ return [
 "cancel"=>"الغاء",
 "delivery_assigned"=>"تم تعيين الدليفرى",
 "view_order_info"=>"عرض معلومات الطلب",
-""=>"",
+
+"clients"=>"عملاء التطبيق",
 "business_location"=>"الفرع",
 "order_number"=>"رقم الطلب",
 "order_details"=>"تفاصيل الطلب",
@@ -1428,4 +1429,9 @@ return [
 
 "new_order_notification" => ":client تم طلب أوردر بواسطة. رقم الطلب - <i>:order_number </i>",
 
+"delivery_name"=>"أسم الدليفرى",
+"order_total_price"=>"سعر الطلب الكلى",
+"order_date_time"=>"تاريخ و وقت الطلب",
+"orderDeliveries"=>"طلبات الدليفرى",
+"client_name"=>"أسم العميل"
 ];

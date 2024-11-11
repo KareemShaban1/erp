@@ -270,6 +270,35 @@ class ApplicationSidebarMenu
                 ['icon' => 'fa fa-cart-arrow-down']
             )->order(24);
 
+            $menu->dropdown(
+                __('lang_v1.orderDeliveries'),
+                function ($sub) {
+                    // Link for All Deliveries (no specific delivery_id)
+                    $sub->url(
+                        action('ApplicationDashboard\DeliveryController@allDeliveries'),
+                        __('lang_v1.allDeliveries'),
+                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
+                    );
+            
+                    // Conditionally handle the URL for orderDeliveries with optional delivery_id
+                    // Check if there's a specific delivery_id (you could determine this based on the context)
+                    $delivery_id = request()->get('delivery_id'); // Or some other logic to get the delivery_id
+            
+                    // If delivery_id exists, include it in the URL
+                    $orderDeliveriesUrl = $delivery_id
+                        ? action('ApplicationDashboard\DeliveryController@orderDeliveries', ['delivery_id' => $delivery_id])
+                        : action('ApplicationDashboard\DeliveryController@orderDeliveries'); // Default to no delivery_id
+            
+                    $sub->url(
+                        $orderDeliveriesUrl,
+                        __('lang_v1.orderDeliveries'),
+                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
+                    );
+                },
+                ['icon' => 'fa fa-cart-arrow-down']
+            )->order(25);
+            
+
         });
 
         //Add menus from modules

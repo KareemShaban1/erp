@@ -434,9 +434,9 @@ $(document).ready(function() {
             { data: 'supplier_business_name', name: 'supplier_business_name' },
             { data: 'name', name: 'name' },
             { data: 'email', name: 'email' },
-            { data: 'tax_number', name: 'tax_number' },
-            { data: 'credit_limit', name: 'credit_limit' },
-            { data: 'pay_term', name: 'pay_term', searchable: false, orderable: false },
+            // { data: 'tax_number', name: 'tax_number' },
+            // { data: 'credit_limit', name: 'credit_limit' },
+            // { data: 'pay_term', name: 'pay_term', searchable: false, orderable: false },
             { data: 'opening_balance', name: 'opening_balance', searchable: false },
             { data: 'balance', name: 'balance', searchable: false },
             { data: 'created_at', name: 'contacts.created_at' }
@@ -445,7 +445,8 @@ $(document).ready(function() {
         if ($('#rp_col').length) {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
-        Array.prototype.push.apply(columns, [{ data: 'customer_group', name: 'cg.name' },
+        Array.prototype.push.apply(columns, [
+            // { data: 'customer_group', name: 'cg.name' },
             { data: 'address', name: 'address', orderable: false },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
@@ -460,9 +461,9 @@ $(document).ready(function() {
             { data: 'supplier_business_name', name: 'supplier_business_name' },
             { data: 'name', name: 'name' },
             { data: 'email', name: 'email' },
-            { data: 'tax_number', name: 'tax_number' },
-            { data: 'credit_limit', name: 'credit_limit' },
-            { data: 'pay_term', name: 'pay_term', searchable: false, orderable: false },
+            // { data: 'tax_number', name: 'tax_number' },
+            // { data: 'credit_limit', name: 'credit_limit' },
+            // { data: 'pay_term', name: 'pay_term', searchable: false, orderable: false },
             { data: 'opening_balance', name: 'opening_balance', searchable: false },
             { data: 'balance', name: 'balance', searchable: false },
             { data: 'created_at', name: 'contacts.created_at' }
@@ -471,7 +472,8 @@ $(document).ready(function() {
         if ($('#rp_col').length) {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
-        Array.prototype.push.apply(columns, [{ data: 'customer_group', name: 'cg.name' },
+        Array.prototype.push.apply(columns, [
+            // { data: 'customer_group', name: 'cg.name' },
             { data: 'address', name: 'address', orderable: false },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
