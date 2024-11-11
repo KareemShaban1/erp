@@ -40,13 +40,13 @@ class EssentialsAllowanceAndDeductionController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
-        if (!(auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
-            abort(403, 'Unauthorized action.');
-        }
+        // if (!(auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        //     abort(403, 'Unauthorized action.');
+        // }
 
-        if (!auth()->user()->can('essentials.add_allowance_and_deduction') && !auth()->user()->can('essentials.view_allowance_and_deduction')) {
-            abort(403, 'Unauthorized action.');
-        }
+        // if (!auth()->user()->can('essentials.add_allowance_and_deduction') && !auth()->user()->can('essentials.view_allowance_and_deduction')) {
+        //     abort(403, 'Unauthorized action.');
+        // }
 
         if (request()->ajax()) {
             $allowances = EssentialsAllowanceAndDeduction::where('business_id', $business_id)
@@ -80,6 +80,8 @@ class EssentialsAllowanceAndDeductionController extends Controller
                 ->rawColumns(['action', 'amount'])
                 ->make(true);
         }
+
+        return view('essentials::allowance_deduction.index');
     }
 
     /**

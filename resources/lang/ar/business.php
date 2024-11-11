@@ -72,7 +72,7 @@
 "business_location_added_success" => "تمت إضافة الفرع",
 "edit_business_location" => "تغيير الموقع التجاري للشركة",
 "business_location_updated_success" => "تم تحديث موقع النشاط التجاري للشركة بنجاح",
-"location" => "الفرع",
+"location" => "المكان",
 "already_registered" => "مسجل بالفعل؟",
 "sign_in" => "تسجيل الدخول",
 "not_yet_registered" => "لم تسجل بعد؟",

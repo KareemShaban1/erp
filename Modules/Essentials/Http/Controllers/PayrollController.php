@@ -197,6 +197,7 @@ class PayrollController extends Controller
                     ->whereDate('transaction_date', $transaction_date)
                     ->get();
 
+
         $add_payroll_for = array_diff($employee_ids, $payrolls->pluck('expense_for')->toArray());
 
         if (!empty($add_payroll_for)) {
@@ -234,6 +235,7 @@ class PayrollController extends Controller
 
                 //get earnings & deductions of employee
                 $allowances_and_deductions = $this->essentialsUtil->getEmployeeAllowancesAndDeductions($business_id, $employee->id, $start_date, $end_date);
+                dd($allowances_and_deductions);
                 foreach ($allowances_and_deductions as $ad) {
                     if ($ad->type == 'allowance') {
                         $payrolls[$employee->id]['allowances']['allowance_names'][] = $ad->description;

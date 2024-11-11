@@ -80,6 +80,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
     Route::middleware('auth:sanctum-delivery')->group(function () {
         Route::get('getNotAssignedOrders', [DeliveryController::class, 'getNotAssignedOrders']);
 
+        // getDeliveryOrders
+        Route::get('getDeliveryOrders', [DeliveryController::class, 'getDeliveryOrders']);
+
         Route::get('getAssignedOrders', [DeliveryController::class, 'getAssignedOrders']);
         Route::post('assignDelivery', [DeliveryController::class, 'assignDelivery']);
 

@@ -1410,7 +1410,8 @@ return [
 "reason"=>"السبب",
 "admin_response"=>"رد الأدمن",
 "amount"=>"الكمية",
-""=>"",
+
+"deliverys"=>"الدليفرى",
 "assign_delivery"=>"تعيين دليفرى",
 "select_delivery"=>"اختار دليفرى",
 "assign"=>"تعيين",

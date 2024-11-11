@@ -30,7 +30,7 @@ class DeliveryController extends Controller
 
                     // Get orders that belong to the delivery's business location but are not assigned in DeliveryOrder
                     $orders = Order::
-                              where('order_status', 'pending')->
+                              where('order_status', 'processing')->
                               where('business_location_id', $delivery->business_location_id)
                               ->whereNotIn('id', $assignedOrderIds)
                               ->get();
@@ -51,7 +51,7 @@ class DeliveryController extends Controller
 
                     // Retrieve assigned orders based on the delivery ID in DeliveryOrder
                     $assignedOrders = Order::
-                              where('order_status', 'pending')->
+                              where('order_status', 'processing')->
                               whereHas('deliveries', function ($query) use ($delivery) {
                                         $query->where('delivery_id', $delivery->id);
                               })->get();
@@ -63,6 +63,38 @@ class DeliveryController extends Controller
                     return new OrderCollection($assignedOrders);
 
           }
+
+
+          public function getDeliveryOrders(Request $request)
+          {
+              $delivery = Delivery::where('id', Auth::user()->id)->first();
+          
+              if (!$delivery) {
+                  return response()->json(['message' => 'Delivery user not found'], 404);
+              }
+          
+              // Retrieve the status from the request, defaulting to 'all' if not provided
+              $status = $request->input('status', 'all');
+          
+              // Retrieve assigned orders based on the delivery ID and status
+              $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
+                  $query->where('delivery_id', $delivery->id);
+              });
+          
+              // Apply status filter if specified and not 'all'
+              if ($status !== 'all') {
+                  $assignedOrders->where('order_status', $status);
+              }
+          
+              $assignedOrders = $assignedOrders->get();
+          
+              if ($assignedOrders->isEmpty()) {
+                  return response()->json(['message' => 'No assigned orders found for you'], 404);
+              }
+          
+              return new OrderCollection($assignedOrders);
+          }
+          
 
           public function assignDelivery(Request $request)
           {
