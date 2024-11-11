@@ -36,8 +36,9 @@ class DeliveryController extends Controller
                               ->get();
 
                     if ($orders->isEmpty()) {
-                              return response()->json(['message' => 'No unassigned orders found for your location'], 404);
-                    }
+                              return $this->returnJSON([],'No unassigned orders found for your location');
+
+                            }
 
                     return new OrderCollection($orders);
           }
@@ -57,7 +58,7 @@ class DeliveryController extends Controller
                               })->get();
 
                     if ($assignedOrders->isEmpty()) {
-                              return response()->json(['message' => 'No assigned orders found for you'], 404);
+                        return $this->returnJSON([],'No assigned orders found for you');
                     }
 
                     return new OrderCollection($assignedOrders);
@@ -89,7 +90,7 @@ class DeliveryController extends Controller
               $assignedOrders = $assignedOrders->get();
           
               if ($assignedOrders->isEmpty()) {
-                  return response()->json(['message' => 'No assigned orders found for you'], 404);
+                  return $this->returnJSON([],'No assigned orders found for you');
               }
           
               return new OrderCollection($assignedOrders);
