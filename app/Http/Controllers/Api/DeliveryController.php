@@ -69,7 +69,7 @@ class DeliveryController extends Controller
           }
 
 
-          public function getDeliveryOrders(Request $request)
+          public function getDeliveryOrders($status)
           {
               $delivery = Delivery::where('id', Auth::user()->id)->first();
           
@@ -78,7 +78,7 @@ class DeliveryController extends Controller
               }
           
               // Retrieve the status from the request, defaulting to 'all' if not provided
-              $status = $request->input('status', 'all');
+            //   $status = $request->input('status', 'all');
           
               // Retrieve assigned orders based on the delivery ID and status
               $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
