@@ -17,72 +17,53 @@ class OrderTracking extends Model
     protected $fillable = ['order_id', 'pending_at', 'processing_at', 'shipped_at', 'canceled_at', 'completed_at'];
 
     /**
-     * Convert pending_at to a timestamp if it is set.
+     * Convert pending_at to 'Y-m-d H:i:s' format if it is set.
      *
-     * @return int|null
+     * @return string|null
      */
     public function getPendingAtAttribute($value)
     {
-        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
+        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
     /**
-     * Convert processing_at to a timestamp if it is set.
+     * Convert processing_at to 'Y-m-d H:i:s' format if it is set.
      *
-     * @return int|null
+     * @return string|null
      */
     public function getProcessingAtAttribute($value)
     {
-        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
+        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
     /**
-     * Convert shipped_at to a timestamp if it is set.
+     * Convert shipped_at to 'Y-m-d H:i:s' format if it is set.
      *
-     * @return int|null
+     * @return string|null
      */
     public function getShippedAtAttribute($value)
     {
-        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
+        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
     /**
-     * Convert canceled_at to a timestamp if it is set.
+     * Convert canceled_at to 'Y-m-d H:i:s' format if it is set.
      *
-     * @return int|null
+     * @return string|null
      */
     public function getCanceledAtAttribute($value)
     {
-        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
+        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
     /**
-     * Convert completed_at to a timestamp if it is set.
+     * Convert completed_at to 'Y-m-d H:i:s' format if it is set.
      *
-     * @return int|null
+     * @return string|null
      */
     public function getCompletedAtAttribute($value)
     {
-        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
-    }
-
-    /**
-     * Ensure timestamps are converted to UNIX format in the response.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $array = parent::toArray();
-
-        // Convert dates to UNIX timestamps
-        $array['pending_at'] = $this->pending_at;
-        $array['processing_at'] = $this->processing_at;
-        $array['shipped_at'] = $this->shipped_at;
-        $array['canceled_at'] = $this->canceled_at;
-        $array['completed_at'] = $this->completed_at;
-
-        return $array;
+        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
 
     public function order()
