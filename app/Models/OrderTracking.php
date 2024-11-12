@@ -14,9 +14,9 @@ class OrderTracking extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_id','pending_at','processing_at','shipped_at','canceled_at','completed_at'];
+    protected $fillable = ['order_id', 'pending_at', 'processing_at', 'shipped_at', 'canceled_at', 'completed_at'];
 
-      /**
+    /**
      * Convert pending_at to a timestamp if it is set.
      *
      * @return int|null
@@ -66,7 +66,27 @@ class OrderTracking extends Model
         return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
-    public function order(){
+    /**
+     * Ensure timestamps are converted to UNIX format in the response.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        // Convert dates to UNIX timestamps
+        $array['pending_at'] = $this->pending_at;
+        $array['processing_at'] = $this->processing_at;
+        $array['shipped_at'] = $this->shipped_at;
+        $array['canceled_at'] = $this->canceled_at;
+        $array['completed_at'] = $this->completed_at;
+
+        return $array;
+    }
+
+    public function order()
+    {
         return $this->belongsTo(Order::class);
     }
 }
