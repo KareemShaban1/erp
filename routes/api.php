@@ -58,7 +58,6 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
 
         Route::get('orders', [OrderController::class, 'index']);
-        Route::get('orders/{id}', [OrderController::class, 'show']);
         Route::post('orders', [OrderController::class, 'store']);
         Route::post('orders/update/{id}', [OrderController::class, 'update']);
         Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
@@ -91,6 +90,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
     });
 
     Route::get('banners', [BannerController::class, 'index']);
+    Route::get('orders/{id}', [OrderController::class, 'show']);
 
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);
