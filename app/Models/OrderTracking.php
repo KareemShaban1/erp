@@ -16,14 +16,14 @@ class OrderTracking extends Model
      */
     protected $fillable = ['order_id','pending_at','processing_at','shipped_at','canceled_at','completed_at'];
 
-    /**
+      /**
      * Convert pending_at to a timestamp if it is set.
      *
      * @return int|null
      */
     public function getPendingAtAttribute($value)
     {
-        return $value ? strtotime($value) : null;
+        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
     /**
@@ -33,7 +33,7 @@ class OrderTracking extends Model
      */
     public function getProcessingAtAttribute($value)
     {
-        return $value ? strtotime($value) : null;
+        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
     /**
@@ -43,7 +43,7 @@ class OrderTracking extends Model
      */
     public function getShippedAtAttribute($value)
     {
-        return $value ? strtotime($value) : null;
+        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
     /**
@@ -53,7 +53,7 @@ class OrderTracking extends Model
      */
     public function getCanceledAtAttribute($value)
     {
-        return $value ? strtotime($value) : null;
+        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
     /**
@@ -63,7 +63,7 @@ class OrderTracking extends Model
      */
     public function getCompletedAtAttribute($value)
     {
-        return $value ? strtotime($value) : null;
+        return $value ? \Carbon\Carbon::parse($value)->timestamp : null;
     }
 
     public function order(){
