@@ -299,6 +299,9 @@ class ApplicationSidebarMenu
             )->order(25);
             
 
+            $menu->url(action('ApplicationDashboard\ApplicationSettingsController@index'), __('lang_v1.application_settings'), ['icon' => 'fa fas fa-cogs', 'active' => request()->segment(1) == 'notification-templates'])->order(80);
+
+            // ApplicationDashboard\ApplicationSettingsController@index
         });
 
         //Add menus from modules

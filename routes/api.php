@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ApplicationSettingsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\BrandController;
@@ -14,7 +15,6 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\WarrantyController;
 use App\Http\Controllers\Api\DeliveryController;
-use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
     Route::get('banners', [BannerController::class, 'index']);
     Route::get('orders/{id}', [OrderController::class, 'show']);
 
+    Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin']);

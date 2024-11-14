@@ -225,6 +225,27 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
 
+    // Route::resource('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController');
+    Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
+    ->name('application_settings.index');
+
+    Route::get('applicationDashboard/settings/create', 'ApplicationDashboard\ApplicationSettingsController@create')
+    ->name('application_settings.create');
+
+    Route::get('applicationDashboard/settings/show/{id}', 'ApplicationDashboard\ApplicationSettingsController@show')
+    ->name('application_settings.show');
+
+
+    Route::post('applicationDashboard/settings/store', 'ApplicationDashboard\ApplicationSettingsController@store')
+    ->name('application_settings.store');
+
+    Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
+    ->name('application_settings.update');
+
+    Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
+    ->name('application_settings.destroy');
+
+
 });
 
 //Routes for authenticated users only
