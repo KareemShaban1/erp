@@ -223,7 +223,7 @@ class AccountController extends Controller
                 $user_id = $request->session()->get('user.id');
                 $input['business_id'] = $business_id;
                 $input['created_by'] = $user_id;
-               
+                
                 $account = Account::create($input);
 
                 //Opening Balance

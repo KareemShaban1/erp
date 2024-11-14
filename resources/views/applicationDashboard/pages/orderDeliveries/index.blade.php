@@ -23,6 +23,7 @@
                         <th>@lang('lang_v1.order_number')</th>
                         <th>@lang('lang_v1.client_name')</th>
                         <th>@lang('lang_v1.order_status')</th>
+                        <th>@lang('lang_v1.payment_status')</th>
                         <th>@lang('lang_v1.order_total_price')</th>
                         <th>@lang('lang_v1.order_date_time')</th>
                     </tr>
@@ -68,6 +69,25 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
         { data: 'order.number', name: 'order.number' },
         { data: 'client_name', name: 'order.client.contact.name' },
         { data: 'order.order_status', name: 'order.order_status' },
+        // { data: 'payment_status', name: 'payment_status' },
+        {
+                data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+                    let badgeClass;
+                    switch (data) {
+                        case 'paid': badgeClass = 'badge btn-success'; break;
+                        case 'not_paid': badgeClass = 'badge btn-danger'; break;
+                        default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                    }
+
+                    return `
+                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                    
+            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                <option value="not_paid" ${data === 'not_paid' ? 'selected' : ''}>Not Paid</option>
+            </select>`;
+                }
+            },
         { data: 'order.total', name: 'order.total' },
         { 
             data: 'order.created_at', 
@@ -196,6 +216,31 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
                         toastr.error(xhr.responseText || 'An error occurred');
                     }
                 });
+            }
+        });
+    });
+
+    $(document).on('change', '.change-payment-status', function () {
+        var orderId = $(this).data('order-id');
+        var status = $(this).val();
+
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\DeliveryController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+            type: 'POST',
+            data: {
+                payment_status: status,
+                _token: '{{ csrf_token() }}' // CSRF token for security
+            },
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    orderDeliveries_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                } else {
+                    alert('Failed to update order status.');
+                }
+            },
+            error: function (xhr) {
+                alert('An error occurred: ' + xhr.responseText);
             }
         });
     });

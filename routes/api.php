@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\WarrantyController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\FcmController;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -73,6 +75,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::get('orders-refunds', [OrderRefundController::class, 'index']);
         Route::post('orders-refunds', [OrderRefundController::class, 'store']);
 
+        Route::get('sendNotification', [NotificationController::class, 'sendNotification']);
+
+
     
     });
 
@@ -98,5 +103,8 @@ Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin']);
 
 Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
+// sendNotification
 
 Route::post('user/login', [AuthController::class, 'userLogin']);
+Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
+Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);

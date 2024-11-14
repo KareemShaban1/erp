@@ -11,12 +11,17 @@ class ApplicationSettingsController extends Controller
     /**
      * Display a listing of the settings.
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $settings = ApplicationSettings::all();
+            return response()->json($settings);
+        }
+    
         $settings = ApplicationSettings::all();
         return view('applicationDashboard.pages.settings.index', compact('settings'));
     }
-
+    
     /**
      * Show the form for creating a new setting.
      */
@@ -31,20 +36,20 @@ class ApplicationSettingsController extends Controller
      */
     public function store(Request $request)
     {
-        // dd( $request->all());
 
         $request->validate([
             'key' => 'required|string|unique:application_settings,key',
             'type' => 'required|in:string,boolean,text,integer,float,json',
             'value' => 'nullable',
+            'group' => 'nullable|string',
         ]);
 
         $setting = new ApplicationSettings();
         $setting->key = $request->key;
         $setting->type = $request->type;
+        $setting->group = $request->group;
         $setting->value = $this->castValue($request->value, $request->type);
 
-        // dd($setting->value);
 
         $setting->save();
 
@@ -52,15 +57,15 @@ class ApplicationSettingsController extends Controller
     }
 
     public function show($id)
-{
+    {
     // Fetch the setting by ID
     $setting = ApplicationSettings::findOrFail($id);
 
     // Return the setting details as a JSON response
-    return response()->json([
-        'data' => $setting
-    ]);
-}
+        return response()->json([
+            'data' => $setting
+        ]);
+    }
 
 
     /**
@@ -83,13 +88,14 @@ class ApplicationSettingsController extends Controller
             'key' => 'required|string|unique:application_settings,key,' . $applicationSetting->id,
             'type' => 'required|in:string,boolean,text,integer,float,json',
             'value' => 'nullable',
+            'group' => 'nullable|string',
         ]);
 
 
         $applicationSetting->key = $request->key;
         $applicationSetting->type = $request->type;
+        $applicationSetting->group = $request->group;
         $applicationSetting->value = $this->castValue($request->value, $request->type);
-        // dd($applicationSetting->id , $applicationSetting->value);
 
         $applicationSetting->save();
 

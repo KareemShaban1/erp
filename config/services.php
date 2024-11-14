@@ -34,4 +34,10 @@ return [
         'secret' => env('SPARKPOST_SECRET'),
     ],
 
+    'fcm' => [
+        'key' => env('FCM_SERVER_KEY'),
+        'url' => env('FCM_API_URL'),
+        'project_id'=>'el-tab3een'
+    ],
+
 ];

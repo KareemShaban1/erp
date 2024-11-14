@@ -15,7 +15,7 @@ class DeliveryOrder extends Model
      *
      * @var array
      */
-    protected $fillable = ['order_id','delivery_id','status',
+    protected $fillable = ['order_id','delivery_id','status','payment_status',
     'assigned_at','shipped_at','delivered_at'];
 
     public function order(){

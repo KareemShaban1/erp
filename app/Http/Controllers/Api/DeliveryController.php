@@ -145,7 +145,7 @@ class DeliveryController extends Controller
           public function changeOrderStatus($orderId)
           {
               // Define allowed statuses
-              $validStatuses = ['pending', 'processing', 'shipped', 'cancelled', 'completed'];
+              $validStatuses = ['shipped', 'completed'];
           
               // Retrieve and validate the input status
               $status = request()->input('order_status');
@@ -163,23 +163,21 @@ class DeliveryController extends Controller
               // Update the order status
               $order->order_status = $status;
               $order->save();
+
           
               // Check if an OrderTracking record already exists for the order; if not, create one
               $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
           
               // Update the appropriate timestamp in the OrderTracking record based on the status
               switch ($status) {
-                  case 'pending':
-                      $orderTracking->pending_at = now();
-                      break;
-                  case 'processing':
-                      $orderTracking->processing_at = now();
-                      break;
                   case 'shipped':
                       $orderTracking->shipped_at = now();
-                      break;
-                  case 'cancelled':
-                      $orderTracking->cancelled_at = now();
+                        // Update delivery contact balance based on order total
+                        $delivery = Delivery::find(Auth::id());
+                        if ($delivery && $delivery->contact) {
+                            $delivery->contact->balance -= $order->total;
+                            $delivery->contact->save();
+                        }
                       break;
                   case 'completed':
                       $orderTracking->completed_at = now();

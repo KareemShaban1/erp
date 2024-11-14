@@ -200,7 +200,7 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     // Route::get('applicationDashboard/orderDeliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries');
 
-    Route::get('/order-deliveries/{delivery_id?}', 'ApplicationDashboard\DeliveryController@orderDeliveries')->name('order.deliveries');
+    Route::get('/order-deliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries')->name('order.deliveries');
 
     Route::get('applicationDashboard/allDeliveries', 'ApplicationDashboard\DeliveryController@allDeliveries');
 
@@ -208,12 +208,14 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
 
     Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');
+    Route::post('applicationDashboard/deliveries/{orderId}/change-payment-status', 'ApplicationDashboard\DeliveryController@changePaymentStatus');
 
 
     Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
     Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
 
 
+    // changePaymentStatus
     Route::resource('applicationDashboard/order-cancellations', 'ApplicationDashboard\OrderCancellationController');
     Route::post('applicationDashboard/order-cancellations/{orderCancellationId}/change-status', 
     'ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus');

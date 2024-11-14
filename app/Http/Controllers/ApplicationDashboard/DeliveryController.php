@@ -93,11 +93,10 @@ class DeliveryController extends Controller
                     return $row->contact->name ?? '';
                 })
                 ->addColumn('action', function ($row) {
-                    // Add a button to redirect to orderDeliveries with delivery_id
                     $url = route('order.deliveries', ['delivery_id' => $row->id]);
-                    return '<a href="' . $url . '" class="btn btn-primary">View Orders</a>';
+                    return '<a href="' . $url . '" class="btn btn-primary">' . __('lang_v1.view_orders') . '</a>';
                 })
-                ->rawColumns(['action']) // Make sure the 'action' column is rendered as HTML
+                ->rawColumns(['action'])
                 ->make(true);
         }
     
@@ -105,40 +104,74 @@ class DeliveryController extends Controller
     }
     
 
-    public function orderDeliveries($delivery_id = null)
-{
 
-    if (request()->ajax()) {
+    public function orderDeliveries(Request $request)
+    {
         $business_id = request()->session()->get('user.business_id');
+        // $delivery_id = $request->input('delivery_id'); // Get delivery_id from the POST request
 
-        // Load orders and related deliveries with their data
-        $ordersDeliveries = DeliveryOrder::with(['order.client.contact', 'delivery.contact'])
-            ->whereHas('delivery.contact', function ($query) use ($business_id) {
-                $query->where('business_id', $business_id);
-            });
+        $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
 
-        // If delivery_id is provided, filter the data based on the delivery_id
-        if (!empty($delivery_id)) {
-            $ordersDeliveries->where('delivery_id', $delivery_id);
+        if (request()->ajax()) {
+
+            // Load orders and related deliveries with their data
+            $ordersDeliveries = DeliveryOrder::with(['order.client.contact', 'delivery.contact'])
+                ->whereHas('delivery.contact', function ($query) use ($business_id) {
+                    $query->where('business_id', $business_id);
+                });
+
+            // If delivery_id is provided, filter the data based on the delivery_id
+            if (!empty($delivery_id)) {
+                $ordersDeliveries->where('delivery_id', $delivery_id);
+            }
+
+            return Datatables::of($ordersDeliveries)
+                ->addColumn('id', function ($row) {
+                    return $row->id;
+                })
+                ->addColumn('delivery_name', function ($row) {
+                    return $row->delivery->contact->name ?? '';
+                })
+                ->addColumn('client_name', function ($row) {
+                    return $row->order->client->contact->name ?? '';
+                })
+                ->make(true);
         }
 
-        return Datatables::of($ordersDeliveries)
-            ->addColumn('id', function ($row) {
-                return $row->id;
-            })
-            ->addColumn('delivery_name', function ($row) {
-                return $row->delivery->contact->name ?? '';
-            })
-            ->addColumn('client_name', function ($row) {
-                return $row->order->client->contact->name ?? '';
-            })
-            ->make(true);
+        // Pass delivery_id to the view outside AJAX block
+        return view('applicationDashboard.pages.orderDeliveries.index', compact('delivery_id'));
     }
-    return view('applicationDashboard.pages.orderDeliveries.index', compact('delivery_id'));
-
-    // return view('applicationDashboard.pages.orderDeliveries.index');
-}
 
 
+
+    public function changePaymentStatus($orderId)
+    {
+        $status = request()->input('payment_status');
+
+        $deliveryOrder = DeliveryOrder::findOrFail($orderId);
+        $deliveryOrder->payment_status = $status;
+
+
+        // Set the tracking status timestamp based on the status provided
+        switch ($status) {
+            case 'paid':
+                $delivery = Delivery::find($deliveryOrder->delivery_id);
+                if ($delivery && $delivery->contact) {
+                    $delivery->contact->balance += $deliveryOrder->order->total;
+                    $delivery->contact->save();
+                }
+
+                $deliveryOrder->paid_at = now();
+                break;
+            case 'not_paid':
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid status: $status");
+        }
+
+        $deliveryOrder->save();
+
+        return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
+    }
 
 }

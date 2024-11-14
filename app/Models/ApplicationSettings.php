@@ -14,5 +14,5 @@ class ApplicationSettings extends Model
      *
      * @var array
      */
-    protected $fillable = ['key','value','type'];
+    protected $fillable = ['key','value','type','group'];
 }
