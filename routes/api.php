@@ -77,7 +77,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::get('sendNotification', [NotificationController::class, 'sendNotification']);
 
+        Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
 
+        Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
     
     });
 
@@ -106,5 +108,3 @@ Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
 // sendNotification
 
 Route::post('user/login', [AuthController::class, 'userLogin']);
-Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
-Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);

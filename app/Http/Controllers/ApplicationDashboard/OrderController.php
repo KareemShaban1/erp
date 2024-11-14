@@ -29,7 +29,7 @@ class OrderController extends Controller
         $this->moduleUtil = $moduleUtil;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $status = request()->get('status');
         $statuses = ['all', 'pending', 'processing', 'shipped', 'cancelled', 'completed'];
@@ -39,10 +39,15 @@ class OrderController extends Controller
         }
 
         if (request()->ajax()) {
-            $startDate = request()->get('start_date');
+            // $request->query('delivery_id');
+            $startDate = $request->query('start_date');
+            // $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
 
+            // dd($startDate);
+
             if (!empty(request()->start_date) && !empty(request()->end_date)) {
+                dd($startDate);
                 $start = request()->start_date;
                 $end = request()->end_date;
                 dd($start, $end);

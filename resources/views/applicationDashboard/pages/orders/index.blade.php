@@ -16,10 +16,6 @@
     @can('lang_v1.create')
         @slot('tool')
         <div class="box-tools">
-            <!-- <button type="button" class="btn btn-block btn-primary btn-modal" 
-                                                        data-href="{{action('ApplicationDashboard\OrderController@create')}}" 
-                                                        data-container=".orders_modal">
-                                                        <i class="fa fa-plus"></i> @lang( 'messages.add' )</button> -->
         </div>
         <!-- @component('components.filters', ['title' => __('report.filters')])
                                     <div class="col-md-3">
@@ -29,6 +25,17 @@
                                         </div>
                                     </div>
                                 @endcomponent -->
+                                  <div class="row">
+            <div class="col-md-3">
+                <input type="date" id="start_date" class="form-control" placeholder="Start Date">
+            </div>
+            <div class="col-md-3">
+                <input type="date" id="end_date" class="form-control" placeholder="End Date">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary" id="filter_date">Filter</button>
+            </div>
+        </div>
         @endslot
     @endcan
     @can('lang_v1.view')
@@ -197,20 +204,8 @@
         ajax: {
             url: '{{ action("ApplicationDashboard\OrderController@index") }}',
             data: function (d) {
-                var start = '';
-                var end = '';
-                if ($('#purchase_list_filter_date_range').val()) {
-                    start = $('input#purchase_list_filter_date_range')
-                        .data('daterangepicker')
-                        .startDate.format('YYYY-MM-DD');
-                    end = $('input#purchase_list_filter_date_range')
-                        .data('daterangepicker')
-                        .endDate.format('YYYY-MM-DD');
-                }
-                d.start_date = start;
-                d.end_date = end;
-
-                d = __datatable_ajax_callback(d);
+                d.start_date = $('#start_date').val();
+                d.end_date = $('#end_date').val();
             }
         },
         columnDefs: [
@@ -286,14 +281,6 @@
                     </span>`;
                     }
 
-                    // Case 3: If the order status is not 'processing', no action needed
-                    // if (data !== 'processing') {
-                    //     return `<span class="badge badge-info">
-                    //                 @lang('lang_v1.status_' + data)
-                    //             </span>`;
-                    // }
-
-                    // Default case: Return empty if none of the above conditions are met
                     return '';
                 },
                 orderable: false,
