@@ -34,8 +34,6 @@ class OrderRefundController extends Controller
     {
         $status = request()->get('status');
 
-        $start_date = request()->get('start_date');
-        $end_date = request()->get('end_date');
 
         $statuses = ['all', 'requested','processed', 'approved', 'rejected'];
 
@@ -44,32 +42,35 @@ class OrderRefundController extends Controller
         }
 
         if (request()->ajax()) {
+            $start_date = request()->get('start_date');
+            $end_date = request()->get('end_date');
+    
             if ($status == 'requested') {
-                return $this->requestedOrderRefunds();
+                return $this->requestedOrderRefunds($start_date , $end_date);
             } elseif ($status == 'processed') {
-                return $this->processedOrderRefund();
+                return $this->processedOrderRefund($start_date , $end_date);
             } elseif ($status == 'approved') {
-                return $this->approvedOrderRefund();
+                return $this->approvedOrderRefund($start_date , $end_date);
             } elseif ($status == 'rejected') {
-                return $this->rejectedOrderRefund();
+                return $this->rejectedOrderRefund($start_date , $end_date);
             } elseif ($status == 'all') {
-                return $this->allOrders();
+                return $this->allOrders($start_date , $end_date);
             }
         }
 
 
-        return view('applicationDashboard.pages.orderRefunds.index');
+        return view('applicationDashboard.pages.orderRefunds.index',compact('status'));
     }
 
-    public function allOrders()
+    public function allOrders($startDate = null, $endDate = null)
     {
         $orderRefunds = OrderRefund::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
-            ->select(['id', 'order_id', 'client_id', 'status','amount']);
+            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
     
         // Apply date filter if start_date and end_date are provided
-        if (request()->has(['start_date', 'end_date'])) {
-            $orderRefunds->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        if ($startDate && $endDate) {
+            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
         }
     
         return Datatables::of($orderRefunds)
@@ -80,16 +81,17 @@ class OrderRefundController extends Controller
     }
     
     
-    public function requestedOrderRefunds()
+    public function requestedOrderRefunds($startDate = null, $endDate = null)
     {
         $orderRefunds = OrderRefund::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
             ->where('status', 'requested')
-            ->select(['id', 'order_id', 'client_id', 'status','amount']);
+            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
     
-        if (request()->has(['start_date', 'end_date'])) {
-            $orderRefunds->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-        }
+            if ($startDate && $endDate) {
+                $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        
     
         return Datatables::of($orderRefunds)
             ->addColumn('client_contact_name', function ($orderRefund) {
@@ -98,16 +100,17 @@ class OrderRefundController extends Controller
             ->make(true);
     }
 
-    public function processedOrderRefunds()
+    public function processedOrderRefunds($startDate = null, $endDate = null)
     {
         $orderRefunds = OrderRefund::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
             ->where('status', 'processed')
-            ->select(['id', 'order_id', 'client_id', 'status','amount']);
+            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
     
-        if (request()->has(['start_date', 'end_date'])) {
-            $orderRefunds->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-        }
+            if ($startDate && $endDate) {
+                $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
+            }
+        
     
         return Datatables::of($orderRefunds)
             ->addColumn('client_contact_name', function ($orderRefund) {
@@ -117,16 +120,17 @@ class OrderRefundController extends Controller
     }
     
     
-    public function approvedOrderRefund()
+    public function approvedOrderRefund($startDate = null, $endDate = null)
     {
         $orderRefunds = OrderRefund::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
         ->where('status', 'approved')
-        ->select(['id', 'order_id', 'client_id', 'status','amount']);
+        ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
 
-    if (request()->has(['start_date', 'end_date'])) {
-        $orderRefunds->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-    }
+        if ($startDate && $endDate) {
+            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
+        }
+    
 
     return Datatables::of($orderRefunds)
         ->addColumn('client_contact_name', function ($orderRefund) {
@@ -135,15 +139,16 @@ class OrderRefundController extends Controller
         ->make(true);
     }
     
-    public function rejectedOrderRefund()
+    public function rejectedOrderRefund($startDate = null, $endDate = null)
     {
         $orderRefunds = OrderRefund::with(['client:id,contact.name','order:id,number'])
         ->where('status', 'rejected')
-        ->select(['id', 'order_id', 'client_id', 'status','amount']);
+        ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
 
-    if (request()->has(['start_date', 'end_date'])) {
-        $orderRefunds->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-    }
+        if ($startDate && $endDate) {
+            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
+        }
+    
 
     return Datatables::of($orderRefunds)
         ->addColumn('client_contact_name', function ($orderRefund) {

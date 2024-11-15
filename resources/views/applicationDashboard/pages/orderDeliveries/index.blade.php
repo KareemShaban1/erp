@@ -68,26 +68,54 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
         { data: 'delivery_name', name: 'delivery.name' },
         { data: 'order.number', name: 'order.number' },
         { data: 'client_name', name: 'order.client.contact.name' },
-        { data: 'order.order_status', name: 'order.order_status' },
-        // { data: 'payment_status', name: 'payment_status' },
+        // { data: 'order.order_status', name: 'order.order_status' },
         {
-                data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+                data: 'order.order_status', name: 'order.order_status', render: function (data, type, row) {
                     let badgeClass;
                     switch (data) {
-                        case 'paid': badgeClass = 'badge btn-success'; break;
-                        case 'not_paid': badgeClass = 'badge btn-danger'; break;
+                        case 'pending': badgeClass = 'badge btn-warning'; break;
+                        case 'processing': badgeClass = 'badge btn-info'; break;
+                        case 'shipped': badgeClass = 'badge btn-primary'; break;
+                        case 'completed': badgeClass = 'badge btn-success'; break;
+                        case 'cancelled': badgeClass = 'badge btn-danger'; break;
                         default: badgeClass = 'badge badge-secondary'; // For any other statuses
                     }
 
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    
-            <select class="form-control change-payment-status" data-order-id="${row.id}">
-                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                <option value="not_paid" ${data === 'not_paid' ? 'selected' : ''}>Not Paid</option>
-            </select>`;
+             `
+            }},
+        // { data: 'payment_status', name: 'payment_status' },
+                {
+            data: 'payment_status',
+            name: 'payment_status',
+            render: function (data, type, row) {
+                let badgeClass;
+                switch (data) {
+                    case 'paid': badgeClass = 'badge btn-success'; break;
+                    case 'not_paid': badgeClass = 'badge btn-danger'; break;
+                    default: badgeClass = 'badge badge-secondary'; // For any other statuses
                 }
+
+                // Check if order_status is 'completed'
+                // if (row.order_status !== 'completed') {
+                //     // Only display the badge
+                //     return `
+                //         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                //     `;
+                // }
+
+                // Display the badge and dropdown when order_status is 'completed'
+                return `
+                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                    <select class="form-control change-payment-status" data-order-id="${row.id}">
+                        <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                        <option value="not_paid" ${data === 'not_paid' ? 'selected' : ''}>Not Paid</option>
+                    </select>
+                `;
+            }
             },
+
         { data: 'order.total', name: 'order.total' },
         { 
             data: 'order.created_at', 

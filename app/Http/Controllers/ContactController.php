@@ -61,7 +61,6 @@ class ContactController extends Controller
     public function index()
     {
         $type = request()->get('type');
-        
 
         $types = ['supplier', 'customer','client','delivery'];
 

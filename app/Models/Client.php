@@ -23,7 +23,7 @@ class Client  extends Authenticatable
      * @var array
      */
     protected $fillable = ['contact_id','business_location_id','email_address',
-    'password','location','client_type','latitude','longitude'];
+    'password','location','client_type','latitude','longitude','fcm_token'];
 
     public function business_location(){
         return $this->belongsTo(BusinessLocation::class);

@@ -18,7 +18,8 @@
         <div class="box-tools">
             <!-- Button to add new order_cancellations if needed -->
         </div>
-        <!-- <div class="row">
+        @component('components.filters', ['title' => __('report.filters')])
+        <div class="row">
             <div class="col-md-3">
                 <input type="date" id="start_date" class="form-control" placeholder="Start Date">
             </div>
@@ -28,10 +29,17 @@
             <div class="col-md-3">
                 <button class="btn btn-primary" id="filter_date">Filter</button>
             </div>
-        </div> -->
+            <div class="col-md-3">
+                <button class="btn btn-primary" id="clear_date">Clear</button>
+            </div>
+        </div>
+        @endcomponent
+            @endcomponent
         @endslot
     @endcan
     @can('lang_v1.view')
+    <input type="hidden" value="{{$status}}" id="status">
+
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="order_cancellations_table">
                 <thead>
@@ -98,6 +106,12 @@
         $('#filter_date').click(function() {
         order_cancellations_table.ajax.reload(); // Reload DataTable with the new date filters
     });
+
+    $('#clear_date').click(function () {
+        $('#start_date').val('');
+        $('#end_date').val('');
+        order_cancellations_table.ajax.reload();
+    });
     //Orders table
     var order_cancellations_table = $('#order_cancellations_table').DataTable({
         processing: true,
@@ -105,6 +119,7 @@
         ajax: {
             url: '{{ action("ApplicationDashboard\OrderCancellationController@index") }}',
             data: function (d) {
+                d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
             }

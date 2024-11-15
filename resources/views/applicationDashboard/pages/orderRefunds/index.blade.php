@@ -18,7 +18,8 @@
         <div class="box-tools">
             <!-- Button to add new order_refunds if needed -->
         </div>
-        <!-- <div class="row">
+        @component('components.filters', ['title' => __('report.filters')])
+        <div class="row">
             <div class="col-md-3">
                 <input type="date" id="start_date" class="form-control" placeholder="Start Date">
             </div>
@@ -28,11 +29,16 @@
             <div class="col-md-3">
                 <button class="btn btn-primary" id="filter_date">Filter</button>
             </div>
-        </div> -->
+            <div class="col-md-3">
+                <button class="btn btn-primary" id="clear_date">Clear</button>
+            </div>
+        </div>
+        @endcomponent
         @endslot
     @endcan
     @can('lang_v1.view')
         <div class="table-responsive">
+            <input type="hidden" value="{{$status}}" id="status">
             <table class="table table-bordered table-striped" id="order_refunds_table">
                 <thead>
                     <tr>
@@ -42,6 +48,7 @@
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.order_refund_status')</th>
                         <th>@lang('lang_v1.order_status')</th>
+                        <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.actions')</th> <!-- New Actions column -->
                     </tr>
                 </thead>
@@ -100,6 +107,11 @@
         $('#filter_date').click(function() {
         order_refunds_table.ajax.reload(); // Reload DataTable with the new date filters
     });
+    $('#clear_date').click(function () {
+        $('#start_date').val('');
+        $('#end_date').val('');
+        order_refunds_table.ajax.reload();
+    });
     //Orders table
     var order_refunds_table = $('#order_refunds_table').DataTable({
         processing: true,
@@ -107,6 +119,7 @@
         ajax: {
             url: '{{ action("ApplicationDashboard\OrderRefundController@index") }}',
             data: function (d) {
+                d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
             }
@@ -160,6 +173,18 @@
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                     `;
+                }
+            },
+            {
+                data: 'created_at',
+                name: 'created_at',
+                render: function (data) {
+                    // Format the date using JavaScript
+                    if (data) {
+                        const date = new Date(data);
+                        return date.toLocaleString(); // Adjust format as needed
+                    }
+                    return '';
                 }
             },
             { 

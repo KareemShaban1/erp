@@ -12,20 +12,13 @@
 
 <!-- Main content -->
 <section class="content">
-    @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.all_your_orders')])
+    @component('components.widget', ['class' => 'box-primary'])
     @can('lang_v1.create')
         @slot('tool')
         <div class="box-tools">
         </div>
-        <!-- @component('components.filters', ['title' => __('report.filters')])
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            {!! Form::label('purchase_list_filter_date_range', __('report.date_range') . ':') !!}
-                                            {!! Form::text('purchase_list_filter_date_range', null, ['placeholder' => __('lang_v1.select_a_date_range'), 'class' => 'form-control', 'readonly']); !!}
-                                        </div>
-                                    </div>
-                                @endcomponent -->
-                                  <div class="row">
+        @component('components.filters', ['title' => __('report.filters')])
+        <div class="row">
             <div class="col-md-3">
                 <input type="date" id="start_date" class="form-control" placeholder="Start Date">
             </div>
@@ -35,10 +28,16 @@
             <div class="col-md-3">
                 <button class="btn btn-primary" id="filter_date">Filter</button>
             </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary" id="clear_date">Clear</button>
+            </div>
         </div>
+        @endcomponent
+
         @endslot
     @endcan
     @can('lang_v1.view')
+        <input type="hidden" value="{{$status}}" id="status">
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orders_table">
                 <thead>
@@ -52,6 +51,7 @@
                         <th>@lang('lang_v1.shipping_cost')</th>
                         <th>@lang('lang_v1.sub_total')</th>
                         <th>@lang('lang_v1.total')</th>
+                        <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.assign_delivery')</th>
                         <th>@lang('lang_v1.actions')</th>
 
@@ -66,127 +66,11 @@
     </div>
 
     <!-- Delivery Assignment Modal -->
-    <div class="modal fade" id="assignDeliveryModal" tabindex="-1" role="dialog" aria-labelledby="assignDeliveryLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="assignDeliveryLabel">@lang('lang_v1.assign_delivery')</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="assignDeliveryForm">
-                        <input type="hidden" name="order_id" id="order_id">
-                        <div class="form-group">
-                            <label for="delivery_id">@lang('lang_v1.select_delivery')</label>
-                            <select class="form-control" name="delivery_id" id="delivery_id"></select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"
-                        id="saveDeliveryAssignment">@lang('lang_v1.assign')</button>
-                    <button type="button" class="btn btn-secondary"
-                        data-dismiss="modal">@lang('lang_v1.cancel')</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('applicationDashboard.pages.orders.assignDeliveryModal')
 
     <!-- Order Information Modal -->
-    <div class="modal fade" id="viewOrderInfoModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderInfoLabel">
-        <div class="modal-dialog  modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="viewOrderInfoLabel">@lang('lang_v1.order_details')</h4>
-                </div>
-                <div class="modal-body">
-                    <form id="viewOrderInfoForm">
-                        <input type="hidden" name="order_id" id="view_order_id">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.order_number'):</label>
-                                    <p id="order_number"></p>
-                                </div>
+    @include('applicationDashboard.pages.orders.orderInformationModal')
 
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.business_location'):</label>
-                                    <p id="business_location"></p>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.client'):</label>
-                                    <p id="client_name"></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.payment_method'):</label>
-                                    <p id="payment_method"></p>
-                                </div>
-
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.shipping_cost'):</label>
-                                    <p id="shipping_cost"></p>
-                                </div>
-
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.sub_total'):</label>
-                                    <p id="sub_total"></p>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.total'):</label>
-                                    <p id=" total">
-                                    </p>
-                                </div>
-
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.order_status'):</label>
-                                    <p id=" order_status">
-                                    </p>
-                                </div>
-
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>@lang('lang_v1.payment_status'):</label>
-                                    <p id=" payment_status">
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-
-
-
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('lang_v1.close')</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </section>
 <!-- /.content -->
@@ -197,6 +81,14 @@
     $('#filter_date').click(function () {
         orders_table.ajax.reload(); // Reload DataTable with the new date filters
     });
+
+    $('#clear_date').click(function () {
+        $('#start_date').val('');
+        $('#end_date').val('');
+        orders_table.ajax.reload();
+    });
+
+
     //Orders table
     var orders_table = $('#orders_table').DataTable({
         processing: true,
@@ -204,6 +96,7 @@
         ajax: {
             url: '{{ action("ApplicationDashboard\OrderController@index") }}',
             data: function (d) {
+                d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
             }
@@ -257,7 +150,18 @@
             { data: 'shipping_cost', name: 'shipping_cost' },
             { data: 'sub_total', name: 'sub_total' },
             { data: 'total', name: 'total' },
-            // other columns as needed
+            {
+                data: 'created_at',
+                name: 'created_at',
+                render: function (data) {
+                    // Format the date using JavaScript
+                    if (data) {
+                        const date = new Date(data);
+                        return date.toLocaleString(); // Adjust format as needed
+                    }
+                    return '';
+                }
+            },
             {
                 data: 'order_status',
                 name: 'order_status',
@@ -272,9 +176,6 @@
                     @lang('lang_v1.assign_delivery')
                 </button > `;
                     }
-
-                    
-
                     if (row.has_delivery === true) {
                         return `<span class="badge badge-success">
                         @lang('lang_v1.delivery_assigned')
@@ -295,7 +196,7 @@
                 },
                 orderable: false,
                 searchable: false
-            }
+            },
 
 
         ],
@@ -425,6 +326,7 @@
     });
 
     // Event listener for the 'View Order Info' button
+    // Event listener for the 'View Order Info' button
     $(document).on('click', '.view-order-info-btn', function () {
         var orderId = $(this).data('order-id'); // Get the order ID
 
@@ -433,12 +335,12 @@
             url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
             type: 'GET',
             success: function (response) {
+                console.log(response);
                 if (response.success) {
                     // Populate the modal with the order details
                     $('#view_order_id').val(response.order.id);
                     $('#order_number').text(response.order.number);
                     $('#business_location').text(response.order.business_location.name);
-                    // businessLocation
                     $('#client_name').text(response.order.client.contact.name);
                     $('#payment_method').text(response.order.payment_method);
                     $('#shipping_cost').text(response.order.shipping_cost);
@@ -446,6 +348,23 @@
                     $('#total').text(response.order.total);
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
+
+                    // Populate the order items
+                    const itemsTable = $('#order_items_table tbody');
+                    itemsTable.empty(); // Clear existing rows
+
+                    response.order.order_items.forEach(item => {
+                        const row = `
+                        <tr>
+                            <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                            <td>${item.product.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>${item.sub_total}</td>
+                        </tr>
+                    `;
+                        itemsTable.append(row);
+                    });
 
                     // Show the modal
                     $('#viewOrderInfoModal').modal('show');

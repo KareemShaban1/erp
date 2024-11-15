@@ -34,8 +34,7 @@ class OrderCancellationController extends Controller
     {
         $status = request()->get('status');
 
-        $start_date = request()->get('start_date');
-        $end_date = request()->get('end_date');
+
 
         $statuses = ['all', 'requested', 'approved', 'rejected'];
 
@@ -44,30 +43,33 @@ class OrderCancellationController extends Controller
         }
 
         if (request()->ajax()) {
+            $start_date = request()->get('start_date');
+            $end_date = request()->get('end_date');
+
             if ($status == 'requested') {
-                return $this->requestedOrderCancellations();
+                return $this->requestedOrderCancellations($start_date , $end_date);
             } elseif ($status == 'approved') {
-                return $this->approvedOrderCancellation();
+                return $this->approvedOrderCancellation($start_date , $end_date);
             } elseif ($status == 'rejected') {
-                return $this->rejectedOrderCancellation();
+                return $this->rejectedOrderCancellation($start_date , $end_date);
             } elseif ($status == 'all') {
-                return $this->allOrders();
+                return $this->allOrders($start_date , $end_date);
             }
         }
 
 
-        return view('applicationDashboard.pages.orderCancellations.index');
+        return view('applicationDashboard.pages.orderCancellations.index',compact('status'));
     }
 
-    public function allOrders()
+    public function allOrders($startDate = null, $endDate = null)
     {
         $orderCancellations = OrderCancellation::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
             ->select(['id', 'order_id', 'client_id', 'status']);
     
         // Apply date filter if start_date and end_date are provided
-        if (request()->has(['start_date', 'end_date'])) {
-            $orderCancellations->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
+        if ($startDate && $endDate) {
+            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
         }
     
         return Datatables::of($orderCancellations)
@@ -78,16 +80,16 @@ class OrderCancellationController extends Controller
     }
     
     
-    public function requestedOrderCancellations()
+    public function requestedOrderCancellations($startDate = null, $endDate = null)
     {
         $orderCancellations = OrderCancellation::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
             ->where('status', 'requested')
             ->select(['id', 'order_id', 'client_id', 'status']);
     
-        if (request()->has(['start_date', 'end_date'])) {
-            $orderCancellations->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-        }
+            if ($startDate && $endDate) {
+                $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
+            }
     
         return Datatables::of($orderCancellations)
             ->addColumn('client_contact_name', function ($orderCancellation) {
@@ -97,16 +99,16 @@ class OrderCancellationController extends Controller
     }
     
     
-    public function approvedOrderCancellation()
+    public function approvedOrderCancellation($startDate = null, $endDate = null)
     {
         $orderCancellations = OrderCancellation::with(
             ['client.contact:id,name', 'order:id,number,order_status'])
         ->where('status', 'approved')
         ->select(['id', 'order_id', 'client_id', 'status']);
 
-    if (request()->has(['start_date', 'end_date'])) {
-        $orderCancellations->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-    }
+        if ($startDate && $endDate) {
+            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
+        }
 
     return Datatables::of($orderCancellations)
         ->addColumn('client_contact_name', function ($orderCancellation) {
@@ -115,15 +117,15 @@ class OrderCancellationController extends Controller
         ->make(true);
     }
     
-    public function rejectedOrderCancellation()
+    public function rejectedOrderCancellation($startDate = null, $endDate = null)
     {
         $orderCancellations = OrderCancellation::with(['client:id,contact.name','order:id,number'])
         ->where('status', 'rejected')
         ->select(['id', 'order_id', 'client_id', 'status']);
 
-    if (request()->has(['start_date', 'end_date'])) {
-        $orderCancellations->whereBetween('created_at', [request()->get('start_date'), request()->get('end_date')]);
-    }
+        if ($startDate && $endDate) {
+            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
+        }
 
     return Datatables::of($orderCancellations)
         ->addColumn('client_contact_name', function ($orderCancellation) {

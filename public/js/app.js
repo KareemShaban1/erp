@@ -453,7 +453,6 @@ $(document).ready(function() {
             { data: 'return_due', searchable: false, orderable: false },
             ]);
     }
-
     else if (contact_table_type == 'delivery') {
         var columns = [
             { data: 'action', searchable: false, orderable: false },

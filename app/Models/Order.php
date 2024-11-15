@@ -25,18 +25,19 @@ class Order extends Model
     protected $fillable = [
         'order_uuid','number','client_id','business_location_id','payment_method','order_status','payment_status','shipping_cost','sub_total','total'];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($order) {
-            // Generate UUID for order_uuid if it's not already set
-            $order->order_uuid = (string) Str::uuid();
-
-            // Generate a unique order number, e.g., a timestamp-based format
-            $order->number = 'ORD-' . strtoupper(Str::random(6)) . '-' . time();
-        });
-    }
+        protected static function boot()
+        {
+            parent::boot();
+        
+            static::creating(function ($order) {
+                // Generate UUID for order_uuid if it's not already set
+                $order->order_uuid = (string) Str::uuid();
+        
+                // Generate order number based on the current date and a random string
+                $order->number = 'ORD-' . now()->format('Y-m-d') . '-' . strtoupper(Str::random(3));
+            });
+        }
+        
 
     public function client(){
         return $this->belongsTo(Client::class,'client_id','id');
@@ -49,7 +50,8 @@ class Order extends Model
 
 
     public function orderItems(){
-        return $this->hasMany(OrderItem::class,'order_id','id');
+        return $this->hasMany(OrderItem::class,'order_id','id')
+        ->with(['product','variation']);
     }
 
     public function orderTracking(){

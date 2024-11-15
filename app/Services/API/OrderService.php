@@ -289,17 +289,6 @@ class OrderService extends BaseService
             throw new \Exception('Stock transfer failed: ' . $e->getMessage());
         }
     }
-    
-
-
-    // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    // {
-    //     // Dispatch the job with a 10-minute delay
-    //     TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    //         ->delay(now());
-
-    //     \Log::info("TransferProductJob dispatched for Order: {$order->id}, OrderItem: {$orderItem->id}");
-    // }
 
 
     protected function makeSale($order, $client, $carts)
@@ -436,6 +425,20 @@ class OrderService extends BaseService
             return $this->handleException($e, __('message.Error happened while making sale'));
         }
     }
+
+
+
+        // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    // {
+    //     // Dispatch the job with a 10-minute delay
+    //     TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    //         ->delay(now());
+
+    //     \Log::info("TransferProductJob dispatched for Order: {$order->id}, OrderItem: {$orderItem->id}");
+    // }
+
+
+    
 
     /**
      * Update the specified Order.

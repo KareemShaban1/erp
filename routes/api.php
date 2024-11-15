@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\WarrantyController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\FcmController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PushNotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,6 +82,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
     
+        Route::post('send-push-notification', [PushNotificationController::class, 'sendPushNotification']);
+
+        // sendPushNotification
     });
 
     Route::middleware('auth:sanctum-delivery')->group(function () {
