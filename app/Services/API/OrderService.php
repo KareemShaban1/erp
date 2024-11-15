@@ -217,12 +217,10 @@ class OrderService extends BaseService
     {
         try {
             DB::beginTransaction();
-    
-               //Update reference count
-            // $ref_count = $this->productUtil->setAndGetReferenceCount('stock_transfer');
+
             $inputData = [
                 'location_id' => $fromLocationId,
-                'ref_no' => '1234',
+                // 'ref_no' => '1234',
                 'transaction_date' => now(),
                 'final_total' => $order->total,
                 'type' => 'sell_transfer',
@@ -231,12 +229,26 @@ class OrderService extends BaseService
                 'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
                 'payment_status' => 'paid',
                 'status' => 'final',
+                'total_before_tax'=>$order->total,
             ];
-    
+
+            // sell_statuses =>   'final' => __('sale.final'), 'draft' => __('sale.draft'), 'quotation' => __('lang_v1.quotation'), 'proforma' => __('lang_v1.proforma')
+
+            //Update reference count
+            $ref_count = $this->productUtil->setAndGetReferenceCount('stock_transfer');
+            //Generate reference number
+            if (empty($input_data['ref_no'])) {
+                $input_data['ref_no'] = $this->productUtil->generateReferenceNumber('stock_transfer', $ref_count);
+            }
+
             $sellTransfer = Transaction::create($inputData);
             $inputData['type'] = 'purchase_transfer';
             $inputData['location_id'] = $toLocationId;
             $inputData['transfer_parent_id'] = $sellTransfer->id;
+            $inputData['status'] = 'ordered';
+
+            // purchase_statuses =>  return [ 'received' => __('lang_v1.received'), 'pending' => __('lang_v1.pending'), 'ordered' => __('lang_v1.ordered')];
+
     
             $purchaseTransfer = Transaction::create($inputData);
     
@@ -302,7 +314,7 @@ class OrderService extends BaseService
                 'final_total' => $order->total,
                 "type" => "sell",
                 "status" => "final",
-                "payment_status" => "paid",
+                'payment_status' => 'paid',
                 "contact_id" => $client->contact_id,
                 "transaction_date" => now(),
                 "total_before_tax" => $order->total,
