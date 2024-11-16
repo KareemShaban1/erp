@@ -200,7 +200,9 @@ class CartService extends BaseService
             // If you are using soft deletes, you can soft delete the cart item
             $cartItem->delete();
 
-            return response()->json(['message' => 'Item removed from cart'], 200);
+            return $this->getCartItems();
+
+            // return response()->json(['message' => 'Item removed from cart'], 200);
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error occurred while removing cart item'));
         }
