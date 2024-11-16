@@ -153,110 +153,113 @@ class DeliveryController extends Controller
     }
 
     public function changeOrderStatus($orderId)
-{
-    // Define allowed statuses
-    $validStatuses = ['shipped', 'completed'];
+    {
+        // Define allowed statuses
+        $validStatuses = ['shipped', 'completed'];
 
-    // Retrieve and validate the input status
-    $status = request()->input('order_status');
-    if (!in_array($status, $validStatuses)) {
+        // Retrieve and validate the input status
+        $status = request()->input('order_status');
+        if (!in_array($status, $validStatuses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status provided.',
+            ], 400);
+        }
+
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+
+        // Find the order or return 404 if not found
+        $order = Order::findOrFail($orderId);
+
+        $delivery = Delivery::find($deliveryOrder->delivery_id);
+
+        // Find the client
+        $client = Client::find($order->client_id);
+        if (!$client) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Client not found.',
+            ], 404);
+        }
+
+
+        // Get or create the OrderTracking record for this order
+        $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
+
+
+
+        // Update timestamps and handle specific status actions
+        switch ($status) {
+            case 'shipped':
+                if ($status === 'shipped') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status is already shipped',
+                    ], 404);
+                }
+                $orderTracking->shipped_at = now();
+
+                // Update delivery contact balance
+                $this->updateDeliveryBalance($order, $delivery);
+
+                // Send and store push notification
+                app(FirebaseService::class)->sendAndStoreNotification(
+                    $client->id,
+                    $client->fcm_token,
+                    'Order Status Updated',
+                    'Your order has been shipped successfully.',
+                    ['order_id' => $order->id, 'status' => $status]
+                );
+                break;
+
+            case 'completed':
+                if ($status === 'shipped') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status is already completed',
+                    ], 404);
+                }
+                $orderTracking->completed_at = now();
+
+                $delivery->status = 'available';
+                $delivery->save();
+
+                break;
+        }
+
+        // Update the order status
+        $order->order_status = $status;
+
+        // Save the tracking record
+        $orderTracking->save();
+
+        $order->save();
+
+
         return response()->json([
-            'success' => false,
-            'message' => 'Invalid status provided.',
-        ], 400);
+            'success' => true,
+            'message' => 'Order status updated successfully.',
+        ]);
     }
 
-    $deliveryOrder = DeliveryOrder::where('order_id',$orderId)->first();
+    /**
+     * Update the delivery contact balance based on the order total.
+     *
+     * @param Order $order
+     * @return void
+     */
+    private function updateDeliveryBalance(Order $order, $delivery)
+    {
+        Log::info($delivery);
 
-    // Find the order or return 404 if not found
-    $order = Order::findOrFail($orderId);
+        if ($delivery && $delivery->contact) {
+            $delivery->contact->balance -= $order->total;
+            $delivery->contact->save();
+        }
 
-    $delivery = Delivery::find($deliveryOrder->delivery_id);
+        Log::info("balance updated");
 
-    // Find the client
-    $client = Client::find($order->client_id);
-    if (!$client) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Client not found.',
-        ], 404);
     }
-
-    // Update the order status
-    $order->order_status = $status;
-
-    // Get or create the OrderTracking record for this order
-    $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
-
-    // Update timestamps and handle specific status actions
-    switch ($status) {
-        case 'shipped':
-            if($status === 'shipped'){
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Status is already shipped',
-                ], 404);
-            }
-            $orderTracking->shipped_at = now();
-
-            // Update delivery contact balance
-            $this->updateDeliveryBalance($order,$delivery);
-
-            // Send and store push notification
-            app(FirebaseService::class)->sendAndStoreNotification(
-                $client->id,
-                $client->fcm_token,
-                'Order Status Updated',
-                'Your order has been shipped successfully.',
-                ['order_id' => $order->id, 'status' => $status]
-            );
-            break;
-
-        case 'completed':
-            if($status === 'shipped'){
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Status is already completed',
-                ], 404);
-            }
-            $orderTracking->completed_at = now();
-
-            $delivery->status = 'available';
-            $delivery->save();
-
-            break;
-    }
-
-    // Save the tracking record
-    $orderTracking->save();
-
-    $order->save();
-
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Order status updated successfully.',
-    ]);
-}
-
-/**
- * Update the delivery contact balance based on the order total.
- *
- * @param Order $order
- * @return void
- */
-private function updateDeliveryBalance(Order $order,$delivery)
-{
-    Log::info($delivery);
-
-    if ($delivery && $delivery->contact) {
-        $delivery->contact->balance -= $order->total;
-        $delivery->contact->save();
-    }
-
-    Log::info("balance updated");
-
-}
 
 
 
