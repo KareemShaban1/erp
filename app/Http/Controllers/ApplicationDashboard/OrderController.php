@@ -249,13 +249,15 @@ class OrderController extends Controller
         $order = Order::findOrFail($orderId);
         $order->payment_status = $status;
         $order->save();
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
 
-        
-        $client = Client::where('id',$order->id)->first();
+        $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-        $client->contact->balance += $order->total ;
-        $client->contact->save();
 
+        if ($delivery && $delivery->contact) {
+            $delivery->contact->balance += $order->total;
+            $delivery->contact->save();
+        }
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
