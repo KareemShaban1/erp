@@ -2072,7 +2072,7 @@ public function store(Request $request)
                 $client->fcm_token,
                 'Account Status',
                 'Your Account is active now.',
-                null
+                []
             );
             $contact->save();
 
