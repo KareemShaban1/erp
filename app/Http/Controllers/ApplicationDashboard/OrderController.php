@@ -4,6 +4,8 @@ namespace App\Http\Controllers\ApplicationDashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\Delivery;
+use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Utils\ModuleUtil;
@@ -203,6 +205,13 @@ class OrderController extends Controller
         // Check if an OrderTracking already exists for the order
         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
+
+
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+
+        $delivery = Delivery::find($deliveryOrder->delivery_id);
+
+
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
             case 'pending':
@@ -212,6 +221,7 @@ class OrderController extends Controller
                 $orderTracking->processing_at = now();
                 break;
             case 'shipped':
+                $this->updateDeliveryBalance($order, $delivery);
                 $orderTracking->shipped_at = now();
                 break;
             case 'cancelled':
@@ -462,5 +472,24 @@ class OrderController extends Controller
         }
 
         return $this->respond($orders);
+    }
+
+     /**
+     * Update the delivery contact balance based on the order total.
+     *
+     * @param Order $order
+     * @return void
+     */
+    private function updateDeliveryBalance($order, $delivery)
+    {
+        Log::info($delivery);
+
+        if ($delivery && $delivery->contact) {
+            $delivery->contact->balance -= $order->total;
+            $delivery->contact->save();
+        }
+
+        Log::info("balance updated");
+
     }
 }
