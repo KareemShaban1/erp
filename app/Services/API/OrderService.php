@@ -296,7 +296,7 @@ class OrderService extends BaseService
     
         } catch (\Exception $e) {
 
-            dd("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+            // dd("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
             DB::rollBack();
             \Log::emergency("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
             throw new \Exception('Stock transfer failed: ' . $e->getMessage());
