@@ -41,7 +41,7 @@ class OrderResource extends JsonResource
                     'payment_status' => ucfirst($this->payment_status),
                     'shipping_cost' => $this->shipping_cost,
                     'sub_total' => $this->sub_total,
-                    'total_discount'=>$this->orderItems->sum('discount'),
+                    'total_discount' => (string) $this->orderItems->sum('discount'),
                     'total' => $this->total,
                     'order_cancellation'=>(new OrderCancellationResource( $this->orderCancellation))->withFullData(true),
                     'order_refunds'=>(new OrderRefundCollection( $this->orderRefunds))->withFullData(true),
