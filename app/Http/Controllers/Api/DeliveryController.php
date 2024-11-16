@@ -191,7 +191,7 @@ class DeliveryController extends Controller
         // Update timestamps and handle specific status actions
         switch ($status) {
             case 'shipped':
-                if ($status === 'shipped') {
+                if ($order->status === 'shipped') {
                     return response()->json([
                         'success' => false,
                         'message' => 'Status is already shipped',
@@ -213,7 +213,7 @@ class DeliveryController extends Controller
                 break;
 
             case 'completed':
-                if ($status === 'shipped') {
+                if ($order->status === 'completed') {
                     return response()->json([
                         'success' => false,
                         'message' => 'Status is already completed',
