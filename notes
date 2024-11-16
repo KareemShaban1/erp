@@ -33,3 +33,10 @@
    quantity_returned quantity(0.0000) , unit_price_before_discount quantity(0.0000), 
    unit_price (null) , line_discount_type (null) (fixed , percentage) ,
    line_discount_amount (0.0000) , unit_price_inc_tax ,item_tax , so_quantity_invoiced(0.0000)
+
+
+
+   --- client notifications
+   - when client account is active 
+   - when delivery change order status to shipped
+   - when admin response on order cancel and order refund

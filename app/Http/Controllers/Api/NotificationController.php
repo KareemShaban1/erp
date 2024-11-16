@@ -8,15 +8,8 @@ use App\Notifications\SendFcmNotification;
 use Illuminate\Support\Facades\Auth;
 
 Class NotificationController extends Controller {
-          public function sendNotification()
-{
-    $client = Client::find(Auth::user()->id); // Replace with the intended user's ID
-
-    $title = 'New Message';
-    $body = 'You have a new message!';
-    $data = ['key' => 'value']; // Optional additional data
-
-    $client->notify(new SendFcmNotification($title, $body, $data));
-}
+         public function getClientNotifications(){
+            $client = Client::where('id', auth()->user()->id)->first();
+         }
 
 }
