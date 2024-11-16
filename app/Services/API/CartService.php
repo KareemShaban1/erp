@@ -86,6 +86,9 @@ class CartService extends BaseService
         $product = Product::findOrFail($productId);
         $variation = Variation::findOrFail($variantId);
 
+        // Fetch the latest discount for the variation
+        $latestDiscount = $variation->discounts()->latest('id')->first();
+
         // Calculate the current stock available
         $current_stock = $variation->variation_location_details->sum('qty_available');
 
@@ -129,18 +132,19 @@ class CartService extends BaseService
             ]);
         }
 
-        // Calculate total price (quantity * price)
-        if ($cartItem->discount) {
-            $cartItem->total = ($cartItem->quantity * $cartItem->price) - $cartItem->discount;
-        } else {
-            $cartItem->total = $cartItem->quantity * $cartItem->price;
-        }
+        // Apply discount if available
+        $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
+
+        // Calculate total price (quantity * price) - discount
+        $cartItem->discount = $discountAmount;
+        $cartItem->total = ($cartItem->quantity * $cartItem->price) - $discountAmount;
 
         // Save the cart item with the updated total
         $cartItem->save();
 
         return $cartItem;
     }
+
 
 
     /**
