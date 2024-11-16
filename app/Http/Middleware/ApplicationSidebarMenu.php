@@ -195,28 +195,28 @@ class ApplicationSidebarMenu
                 function ($sub) {
                     // Link for All Orders (no status)
                     $sub->url(
-                        route('order-cancellations.index', ['status' => 'all']),
+                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'all']),
                         __('lang_v1.all_order_cancellations'),
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
                     );
 
                     // Link for Pending Orders
                     $sub->url(
-                        route('order-cancellations.index', ['status' => 'requested']),
+                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'requested']),
                         __('lang_v1.requested_order_cancellations'),
                         ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
                     );
 
                     // Link for Processing Orders
                     $sub->url(
-                        route('order-cancellations.index', ['status' => 'approved']),
+                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'approved']),
                         __('lang_v1.approved_order_cancellations'),
                         ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
                     );
 
                     // Link for shipped Orders
                     $sub->url(
-                        route('order-cancellations.index', ['status' => 'rejected']),
+                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'rejected']),
                         __('lang_v1.rejected_order_cancellations'),
                         ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
                     );

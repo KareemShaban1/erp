@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Order')
+@section('title', 'Order Cancellation')
 
 @section('content')
 
@@ -9,7 +9,6 @@
     </h1>
 </section>
 
-<!-- Main content -->
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
@@ -34,9 +33,9 @@
             </div>
         </div>
         @endcomponent
-            @endcomponent
         @endslot
     @endcan
+    
     @can('lang_v1.view')
     <input type="hidden" value="{{$status}}" id="status">
 

@@ -35,7 +35,6 @@ class OrderCancellationController extends Controller
         $status = request()->get('status');
 
 
-
         $statuses = ['all', 'requested', 'approved', 'rejected'];
 
         if (empty($status) || !in_array($status, $statuses)) {
@@ -58,7 +57,7 @@ class OrderCancellationController extends Controller
         }
 
 
-        return view('applicationDashboard.pages.orderCancellations.index',compact('status'));
+        return view('applicationDashboard.pages.orderCancellations.index', compact('status'));
     }
 
     public function allOrders($startDate = null, $endDate = null)
