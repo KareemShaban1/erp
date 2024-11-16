@@ -184,7 +184,6 @@ class DeliveryController extends Controller
 
     // Update the order status
     $order->order_status = $status;
-    $order->save();
 
     // Get or create the OrderTracking record for this order
     $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
@@ -230,6 +229,9 @@ class DeliveryController extends Controller
 
     // Save the tracking record
     $orderTracking->save();
+
+    $order->save();
+
 
     return response()->json([
         'success' => true,
