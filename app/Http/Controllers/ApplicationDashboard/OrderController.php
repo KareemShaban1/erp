@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApplicationDashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Utils\ModuleUtil;
@@ -237,6 +238,12 @@ class OrderController extends Controller
         $order = Order::findOrFail($orderId);
         $order->payment_status = $status;
         $order->save();
+
+        
+        $client = Client::where('id',$order->id)->first();
+
+        $client->contact->balance += $order->total ;
+        $client->contact->save();
 
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
