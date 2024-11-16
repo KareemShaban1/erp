@@ -19,62 +19,63 @@ class CartService extends BaseService
      * Get all cart items for the authenticated user.
      */
     public function getCartItems()
-{
-    try {
-        $client = Client::findOrFail(Auth::id());
-        $carts = Cart::where('client_id', Auth::id())
-            ->with(['product', 'variation.variation_location_details', 'client'])
-            ->get();
-
-             // Check if cart is empty
-        if ($carts->isEmpty()) {
-            return $this->returnJSON([], __('message.Cart is empty'));
-        }
-
-        $totalPrice = 0;
-        $totalDiscount = 0;
-        $totalAfterDiscount = 0;
-        $multiLocationMessage = false;
-
-        foreach ($carts as $cart) {
-            $price = $cart->variation->default_sell_price ?? 0;
-            $quantity = $cart->quantity;
-            $discount = $cart->variation->discount ?? 0;
-
-            // Check if sufficient quantity is available at client's business location
-            $sufficientQuantity = $this->checkSufficientQuantity($cart->variation->variation_location_details, $client->business_location_id, $quantity);
-
-            // If the required quantity is not available, set multi-location message
-            if (!$sufficientQuantity) {
-                $multiLocationMessage = true;
+    {
+        try {
+            $client = Client::findOrFail(Auth::id());
+            $carts = Cart::where('client_id', Auth::id())
+                ->with(['product', 'variation.variation_location_details', 'client'])
+                ->get();
+    
+            // Check if the cart is empty
+            if ($carts->isEmpty()) {
+                return $this->returnJSON([], __('message.Cart is empty'));
             }
-
-            $totalPrice += ($price * $quantity);
-            $totalDiscount += ($discount * $quantity);
-            $totalAfterDiscount += (($price - $discount) * $quantity);
-
+    
+            $totalPrice = 0;
+            $totalDiscount = 0;
+            $totalAfterDiscount = 0;
+            $multiLocationMessage = false;
+    
+            foreach ($carts as $cart) {
+                $price = $cart->variation->default_sell_price ?? 0;
+                $quantity = $cart->quantity;
+    
+                // Fetch the latest discount for the variation
+                $latestDiscount = $cart->variation->discounts()->latest('id')->first();
+                $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
+    
+                // Calculate total discount for this cart item
+                $itemDiscount = $discountAmount * $quantity;
+    
+                // Check if sufficient quantity is available at the client's business location
+                $sufficientQuantity = $this->checkSufficientQuantity($cart->variation->variation_location_details, $client->business_location_id, $quantity);
+    
+                // If the required quantity is not available, set multi-location message
+                if (!$sufficientQuantity) {
+                    $multiLocationMessage = true;
+                }
+    
+                $totalPrice += ($price * $quantity);
+                $totalDiscount += $itemDiscount;
+                $totalAfterDiscount += (($price * $quantity) - $itemDiscount);
+            }
+    
+            // Create response with CartCollection and additional data
+            $cartCollection = (new CartCollection($carts))
+                ->withFullData(true)
+                ->setTotals($totalPrice, $totalDiscount, $totalAfterDiscount);
+    
+            // Add multi-location message if applicable
+            if ($multiLocationMessage) {
+                $cartCollection->setLocationMessage(__('message.Order will be shipped tomorrow due to multiple locations'));
+            }
+    
+            return $cartCollection;
+    
+        } catch (\Exception $e) {
+            return $this->handleException($e, __('message.Error happened while listing cart items'));
         }
-
-        // Create response with CartCollection and additional data
-        $cartCollection = (new CartCollection($carts))
-            ->withFullData(true)
-            ->setTotals($totalPrice, $totalDiscount,$totalAfterDiscount);
-
-        // Add multi-location message if applicable
-        if ($multiLocationMessage) {
-            $cartCollection->setLocationMessage(__('message.Order will be shipped tomorrow due to multiple locations'));
-        }
-
-        return $cartCollection;
-
-    } catch (\Exception $e) {
-        return $this->handleException($e, __('message.Error happened while listing cart items'));
     }
-}
-
-    
-
-    
     
 
     /**
