@@ -199,6 +199,8 @@ class DeliveryController extends Controller
                 }
                 $orderTracking->shipped_at = now();
 
+                \Log::info($order);
+                \Log::warning($delivery);
                 // Update delivery contact balance
                 $this->updateDeliveryBalance($order, $delivery);
 
@@ -248,7 +250,7 @@ class DeliveryController extends Controller
      * @param Order $order
      * @return void
      */
-    private function updateDeliveryBalance(Order $order, $delivery)
+    private function updateDeliveryBalance($order, $delivery)
     {
         Log::info($delivery);
 
