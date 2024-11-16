@@ -7,6 +7,7 @@ use App\Http\Resources\Order\OrderResource;
 use App\Jobs\TransferProductJob;
 use App\Models\Cart;
 use App\Models\Client;
+use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Transaction;
@@ -69,11 +70,11 @@ class OrderService extends BaseService
         try {
             $order = Order::findOrFail($id);
 
+            $orderDelivery = DeliveryOrder::where('order_id',$order->id)->first();
             if(!$order) {
                 return null;
             }
             return $order;
-
 
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while showing Order'));

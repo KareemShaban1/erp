@@ -8,6 +8,7 @@ use App\Http\Resources\Order\OrderResource;
 use App\Jobs\TransferProductJob;
 use App\Models\Cart;
 use App\Models\Client;
+use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Transaction;
@@ -90,6 +91,8 @@ class OrderService extends BaseService
             if (!$order) {
                 return null;
             }
+            $orderDelivery = DeliveryOrder::where('order_id',$order->id)->first();
+
             return new OrderResource($order);
 
         } catch (\Exception $e) {

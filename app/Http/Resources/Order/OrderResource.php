@@ -8,6 +8,7 @@ use App\Http\Resources\OrderItem\OrderItemCollection;
 use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use App\Http\Resources\OrderTracking\OrderTrackingCollection;
 use App\Http\Resources\OrderTracking\OrderTrackingResource;
+use App\Models\DeliveryOrder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -45,6 +46,7 @@ class OrderResource extends JsonResource
                     'total' => $this->total,
                     'order_cancellation'=>(new OrderCancellationResource( $this->orderCancellation))->withFullData(true),
                     'order_refunds'=>(new OrderRefundCollection( $this->orderRefunds))->withFullData(true),
+                    'assigned_delivery' => DeliveryOrder::where('order_id', $this->id)->exists(),
                     'created_at' => $this->created_at,
                 ];
             }),
