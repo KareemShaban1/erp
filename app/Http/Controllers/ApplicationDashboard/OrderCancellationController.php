@@ -148,6 +148,8 @@ class OrderCancellationController extends Controller
             case 'approved':
                 $orderCancellation->processed_at = now();
                 break;
+            case 'rejected':
+                break;        
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
         }
