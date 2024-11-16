@@ -22,6 +22,7 @@ use Excel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\TransactionPayment;
+use App\Services\FirebaseService;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Models\Activity;
 
@@ -2065,6 +2066,14 @@ public function store(Request $request)
             $business_id = request()->session()->get('user.business_id');
             $contact = Contact::where('business_id', $business_id)->find($id);
             $contact->contact_status = $contact->contact_status == 'active' ? 'inactive' : 'active';
+            $client = Client::where('contact_id',$contact->id)->first();
+            app(FirebaseService::class)->sendAndStoreNotification(
+                $client->id,
+                $client->fcm_token,
+                'Account Status',
+                'Your Account is active now.',
+                null
+            );
             $contact->save();
 
             $output = ['success' => true,
