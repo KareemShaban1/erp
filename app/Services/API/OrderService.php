@@ -158,7 +158,7 @@ class OrderService extends BaseService
             return new OrderResource($order);
 
         } catch (\Exception $e) {
-            dd($e);
+            // dd($e);
             \Log::error("Error in store method: " . $e->getMessage());
             return $this->handleException($e, __('message.Error happened while storing Order'));
         }
