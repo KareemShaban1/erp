@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\BusinessLocation;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Delivery;
@@ -104,8 +105,11 @@ class AuthController extends Controller
     }
 
 
-        $business = Business::where('id',$request->business_location_id)->first();
-    
+        $business_location = BusinessLocation::where('id',$request->business_location_id)->first();
+
+        $business = Business::where('id',$business_location->business_id)->first();
+
+
         // business need to changed
         // Create contact information
         $contactInfo = Contact::create([
