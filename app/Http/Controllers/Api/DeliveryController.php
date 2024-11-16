@@ -14,6 +14,7 @@ use App\Models\OrderTracking;
 use App\Services\FirebaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class DeliveryController extends Controller
 {
@@ -244,10 +245,15 @@ class DeliveryController extends Controller
  */
 private function updateDeliveryBalance(Order $order,$delivery)
 {
+    Log::info($delivery);
+
     if ($delivery && $delivery->contact) {
         $delivery->contact->balance -= $order->total;
         $delivery->contact->save();
     }
+
+    Log::info("balance updated");
+
 }
 
 
