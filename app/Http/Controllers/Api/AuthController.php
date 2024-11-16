@@ -124,6 +124,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'location' => $request->location,
             'business_location_id' => $request->business_location_id,
+            'fcm_token'=>$request->fcm_token,
             'client_type' => 'application',
         ]);
     
@@ -146,6 +147,7 @@ class AuthController extends Controller
     $validator = Validator::make($request->all(), [
         'email_address' => 'required|string|email',
         'password' => 'required|string',
+        'fcm_token'=>'required|string',
     ]);
 
     if ($validator->fails()) {
@@ -176,6 +178,9 @@ class AuthController extends Controller
 
     // Generate Sanctum Token
     $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+    $client->fcm_token = $request->fcm_token;
+    $client->save();
 
     // Respond with Client Data and Token
     return response()->json([
