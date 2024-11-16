@@ -53,40 +53,35 @@ Route::middleware('auth:sanctum-client')->group(function () {
           Route::post('update_cart/{id}', [CartController::class, 'update']);
           Route::delete('delete_cart/{id}', [CartController::class, 'destroy']);
           Route::delete('clear_cart', [CartController::class, 'clear']);
+
+          Route::get('brands', [BrandController::class, 'index']);
+
+          Route::get('orders', [OrderController::class, 'index']);
+          Route::post('orders', [OrderController::class, 'store']);
+          Route::post('orders/update/{id}', [OrderController::class, 'update']);
+          Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
+          Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
+  
+          Route::get('clients', [ClientController::class, 'index']);
+          Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
+      
+          Route::get('orders-cancellation', [OrderCancellationController::class, 'index']);
+          Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
+          Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
+  
+          Route::get('orders-refunds', [OrderRefundController::class, 'index']);
+          Route::post('orders-refunds', [OrderRefundController::class, 'store']);
+  
+          Route::get('sendNotification', [NotificationController::class, 'sendNotification']);
+  
+          Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
+  
+          Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
+      
+          Route::post('send-push-notification', [PushNotificationController::class, 'sendPushNotification']);
+  
+  
       });
-
-      Route::middleware('auth:sanctum-client')->group(function () {
-
-        Route::get('brands', [BrandController::class, 'index']);
-
-
-        Route::get('orders', [OrderController::class, 'index']);
-        Route::post('orders', [OrderController::class, 'store']);
-        Route::post('orders/update/{id}', [OrderController::class, 'update']);
-        Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
-        Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
-
-        Route::get('clients', [ClientController::class, 'index']);
-        Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
-    
-        Route::get('orders-cancellation', [OrderCancellationController::class, 'index']);
-        Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
-        Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
-
-        Route::get('orders-refunds', [OrderRefundController::class, 'index']);
-        Route::post('orders-refunds', [OrderRefundController::class, 'store']);
-
-        Route::get('sendNotification', [NotificationController::class, 'sendNotification']);
-
-        Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
-
-        Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
-    
-        Route::post('send-push-notification', [PushNotificationController::class, 'sendPushNotification']);
-
-        // sendPushNotification
-    });
-
     Route::middleware('auth:sanctum-delivery')->group(function () {
         Route::get('getNotAssignedOrders', [DeliveryController::class, 'getNotAssignedOrders']);
 
