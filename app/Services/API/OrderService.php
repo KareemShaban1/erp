@@ -66,7 +66,7 @@ class OrderService extends BaseService
         try {
 
             $client = Client::find(Auth::id());
-            $query = Order::where('client_id',$client->id)->query();
+            $query = Order::where('client_id',$client->id);
 
             $query = $this->withTrashed($query, $request);
 
