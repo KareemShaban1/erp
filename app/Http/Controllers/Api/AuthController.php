@@ -170,6 +170,12 @@ class AuthController extends Controller
         return response()->json(['message' => 'Client not found'], 404);
     }
 
+    // Check if the delivery account is deleted
+    if ($client->account_status == 'deleted') {
+        return response()->json(['message' => 'client account is deleted'], 403); // Forbidden for inactive deliverys
+    }
+    
+
     // Check if the client is active
     if ($client_status == 'inactive') {
         return response()->json(['message' => 'Client is not active'], 403); // Forbidden for inactive clients
@@ -218,6 +224,11 @@ public function deliveryLogin(Request $request)
         return response()->json(['message' => 'delivery not found'], 404);
     }
 
+    // Check if the delivery account is deleted
+    if ($delivery->account_status == 'deleted') {
+        return response()->json(['message' => 'delivery account is deleted'], 403); // Forbidden for inactive deliverys
+    }
+
     // Check if the delivery is active
     if ($delivery_status == 'inactive') {
         return response()->json(['message' => 'delivery is not active'], 403); // Forbidden for inactive deliverys
@@ -238,6 +249,19 @@ public function deliveryLogin(Request $request)
     ], 200);
 }
 
+public function deleteClientAccount(){
+    $client = Auth::user();
+    $client->account_status = 'deleted';
+    $client->save();
+    return response()->json(['message' => 'Account deleted successfully'], 200);
+}
+
+public function deleteDeliveryAccount(){
+    $client = Auth::user();
+    $client->account_status = 'deleted';
+    $client->save();
+    return response()->json(['message' => 'Account deleted successfully'], 200);
+}
     
 
 }

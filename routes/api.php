@@ -80,6 +80,8 @@ Route::middleware('auth:sanctum-client')->group(function () {
       
           Route::post('send-push-notification', [PushNotificationController::class, 'sendPushNotification']);
   
+          Route::get('client/delete-account', [AuthController::class, 'deleteClientAccount']);
+
   
       });
     Route::middleware('auth:sanctum-delivery')->group(function () {
@@ -93,6 +95,8 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
 
+        Route::get('delivery/delete-account', [AuthController::class, 'deleteClientAccount']);
+
     });
 
     Route::get('banners', [BannerController::class, 'index']);
@@ -100,10 +104,10 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
     Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
 
-Route::post('client/register', [AuthController::class, 'clientRegister']);
-Route::post('client/login', [AuthController::class, 'clientLogin']);
+    Route::post('client/register', [AuthController::class, 'clientRegister']);
+    Route::post('client/login', [AuthController::class, 'clientLogin']);
 
-Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
-// sendNotification
+    Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
+    // sendNotification
 
-Route::post('user/login', [AuthController::class, 'userLogin']);
+    Route::post('user/login', [AuthController::class, 'userLogin']);

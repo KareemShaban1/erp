@@ -232,7 +232,7 @@ class OrderService extends BaseService
                 'created_by' => 1,
                 'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
                 'payment_status' => 'paid',
-                'status' => 'final',
+                'status' => 'in_transit', 
                 'total_before_tax'=>$order->total,
             ];
 
@@ -249,7 +249,7 @@ class OrderService extends BaseService
             $inputData['type'] = 'purchase_transfer';
             $inputData['location_id'] = $toLocationId;
             $inputData['transfer_parent_id'] = $sellTransfer->id;
-            $inputData['status'] = 'ordered';
+            $inputData['status'] = 'in_transit';
 
             // purchase_statuses =>  return [ 'received' => __('lang_v1.received'), 'pending' => __('lang_v1.pending'), 'ordered' => __('lang_v1.ordered')];
 

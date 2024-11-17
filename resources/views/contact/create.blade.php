@@ -180,6 +180,18 @@
                     {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
                 </div>
             </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('account_status', __('business.account_status') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('account_status', ['active','deleted'], null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
+                </div>
+            </div>
            </div>
 
            <div class="row">
@@ -192,7 +204,7 @@
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    {!! Form::label('business_location', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>

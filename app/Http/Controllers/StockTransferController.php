@@ -126,7 +126,6 @@ class StockTransferController extends Controller
                     $status =  $statuses[$row->status];
                     $status_color = !empty($this->status_colors[$row->status]) ? $this->status_colors[$row->status] : 'bg-gray';
                     $status = $row->status != 'completed' ? '<a href="#" class="stock_transfer_status" data-status="' . $row->status . '" data-href="' . action("StockTransferController@updateStatus", [$row->id]) . '"><span class="label ' . $status_color .'">' . $statuses[$row->status] . '</span></a>' : '<span class="label ' . $status_color .'">' . $statuses[$row->status] . '</span>';
-                     
                     return $status;
                 })
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')

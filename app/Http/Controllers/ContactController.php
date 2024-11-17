@@ -991,16 +991,17 @@ class ContactController extends Controller
             $types['both'] = __('lang_v1.both_supplier_customer');
         }
 
+        $account_statuses = ['active','deleted'];
         $customer_groups = CustomerGroup::forDropdown($business_id);
         $selected_type = request()->type;
 
-        $business_locations = BusinessLocation::forDropdown($business_id, true);
+        $business_locations = BusinessLocation::forDropdown($business_id, false);
 
 
         $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
         
         return view('contact.create')
-            ->with(compact('types', 
+            ->with(compact('types','account_statuses',
             'business_locations','customer_groups', 'selected_type', 'module_form_parts'));
     }
 
@@ -1095,6 +1096,7 @@ public function store(Request $request)
                 'location' => $clientData['location'] ?? null,
                 'latitude' => $clientData['latitude'] ?? null,
                 'longitude' => $clientData['longitude'] ?? null,
+                'account_status' => $clientData['account_status'] ?? null,
             ]);
         }
 
@@ -1247,8 +1249,10 @@ public function store(Request $request)
 
             $delivery = Delivery::where('contact_id',$contact->id)->first();
 
+            $account_statuses = ['active','deleted'];
+
             return view('contact.edit')
-                ->with(compact('contact','client','delivery', 'business_locations','types', 'customer_groups', 'opening_balance'));
+                ->with(compact('contact','account_statuses','client','delivery', 'business_locations','types', 'customer_groups', 'opening_balance'));
         }
     }
 
@@ -1265,6 +1269,7 @@ public function store(Request $request)
             abort(403, 'Unauthorized action.');
         }
     
+        // dd($request->all());
         if ($request->ajax()) {
             try {
                 // Collect input fields
@@ -1319,32 +1324,36 @@ public function store(Request $request)
                 if ($request->input('type') === 'client') {
                     // Adjust validation rules
                     $request->validate([
-                        'email_address' => 'required|email|unique:clients,email_address,' . $request->client_id, // Exclude current record
-                        'password' => 'nullable|string|min:8', // Make password optional
-                        'business_location_id' => 'required|integer',
-                        'location' => 'nullable|string',
-                        'latitude' => 'nullable|numeric',
-                        'longitude' => 'nullable|numeric'
+                        'client_email_address' => 'required|email|unique:clients,email_address,' . $request->client_id, // Exclude current record
+                        'client_password' => 'nullable|string|min:8', // Make password optional
+                        'client_business_location_id' => 'required|integer',
+                        'client_location' => 'nullable|string',
+                        'client_latitude' => 'nullable|numeric',
+                        'client_longitude' => 'nullable|numeric'
                     ]);
     
                     // Prepare client data and update record
-                    $clientData = $request->only(['client_id', 'location','email_address', 'password', 'business_location_id', 'latitude', 'longitude']);
+                    $clientData = $request->only(
+                        ['client_id', 'client_location','client_email_address', 
+                        'client_password', 'client_business_location_id', 
+                        'client_latitude', 'client_longitude','client_account_status']);
                     $client = Client::findOrFail($clientData['client_id']);
                     
                     // Prepare data for client update
                     $updateData = [
-                        'email_address' => $clientData['email_address'],
-                        'business_location_id' => $clientData['business_location_id'],
+                        'email_address' => $clientData['client_email_address'],
+                        'business_location_id' => $clientData['client_business_location_id'],
                         'contact_id' => $output['data']->id,
                         'client_type' => 'erp_client',
-                        'location' => $clientData['location'] ?? null,
-                        'latitude' => $clientData['latitude'] ?? null,
-                        'longitude' => $clientData['longitude'] ?? null,
+                        'location' => $clientData['client_location'] ?? null,
+                        'latitude' => $clientData['client_latitude'] ?? null,
+                        'longitude' => $clientData['client_longitude'] ?? null,
+                        'account_status' => $clientData['client_account_status'] ?? null,
                     ];
     
                     // Update password only if provided
-                    if (!empty($clientData['password'])) {
-                        $updateData['password'] = Hash::make($clientData['password']);
+                    if (!empty($clientData['client_password'])) {
+                        $updateData['password'] = Hash::make($clientData['client_password']);
                     }
     
                     $client->update($updateData);
@@ -1354,28 +1363,31 @@ public function store(Request $request)
                 if ($request->input('type') === 'delivery') {
                     // Adjust validation rules
                     $request->validate([
-                        'email_address' => 'required|email|unique:deliveries,email_address,' . $request->client_id, // Exclude current record
-                        'password' => 'nullable|string|min:8', // Make password optional
-                        'business_location_id' => 'required|integer',
-                        'location' => 'nullable|string',
+                        'delivery_email_address' => 'required|email|unique:deliveries,email_address,' . $request->client_id, // Exclude current record
+                        'delivery_password' => 'nullable|string|min:8', // Make password optional
+                        'delivery_business_location_id' => 'required|integer',
+                        'delivery_location' => 'nullable|string',
                     ]);
     
                     // Prepare delivery data and update record
-                    $deliveryData = $request->only(['delivery_id', 'location','email_address', 'password', 'business_location_id', 'latitude', 'longitude']);
+                    $deliveryData = $request->only(['delivery_id', 'delivery_location',
+                    'delivery_email_address', 'delivery_password', 
+                    'delivery_business_location_id', 'delivery_latitude', 
+                    'delivery_longitude','delivery_account_status']);
                     $delivery = Delivery::findOrFail($deliveryData['delivery_id']);
                     
                     // Prepare data for delivery update
                     $updateData = [
-                        'email_address' => $deliveryData['email_address'],
-                        'business_location_id' => $deliveryData['business_location_id'],
+                        'email_address' => $deliveryData['delivery_email_address'],
+                        'business_location_id' => $deliveryData['delivery_business_location_id'],
                         'contact_id' => $output['data']->id,
-                        'location' => $clientData['location'] ?? null,
+                        'location' => $clientData['delivery_location'] ?? null,
 
                     ];
     
                     // Update password only if provided
-                    if (!empty($deliveryData['password'])) {
-                        $updateData['password'] = Hash::make($deliveryData['password']);
+                    if (!empty($deliveryData['delivery_password'])) {
+                        $updateData['password'] = Hash::make($deliveryData['delivery_password']);
                     }
     
                     $delivery->update($updateData);

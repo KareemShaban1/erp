@@ -96,4 +96,9 @@
 "tax_number2"=>"رقم الضريبة 2",
 "is_active"=>"نشيط",
 "created_by"=>"انشأ من قبل",
+"email_placeholder"=>"أختار البريد الألكترونى",
+"password_placeholder"=>"أختار كلمة المرور",
+"location_placeholder"=>"أختار المكان",
+"email_address"=>"البريد الألكترونى",
+"account_status"=>'حالة الحساب'
 ];

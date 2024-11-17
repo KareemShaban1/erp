@@ -30,5 +30,7 @@
 "total_sale_due" => "مجموع المبيعات غير المدفوعة", 
 "customer" => "عميل", 
 "address1"=> "عنوان 1",
-"address2"=>'عنوان 2'
+"address2"=>'عنوان 2',
+"latitude"=>'Latitude',
+"longitude"=>'Longitude',
 ];

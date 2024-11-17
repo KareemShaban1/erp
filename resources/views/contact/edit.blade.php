@@ -16,6 +16,7 @@
       $lead_users = [];
     }
   @endphp
+  
 
     {!! Form::open(['url' => $url, 'method' => 'PUT', 'id' => 'contact_edit_form']) !!}
 
@@ -72,14 +73,29 @@
            <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('email', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('email_address', $client->email_address, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::email('client_email_address', $client->email_address, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::text('client_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('account_status', __('business.account_status') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('client_account_status', 
+                        //['active','deleted']
+                        ['active' => __('lang_v1.active'), 'deleted' => __('lang_v1.deleted')]
+                        , $client->account_status , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
                 </div>
             </div>
            </div>
@@ -88,18 +104,18 @@
            <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('location', __( 'business.location' ) . ':') !!}
-                    {!! Form::text('location', $client->location, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                    {!! Form::text('client_location', $client->location, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    {!! Form::label('business_location', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('business_location_id', $business_locations, $client->business_location_id , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('client_business_location_id', $business_locations, $client->business_location_id , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>
@@ -109,14 +125,14 @@
            <div class="col-md-6">
             <div class="form-group">
                 {!! Form::label('latitude', __('contact.latitude') . ':') !!}
-                {!! Form::text('latitude', $client->latitude, ['class' => 'form-control', 'id' => 'latitude', 'placeholder' => 'Latitude', 'readonly']); !!}
+                {!! Form::text('client_latitude', $client->latitude, ['class' => 'form-control', 'id' => 'latitude', 'placeholder' => 'Latitude', 'readonly']); !!}
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="form-group">
                 {!! Form::label('longitude', __('contact.longitude') . ':') !!}
-                {!! Form::text('longitude', $client->longitude, ['class' => 'form-control', 'id' => 'longitude', 'placeholder' => 'Longitude', 'readonly']); !!}
+                {!! Form::text('client_longitude', $client->longitude, ['class' => 'form-control', 'id' => 'longitude', 'placeholder' => 'Longitude', 'readonly']); !!}
             </div>
         </div>
         
@@ -132,34 +148,47 @@
            <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('email', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('email_address', $delivery->email_address, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::email('delivery_email_address', $delivery->email_address, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::text('delivery_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
                 </div>
             </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('account_status', __('business.account_status') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('delivery_account_status', ['active','deleted'], $delivery->account_status , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
+                </div>
+            </div>
+            
            </div>
 
            <div class="row">
            <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('location', __( 'business.location' ) . ':') !!}
-                    {!! Form::text('location', $delivery->location, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                    {!! Form::text('delivery_location', $delivery->location, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    {!! Form::label('business_location', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('business_location_id', $business_locations, $delivery->business_location_id , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('delivery_business_location_id', $business_locations, $delivery->business_location_id , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>
