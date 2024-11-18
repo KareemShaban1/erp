@@ -82,6 +82,10 @@ Route::middleware('auth:sanctum-client')->group(function () {
   
           Route::get('client/delete-account', [AuthController::class, 'deleteClientAccount']);
 
+          Route::get('client/account-info', [AuthController::class, 'getClientAccount']);
+
+          Route::post('client/update-password', [AuthController::class, 'updateClientPassword']);
+
   
       });
     Route::middleware('auth:sanctum-delivery')->group(function () {
@@ -96,6 +100,10 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
 
         Route::get('delivery/delete-account', [AuthController::class, 'deleteClientAccount']);
+
+        Route::get('delivery/account-info', [AuthController::class, 'getDeliveryAccount']);
+
+        Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
 
     });
 
