@@ -16,7 +16,7 @@ use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\WarrantyController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\FcmController;
-use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ClientNotificationController;
 use App\Http\Controllers\Api\PushNotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,7 +72,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
           Route::get('orders-refunds', [OrderRefundController::class, 'index']);
           Route::post('orders-refunds', [OrderRefundController::class, 'store']);
   
-          Route::get('sendNotification', [NotificationController::class, 'sendNotification']);
+          Route::get('sendNotification', [ClientNotificationController::class, 'sendNotification']);
   
           Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
   
@@ -86,7 +86,17 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
           Route::post('client/update-password', [AuthController::class, 'updateClientPassword']);
 
-  
+
+          Route::get('client/all-notifications', [ClientNotificationController::class, 'getClientNotifications']);
+
+          Route::get('client/get-un-read-notifications', [ClientNotificationController::class, 'getUnreadNotificationsCount']);
+
+          Route::post('client/mark-notification-as-read/{id}', [ClientNotificationController::class, 'markNotificationAsRead']);
+
+          Route::post('client/mark-all-notifications-as-read', [ClientNotificationController::class, 'markAllNotificationsAsRead']);
+        
+
+          //   getClientNotifications
       });
     Route::middleware('auth:sanctum-delivery')->group(function () {
         Route::get('getNotAssignedOrders', [DeliveryController::class, 'getNotAssignedOrders']);
