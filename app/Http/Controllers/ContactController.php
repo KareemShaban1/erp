@@ -2083,18 +2083,37 @@ public function store(Request $request)
                 "type" => $request->type ?? '',
                 'url' => $request->url ?? '',
             ];
-            // $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
 
-            if($contact->contact_status == ''){
+            if($contact->type == 'client'){
 
+                if($contact->contact_status == 'active'){
+                    app(FirebaseService::class)->sendAndStoreNotification(
+                        $client->id,
+                        $client->fcm_token,
+                        'Account Status',
+                        'Your Account is active now.',
+                        $data
+                    );
+                    // $this->moduleUtil->activityLog($contact, 'change_status', null, 
+                    // ['order_number' => $order->number, 'status'=>'approved']);
+                $this->contactUtil->activityLog($contact, 'change_status', null,
+                ['contact_name'=>$contact->name,'status' => $contact->contact_status]);
+    
+                }else {
+                    app(FirebaseService::class)->sendAndStoreNotification(
+                        $client->id,
+                        $client->fcm_token,
+                        'Account Status',
+                        'Your Account is not active now.',
+                        $data
+                    );
+
+                    $this->contactUtil->activityLog($contact, 'change_status', null,
+                    ['contact_name'=>$contact->name,'status' => $contact->contact_status]);
+                }
             }
-            app(FirebaseService::class)->sendAndStoreNotification(
-                $client->id,
-                $client->fcm_token,
-                'Account Status',
-                'Your Account is active now.',
-                $data
-            );
+           
+           
             $contact->save();
 
             $output = ['success' => true,
