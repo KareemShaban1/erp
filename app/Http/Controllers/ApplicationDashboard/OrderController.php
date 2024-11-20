@@ -216,6 +216,7 @@ class OrderController extends Controller
         switch ($status) {
             case 'pending':
                 $orderTracking->pending_at = now();
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'pending']);
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
@@ -228,6 +229,7 @@ class OrderController extends Controller
                     ['order_id' => $order->id,
                     'status'=>$order->status]
                 );
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->order, 'status'=>'processing']);
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
@@ -241,9 +243,11 @@ class OrderController extends Controller
                     'status'=>$order->status]
                 );
                 $orderTracking->shipped_at = now();
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'shipped']);
                 break;
             case 'cancelled':
                 $orderTracking->cancelled_at = now();
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'cancelled']);
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
@@ -256,6 +260,7 @@ class OrderController extends Controller
                     ['order_id' => $order->id, 
                     'status'=>$order->status]
                 );
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'completed']);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -279,11 +284,24 @@ class OrderController extends Controller
 
         $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-
         if ($delivery && $delivery->contact) {
             $delivery->contact->balance += $order->total;
             $delivery->contact->save();
         }
+
+        switch ($status) {
+            case 'pending':
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'pending']);
+                break;
+            case 'paid':
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'paid']);
+                break;
+            case 'failed':
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'failed']);
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid status: $status");    
+            }
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
