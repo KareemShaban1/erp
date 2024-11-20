@@ -94,7 +94,12 @@ class CartController extends Controller
             return $cartItem;
         }
 
-        return $this->returnJSON($cartItem, __('message.Cart Item has been deleted successfully'));
+        return $cartItem->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' =>  __('message.Cart Items have been deleted successfully'),
+        ]);
+        // return $this->returnJSON($cartItem, __('message.Cart Item has been deleted successfully'));
     }
 
     /**
