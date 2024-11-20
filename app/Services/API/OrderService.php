@@ -6,6 +6,7 @@ use App\Http\Resources\Client\ClientResource;
 use App\Http\Resources\Order\OrderCollection;
 use App\Http\Resources\Order\OrderResource;
 use App\Jobs\TransferProductJob;
+use App\Models\ApplicationSettings;
 use App\Models\Cart;
 use App\Models\Client;
 use App\Models\DeliveryOrder;
@@ -67,7 +68,7 @@ class OrderService extends BaseService
         try {
 
             $client = Client::find(Auth::id());
-            $query = Order::where('client_id',$client->id);
+            $query = Order::where('client_id', $client->id);
 
             $query = $this->withTrashed($query, $request);
 
@@ -91,7 +92,7 @@ class OrderService extends BaseService
             if (!$order) {
                 return null;
             }
-            $orderDelivery = DeliveryOrder::where('order_id',$order->id)->first();
+            $orderDelivery = DeliveryOrder::where('order_id', $order->id)->first();
 
             return new OrderResource($order);
 
@@ -106,34 +107,33 @@ class OrderService extends BaseService
     public function store()
     {
         try {
-
             DB::beginTransaction();
-
+    
             $carts = Cart::where('client_id', Auth::id())
                 ->with(['product', 'variation.variation_location_details', 'client'])
                 ->get();
-
-            // Check if cart is empty
+    
+            // Check if the cart is empty
             if ($carts->isEmpty()) {
                 return $this->returnJSON([], __('message.Cart is empty'));
             }
-
-
+    
             $client = Client::findOrFail(Auth::id());
             $orderTotal = $carts->sum('total');
-
+    
+            // Create the order
             $order = Order::create([
                 'client_id' => Auth::id(),
                 'sub_total' => $orderTotal,
                 'total' => $orderTotal,
-                'payment_method'=>'Cash on delivery',
+                'payment_method' => 'Cash on delivery',
                 'business_location_id' => $client->business_location_id,
             ]);
-
+    
             $this->orderTrackingService->store($order, 'pending');
-
             $this->cartService->clearCart();
-
+    
+            // Process each cart item
             foreach ($carts as $cart) {
                 $orderItem = OrderItem::create([
                     'order_id' => $order->id,
@@ -144,29 +144,29 @@ class OrderService extends BaseService
                     'discount' => $cart->discount ?? 0,
                     'sub_total' => $cart->total,
                 ]);
-
+    
+                // Handle stock transfer and updates
                 $this->handleQuantityTransfer($cart, $client, $order, $orderItem);
-
             }
-
+    
+            // Create sale record
             $saleResponse = $this->makeSale($order, $client, $carts);
-
+    
             DB::commit();
-
+    
+            // Notify admins about the order
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-
             \Notification::send($admins, new OrderCreatedNotification($order));
-
-
+    
             return new OrderResource($order);
-
+    
         } catch (\Exception $e) {
-            // dd($e);
+            DB::rollBack();
             \Log::error("Error in store method: " . $e->getMessage());
             return $this->handleException($e, __('message.Error happened while storing Order'));
         }
     }
-
+    
     /**
      * Handle quantity transfer between locations based on client needs.
      */
@@ -174,85 +174,95 @@ class OrderService extends BaseService
     {
         $requiredQuantity = $cart->quantity;
         $quantityTransferred = 0;
-        $sufficientQuantity = false;
-
+    
+        // Step 1: Attempt to fulfill from client's business location
         foreach ($cart->variation->variation_location_details as $locationDetail) {
-            $locationId = $locationDetail->location->id;
-
-            if ($locationId === $client->business_location_id) {
-                if ($locationDetail->qty_available >= $requiredQuantity) {
-                    $sufficientQuantity = true;
-                    break;
-                } else {
-                    $quantityTransferred = $locationDetail->qty_available;
-                    $requiredQuantity -= $quantityTransferred;
-                }
-            }
-        }
-
-        if (!$sufficientQuantity && $requiredQuantity > 0) {
-            foreach ($cart->variation->variation_location_details as $locationDetail) {
-                $locationId = $locationDetail->location->id;
-
-                if ($locationId !== $client->business_location_id && $locationDetail->qty_available > 0) {
-                    $transferQuantity = min($requiredQuantity, $locationDetail->qty_available);
-                    $this->transferQuantity($order, $orderItem, $client, $locationId, $client->business_location_id, $transferQuantity);
-
-                    $quantityTransferred += $transferQuantity;
-                    $requiredQuantity -= $transferQuantity;
-
+            if ($locationDetail->location->id === $client->business_location_id) {
+                $availableQty = $locationDetail->qty_available;
+                $transferQty = min($requiredQuantity, $availableQty);
+    
+                if ($transferQty > 0) {
+                    $requiredQuantity -= $transferQty;
+                    $quantityTransferred += $transferQty;
+                    $this->updateStock($orderItem, $locationDetail->location->id, $transferQty);
+    
+                    // If fulfilled, break out
                     if ($requiredQuantity <= 0) {
-                        $sufficientQuantity = true;
-                        break;
+                        return;
                     }
                 }
             }
         }
-
-        if (!$sufficientQuantity) {
-            throw new \Exception('Insufficient quantity for product ' . $cart->product_id);
+    
+        // Step 2: Attempt to fulfill remaining quantity from other locations
+        foreach ($cart->variation->variation_location_details as $locationDetail) {
+            if ($locationDetail->location->id !== $client->business_location_id && $locationDetail->qty_available > 0) {
+                $availableQty = $locationDetail->qty_available;
+                $transferQty = min($requiredQuantity, $availableQty);
+    
+                $this->transferQuantity(
+                    $order,
+                    $orderItem,
+                    $client,
+                    $locationDetail->location->id,
+                    $client->business_location_id,
+                    $transferQty
+                );
+    
+                $requiredQuantity -= $transferQty;
+                $quantityTransferred += $transferQty;
+    
+                // If fulfilled, break out
+                if ($requiredQuantity <= 0) {
+                    return;
+                }
+            }
+        }
+    
+        // Step 3: If insufficient stock even after all transfers, throw an exception
+        if ($requiredQuantity > 0) {
+            throw new \Exception(
+                sprintf(
+                    'Insufficient stock for product ID %d. Missing quantity: %d.',
+                    $cart->product_id,
+                    $requiredQuantity
+                )
+            );
         }
     }
-
+    
     /**
      * Transfers a specified quantity from one location to another.
      */
-    protected function transferQuantity($order,$orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
     {
         try {
             DB::beginTransaction();
 
+            $business_id = $client->contact->business_id;
+    
             $inputData = [
                 'location_id' => $fromLocationId,
-                // 'ref_no' => '1234',
                 'transaction_date' => now(),
                 'final_total' => $order->total,
                 'type' => 'sell_transfer',
-                'business_id' => $client->contact->business_id,
+                'business_id' => $business_id,
                 'created_by' => 1,
                 'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
                 'payment_status' => 'paid',
-                'status' => 'in_transit', 
-                'total_before_tax'=>$order->total,
+                'status' => 'in_transit',
+                'total_before_tax' => $order->total,
             ];
-
-            // sell_statuses =>   'final' => __('sale.final'), 'draft' => __('sale.draft'), 'quotation' => __('lang_v1.quotation'), 'proforma' => __('lang_v1.proforma')
-
-            //Update reference count
-            $ref_count = $this->productUtil->setAndGetReferenceCount('stock_transfer');
-            //Generate reference number
-            if (empty($input_data['ref_no'])) {
-                $input_data['ref_no'] = $this->productUtil->generateReferenceNumber('stock_transfer', $ref_count);
-            }
-
+    
+            // Generate reference number
+            $refCount = $this->productUtil->setAndGetReferenceCount('stock_transfer',$business_id);
+            $inputData['ref_no'] = $this->productUtil->generateReferenceNumber('stock_transfer', $refCount, $business_id);
+    
             $sellTransfer = Transaction::create($inputData);
             $inputData['type'] = 'purchase_transfer';
             $inputData['location_id'] = $toLocationId;
             $inputData['transfer_parent_id'] = $sellTransfer->id;
             $inputData['status'] = 'in_transit';
-
-            // purchase_statuses =>  return [ 'received' => __('lang_v1.received'), 'pending' => __('lang_v1.pending'), 'ordered' => __('lang_v1.ordered')];
-
     
             $purchaseTransfer = Transaction::create($inputData);
     
@@ -263,48 +273,53 @@ class OrderService extends BaseService
                     'quantity' => $quantity,
                     'unit_price' => $orderItem->price,
                     'unit_price_inc_tax' => $orderItem->price,
-                    'enable_stock'=>$orderItem->product->enable_stock,
-                    'item_tax'=>0,
-                    'tax_id'=>null,
+                    'enable_stock' => $orderItem->product->enable_stock,
+                    'item_tax' => 0,
+                    'tax_id' => null,
                 ]
             ];
-
+    
             $this->transactionUtil->createOrUpdateSellLines($sellTransfer, $products, $fromLocationId);
             $purchaseTransfer->purchase_lines()->createMany($products);
-
-            $this->cartService->clearCart();
-
-           
-                foreach ($products as $product) {
-                    $this->productUtil->decreaseProductQuantity(
-                        $product['product_id'],
-                        $product['variation_id'],
-                        $sellTransfer->location_id,
-                        $this->productUtil->num_uf($product['quantity'])
-                    );
-
-                    $this->productUtil->updateProductQuantity(
-                        $purchaseTransfer->location_id,
-                        $product['product_id'],
-                        $product['variation_id'],
-                        $product['quantity']
-                    );
-                }
-                
+    
+            foreach ($products as $product) {
+                $this->productUtil->decreaseProductQuantity(
+                    $product['product_id'],
+                    $product['variation_id'],
+                    $sellTransfer->location_id,
+                    $product['quantity']
+                );
+    
+                $this->productUtil->updateProductQuantity(
+                    $purchaseTransfer->location_id,
+                    $product['product_id'],
+                    $product['variation_id'],
+                    $product['quantity']
+                );
+            }
     
             DB::commit();
-
-            return new OrderResource($order);
-
     
         } catch (\Exception $e) {
-
-            // dd("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+            \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
             throw new \Exception('Stock transfer failed: ' . $e->getMessage());
         }
     }
+    
+    /**
+     * Update stock directly without a transfer (e.g., from the client's location).
+     */
+    protected function updateStock($orderItem, $locationId, $quantity)
+    {
+        $this->productUtil->decreaseProductQuantity(
+            $orderItem->product_id,
+            $orderItem->variation_id,
+            $locationId,
+            $quantity
+        );
+    }
+    
 
 
     protected function makeSale($order, $client, $carts)
@@ -331,7 +346,7 @@ class OrderService extends BaseService
                 // Calculate the unit price including tax if necessary, adjust based on your tax rules.
                 // $unit_price_inc_tax = $cart->price + ($cart->price * $cart->tax_rate / 100); // Example tax calculation
                 return [
-                    'unit_price_inc_tax' =>  $cart->price,
+                    'unit_price_inc_tax' => $cart->price,
                     'quantity' => $cart->quantity,
                     'modifier_price' => $cart->modifier_price ?? [], // Ensure it has a default array if no modifier exists
                     'modifier_quantity' => $cart->modifier_quantity ?? [], // Same for modifier quantity
@@ -348,7 +363,7 @@ class OrderService extends BaseService
             $invoice_total = $this->productUtil->calculateInvoiceTotal($cartsArray, $tax_id, $discount);
 
             $invoice_total['total_before_tax'] = $invoice_total['total_before_tax'] ?? 0;
-            
+
             $transactionData['invoice_total'] = $invoice_total;
 
             $business_id = $client->contact->business_id;
@@ -373,16 +388,16 @@ class OrderService extends BaseService
                     'quantity' => $cart->quantity,
                     'price' => $cart->price,
                     'discount' => $cart->discount,
-                    'enable_stock'=>1,
+                    'enable_stock' => 1,
                     'unit_price' => $cart->price,
-                    'item_tax'=>0,
-                    'tax_id'=>null,
-                    'unit_price_inc_tax'=>$cart->price,
+                    'item_tax' => 0,
+                    'tax_id' => null,
+                    'unit_price_inc_tax' => $cart->price,
 
                 ];
             })->toArray();
 
-            $sellLines =  $this->transactionUtil->createOrUpdateSellLines($transaction, $products, $client->business_location_id);
+            $sellLines = $this->transactionUtil->createOrUpdateSellLines($transaction, $products, $client->business_location_id);
 
             Log::info($sellLines);
 
@@ -397,7 +412,7 @@ class OrderService extends BaseService
                         $decrease_qty = $decrease_qty * $product['base_unit_multiplier'];
                     }
 
-                   
+
                     if ($product['enable_stock']) {
                         Log::info($products);
                         Log::info($decrease_qty);
@@ -436,7 +451,7 @@ class OrderService extends BaseService
             ];
 
         } catch (\Exception $e) {
-            \Log::error("Error in makeSale: " . $e->getMessage(). " Line:" . $e->getLine());
+            \Log::error("Error in makeSale: " . $e->getMessage() . " Line:" . $e->getLine());
             DB::rollBack();
             return $this->handleException($e, __('message.Error happened while making sale'));
         }
@@ -444,7 +459,7 @@ class OrderService extends BaseService
 
 
 
-        // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+    // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
     // {
     //     // Dispatch the job with a 10-minute delay
     //     TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
@@ -454,7 +469,7 @@ class OrderService extends BaseService
     // }
 
 
-    
+
 
     /**
      * Update the specified Order.
@@ -521,11 +536,22 @@ class OrderService extends BaseService
 
     public function checkQuantityAndLocation()
     {
-
         try {
+            // Retrieve application settings for messages
+            $settingTodayMessages = ApplicationSettings::where('key', 'order_message_today')->value('value');
+            $settingTomorrowMessages = ApplicationSettings::where('key', 'order_message_tomorrow')->value('value');
+
+            // Validate application settings
+            if (!$settingTodayMessages || !$settingTomorrowMessages) {
+                return $this->returnJSON(null, __('message.Application settings are missing'));
+            }
+
+            // Get the authenticated client
             $client = Client::findOrFail(Auth::id());
+
+            // Retrieve cart items with necessary relations
             $carts = Cart::where('client_id', Auth::id())
-                ->with(['product', 'variation.variation_location_details', 'client'])
+                ->with(['product', 'variation.variation_location_details'])
                 ->get();
 
             // Check if cart is empty
@@ -533,34 +559,44 @@ class OrderService extends BaseService
                 return $this->returnJSON(null, __('message.Cart is empty'));
             }
 
-            $multiLocationMessage = false;
+            // Check product quantities
+            $multiLocationMessage = $this->hasInsufficientQuantities($carts, $client->business_location_id);
 
-            foreach ($carts as $cart) {
-                $quantity = $cart->quantity;
+            // Return appropriate response based on multi-location status
+            $message = $multiLocationMessage ? $settingTomorrowMessages : $settingTodayMessages;
 
-                // Check if sufficient quantity is available at client's business location
-                $sufficientQuantity = $this->checkSufficientQuantity($cart->variation->variation_location_details, $client->business_location_id, $quantity);
-
-                // If the required quantity is not available, set multi-location message
-                if (!$sufficientQuantity) {
-                    $multiLocationMessage = true;
-                }
-
-            }
-
-            // Add multi-location message if applicable
-            if ($multiLocationMessage) {
-                return $this->returnJSON(new ClientResource($client), __('message.Order will be shipped tomorrow due to multiple locations'));
-                ;
-            }
-
-            return $this->returnJSON(new ClientResource($client), __('message.Order will be shipped today'));
-            ;
-
-
+            return $this->returnJSON(new ClientResource($client), $message);
         } catch (\Exception $e) {
+            // Log the exception for debugging
+            \Log::error('Error in checkQuantityAndLocation: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return $this->handleException($e, __('message.Error happened while listing cart items'));
         }
     }
+
+    /**
+     * Check if any cart item has insufficient quantities at the specified location.
+     *
+     * @param \Illuminate\Support\Collection $carts
+     * @param int $businessLocationId
+     * @return bool
+     */
+    private function hasInsufficientQuantities($carts, $businessLocationId)
+    {
+        foreach ($carts as $cart) {
+            $quantity = $cart->quantity;
+            $locationDetails = $cart->variation->variation_location_details;
+
+            // Check if sufficient quantity is available at the specified location
+            if (!$this->checkSufficientQuantity($locationDetails, $businessLocationId, $quantity)) {
+                return true; // Multi-location message is required
+            }
+        }
+
+        return false; // All items have sufficient quantities
+    }
+
 
 }

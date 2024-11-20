@@ -42,6 +42,8 @@ class Kernel extends HttpKernel
             'bindings',
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Session\Middleware\StartSession::class, // Add this for session in API routes
+
         ],
     ];
 

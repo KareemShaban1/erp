@@ -365,6 +365,48 @@ class Util
         return $ref_number;
     }
 
+
+    /**
+     * Generates reference number
+     *
+     * @param string $type
+     * @param int $business_id
+     *
+     * @return int
+     */
+    public function generateReferenceNumberForApp($type, $ref_count, $business_id = null, $default_prefix = null)
+    {
+        $prefix = '';
+    
+        // Fetch prefix from the provided business ID if available
+        if (!empty($business_id)) {
+            $business = Business::find($business_id);
+            if ($business && !empty($business->ref_no_prefixes)) {
+                $prefixes = $business->ref_no_prefixes;
+                $prefix = !empty($prefixes[$type]) ? $prefixes[$type] : '';
+            }
+        }
+    
+        // Override prefix with the default prefix if provided
+        if (!empty($default_prefix)) {
+            $prefix = $default_prefix;
+        }
+    
+        // Format the reference digits
+        $ref_digits = str_pad($ref_count, 4, 0, STR_PAD_LEFT);
+    
+        // Generate the reference number based on the type
+        if (!in_array($type, ['contacts', 'business_location', 'username'])) {
+            $ref_year = \Carbon::now()->year;
+            $ref_number = $prefix . $ref_year . '/' . $ref_digits;
+        } else {
+            $ref_number = $prefix . $ref_digits;
+        }
+    
+        return $ref_number;
+    }
+    
+
     /**
     * Checks if the given user is admin
     *

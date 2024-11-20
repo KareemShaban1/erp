@@ -322,11 +322,14 @@
                 $('#editType').val(setting.type).trigger('change');
 
                 // Check if the key is in the predefined array
-                const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'];
+                const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'
+                ,'order_message_today','order_message_tomorrow'];
                 if (readonlyKeys.includes(setting.key)) {
                     $('#editKey').prop('readonly', true);
+                    $('#editType').prop('disabled', true);
                 } else {
                     $('#editKey').prop('readonly', false);
+                    $('#editType').prop('disabled', false);
                 }
 
                 if (setting.type === 'boolean') {

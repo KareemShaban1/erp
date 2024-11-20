@@ -226,6 +226,15 @@ class DeliveryController extends Controller
                 $delivery->status = 'available';
                 $delivery->save();
 
+                 // Send and store push notification
+                app(FirebaseService::class)->sendAndStoreNotification(
+                    $client->id,
+                    $client->fcm_token,
+                    'Order Status Updated',
+                    'Your order has been completed successfully.',
+                    ['order_id' => $order->id, 'status' => $status]
+                );
+
                 break;
         }
 
