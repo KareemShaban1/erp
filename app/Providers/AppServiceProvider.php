@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Utils\ModuleUtil;
 use Lcobucci\JWT\Configuration;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Relation::morphMap([
+            'transaction' => 'App\Models\Transaction',
+        ]);
+
+        
         ini_set('memory_limit', '-1');
         set_time_limit(0);
 

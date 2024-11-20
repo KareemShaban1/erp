@@ -523,4 +523,9 @@ class Transaction extends Model
         
         return $sales_orders;
     }
+
+    public function transactionable()
+{
+    return $this->morphTo();
+}
 }
