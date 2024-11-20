@@ -538,17 +538,20 @@ class OrderService extends BaseService
     public function checkQuantityAndLocation()
     {
         try {
+
+            // Get the authenticated client
+            $client = Client::findOrFail(Auth::id());
+
             // Retrieve application settings for messages
             $settingTodayMessages = ApplicationSettings::where('key', 'order_message_today')->value('value');
             $settingTomorrowMessages = ApplicationSettings::where('key', 'order_message_tomorrow')->value('value');
 
             // Validate application settings
             if (!$settingTodayMessages || !$settingTomorrowMessages) {
-                return $this->returnJSON(null, __('message.Application settings are missing'));
+                return $this->returnJSON(new ClientResource($client), 
+                __('message.Application settings are missing'));
             }
 
-            // Get the authenticated client
-            $client = Client::findOrFail(Auth::id());
 
             // Retrieve cart items with necessary relations
             $carts = Cart::where('client_id', Auth::id())
