@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderCancellation;
 use App\Models\OrderTracking;
 use App\Services\BaseService;
+use App\Services\FirebaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
 use Illuminate\Http\Request;
@@ -126,7 +127,20 @@ class OrderCancellationService extends BaseService
 
         // Validate the request data
         $data = $request->validated();
+        $order = Order::where('id',$OrderCancellation->order_id)->first();
 
+        if($data['admin_response']){
+             // Send and store push notification
+             app(FirebaseService::class)->sendAndStoreNotification(
+                $order->client->id,
+                $order->client->fcm_token,
+                'Order Cancellation Admin Response',
+                'Your order has been shipped successfully.',
+                ['order_id' => $order->id, 
+                'order_cancellation_id'=>$OrderCancellation->id,
+                'admin_response' => $data['admin_response']]
+            );
+        }
         $OrderCancellation->update($data);
 
         return new OrderCancellationResource($OrderCancellation);

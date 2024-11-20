@@ -8,6 +8,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderTracking;
+use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -206,8 +207,6 @@ class OrderController extends Controller
         // Check if an OrderTracking already exists for the order
         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
-
-
         $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
 
         $delivery = Delivery::find($deliveryOrder->delivery_id);
@@ -220,9 +219,27 @@ class OrderController extends Controller
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
+                // Send and store push notification
+                app(FirebaseService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been processed successfully.',
+                    ['order_id' => $order->id,
+                    'status'=>$order->status]
+                );
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
+                 // Send and store push notification
+                app(FirebaseService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been shipped successfully.',
+                    ['order_id' => $order->id, 
+                    'status'=>$order->status]
+                );
                 $orderTracking->shipped_at = now();
                 break;
             case 'cancelled':
@@ -230,6 +247,15 @@ class OrderController extends Controller
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
+                // Send and store push notification
+                app(FirebaseService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been completed successfully.',
+                    ['order_id' => $order->id, 
+                    'status'=>$order->status]
+                );
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\WarrantyController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\FcmController;
 use App\Http\Controllers\Api\ClientNotificationController;
+use App\Http\Controllers\Api\DeliveryNotificationController;
 use App\Http\Controllers\Api\PushNotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -114,6 +115,14 @@ Route::middleware('auth:sanctum-client')->group(function () {
         Route::get('delivery/account-info', [AuthController::class, 'getDeliveryAccount']);
 
         Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
+
+        Route::get('delivery/all-notifications', [DeliveryNotificationController::class, 'getDeliveryNotifications']);
+
+        Route::get('delivery/get-un-read-notifications', [DeliveryNotificationController::class, 'getUnreadNotificationsCount']);
+
+        Route::post('delivery/mark-notification-as-read/{id}', [DeliveryNotificationController::class, 'markNotificationAsRead']);
+
+        Route::post('delivery/mark-all-notifications-as-read', [DeliveryNotificationController::class, 'markAllNotificationsAsRead']);
 
     });
 

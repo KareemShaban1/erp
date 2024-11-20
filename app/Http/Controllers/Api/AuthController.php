@@ -347,4 +347,51 @@ class AuthController extends Controller
             'message' => __('message.Password updated successfully'),
         ]);
     }
+
+
+    public function updatePassword(Request $request)
+{
+    // Validate the request
+    $request->validate([
+        'type' => 'required|in:client,delivery',
+        'current_password' => 'required',
+        'new_password' => 'required|min:8',
+    ]);
+
+    // Get the authenticated user
+    $user = Auth::user();
+
+    // Check the user type and apply specific logic
+    if ($request->type === 'client' && $user->role !== 'client') {
+        return response()->json([
+            'success' => false,
+            'message' => __('message.Unauthorized user for client type'),
+        ], 403);
+    }
+
+    if ($request->type === 'delivery' && $user->role !== 'delivery') {
+        return response()->json([
+            'success' => false,
+            'message' => __('message.Unauthorized user for delivery type'),
+        ], 403);
+    }
+
+    // Verify the current password
+    if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json([
+            'success' => false,
+            'message' => __('message.Current password is incorrect'),
+        ], 400);
+    }
+
+    // Update the password with hashing
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => __('message.Password updated successfully'),
+    ]);
+}
+
 }

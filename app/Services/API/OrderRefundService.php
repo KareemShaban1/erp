@@ -4,8 +4,10 @@ namespace App\Services\API;
 
 use App\Http\Resources\OrderRefund\OrderRefundCollection;
 use App\Http\Resources\OrderRefund\OrderRefundResource;
+use App\Models\Order;
 use App\Models\OrderRefund;
 use App\Services\BaseService;
+use App\Services\FirebaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
 use Illuminate\Http\Request;
@@ -103,6 +105,21 @@ class OrderRefundService extends BaseService
         $data = $request->validated();
 
         $orderRefund->update($data);
+
+        $order = Order::where('id',$orderRefund->order_id)->first();
+
+        if($data['admin_response']){
+            // Send and store push notification
+            app(FirebaseService::class)->sendAndStoreNotification(
+               $order->client->id,
+               $order->client->fcm_token,
+               'Order Cancellation Admin Response',
+               'Your order has been shipped successfully.',
+               ['order_id' => $order->id, 
+               'order_refund_id'=>$orderRefund->id,
+               'admin_response' => $data['admin_response']]
+           );
+       }
 
         return new OrderRefundResource($orderRefund);
 
