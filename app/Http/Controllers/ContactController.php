@@ -2082,7 +2082,12 @@ public function store(Request $request)
             $data = [
                 "type" => $request->type ?? '',
                 'url' => $request->url ?? '',
-      ];
+            ];
+            // $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
+
+            if($contact->contact_status == ''){
+
+            }
             app(FirebaseService::class)->sendAndStoreNotification(
                 $client->id,
                 $client->fcm_token,

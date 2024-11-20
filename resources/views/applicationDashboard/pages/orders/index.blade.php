@@ -257,7 +257,7 @@
             },
             success: function (response) {
                 if (response.success) {
-                    alert(response.message);
+                    toastr.success(response.message);
                     orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
                 } else {
                     alert('Failed to update payment status.');

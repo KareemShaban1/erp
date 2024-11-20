@@ -140,16 +140,21 @@ class OrderCancellationController extends Controller
         $orderCancellation = OrderCancellation::findOrFail($orderCancellationId);
         $orderCancellation->status = $status;
 
+        $order = Order::where('id',$orderCancellation->order_id)->first();
+
 
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
             case 'requested':
                 $orderCancellation->requested_at = now();
+                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'requested']);
                 break;
             case 'approved':
                 $orderCancellation->processed_at = now();
+                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
                 break;
             case 'rejected':
+                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'rejected']);
                 break;        
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

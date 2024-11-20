@@ -488,7 +488,7 @@ class OrderService extends BaseService
                 return null;
             }
             $order->delete();
-            return $order;
+            return new OrderResource($order);
 
 
         } catch (\Exception $e) {

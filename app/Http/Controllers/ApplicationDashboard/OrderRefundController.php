@@ -164,19 +164,24 @@ class OrderRefundController extends Controller
         $orderRefund = OrderRefund::findOrFail($orderRefundId);
         $orderRefund->status = $status;
 
+        $order = Order::where('id',$orderRefund->order_id)->first();
 
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
             case 'requested':
                 $orderRefund->requested_at = now();
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'requested']);
                 break;
             case 'processed':
                 $orderRefund->processed_at = now();
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'processed']);
                 break;
             case 'approved':
                     $orderRefund->processed_at = now();
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
                     break;
             case 'rejected':
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'rejected']);
                     break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

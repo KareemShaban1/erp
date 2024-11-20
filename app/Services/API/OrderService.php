@@ -502,8 +502,9 @@ class OrderService extends BaseService
                 return null;
             }
             $order->delete();
-            return $order;
+            // return $order;
 
+            return new OrderResource($order);
 
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while deleting Order'));

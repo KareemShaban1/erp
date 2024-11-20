@@ -525,7 +525,7 @@ class Transaction extends Model
     }
 
     public function transactionable()
-{
-    return $this->morphTo();
-}
+        {
+            return $this->morphTo();
+        }
 }
