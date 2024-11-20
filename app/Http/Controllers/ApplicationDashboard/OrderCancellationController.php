@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderCancellation;
 use App\Models\OrderTracking;
+use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -237,6 +238,20 @@ class OrderCancellationController extends Controller
                 $orderCancellation->status = $input['status'];
                 $orderCancellation->reason = $input['reason'];
                 $orderCancellation->admin_response = $input['admin_response'];
+                $order = Order::where('id',$orderCancellation->order_id)->first();
+
+                if($input['admin_response']){
+                    // Send and store push notification
+                    app(FirebaseService::class)->sendAndStoreNotification(
+                       $order->client->id,
+                       $order->client->fcm_token,
+                       'Order Cancellation Admin Response',
+                       'Your order has been shipped successfully.',
+                       ['order_id' => $order->id, 
+                       'order_cancellation_id'=>$orderCancellation->id,
+                       'admin_response' => $input['admin_response']]
+                   );
+               }
 
                 $orderCancellation->save();
 
