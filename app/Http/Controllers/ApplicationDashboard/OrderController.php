@@ -157,7 +157,7 @@ class OrderController extends Controller
             ->make(true);
     }
 
-    public function canceledOrders($startDate = null, $endDate = null)
+    public function cancelledOrders($startDate = null, $endDate = null)
     {
         $orders = Order::with('client')
             ->where('order_status', 'cancelled')
