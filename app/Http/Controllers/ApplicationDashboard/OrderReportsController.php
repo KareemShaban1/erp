@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApplicationDashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class OrderReportsController extends Controller
 {
@@ -27,5 +28,44 @@ class OrderReportsController extends Controller
               return view('applicationDashboard.pages.orderReports.index', compact('orderStats', 'grandTotalAmount', 'grandCanceledAmount'));
           }
           
+
+          public function clientOrders($clientId, $startDate = null, $endDate = null)
+{
+    $orders = Order::with(['client', 'businessLocation'])
+        ->select([
+            'id', 
+            'number', 
+            'client_id', 
+            'payment_method', 
+            'order_status', 
+            'payment_status', 
+            'shipping_cost', 
+            'sub_total', 
+            'total', 
+            'created_at'
+        ])
+        ->where('client_id', $clientId) // Filter by client ID
+        ->latest();
+
+    // Apply date filter if start_date and end_date are provided
+    if ($startDate && $endDate) {
+        $orders->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    if (request()->ajax()) {
+      return Datatables::of($orders)
+        ->addColumn('client_contact_name', function ($order) {
+            return optional($order->client->contact)->name ?? 'N/A';
+        })
+        ->addColumn('has_delivery', function ($order) {
+            return $order->has_delivery; // Add the delivery status here
+        })
+        ->make(true);
+}
+
+        return view('applicationDashboard.pages.orderReports.clientOrders');
+
+}
+
           
 }
