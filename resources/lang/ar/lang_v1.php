@@ -1455,7 +1455,7 @@ return [
 "deleted"=>"deleted",
 ""=>"",
 "order_reports"=>"تقارير الطلبات",
-"clients_orders_reports"=>"تقارير طلبات العملاء",
+"client_orders_reports"=>"تقارير طلبات العملاء",
 ""=>"",
 ""=>"",
 ""=>"",
