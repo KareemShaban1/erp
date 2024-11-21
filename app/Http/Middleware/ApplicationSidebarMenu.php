@@ -180,9 +180,9 @@ class ApplicationSidebarMenu
 
                     // Link for canceled Orders
                     $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'canceled']),
+                        action('ApplicationDashboard\OrderController@index', ['status' => 'cancelled']),
                         __('lang_v1.canceled_orders'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'canceled']
+                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'cancelled']
                     );
 
 
