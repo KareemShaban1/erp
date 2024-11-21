@@ -14,13 +14,12 @@ class OrderReportsController extends Controller
               $orderStats = Order::select(
                   'client_id',
                   DB::raw('SUM(total) as total_amount'), // Total order amount for each client
-                  DB::raw('SUM(CASE WHEN order_status = "canceled" THEN total ELSE 0 END) as canceled_amount') // Total canceled order amount for each client
+                  DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount') // Total canceled order amount for each client
               )
               ->with('client') // Eager load client relationship
               ->groupBy('client_id') // Group by client_id
               ->get();
           
-              dd($orderStats);
               // Calculate overall totals
               $grandTotalAmount = Order::sum('total'); // Grand total amount of all orders
               $grandCanceledAmount = Order::where('order_status', 'cancelled')->sum('total'); // Grand total amount of canceled orders
