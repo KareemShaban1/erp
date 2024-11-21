@@ -86,6 +86,7 @@ class AuthController extends Controller
             'password.required' => 'كلمة المرور مطلوبة.',
             'password.min' => 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
             'mobile.required' => 'رقم الهاتف مطلوب.',
+            'mobile.unique' => 'رقم الهاتف هذا مسجل بالفعل.',
             'mobile.max' => 'يجب ألا يتجاوز رقم الهاتف 20 حرفًا.',
             'fcm_token.required' => 'رمز FCM مطلوب.',
             'business_location_id.required' => 'معرف موقع العمل مطلوب.',
@@ -107,7 +108,7 @@ class AuthController extends Controller
                 'string',
                 'min:8',
             ],
-            'mobile' => 'required|string|max:20',
+            'mobile' => 'required|string|max:20|unique:contacts',
             'location' => 'nullable|string|max:255',
             'fcm_token' => 'required|string',
             'business_location_id' => 'required|numeric|exists:business_locations,id'
