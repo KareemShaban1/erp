@@ -9,12 +9,12 @@
 
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    
+
 
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Client</th>
+                <th>Client Name</th>
                 <th>Total Order Amount</th>
                 <th>Total Canceled Amount</th>
             </tr>
@@ -22,7 +22,7 @@
         <tbody>
             @foreach ($orderStats as $stat)
                 <tr>
-                    <td>{{ $stat->client->contact->name ?? 'Unknown Client' }}</td>
+                    <td>{{ $stat->client->name ?? 'Unknown Client' }}</td> <!-- Display client name -->
                     <td>{{ number_format($stat->total_amount, 2) }}</td>
                     <td>{{ number_format($stat->canceled_amount, 2) }}</td>
                 </tr>
