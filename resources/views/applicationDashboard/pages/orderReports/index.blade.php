@@ -22,7 +22,7 @@
         <tbody>
             @foreach ($orderStats as $stat)
                 <tr>
-                    <td>{{ $stat->client->name ?? 'Unknown Client' }}</td> <!-- Display client name -->
+                    <td>{{ $stat->client->contact->name ?? 'Unknown Client' }}</td> <!-- Display client name -->
                     <td>{{ number_format($stat->total_amount, 2) }}</td>
                     <td>{{ number_format($stat->canceled_amount, 2) }}</td>
                 </tr>

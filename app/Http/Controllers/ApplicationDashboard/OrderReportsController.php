@@ -20,6 +20,7 @@ class OrderReportsController extends Controller
               ->groupBy('client_id') // Group by client_id
               ->get();
           
+              dd($orderStats);
               // Calculate overall totals
               $grandTotalAmount = Order::sum('total'); // Grand total amount of all orders
               $grandCanceledAmount = Order::where('order_status', 'cancelled')->sum('total'); // Grand total amount of canceled orders
