@@ -161,12 +161,20 @@ class AuthController extends Controller
 
     public function clientLogin(Request $request)
     {
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'email_address' => 'required|string|email',
-            'password' => 'required|string',
-            'fcm_token' => 'required|string',
-        ]);
+        // Custom validation messages
+    $messages = [
+        'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
+        'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+        'password.required' => 'كلمة المرور مطلوبة.',
+        'fcm_token.required' => 'رمز FCM مطلوب.',
+    ];
+
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'email_address' => 'required|string|email',
+        'password' => 'required|string',
+        'fcm_token' => 'required|string',
+    ], $messages);
 
         if ($validator->fails()) {
             // Get the first error message
@@ -216,11 +224,18 @@ class AuthController extends Controller
 
     public function deliveryLogin(Request $request)
     {
+        $messages = [
+            'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
+            'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'fcm_token.required' => 'رمز FCM مطلوب.',
+        ];
         // Validation
         $validator = Validator::make($request->all(), [
             'email_address' => 'required|string|email',
             'password' => 'required|string',
-        ]);
+            'fcm_token' => 'required|string',
+        ],$messages);
 
         if ($validator->fails()) {
             // Get the first error message
