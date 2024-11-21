@@ -194,6 +194,8 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
 
     Route::resource('warranties', 'WarrantyController');
     
+    Route::get('applicationDashboard/client-orders-report', 'ApplicationDashboard\OrderReportsController@index')->name('orders.reports');
+
 
     Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
     Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');

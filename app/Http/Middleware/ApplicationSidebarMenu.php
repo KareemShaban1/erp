@@ -304,7 +304,19 @@ class ApplicationSidebarMenu
                 'active' => request()->segment(1)
             ])->order(80);
 
-            // ApplicationDashboard\ApplicationSettingsController@index
+            $menu->dropdown(
+                __('lang_v1.order_reports'),
+                function ($sub) {
+                    $sub->url(
+                        action('ApplicationDashboard\OrderReportsController@index'),
+                        __('lang_v1.client_orders_reports'),
+                        ['icon' => 'fa fas fa-list']
+                    );
+                },
+                ['icon' => 'fa fas fa-chart-bar']
+            )->order(26);
+
+            // ApplicationDashboard\OrderReportsController@index
         });
 
         //Add menus from modules
