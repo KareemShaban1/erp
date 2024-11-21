@@ -77,6 +77,22 @@ class AuthController extends Controller
 
     public function clientRegister(Request $request)
     {
+         // Custom validation messages
+         $messages = [
+            'name.required' => 'الاسم مطلوب.',
+            'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
+            'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+            'email_address.unique' => 'عنوان البريد الإلكتروني هذا مسجل بالفعل.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'password.min' => 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.',
+            'mobile.required' => 'رقم الهاتف مطلوب.',
+            'mobile.max' => 'يجب ألا يتجاوز رقم الهاتف 20 حرفًا.',
+            'fcm_token.required' => 'رمز FCM مطلوب.',
+            'business_location_id.required' => 'معرف موقع العمل مطلوب.',
+            'business_location_id.exists' => 'معرف موقع العمل المحدد غير صالح.',
+        ];
+        
+
         // Validation
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -93,13 +109,11 @@ class AuthController extends Controller
             ],
             'mobile' => 'required|string|max:20',
             'location' => 'nullable|string|max:255',
-            // 'business_id' => 'required|numeric|exists:business,id',
             'fcm_token' => 'required|string',
             'business_location_id' => 'required|numeric|exists:business_locations,id'
-        ]);
+        ], $messages);
 
         if ($validator->fails()) {
-            // Get the first error message
             $firstError = $validator->errors()->first();
             return response()->json(['message' => $firstError], 422);
         }
