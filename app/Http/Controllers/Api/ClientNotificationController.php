@@ -57,7 +57,9 @@ class ClientNotificationController extends Controller
       $notifications =  Notification::where('notifiable_type', 'App\Models\Client')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at') // Only unread notifications
-         ->update(['read_at' => now()]); // Mark as read
+         ->get(); 
+
+         $notifications->each->update(['read_at' => now()]);
 
          $response = new NotificationCollection($notifications);
 

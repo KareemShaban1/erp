@@ -53,17 +53,22 @@ class DeliveryNotificationController extends Controller
 
    }
    public function markAllNotificationsAsRead()
-   {
-      $notifications =  Notification::where('notifiable_type', 'App\Models\Delivery')
-         ->where('notifiable_id', Auth::id())
-         ->whereNull('read_at') // Only unread notifications
-         ->update(['read_at' => now()]); // Mark as read
+{
+    // Update unread notifications and fetch them
+    $notifications = Notification::where('notifiable_type', 'App\Models\Delivery')
+        ->where('notifiable_id', Auth::id())
+        ->whereNull('read_at') // Only unread notifications
+        ->get(); // Fetch the records
 
-         $response = new NotificationCollection($notifications);
+    // Update their `read_at` field
+    $notifications->each->update(['read_at' => now()]);
 
-      return $this->returnJSON($response, __('message.All Notifications marked as read successfully'));
+    // Use the NotificationCollection to transform the notifications
+    $response = new NotificationCollection($notifications);
 
-   }
+    return $this->returnJSON($response, __('message.All Notifications marked as read successfully'));
+}
+
 
 
 }
