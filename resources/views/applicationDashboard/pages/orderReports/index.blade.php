@@ -4,7 +4,7 @@
 @section('content')
 
 <section class="content-header">
-    <h1>Order Reports</h1>
+    <h1>{{__('lang_v1.client_orders_reports')}}</h1>
 </section>
 
 <section class="content">
@@ -14,9 +14,9 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Client Name</th>
-                <th>Total Order Amount</th>
-                <th>Total Canceled Amount</th>
+                <th>{{__('lang_v1.Client_Name')}}</th>
+                <th>{{__('lang_v1.Total_Order_Amount')}} </th>
+                <th>{{__('lang_v1.Total_Cancelled_Amount')}} </th>
             </tr>
         </thead>
         <tbody>

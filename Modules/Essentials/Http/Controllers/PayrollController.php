@@ -94,8 +94,9 @@ class PayrollController extends Controller
                     $payrolls->where('dept.id', request()->input('department_id'));
                 }
             }
+            // dd(auth()->user()->can('essentials.all_payroll'));
 
-            if (!$is_admin) {
+            if (!$is_admin && !auth()->user()->can('essentials.all_payroll')) {
                 $payrolls->where('transactions.expense_for', auth()->user()->id);
             }
 
@@ -235,7 +236,7 @@ class PayrollController extends Controller
 
                 //get earnings & deductions of employee
                 $allowances_and_deductions = $this->essentialsUtil->getEmployeeAllowancesAndDeductions($business_id, $employee->id, $start_date, $end_date);
-                dd($allowances_and_deductions);
+                // dd($allowances_and_deductions);
                 foreach ($allowances_and_deductions as $ad) {
                     if ($ad->type == 'allowance') {
                         $payrolls[$employee->id]['allowances']['allowance_names'][] = $ad->description;
@@ -247,7 +248,7 @@ class PayrollController extends Controller
                         $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $ad->amount_type == 'fixed' ? $ad->amount : 0;
                         $payrolls[$employee->id]['deductions']['deduction_types'][] = $ad->amount_type;
                         $payrolls[$employee->id]['deductions']['deduction_percents'][] = $ad->amount_type == 'percent' ? $ad->amount : 0;
-                    }
+                    } 
                 }
             }
 

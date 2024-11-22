@@ -190,6 +190,11 @@ class DataController extends Controller
     {
         return [
             [
+                'value' => 'essentials.all_payroll',
+                'label' => __('essentials::lang.show_all_payroll'),
+                'default' => false
+            ],
+            [
                 'value' => 'essentials.crud_leave_type',
                 'label' => __('essentials::lang.crud_leave_type'),
                 'default' => false
@@ -197,6 +202,11 @@ class DataController extends Controller
             [
                 'value' => 'essentials.crud_all_leave',
                 'label' => __('essentials::lang.crud_all_leave'),
+                'default' => false
+            ],
+            [
+                'value' => 'essentials.delete_leave',
+                'label' => __('essentials::lang.delete_leave'),
                 'default' => false
             ],
             [
@@ -264,6 +274,7 @@ class DataController extends Controller
                 'label' => __('essentials::lang.view_message'),
                 'default' => false
             ],
+
         ];
     }
 
@@ -351,20 +362,22 @@ class DataController extends Controller
     {
         if ($data['view'] == 'manage_user.create' || $data['view'] == 'manage_user.edit') {
             $business_id = session()->get('business.id');
+            $user = !empty($data['user']) ? $data['user'] : null;
+
             $departments = Category::forDropdown($business_id, 'hrm_department');
             $designations = Category::forDropdown($business_id, 'hrm_designation');
-            $pay_comoponenets = EssentialsAllowanceAndDeduction::forDropdown($business_id);
+            $pay_components = EssentialsAllowanceAndDeduction::forDropdown($business_id);
 
-            $user = !empty($data['user']) ? $data['user'] : null;
+            // dd($pay_components);
 
             $allowance_deduction_ids = [];
             if (!empty($user)) {
                 $allowance_deduction_ids = EssentialsUserAllowancesAndDeduction::where('user_id', $user->id)
                                             ->pluck('allowance_deduction_id')
                                             ->toArray();
-            }
+            } 
 
-            return view('essentials::partials.user_form_part', compact('departments', 'designations', 'user', 'pay_comoponenets', 'allowance_deduction_ids'))
+            return view('essentials::partials.user_form_part', compact('departments', 'designations', 'user', 'pay_components', 'allowance_deduction_ids'))
                 ->render();
         } elseif ($data['view'] == 'manage_user.show') {
             $user = !empty($data['user']) ? $data['user'] : null;

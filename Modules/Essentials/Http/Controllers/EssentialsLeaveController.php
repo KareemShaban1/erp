@@ -111,7 +111,7 @@ class EssentialsLeaveController extends Controller
                     'action',
                     function ($row) {
                         $html = '';
-                        if (auth()->user()->can('essentials.crud_all_leave')) {
+                        if (auth()->user()->can('essentials.delete_leave')) {
                             $html .= '<button class="btn btn-xs btn-danger delete-leave" data-href="' . action('\Modules\Essentials\Http\Controllers\EssentialsLeaveController@destroy', [$row->id]) . '"><i class="fa fa-trash"></i> ' . __("messages.delete") . '</button>';
                         }
 

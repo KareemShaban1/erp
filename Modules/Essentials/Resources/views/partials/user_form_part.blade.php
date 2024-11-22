@@ -40,8 +40,13 @@
         </div>
     </div> --}}
     <div class="form-group col-md-4">
-        {!! Form::label('pay_components', __('essentials::lang.pay_components') . ':') !!}
-        {!! Form::select('pay_components[]', $pay_comoponenets, !empty($allowance_deduction_ids) ? $allowance_deduction_ids : [], ['class' => 'form-control select2', 'multiple' ]); !!}
-    </div>
+    {!! Form::label('pay_components', __('essentials::lang.pay_components') . ':') !!}
+    {!! Form::select('pay_components[]', $pay_components, $allowance_deduction_ids, [
+        'class' => 'form-control select2',
+        'multiple' => 'multiple',
+        'style' => 'width: 100%;',
+    ]) !!}
 </div>
+
+</div> 
 @endcomponent
