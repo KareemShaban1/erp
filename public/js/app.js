@@ -1482,7 +1482,7 @@ $(document).ready(function() {
         serverSide: true,
         aaSorting: [[1, 'desc']],
         ajax: {
-            url: '/expenses',
+            url: '/payment/expenses',
             data: function(d) {
                 d.expense_for = $('select#expense_for').val();
                 d.contact_id = $('select#expense_contact_filter').val();
@@ -2651,6 +2651,7 @@ function getTotalUnreadNotifications(){
             dataType: 'json',
             global: false,
             success: function(data) {
+                console.log(data)
                 if (data.total_unread != 0 ) {
                     $('span.notifications_count').text(data.total_unread);
                 }

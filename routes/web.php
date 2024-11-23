@@ -228,6 +228,9 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::post('applicationDashboard/order-refunds/{orderRefundId}/change-status', 
     'ApplicationDashboard\OrderRefundController@changeOrderRefundStatus');
 
+    Route::post('applicationDashboard/order-refunds/{orderRefundId}/change-refund-status', 
+    'ApplicationDashboard\OrderRefundController@changeRefundStatus');
+
     Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
 
     // Route::resource('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController');
@@ -399,7 +402,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('expense-categories', 'ExpenseCategoryController');
 
     //Expenses...
-    Route::resource('expenses', 'ExpenseController');
+    Route::resource('payment/expenses', 'ExpenseController');
 
     //Transaction payments...
     // Route::get('/payments/opening-balance/{contact_id}', 'TransactionPaymentController@getOpeningBalancePayments');
