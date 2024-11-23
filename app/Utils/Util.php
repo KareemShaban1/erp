@@ -1454,14 +1454,14 @@ class Util
         $user_details['business_id'] = $business_id;
         
         //Check if subscribed or not, then check for users quota
-        if($user_details['user_type'] == 'user') {
-            $moduleUtil = new \App\Utils\ModuleUtil;
-            if (!$moduleUtil->isSubscribed($business_id)) {
-                return $moduleUtil->expiredResponse();
-            } elseif (!$moduleUtil->isQuotaAvailable('users', $business_id)) {
-                return $moduleUtil->quotaExpiredResponse('users', $business_id, action('ManageUserController@index'));
-            }
-        }
+        // if($user_details['user_type'] == 'user') {
+        //     $moduleUtil = new \App\Utils\ModuleUtil;
+        //     if (!$moduleUtil->isSubscribed($business_id)) {
+        //         return $moduleUtil->expiredResponse();
+        //     } elseif (!$moduleUtil->isQuotaAvailable('users', $business_id)) {
+        //         return $moduleUtil->quotaExpiredResponse('users', $business_id, action('ManageUserController@index'));
+        //     }
+        // }
         
         if (empty($user_details['allow_login']) || !$user_details['allow_login']) {
             unset($user_details['username']);
