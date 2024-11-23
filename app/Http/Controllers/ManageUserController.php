@@ -130,48 +130,152 @@ class ManageUserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // public function store(Request $request)
+    // {
+    //     if (!auth()->user()->can('user.create')) {
+    //         abort(403, 'Unauthorized action.');
+    //     }
+
+    //     try {
+
+
+    //         if (!empty($request->input('dob'))) {
+    //             $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+    //         }
+            
+    //         $request['cmmsn_percent'] = !empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
+
+    //         $request['max_sales_discount_percent'] = !is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
+
+    //         $business_id = request()->session()->get('user.business_id');
+
+    //         $data = $request->except(['is_active','confirm_password','role','access_all_locations']);
+            
+    //         $data['business_id'] = $business_id;
+            
+    //         // $user = User::create($data);
+                        
+    //         $user = $this->moduleUtil->createUser($request);
+            
+
+    //         $output = ['success' => 1,
+    //                     'msg' => __("user.user_added")
+    //                 ];
+    //     } catch (\Exception $e) {
+    //         \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
+            
+    //         $output = ['success' => 0,
+    //                     'msg' => __("messages.something_went_wrong")
+    //                 ];
+    //     }
+
+    //     return redirect('users')->with('status', $output);
+    // }
+
+
     public function store(Request $request)
-    {
-        if (!auth()->user()->can('user.create')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        try {
-
-
-            if (!empty($request->input('dob'))) {
-                $request['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
-            }
-            
-            $request['cmmsn_percent'] = !empty($request->input('cmmsn_percent')) ? $this->moduleUtil->num_uf($request->input('cmmsn_percent')) : 0;
-
-            $request['max_sales_discount_percent'] = !is_null($request->input('max_sales_discount_percent')) ? $this->moduleUtil->num_uf($request->input('max_sales_discount_percent')) : null;
-
-            $business_id = request()->session()->get('user.business_id');
-
-            $data = $request->except(['is_active','confirm_password','role','access_all_locations']);
-            
-            $data['business_id'] = $business_id;
-            
-            // $user = User::create($data);
-            
-            
-            $user = $this->moduleUtil->createUser($request);
-            
-
-            $output = ['success' => 1,
-                        'msg' => __("user.user_added")
-                    ];
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => 0,
-                        'msg' => __("messages.something_went_wrong")
-                    ];
-        }
-
-        return redirect('users')->with('status', $output);
+{
+    if (!auth()->user()->can('user.create')) {
+        abort(403, 'Unauthorized action.');
     }
+
+    try {
+        $user_data = $request->only(['surname', 'first_name', 'last_name', 'email', 'selected_contacts', 'marital_status',
+            'blood_group', 'contact_number', 'fb_link', 'twitter_link', 'social_media_1',
+            'social_media_2', 'permanent_address', 'current_address',
+            'guardian_name', 'custom_field_1', 'custom_field_2',
+            'custom_field_3', 'custom_field_4', 'id_proof_name', 'id_proof_number', 'cmmsn_percent', 'gender', 'max_sales_discount_percent', 'family_number', 'alt_number']);
+
+        $user_data['status'] = !empty($request->input('is_active')) ? 'active' : 'inactive';
+        $business_id = request()->session()->get('user.business_id');
+
+        if (!isset($user_data['selected_contacts'])) {
+            $user_data['selected_contacts'] = 0;
+        }
+
+        if (empty($request->input('allow_login'))) {
+            $user_data['username'] = null;
+            $user_data['password'] = null;
+            $user_data['allow_login'] = 0;
+        } else {
+            $user_data['allow_login'] = 1;
+        }
+
+        if (!empty($request->input('password'))) {
+            $user_data['password'] = $user_data['allow_login'] == 1 ? Hash::make($request->input('password')) : null;
+        }
+
+        // Sales commission percentage
+        $user_data['cmmsn_percent'] = !empty($user_data['cmmsn_percent']) ? $this->moduleUtil->num_uf($user_data['cmmsn_percent']) : 0;
+
+        $user_data['max_sales_discount_percent'] = !is_null($user_data['max_sales_discount_percent']) ? $this->moduleUtil->num_uf($user_data['max_sales_discount_percent']) : null;
+
+        if (!empty($request->input('dob'))) {
+            $user_data['dob'] = $this->moduleUtil->uf_date($request->input('dob'));
+        }
+
+        if (!empty($request->input('bank_details'))) {
+            $user_data['bank_details'] = json_encode($request->input('bank_details'));
+        }
+
+        DB::beginTransaction();
+
+        if ($user_data['allow_login']) {
+            $user_data['username'] = $request->input('username');
+            $ref_count = $this->moduleUtil->setAndGetReferenceCount('username');
+            if (blank($user_data['username'])) {
+                $user_data['username'] = $this->moduleUtil->generateReferenceNumber('username', $ref_count);
+            }
+
+            $username_ext = $this->moduleUtil->getUsernameExtension();
+            if (!empty($username_ext)) {
+                $user_data['username'] .= $username_ext;
+            }
+        }
+
+        $user_data['business_id'] = $business_id;
+
+        $user = User::create($user_data);
+
+        $role_id = $request->input('role');
+        $role = Role::findOrFail($role_id);
+        $user->assignRole($role->name);
+
+        // Grant location permissions
+        $this->moduleUtil->giveLocationPermissions($user, $request);
+
+        // Assign selected contacts
+        if ($user_data['selected_contacts'] == 1) {
+            $contact_ids = $request->get('selected_contact_ids');
+        } else {
+            $contact_ids = [];
+        }
+        $user->contactAccess()->sync($contact_ids);
+
+        // Save module fields for the user
+        $this->moduleUtil->getModuleData('afterModelSaved', ['event' => 'user_saved', 'model_instance' => $user]);
+
+        $this->moduleUtil->activityLog($user, 'added', null, ['name' => $user->user_full_name]);
+
+        $output = ['success' => 1,
+                    'msg' => __("user.user_added_success")
+                ];
+
+        DB::commit();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
+
+        $output = ['success' => 0,
+                    'msg' => $e->getMessage()
+                ];
+    }
+
+    return redirect('users')->with('status', $output);
+}
+
 
     /**
      * Display the specified resource.
