@@ -3,6 +3,10 @@
 
 @section('content')
 
+@php
+$statuses = ['all','pending','processing'];
+@endphp
+
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>@lang('lang_v1.orders')
@@ -25,10 +29,34 @@
             <div class="col-md-3">
                 <input type="date" id="end_date" class="form-control" placeholder="End Date">
             </div>
+
             <div class="col-md-3">
-                <button class="btn btn-primary" id="filter_date">Filter</button>
+            <div class="form-group">
+                    <!-- {!! Form::label('type', __('contact.status') . ':*' ) !!} -->
+                    <div class="input-group">
+                        <!-- <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span> -->
+                        {!! Form::select('status', [
+                                'all' => __('All'), 
+                                'pending' => __('Pending'), 
+                                'processing' => __('Processing'),
+                                'shipped' => __('Shipped'),
+                                'completed'=> __('Completed'),
+                                'cancelled' => __('Cancelled')
+                            ], 'all', [
+                                'class' => 'form-control', 
+                                'id' => 'status', 
+                                'placeholder' => __('messages.please_select'), 
+                                'required'
+                            ]) !!}
+
+                    </div>
+                </div>
+
             </div>
             <div class="col-md-3">
+                <button class="btn btn-primary" id="filter_date">Filter</button>
                 <button class="btn btn-primary" id="clear_date">Clear</button>
             </div>
         </div>
@@ -37,7 +65,6 @@
         @endslot
     @endcan
     @can('lang_v1.view')
-        <input type="hidden" value="{{$status}}" id="status">
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orders_table">
                 <thead>
@@ -79,6 +106,7 @@
 @section('javascript')
 <script>
     $('#filter_date').click(function () {
+    console.log($('#status').val());
         orders_table.ajax.reload(); // Reload DataTable with the new date filters
     });
 

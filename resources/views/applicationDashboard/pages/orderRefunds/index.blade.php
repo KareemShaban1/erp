@@ -26,10 +26,33 @@
             <div class="col-md-3">
                 <input type="date" id="end_date" class="form-control" placeholder="End Date">
             </div>
+            <!-- 'all', 'requested','processed', 'approved', 'rejected' -->
             <div class="col-md-3">
-                <button class="btn btn-primary" id="filter_date">Filter</button>
+            <div class="form-group">
+                    <!-- {!! Form::label('type', __('contact.status') . ':*' ) !!} -->
+                    <div class="input-group">
+                        <!-- <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span> -->
+                        {!! Form::select('status', [
+                                'all' => __('All'), 
+                                'requested' => __('Requested'), 
+                                'processed' => __('Processed'),
+                                'approved' => __('Approved'),
+                                'rejected' => __('Rejected'),
+                            ], 'all', [
+                                'class' => 'form-control', 
+                                'id' => 'status', 
+                                'placeholder' => __('messages.please_select'), 
+                                'required'
+                            ]) !!}
+
+                    </div>
+                </div>
+
             </div>
             <div class="col-md-3">
+                <button class="btn btn-primary" id="filter_date">Filter</button>
                 <button class="btn btn-primary" id="clear_date">Clear</button>
             </div>
         </div>
@@ -38,7 +61,6 @@
     @endcan
     @can('lang_v1.view')
         <div class="table-responsive">
-            <input type="hidden" value="{{$status}}" id="status">
             <table class="table table-bordered table-striped" id="order_refunds_table">
                 <thead>
                     <tr>
@@ -133,7 +155,7 @@
         ],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order.number', name: 'number' },
+            { data: 'order_number', name: 'order.number' },
             { data: 'amount', name: 'amount' },
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
             {

@@ -25,10 +25,33 @@
             <div class="col-md-3">
                 <input type="date" id="end_date" class="form-control" placeholder="End Date">
             </div>
+
             <div class="col-md-3">
-                <button class="btn btn-primary" id="filter_date">Filter</button>
+            <div class="form-group">
+                    <!-- {!! Form::label('type', __('contact.status') . ':*' ) !!} -->
+                    <div class="input-group">
+                        <!-- <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span> -->
+                        <!-- 'requested', 'approved', 'rejected' -->
+                        {!! Form::select('status', [
+                                'all' => __('All'), 
+                                'requested' => __('Requested'), 
+                                'approved' => __('Approved'),
+                                'rejected' => __('Rejected'),
+                            ], 'all', [
+                                'class' => 'form-control', 
+                                'id' => 'status', 
+                                'placeholder' => __('messages.please_select'), 
+                                'required'
+                            ]) !!}
+
+                    </div>
+                </div>
+
             </div>
             <div class="col-md-3">
+                <button class="btn btn-primary" id="filter_date">Filter</button>
                 <button class="btn btn-primary" id="clear_date">Clear</button>
             </div>
         </div>
@@ -37,7 +60,7 @@
     @endcan
     
     @can('lang_v1.view')
-    <input type="hidden" value="{{$status}}" id="status">
+    <!-- <input type="hidden" value="{{$status}}" id="status"> -->
 
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="order_cancellations_table">
@@ -48,7 +71,8 @@
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.order_cancellation_status')</th>
                         <th>@lang('lang_v1.order_status')</th>
-                        <th>@lang('lang_v1.actions')</th> <!-- New Actions column -->
+                        <th>@lang('lang_v1.order_date_time')</th>
+                        <th>@lang('lang_v1.actions')</th>
                     </tr>
                 </thead>
             </table>
@@ -132,7 +156,7 @@
         ],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order.number', name: 'number' },
+            { data: 'order_number', name: 'order.number' },
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
             {
                 data: 'status', name: 'status', render: function (data, type, row) {
@@ -169,6 +193,18 @@
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                     `;
+                }
+            },
+            {
+                data: 'created_at',
+                name: 'created_at',
+                render: function (data) {
+                    // Format the date using JavaScript
+                    if (data) {
+                        const date = new Date(data);
+                        return date.toLocaleString(); // Adjust format as needed
+                    }
+                    return '';
                 }
             },
             { 

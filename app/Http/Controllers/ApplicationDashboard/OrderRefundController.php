@@ -33,130 +33,84 @@ class OrderRefundController extends Controller
 
     public function index()
     {
-        $status = request()->get('status');
-
-
-        $statuses = ['all', 'requested','processed', 'approved', 'rejected'];
-
-        if (empty($status) || !in_array($status, $statuses)) {
-            return redirect()->back();
-        }
-
         if (request()->ajax()) {
-            $start_date = request()->get('start_date');
-            $end_date = request()->get('end_date');
-    
-            if ($status == 'requested') {
-                return $this->requestedOrderRefunds($start_date , $end_date);
-            } elseif ($status == 'processed') {
-                return $this->processedOrderRefund($start_date , $end_date);
-            } elseif ($status == 'approved') {
-                return $this->approvedOrderRefund($start_date , $end_date);
-            } elseif ($status == 'rejected') {
-                return $this->rejectedOrderRefund($start_date , $end_date);
-            } elseif ($status == 'all') {
-                return $this->allOrders($start_date , $end_date);
+            $status = request()->get('status', 'all'); // Default to 'all' if not provided
+            $startDate = request()->get('start_date');
+            $endDate = request()->get('end_date');
+            $search = request()->get('search.value');
+
+            // Validate status
+            $validStatuses = ['all', 'requested', 'processed', 'approved', 'rejected'];
+            if (!in_array($status, $validStatuses)) {
+                $status = 'all';
+            }
+
+            // Fetch filtered data
+            return $this->fetchOrderRefunds($status, $startDate, $endDate, $search);
+        }
+
+        return view('applicationDashboard.pages.orderRefunds.index');
+    }
+
+    /**
+     * Fetch order refunds based on filters.
+     */
+    private function fetchOrderRefunds($status, $startDate = null, $endDate = null, $search = null)
+    {
+        $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status'])
+            ->select(['id', 'order_id', 'client_id', 'status', 'amount', 'created_at']);
+
+        // Apply status filter
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filter
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                // Filter for a single day
+                $query->whereDate('created_at', $startDate);
+            } else {
+                // Filter for a range of dates
+                $query->whereBetween('created_at', [$startDate, $endDate]);
             }
         }
 
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('id', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhereHas('order', function ($query) use ($search) {
+                        $query->where('number', 'like', "%$search%");
+                    })
+                    ->orWhereHas('client.contact', function ($query) use ($search) {
+                        $query->where('name', 'like', "%$search%");
+                    });
+            });
+        }
 
-        return view('applicationDashboard.pages.orderRefunds.index',compact('status'));
+        return $this->formatDatatableResponse($query);
     }
 
-    public function allOrders($startDate = null, $endDate = null)
+    /**
+     * Format the response for DataTables.
+     */
+    private function formatDatatableResponse($query)
     {
-        $orderRefunds = OrderRefund::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
-    
-        // Apply date filter if start_date and end_date are provided
-        if ($startDate && $endDate) {
-            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
-        }
-    
-        return Datatables::of($orderRefunds)
+        return Datatables::of($query)
             ->addColumn('client_contact_name', function ($orderRefund) {
                 return optional($orderRefund->client->contact)->name ?? 'N/A';
             })
-            ->make(true);
-    }
-    
-    
-    public function requestedOrderRefunds($startDate = null, $endDate = null)
-    {
-        $orderRefunds = OrderRefund::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-            ->where('status', 'requested')
-            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
-    
-            if ($startDate && $endDate) {
-                $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
-            }
-        
-    
-        return Datatables::of($orderRefunds)
-            ->addColumn('client_contact_name', function ($orderRefund) {
-                return optional($orderRefund->client->contact)->name ?? 'N/A';
+            ->addColumn('order_number', function ($orderRefund) {
+                return optional($orderRefund->order)->number ?? 'N/A';
+            })
+            ->addColumn('order_status', function ($orderRefund) {
+                return optional($orderRefund->order)->order_status ?? 'N/A';
             })
             ->make(true);
     }
 
-    public function processedOrderRefunds($startDate = null, $endDate = null)
-    {
-        $orderRefunds = OrderRefund::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-            ->where('status', 'processed')
-            ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
-    
-            if ($startDate && $endDate) {
-                $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
-            }
-        
-    
-        return Datatables::of($orderRefunds)
-            ->addColumn('client_contact_name', function ($orderRefund) {
-                return optional($orderRefund->client->contact)->name ?? 'N/A';
-            })
-            ->make(true);
-    }
-    
-    
-    public function approvedOrderRefund($startDate = null, $endDate = null)
-    {
-        $orderRefunds = OrderRefund::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-        ->where('status', 'approved')
-        ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
-
-        if ($startDate && $endDate) {
-            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
-        }
-    
-
-    return Datatables::of($orderRefunds)
-        ->addColumn('client_contact_name', function ($orderRefund) {
-            return optional($orderRefund->client->contact)->name ?? 'N/A';
-        })
-        ->make(true);
-    }
-    
-    public function rejectedOrderRefund($startDate = null, $endDate = null)
-    {
-        $orderRefunds = OrderRefund::with(['client:id,contact.name','order:id,number'])
-        ->where('status', 'rejected')
-        ->select(['id', 'order_id', 'client_id', 'status','amount','created_at']);
-
-        if ($startDate && $endDate) {
-            $orderRefunds->whereBetween('created_at', [$startDate, $endDate]);
-        }
-    
-
-    return Datatables::of($orderRefunds)
-        ->addColumn('client_contact_name', function ($orderRefund) {
-            return optional($orderRefund->client->contact)->name ?? 'N/A';
-        })
-        ->make(true);
-    }
     public function changeOrderRefundStatus($orderRefundId)
     {
         $status = request()->input('status'); // Retrieve status from the request
@@ -164,25 +118,25 @@ class OrderRefundController extends Controller
         $orderRefund = OrderRefund::findOrFail($orderRefundId);
         $orderRefund->status = $status;
 
-        $order = Order::where('id',$orderRefund->order_id)->first();
+        $order = Order::where('id', $orderRefund->order_id)->first();
 
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
             case 'requested':
                 $orderRefund->requested_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'requested']);
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'requested']);
                 break;
             case 'processed':
                 $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'processed']);
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'processed']);
                 break;
             case 'approved':
-                    $orderRefund->processed_at = now();
-                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
-                    break;
+                $orderRefund->processed_at = now();
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'approved']);
+                break;
             case 'rejected':
-                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status'=>'rejected']);
-                    break;
+                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
+                break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
         }
@@ -264,7 +218,7 @@ class OrderRefundController extends Controller
 
         if (request()->ajax()) {
             try {
-                $input = $request->only(['status', 'reason','admin_response']);
+                $input = $request->only(['status', 'reason', 'admin_response']);
 
                 $orderRefund = OrderRefund::findOrFail($id);
                 $orderRefund->status = $input['status'];
@@ -273,20 +227,22 @@ class OrderRefundController extends Controller
 
                 $orderRefund->save();
 
-                $order = Order::where('id',$orderRefund->order_id)->first();
+                $order = Order::where('id', $orderRefund->order_id)->first();
 
-                if($input['admin_response']){
+                if ($input['admin_response']) {
                     // Send and store push notification
                     app(FirebaseService::class)->sendAndStoreNotification(
-                       $order->client->id,
-                       $order->client->fcm_token,
-                       'Order Cancellation Admin Response',
-                       'Your order has been shipped successfully.',
-                       ['order_id' => $order->id, 
-                       'order_refund_id'=>$orderRefund->id,
-                       'admin_response' => $input['admin_response']]
-                   );
-               }
+                        $order->client->id,
+                        $order->client->fcm_token,
+                        'Order Cancellation Admin Response',
+                        'Your order has been shipped successfully.',
+                        [
+                            'order_id' => $order->id,
+                            'order_refund_id' => $orderRefund->id,
+                            'admin_response' => $input['admin_response']
+                        ]
+                    );
+                }
 
                 // $output = [
                 //     'success' => true,

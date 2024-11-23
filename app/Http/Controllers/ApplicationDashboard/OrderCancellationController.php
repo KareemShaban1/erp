@@ -31,108 +31,89 @@ class OrderCancellationController extends Controller
         $this->moduleUtil = $moduleUtil;
     }
 
+
+
     public function index()
     {
-        $status = request()->get('status');
-
-
-        $statuses = ['all', 'requested', 'approved', 'rejected'];
-
-        if (empty($status) || !in_array($status, $statuses)) {
-            return redirect()->back();
-        }
-
         if (request()->ajax()) {
-            $start_date = request()->get('start_date');
-            $end_date = request()->get('end_date');
+            $status = request()->get('status', 'all'); // Default to 'all' if not provided
+            $startDate = request()->get('start_date');
+            $endDate = request()->get('end_date');
+            $search = request()->get('search.value');
 
-            if ($status == 'requested') {
-                return $this->requestedOrderCancellations($start_date , $end_date);
-            } elseif ($status == 'approved') {
-                return $this->approvedOrderCancellation($start_date , $end_date);
-            } elseif ($status == 'rejected') {
-                return $this->rejectedOrderCancellation($start_date , $end_date);
-            } elseif ($status == 'all') {
-                return $this->allOrders($start_date , $end_date);
+            // Validate status
+            $validStatuses = ['all', 'requested', 'approved', 'rejected'];
+            if (!in_array($status, $validStatuses)) {
+                $status = 'all';
+            }
+
+            // Fetch filtered data
+            return $this->fetchOrderCancellations($status, $startDate, $endDate, $search);
+        }
+
+        return view('applicationDashboard.pages.orderCancellations.index');
+    }
+
+    /**
+     * Fetch order refunds based on filters.
+     */
+    private function fetchOrderCancellations($status, $startDate = null, $endDate = null, $search = null)
+    {
+        $query = OrderCancellation::with(['client.contact:id,name', 'order:id,number,order_status'])
+            ->select(['id', 'order_id', 'client_id', 'status', 'created_at']);
+
+        // Apply status filter
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Apply date filter
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                // Filter for a single day
+                $query->whereDate('created_at', $startDate);
+            } else {
+                // Filter for a range of dates
+                $query->whereBetween('created_at', [$startDate, $endDate]);
             }
         }
 
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('id', 'like', "%$search%")
+                    ->orWhere('status', 'like', "%$search%")
+                    ->orWhereHas('order', function ($query) use ($search) {
+                        $query->where('number', 'like', "%$search%");
+                    })
+                    ->orWhereHas('client.contact', function ($query) use ($search) {
+                        $query->where('name', 'like', "%$search%");
+                    });
+            });
+        }
 
-        return view('applicationDashboard.pages.orderCancellations.index', compact('status'));
+        return $this->formatDatatableResponse($query);
     }
 
-    public function allOrders($startDate = null, $endDate = null)
+    /**
+     * Format the response for DataTables.
+     */
+    private function formatDatatableResponse($query)
     {
-        $orderCancellations = OrderCancellation::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-            ->select(['id', 'order_id', 'client_id', 'status']);
-    
-        // Apply date filter if start_date and end_date are provided
-        if ($startDate && $endDate) {
-            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
-        }
-    
-        return Datatables::of($orderCancellations)
-            ->addColumn('client_contact_name', function ($orderCancellation) {
-                return optional($orderCancellation->client->contact)->name ?? 'N/A';
+        return Datatables::of($query)
+            ->addColumn('client_contact_name', function ($orderRefund) {
+                return optional($orderRefund->client->contact)->name ?? 'N/A';
+            })
+            ->addColumn('order_number', function ($orderRefund) {
+                return optional($orderRefund->order)->number ?? 'N/A';
+            })
+            ->addColumn('order_status', function ($orderRefund) {
+                return optional($orderRefund->order)->order_status ?? 'N/A';
             })
             ->make(true);
     }
-    
-    
-    public function requestedOrderCancellations($startDate = null, $endDate = null)
-    {
-        $orderCancellations = OrderCancellation::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-            ->where('status', 'requested')
-            ->select(['id', 'order_id', 'client_id', 'status']);
-    
-            if ($startDate && $endDate) {
-                $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
-            }
-    
-        return Datatables::of($orderCancellations)
-            ->addColumn('client_contact_name', function ($orderCancellation) {
-                return optional($orderCancellation->client->contact)->name ?? 'N/A';
-            })
-            ->make(true);
-    }
-    
-    
-    public function approvedOrderCancellation($startDate = null, $endDate = null)
-    {
-        $orderCancellations = OrderCancellation::with(
-            ['client.contact:id,name', 'order:id,number,order_status'])
-        ->where('status', 'approved')
-        ->select(['id', 'order_id', 'client_id', 'status']);
 
-        if ($startDate && $endDate) {
-            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
-        }
 
-    return Datatables::of($orderCancellations)
-        ->addColumn('client_contact_name', function ($orderCancellation) {
-            return optional($orderCancellation->client->contact)->name ?? 'N/A';
-        })
-        ->make(true);
-    }
-    
-    public function rejectedOrderCancellation($startDate = null, $endDate = null)
-    {
-        $orderCancellations = OrderCancellation::with(['client:id,contact.name','order:id,number'])
-        ->where('status', 'rejected')
-        ->select(['id', 'order_id', 'client_id', 'status']);
-
-        if ($startDate && $endDate) {
-            $orderCancellations->whereBetween('created_at', [$startDate, $endDate]);
-        }
-
-    return Datatables::of($orderCancellations)
-        ->addColumn('client_contact_name', function ($orderCancellation) {
-            return optional($orderCancellation->client->contact)->name ?? 'N/A';
-        })
-        ->make(true);
-    }
     public function changeOrderCancellationStatus($orderCancellationId)
     {
         $status = request()->input('status'); // Retrieve status from the request

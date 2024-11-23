@@ -145,45 +145,45 @@ class ApplicationSidebarMenu
                 function ($sub) {
                     // Link for All Orders (no status)
                     $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'all']),
+                        action('ApplicationDashboard\OrderController@index'),
                         __('lang_v1.all_orders'),
                         ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
                     );
 
-                    // Link for Pending Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'pending']),
-                        __('lang_v1.pending_orders'),
-                        ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'pending']
-                    );
+                    // // Link for Pending Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'pending']),
+                    //     __('lang_v1.pending_orders'),
+                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'pending']
+                    // );
 
-                    // Link for Processing Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'processing']),
-                        __('lang_v1.processing_orders'),
-                        ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'processing']
-                    );
+                    // // Link for Processing Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'processing']),
+                    //     __('lang_v1.processing_orders'),
+                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'processing']
+                    // );
 
-                    // Link for shipped Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'shipped']),
-                        __('lang_v1.shipped_orders'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'shipped']
-                    );
+                    // // Link for shipped Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'shipped']),
+                    //     __('lang_v1.shipped_orders'),
+                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'shipped']
+                    // );
 
-                    // Link for completed Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'completed']),
-                        __('lang_v1.completed_orders'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'completed']
-                    );
+                    // // Link for completed Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'completed']),
+                    //     __('lang_v1.completed_orders'),
+                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'completed']
+                    // );
 
-                    // Link for canceled Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index', ['status' => 'cancelled']),
-                        __('lang_v1.canceled_orders'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'cancelled']
-                    );
+                    // // Link for canceled Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'cancelled']),
+                    //     __('lang_v1.canceled_orders'),
+                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'cancelled']
+                    // );
 
 
                 },
@@ -195,31 +195,31 @@ class ApplicationSidebarMenu
                 function ($sub) {
                     // Link for All Orders (no status)
                     $sub->url(
-                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'all']),
+                        action('ApplicationDashboard\OrderCancellationController@index'),
                         __('lang_v1.all_order_cancellations'),
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
                     );
 
-                    // Link for Pending Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'requested']),
-                        __('lang_v1.requested_order_cancellations'),
-                        ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
-                    );
+                    // // Link for Pending Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'requested']),
+                    //     __('lang_v1.requested_order_cancellations'),
+                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
+                    // );
 
-                    // Link for Processing Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'approved']),
-                        __('lang_v1.approved_order_cancellations'),
-                        ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
-                    );
+                    // // Link for Processing Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'approved']),
+                    //     __('lang_v1.approved_order_cancellations'),
+                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
+                    // );
 
-                    // Link for shipped Orders
-                    $sub->url(
-                        action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'rejected']),
-                        __('lang_v1.rejected_order_cancellations'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
-                    );
+                    // // Link for shipped Orders
+                    // $sub->url(
+                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'rejected']),
+                    //     __('lang_v1.rejected_order_cancellations'),
+                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
+                    // );
 
 
                 },
@@ -232,38 +232,38 @@ class ApplicationSidebarMenu
                 function ($sub) {
                     // Link for All Orders (no status)
                     $sub->url(
-                        route('order-refunds.index', ['status' => 'all']),
+                        route('order-refunds.index'),
                         __('lang_v1.all_order_refunds'),
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_refunds' && !request()->segment(2)]
                     );
 
-                    // Link for Pending Orders
-                    $sub->url(
-                        route('order-refunds.index', ['status' => 'requested']),
-                        __('lang_v1.requested_order_refunds'),
-                        ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
-                    );
+                    // // Link for Pending Orders
+                    // $sub->url(
+                    //     route('order-refunds.index', ['status' => 'requested']),
+                    //     __('lang_v1.requested_order_refunds'),
+                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
+                    // );
 
 
-                    $sub->url(
-                        route('order-refunds.index', ['status' => 'processed']),
-                        __('lang_v1.requested_order_refunds'),
-                        ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'processed']
-                    );
+                    // $sub->url(
+                    //     route('order-refunds.index', ['status' => 'processed']),
+                    //     __('lang_v1.requested_order_refunds'),
+                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'processed']
+                    // );
 
-                    // Link for Processing Orders
-                    $sub->url(
-                        route('order-refunds.index', ['status' => 'approved']),
-                        __('lang_v1.approved_order_refunds'),
-                        ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
-                    );
+                    // // Link for Processing Orders
+                    // $sub->url(
+                    //     route('order-refunds.index', ['status' => 'approved']),
+                    //     __('lang_v1.approved_order_refunds'),
+                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
+                    // );
 
-                    // Link for shipped Orders
-                    $sub->url(
-                        route('order-refunds.index', ['status' => 'rejected']),
-                        __('lang_v1.rejected_order_refunds'),
-                        ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
-                    );
+                    // // Link for shipped Orders
+                    // $sub->url(
+                    //     route('order-refunds.index', ['status' => 'rejected']),
+                    //     __('lang_v1.rejected_order_refunds'),
+                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
+                    // );
 
 
                 },
