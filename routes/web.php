@@ -419,6 +419,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     //Expenses...
     Route::get('expenses', 'ExpenseController@index');
+    Route::get('expenses/create', 'ExpenseController@create');
+    Route::get('expenses/{id}/edit', 'ExpenseController@edit');
 
     //Transaction payments...
     // Route::get('/payments/opening-balance/{contact_id}', 'TransactionPaymentController@getOpeningBalancePayments');
