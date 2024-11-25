@@ -1482,7 +1482,7 @@ $(document).ready(function() {
         serverSide: true,
         aaSorting: [[1, 'desc']],
         ajax: {
-            url: '/payment/expenses',
+            url: '/applicationDashboard/expenses',
             data: function(d) {
                 d.expense_for = $('select#expense_for').val();
                 d.contact_id = $('select#expense_contact_filter').val();
@@ -2643,18 +2643,78 @@ $(document).on('click', 'button.activate-deactivate-location', function(){
     });
 });
 
-function getTotalUnreadNotifications(){
+function getTotalUnreadNotifications() {
+    // Toastr setting
+    toastr.options.preventDuplicates = true;
+    toastr.options.timeOut = "3000";
+
+    // Unlock audio playback if not already unlocked
+    document.addEventListener(
+        'click',
+        function unlockAudio() {
+            const audio = document.getElementById('success-audio');
+            if (audio) {
+                audio.play().then(() => {
+                    audio.pause(); // Unlock audio playback for future use
+                    console.log('Audio unlocked.');
+                }).catch((err) => {
+                    console.warn('Failed to unlock audio:', err);
+                });
+            }
+            document.removeEventListener('click', unlockAudio); // Remove event listener after first interaction
+        },
+        { once: true }
+    );
+
+    // Toastr notification sound logic
+    toastr.options.onShown = function () {
+        var audio;
+        if ($(this).hasClass('toast-success')) {
+            audio = $('#success-audio')[0];
+        } else if ($(this).hasClass('toast-error')) {
+            audio = $('#error-audio')[0];
+        } else if ($(this).hasClass('toast-warning')) {
+            audio = $('#warning-audio')[0];
+        }
+
+        if (audio) {
+            audio.play().catch((error) => {
+                console.warn('Audio playback blocked:', error);
+            });
+        }
+    };
+
+    // Check if notifications count span exists
     if ($('span.notifications_count').length) {
         var href = '/get-total-unread';
         $.ajax({
             url: href,
             dataType: 'json',
             global: false,
-            success: function(data) {
-                console.log(data)
-                if (data.total_unread != 0 ) {
+            success: function (data) {
+                if (data.total_unread && data.total_unread > 0) {
+                    // Update notifications count
                     $('span.notifications_count').text(data.total_unread);
+
+                    // Check notification permission and display browser notification
+                    if ('Notification' in window) {
+                        if (Notification.permission === 'default') {
+                            // Request permission if not already granted/denied
+                            Notification.requestPermission().then((permission) => {
+                                if (permission === 'granted') {
+                                    showBrowserNotification();
+                                }
+                            });
+                        } else if (Notification.permission === 'granted') {
+                            showBrowserNotification();
+                        }
+                    }
+
+                    // Show Toastr notification
+                    toastr.success('You have a new notification!');
                 }
+
+                // Handle notification modal
                 if (data.notification_html) {
                     $('.view_modal').html(data.notification_html);
                     $('.view_modal').modal('show');
@@ -2662,7 +2722,27 @@ function getTotalUnreadNotifications(){
             },
         });
     }
+
+    // Helper function to display browser notification
+    function showBrowserNotification() {
+        const notification = new Notification('New Notification', {
+            body: 'You have a new notification!',
+            // icon: '/path-to-icon.png', // Change this to the path of your icon
+        });
+
+        // Optional: Add an event listener to the notification
+        notification.onclick = function () {
+            window.focus(); // Focus the window when the user clicks the notification
+        };
+
+        // Play audio if unlocked
+        const audio = document.getElementById('success-audio');
+        if (audio) {
+            audio.play().catch(console.warn);
+        }
+    }
 }
+
 
 $(document).on('shown.bs.modal', '.view_modal', function (e) {
     if ($(this).find('#email_body').length) {
