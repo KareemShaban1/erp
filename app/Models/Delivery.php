@@ -36,5 +36,6 @@ class Delivery extends Authenticatable
                     ->withPivot('status', 'assigned_at', 'delivered_at')
                     ->withTimestamps();
     }
+    
 
 }

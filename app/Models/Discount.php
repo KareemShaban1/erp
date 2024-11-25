@@ -20,6 +20,9 @@ class Discount extends Model
      */
     protected $guarded = ['id'];
 
+/**
+     * The variations that belong to the discount.
+     */
     public function variations()
     {
         return $this->belongsToMany(\App\Models\Variation::class, 'discount_variations', 'discount_id', 'variation_id');

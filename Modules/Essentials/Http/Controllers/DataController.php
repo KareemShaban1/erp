@@ -179,6 +179,24 @@ class DataController extends Controller
         ];
     } 
 
+    elseif ($notification->type ==
+        'App\Notifications\ClientCreatedNotification') {
+        $data = $notification->data;
+
+          $msg = __('essentials::lang.new_client_notification', 
+        ['client_name' => $data['client_name'], 
+        'client_email' => $data['client_email']]);
+
+
+        $notification_data = [
+            'msg' => $msg,
+            'icon_class' => 'fa fa-cube bg-green',
+            'link' =>action('ContactController@index', ['type' => 'client']),
+            'read_at' => $notification->read_at,
+            'created_at' => $notification->created_at->diffForHumans()
+        ];
+    } 
+
         return $notification_data;
     }
 

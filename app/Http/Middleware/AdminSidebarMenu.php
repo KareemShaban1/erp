@@ -415,7 +415,7 @@ class AdminSidebarMenu
                     __('expense.expenses'),
                     function ($sub) {
                         $sub->url(
-                            action('ExpenseController@index'),
+                            action('ApplicationDashboard\ExpenseController@index'),
                             __('lang_v1.list_expenses'),
                             ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'expenses' && request()->segment(2) == null]
                         );

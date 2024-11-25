@@ -78,21 +78,18 @@ class CartService extends BaseService
     }
     
 
-    /**
-     * Add a product (and optional variant) to the cart.
-     */
     public function addToCart($productId, $variantId, $quantity)
     {
         // Fetch the product and variation
         $product = Product::findOrFail($productId);
         $variation = Variation::findOrFail($variantId);
-
+    
         // Fetch the latest discount for the variation
         $latestDiscount = $variation->discounts()->latest('id')->first();
-
+    
         // Calculate the current stock available
         $current_stock = $variation->variation_location_details->sum('qty_available');
-
+    
         // Check if the requested quantity exceeds available stock
         if ($quantity > $current_stock) {
             return response()->json([
@@ -102,16 +99,18 @@ class CartService extends BaseService
                 'data' => null
             ], 400);
         }
-
+    
         // Check if the item already exists in the cart
         $cartItem = Cart::where('client_id', Auth::id())
             ->where('product_id', $productId)
             ->where('variation_id', $variantId)
             ->first();
-
+    
         if ($cartItem) {
-            // If the new quantity after adding exceeds available stock, return an error
-            if ($cartItem->quantity + $quantity > $current_stock) {
+            // Set the new total quantity (prevent exceeding available stock)
+            $newQuantity = $cartItem->quantity + $quantity;
+    
+            if ($newQuantity > $current_stock) {
                 return response()->json([
                     'code' => 400,
                     'status' => 'failed',
@@ -119,9 +118,9 @@ class CartService extends BaseService
                     'data' => null
                 ], 400);
             }
-
-            // Update quantity if the item already exists in the cart
-            $cartItem->quantity += $quantity;
+    
+            // Update the quantity and recalculate totals
+            $cartItem->quantity = $newQuantity;
         } else {
             // Create a new cart item
             $cartItem = Cart::create([
@@ -132,20 +131,20 @@ class CartService extends BaseService
                 'price' => $variation->default_sell_price,
             ]);
         }
-
+    
         // Apply discount if available
         $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
-
+    
         // Calculate total price (quantity * price) - discount
         $cartItem->discount = $discountAmount;
         $cartItem->total = ($cartItem->quantity * $cartItem->price) - $discountAmount;
-
+    
         // Save the cart item with the updated total
         $cartItem->save();
-
+    
         return $cartItem;
     }
-
+    
 
 
     /**

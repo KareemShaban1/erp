@@ -344,6 +344,7 @@ class ProductUtil extends Util
             $qty_difference = $new_quantity - $old_quantity;
         }
 
+     
         $product = Product::find($product_id);
 
         //Check if stock is enabled or not.
@@ -369,6 +370,11 @@ class ProductUtil extends Util
                 $variation_location_d->qty_available = 0;
             }
 
+            \Log::info("update quantity");
+            \Log::info($new_quantity);
+            \Log::info($variation_location_d);
+            \Log::info($qty_difference);
+    
             $variation_location_d->qty_available += $qty_difference;
             $variation_location_d->save();
         }
@@ -413,6 +419,9 @@ class ProductUtil extends Util
                           ]);
             }
             
+            \Log::info($details);
+            \Log::info($qty_difference);
+
             $details->decrement('qty_available', $qty_difference);
         }
 

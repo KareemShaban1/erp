@@ -23,7 +23,7 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'order_uuid','number','client_id','business_location_id','payment_method','order_status','payment_status','shipping_cost','sub_total','total'];
+        'order_uuid','number','client_id','parent_order_id','business_location_id','payment_method','order_type','order_status','payment_status','shipping_cost','sub_total','total'];
 
         protected static function boot()
         {
@@ -45,6 +45,14 @@ class Order extends Model
 
     public function businessLocation(){
         return $this->belongsTo(BusinessLocation::class,'business_location_id','id');
+    }
+
+    public function fromBusinessLocation(){
+        return $this->belongsTo(BusinessLocation::class,'from_business_location_id','id');
+    }
+
+    public function toBusinessLocation(){
+        return $this->belongsTo(BusinessLocation::class,'to_business_location_id','id');
     }
 
 

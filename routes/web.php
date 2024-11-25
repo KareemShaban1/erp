@@ -268,7 +268,7 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
 
-    // Route::resource('applicationDashboard/expenses', 'ApplicationDashboard\ExpenseController');
+    Route::resource('applicationDashboard/expenses', 'ApplicationDashboard\ExpenseController');
 
 
 });

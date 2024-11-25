@@ -8,6 +8,7 @@ use App\Models\Delivery;
 use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderRefund;
+use App\Models\OrderTransfer;
 use App\Models\OrderTracking;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
-class OrderController extends Controller
+class TransferOrderController extends Controller
 {
     /**
      * All Utils instance.
@@ -54,19 +55,20 @@ class OrderController extends Controller
             return $this->fetchOrders($status, $startDate, $endDate, $search);
         }
 
-        return view('applicationDashboard.pages.orders.index');
+        return view('applicationDashboard.pages.transferOrders.index');
     }
 
     /**
-     * Fetch order refunds based on filters.
+     * Fetch order Transfers based on filters.
      */
     private function fetchOrders($status, $startDate = null, $endDate = null, $search = null)
     {
-        $query = Order::with('client')
-                ->where('order_type','order')
+        $query = Order::with(['client','fromBusinessLocation','toBusinessLocation'])
+                ->where('order_type','order_transfer')
                 ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])
                 ->latest();
 
+                
         // Apply status filter
         if ($status !== 'all') {
             $query->where('order_status', $status);
@@ -242,13 +244,13 @@ class OrderController extends Controller
     ])->find($orderId);
 
     if ($order) {
-        // Iterate through each order item and check for refund details
+        // Iterate through each order item and check for Transfer details
         foreach ($order->orderItems as $item) {
-            // Check if there are any records in the order_refund table for this order item
-            $refund = OrderRefund::where('order_item_id', $item->id)->get(); // Assuming 'refund_amount' stores the refunded quantity or amount
+            // Check if there are any records in the order_Transfer table for this order item
+            $refund = OrderRefund::where('order_item_id', $item->id)->first(); // Assuming 'Transfer_amount' stores the Transfered quantity or amount
 
-            $refund_amount = $refund->sum('amount') ?? 0;
-            // Calculate the difference between the order item quantity and the refunded amount
+            $refund_amount = $refund->amount ?? 0;
+            // Calculate the difference between the order item quantity and the Transfered amount
             $item->remaining_quantity = $item->quantity - $refund_amount;
         }
 

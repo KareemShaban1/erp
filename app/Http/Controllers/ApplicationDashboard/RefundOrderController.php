@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 
-class OrderController extends Controller
+class RefundOrderController extends Controller
 {
     /**
      * All Utils instance.
@@ -54,7 +54,7 @@ class OrderController extends Controller
             return $this->fetchOrders($status, $startDate, $endDate, $search);
         }
 
-        return view('applicationDashboard.pages.orders.index');
+        return view('applicationDashboard.pages.refundOrders.index');
     }
 
     /**
@@ -63,10 +63,11 @@ class OrderController extends Controller
     private function fetchOrders($status, $startDate = null, $endDate = null, $search = null)
     {
         $query = Order::with('client')
-                ->where('order_type','order')
+                ->where('order_type','order_refund')
                 ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])
                 ->latest();
 
+                
         // Apply status filter
         if ($status !== 'all') {
             $query->where('order_status', $status);
@@ -245,9 +246,9 @@ class OrderController extends Controller
         // Iterate through each order item and check for refund details
         foreach ($order->orderItems as $item) {
             // Check if there are any records in the order_refund table for this order item
-            $refund = OrderRefund::where('order_item_id', $item->id)->get(); // Assuming 'refund_amount' stores the refunded quantity or amount
+            $refund = OrderRefund::where('order_item_id', $item->id)->first(); // Assuming 'refund_amount' stores the refunded quantity or amount
 
-            $refund_amount = $refund->sum('amount') ?? 0;
+            $refund_amount = $refund->amount ?? 0;
             // Calculate the difference between the order item quantity and the refunded amount
             $item->remaining_quantity = $item->quantity - $refund_amount;
         }

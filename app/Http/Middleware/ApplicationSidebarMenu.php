@@ -150,6 +150,18 @@ class ApplicationSidebarMenu
                         ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
                     );
 
+                    $sub->url(
+                        action('ApplicationDashboard\RefundOrderController@index'),
+                        __('lang_v1.all_refund_orders'),
+                        ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
+                    );
+
+                    $sub->url(
+                        action('ApplicationDashboard\TransferOrderController@index'),
+                        __('lang_v1.all_transfer_orders'),
+                        ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
+                    );
+
                     // // Link for Pending Orders
                     // $sub->url(
                     //     action('ApplicationDashboard\OrderController@index', ['status' => 'pending']),

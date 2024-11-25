@@ -67,9 +67,12 @@
                         <th>@lang('lang_v1.id')</th>
                         <th>@lang('lang_v1.number')</th>
                         <th>@lang('lang_v1.amount')</th>
+                        <th>@lang('lang_v1.order_item')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.order_refund_status')</th>
-                        <th>@lang('lang_v1.order_status')</th>
+                        <th>@lang('lang_v1.refund_status')</th>
+                        <!-- <th>@lang('lang_v1.order_status')</th> -->
+                         <th>@lang('lang_v1.delivery_assign')</th>
                         <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.actions')</th> <!-- New Actions column -->
                     </tr>
@@ -157,6 +160,26 @@
             { data: 'id', name: 'id' },
             { data: 'order_number', name: 'order.number' },
             { data: 'amount', name: 'amount' },
+            {
+    data: 'order_item', name: 'order_item',
+    render: function (data) {
+        try {
+            // Parse the order_item JSON string
+            let orderItem = JSON.parse(data);
+            
+            // Check if the parsed data and product properties exist
+            if (orderItem && orderItem.product && orderItem.product.name && orderItem.quantity) {
+                return `${orderItem.product.name} - ${orderItem.quantity}`;
+            }
+        } catch (e) {
+            console.error('Error parsing order_item:', e);
+        }
+        
+        return 'N/A'; // If parsing fails or the required data is missing, return 'N/A'
+    }
+},
+
+
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
             {
                 data: 'status', name: 'status', render: function (data, type, row) {
@@ -181,22 +204,68 @@
                 }
             },
             {
-                data: 'order.order_status', name: 'order.order_status', render: function (data, type, row) {
+                data: 'refund_status', name: 'refund_status', render: function (data, type, row) {
                     let badgeClass;
         switch(data) {
             case 'pending': badgeClass = 'badge btn-warning'; break;
-            case 'processing': badgeClass = 'badge btn-info'; break;
-            case 'shipped': badgeClass = 'badge btn-primary'; break;
+            case 'processed': badgeClass = 'badge btn-info'; break;
+            case 'delivering': badgeClass = 'badge btn-primary'; break;
             case 'completed': badgeClass = 'badge btn-success'; break;
-            case 'canceled': badgeClass = 'badge btn-danger'; break;
             default: badgeClass = 'badge badge-secondary'; // For any other statuses
         }
                     
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    `;
+                    
+            <select class="form-control change-refund-status" data-order-refund-id="${row.id}">
+                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                 <option value="processed" ${data === 'processed' ? 'selected' : ''}>Processed</option>
+                <option value="delivering" ${data === 'delivering' ? 'selected' : ''}>Delivering</option>
+                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+            </select>`;
                 }
             },
+            {
+                data: 'order_status',
+                name: 'order.order_status',
+                render: function (data, type, row) {
+                    // Case 1: If the order status is 'processing' and has no delivery assigned
+                    if (data === 'processing' && row.has_delivery === false) {
+                        return `<button class="btn btn-primary assign-delivery-btn" 
+                    data-order-id="${row.id}" 
+                    data-contact-name="${row.client_contact_name
+                            } ">
+                    @lang('lang_v1.assign_delivery')
+                </button > `;
+                    }
+                    if (row.has_delivery === true) {
+                        return `<span class="badge badge-success">
+                        @lang('lang_v1.delivery_assigned')
+                    </span>`;
+                    }
+
+                    return '';
+                },
+                orderable: false,
+                searchable: false
+            },
+            // {
+            //     data: 'order.order_status', name: 'order.order_status', render: function (data, type, row) {
+            //         let badgeClass;
+            //         switch(data) {
+            //             case 'pending': badgeClass = 'badge btn-warning'; break;
+            //             case 'processing': badgeClass = 'badge btn-info'; break;
+            //             case 'shipped': badgeClass = 'badge btn-primary'; break;
+            //             case 'completed': badgeClass = 'badge btn-success'; break;
+            //             case 'canceled': badgeClass = 'badge btn-danger'; break;
+            //             default: badgeClass = 'badge badge-secondary'; // For any other statuses
+            //         }
+                    
+            //         return `
+            //         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+            //         `;
+            //     }
+            // },
             {
                 data: 'created_at',
                 name: 'created_at',
@@ -250,6 +319,32 @@
         });
     });
 
+
+    $(document).on('change', '.change-refund-status', function () {
+        var orderRefundId = $(this).data('order-refund-id');
+        var status = $(this).val();
+
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderRefundController@changeRefundStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
+            type: 'POST',
+            data: {
+                status: status,
+                _token: '{{ csrf_token() }}' // CSRF token for security
+            },
+            success: function (response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    // alert(response.message);
+                    order_refunds_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                } else {
+                    alert('Failed to update order status.');
+                }
+            },
+            error: function (xhr) {
+                alert('An error occurred: ' + xhr.responseText);
+            }
+        });
+    });
 
 
     $(document).on('click', '.edit-order-refund', function () {

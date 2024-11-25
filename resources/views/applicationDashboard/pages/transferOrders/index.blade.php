@@ -72,7 +72,7 @@
                         <th>@lang('lang_v1.order_type')</th>
                         <th>@lang('lang_v1.number')</th>
                         <th>@lang('lang_v1.client')</th>
-                        <th>@lang('lang_v1.payment_method')</th>
+                        <!-- <th>@lang('lang_v1.payment_method')</th> -->
                         <th>@lang('lang_v1.order_status')</th>
                         <th>@lang('lang_v1.payment_status')</th>
                         <th>@lang('lang_v1.shipping_cost')</th>
@@ -98,8 +98,6 @@
     <!-- Order Information Modal -->
     @include('applicationDashboard.pages.orders.orderInformationModal')
 
-    @include('applicationDashboard.pages.orders.refundOrderModal')
-
 
 </section>
 <!-- /.content -->
@@ -123,7 +121,7 @@
         processing: true,
         serverSide: true,
         ajax: {
-            url: '{{ action("ApplicationDashboard\OrderController@index") }}',
+            url: '{{ action("ApplicationDashboard\TransferOrderController@index") }}',
             data: function (d) {
                 d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
@@ -139,11 +137,19 @@
         ],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order_type', name: 'order_type' },
-
+            { data: 'order_type', name: 'order_type',
+                render: function (data) {
+                    console.log(data)
+                    if (data == 'order_refund') {
+                        return '<span class="badge btn-danger">Transfer</span>';
+                        } else {
+                            return '<span class="badge btn-success">Order</span>';
+                            }
+                }
+             },
             { data: 'number', name: 'number' },
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
-            { data: 'payment_method', name: 'payment_method' },
+            // { data: 'payment_method', name: 'payment_method' },
             {
                 data: 'order_status', name: 'order_status', render: function (data, type, row) {
                     let badgeClass;
@@ -226,12 +232,12 @@
                           @lang('lang_v1.view_order_info')
                        </button>`;
 
-                    // Conditionally add the "Refund Order" button
-                    if (row.order_status === 'completed') {
-                        buttons += `<button class="btn btn-warning refund-order-btn" data-order-id="${data}">
-                            @lang('lang_v1.refund_order')
-                        </button>`;
-                    }
+                    // Conditionally add the "Transfer Order" button
+                    // if (row.order_status === 'completed') {
+                    //     buttons += `<button class="btn btn-warning refund-order-btn" data-order-id="${data}">
+                    //         @lang('lang_v1.refund_order')
+                    //     </button>`;
+                    // }
 
                     return buttons;
                 },
@@ -254,7 +260,7 @@
         var status = $(this).val();
 
         $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+            url: `{{ action("ApplicationDashboard\TransferOrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
                 order_status: status,
@@ -279,7 +285,7 @@
         var status = $(this).val();
 
         $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+            url: `{{ action("ApplicationDashboard\TransferOrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
                 payment_status: status,
@@ -360,7 +366,7 @@
 
         // Fetch the order details
         $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            url: `{{ action("ApplicationDashboard\TransferOrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
             type: 'GET',
             success: function (response) {
                 if (response.success) {
@@ -401,148 +407,6 @@
             },
             error: function () {
                 alert('An error occurred while fetching the order details.');
-            }
-        });
-    });
-
-    // Show refund modal
-    $(document).on('click', '.refund-order-btn', function () {
-    var orderId = $(this).data('order-id');
-
-    // Populate hidden order ID field in the refund modal
-    $('#refund_order_id').val(orderId);
-
-    // Fetch the order details
-    $.ajax({
-        url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
-        type: 'GET',
-        success: function (response) {
-            if (response.success) {
-                const itemsTable = $('#order_items_table tbody');
-                itemsTable.empty(); // Clear existing rows
-
-                response.order.order_items.forEach(item => {
-                    const row = `
-                    <tr>
-                        <td>
-                            <img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;">
-                        </td>
-                        <td>Name: ${item.product.name} / quantity: ${item.quantity}</td>
-                        <td>
-                            <textarea name="refund_reason_${item.id}" class="form-control refund-reason" rows="2" data-item-id="${item.id}"></textarea>
-                        </td>
-                        <td>
-                            <div class="input-group">
-                                <button type="button" class="btn btn-secondary decrement-btn" data-item-id="${item.id}">-</button>
-                                <input type="text" name="refund_amount_${item.id}" class="form-control refund-amount" data-item-id="${item.id}" value="0" readonly>
-                                <button type="button" class="btn btn-secondary increment-btn" data-item-id="${item.id}">+</button>
-                            </div>
-                        </td>
-                        <td>
-                            <select name="refund_status_${item.id}" class="form-control refund-status" data-item-id="${item.id}">
-                                <option value="requested">@lang('lang_v1.Requested')</option>
-                                <option value="processed">@lang('lang_v1.Processed')</option>
-                                <option value="approved">@lang('lang_v1.Approved')</option>
-                                <option value="rejected">@lang('lang_v1.Rejected')</option>
-                            </select>
-                        </td>
-                        <td>
-                            <textarea name="admin_response_${item.id}" class="form-control refund-admin-response" rows="2" data-item-id="${item.id}"></textarea>
-                        </td>
-                    </tr>
-                    `;
-                    // Append the row to the table
-                    $('#order_items_table tbody').append(row);
-
-                    // Dynamically set the max value for refund amount based on remaining quantity
-                    $(`input[name="refund_amount_${item.id}"]`).attr('max', item.remaining_quantity);
-                });
-
-                // Show the modal
-                $('#refundOrderModal').modal('show');
-            } else {
-                alert('Failed to fetch order details.');
-            }
-        },
-        error: function () {
-            alert('An error occurred while fetching the order details.');
-        }
-    });
-});
-
-// Event handler for incrementing refund amount
-$(document).on('click', '.increment-btn', function () {
-    var itemId = $(this).data('item-id');
-    var $input = $(`input[name="refund_amount_${itemId}"]`);
-    var currentValue = parseInt($input.val(), 10) || 0;
-    var maxQuantity = parseInt($input.attr('max'), 10);
-
-    if (currentValue < maxQuantity) {
-        $input.val(currentValue + 1);
-    }
-});
-
-// Event handler for decrementing refund amount
-$(document).on('click', '.decrement-btn', function () {
-    var itemId = $(this).data('item-id');
-    var $input = $(`input[name="refund_amount_${itemId}"]`);
-    var currentValue = parseInt($input.val(), 10) || 0;
-
-    if (currentValue > 0) {
-        $input.val(currentValue - 1);
-    }
-});
-
-
-    $('#saveRefund').click(function () {
-        const items = [];
-
-        $('#order_items_table tbody tr').each(function () {
-            const itemId = $(this).find('.refund-reason').data('item-id');
-        const reason = $(this).find('.refund-reason').val().trim();
-        const amount = $(this).find('.refund-amount').val().trim();  // Ensure to trim any extra spaces
-        const status = $(this).find('.refund-status').val();
-        const adminResponse = $(this).find('.refund-admin-response').val().trim();
-
-        // Skip rows where any required data is empty
-        if (itemId && reason && amount && status && adminResponse) {
-            items.push({
-                id: itemId,
-                refund_reason: reason,
-                refund_amount: amount,
-                refund_status: status,
-                refund_admin_response: adminResponse,
-            });
-        }
-        });
-
-        if (items.length === 0) {
-            alert('Please fill in refund details for at least one item.');
-            return;
-        }
-
-        console.log('Final Items Array:', items);
-
-        $.ajax({
-            url: '{{ action("ApplicationDashboard\OrderRefundController@store") }}',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                _token: '{{ csrf_token() }}',
-                order_id: $('#refund_order_id').val(),
-                items: items,
-            }),
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    $('#refundOrderModal').modal('hide');
-                    // Reload DataTable or update UI
-                } else {
-                    alert('Failed to process refund.');
-                }
-            },
-            error: function () {
-                alert('An error occurred while processing the refund.');
             }
         });
     });

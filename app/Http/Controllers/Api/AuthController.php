@@ -9,6 +9,8 @@ use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Delivery;
 use App\Models\User;
+use App\Notifications\ClientCreatedNotification;
+use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,6 +19,16 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends Controller
 {
     //
+    protected $moduleUtil;
+    /**
+     * Constructor
+     *
+     * @param ProductUtils $product
+     * @return void
+     */
+    public function __construct(ModuleUtil $moduleUtil) {
+        $this->moduleUtil = $moduleUtil;
+    }
 
     public function userRegister(Request $request)
     {
@@ -149,6 +161,10 @@ class AuthController extends Controller
 
         // Generate Sanctum Token
         $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+           // Notify admins about the order
+           $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+           \Notification::send($admins, new ClientCreatedNotification($client));
 
         // Respond with Client Data and Token
         return response()->json([

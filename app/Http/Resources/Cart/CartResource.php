@@ -28,7 +28,7 @@ class CartResource extends JsonResource
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'client'=>$this->client,
-                    'product' => (new ProductResource( $this->product))->withFullData(true),
+                    'product' => (new ProductResource( $this->product))->withFullData(true,true),
                     // 'variation' => (new VariationResource( $this->variation))->withFullData(true),
                     'quantity'=>$this->quantity,
                     'price'=>$this->price,
