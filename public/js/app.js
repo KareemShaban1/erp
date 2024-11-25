@@ -1482,7 +1482,7 @@ $(document).ready(function() {
         serverSide: true,
         aaSorting: [[1, 'desc']],
         ajax: {
-            url: "{{ action('ExpenseController@index') }}",
+            // url: '/expenses',
             data: function(d) {
                 d.expense_for = $('select#expense_for').val();
                 d.contact_id = $('select#expense_contact_filter').val();
