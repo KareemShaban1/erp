@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Discount;
 
+use App\Http\Resources\Variation\VariationCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class DiscountResource extends JsonResource
@@ -58,6 +59,8 @@ class DiscountResource extends JsonResource
                     'starts_at' => $this->starts_at,
                     'ends_at' => $this->ends_at,
                     'is_active' => $this->is_active,
+                    'variations'=>$this->variations,
+                    // (new VariationCollection( $this->variations))->withFullData(true),
                     // Additional fields if needed
                 ];
             }),
