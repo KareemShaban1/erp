@@ -2,16 +2,19 @@
 
 namespace App\Http\Resources\Variation;
 
-
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class VariationCollection extends ResourceCollection
 {
     private bool $withFullData = true;
+    private bool $isDiscount = true;
 
-    public function withFullData($withFullData): self
+    // Pass the isDiscount flag here
+    public function withFullData($withFullData, $isDiscount = true): self
     {
         $this->withFullData = $withFullData;
+        $this->isDiscount = $isDiscount;
+
         return $this;
     }
 
@@ -25,8 +28,9 @@ class VariationCollection extends ResourceCollection
     {
         // Wrap each item in the collection with VariationResource
         return $this->collection->map(function ($variation) use ($request) {
-            // Pass the withFullData flag to the VariationResource
-            return (new VariationResource($variation))->withFullData($this->withFullData)->toArray($request);
+            return (new VariationResource($variation))
+                ->withFullData($this->withFullData, $this->isDiscount) // Pass the isDiscount flag
+                ->toArray($request);
         })->all();
     }
 }
