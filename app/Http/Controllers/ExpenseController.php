@@ -21,6 +21,12 @@ use App\Utils\CashRegisterUtil;
 
 class ExpenseController extends Controller
 {
+    protected $moduleUtil;
+    protected $transactionUtil;
+    protected $dummyPaymentLine;
+    protected $cashRegisterUtil;
+
+
     /**
     * Constructor
     *
