@@ -1,17 +1,19 @@
 <div class="modal-dialog" role="document">
   <div class="modal-content">
 
-    {!! Form::open(['url' => action('ApplicationDashboard\BannerController@store'), 'method' => 'post', 'id' => $quick_add ? 'quick_add_banner_form' : 'banner_add_form' ]) !!}
+    <!-- {!! Form::open(['url' => action('ApplicationDashboard\BannerController@store'), 'method' => 'post', 'id' => $quick_add ? 'quick_add_banner_form' : 'banner_add_form' ]) !!} -->
+
+    {!! Form::open(['url' => action('ApplicationDashboard\BannerController@store'), 'method' => 'post', 'id' => 'banner_add_form' ]) !!}
 
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      <h4 class="modal-title">@lang( 'banner.add_banner' )</h4>
+      <h4 class="modal-title">@lang( 'lang_v1.add_banner' )</h4>
     </div>
 
     <div class="modal-body">
       <div class="form-group">
-        {!! Form::label('name', __( 'banner.banner_name' ) . ':*') !!}
-          {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => __( 'banner.banner_name' ) ]); !!}
+        {!! Form::label('name', __( 'lang_v1.banner_name' ) . ':*') !!}
+          {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => __( 'lang_v1.banner_name' ) ]); !!}
       </div>
 
       <div class="form-group">
@@ -25,6 +27,19 @@
             {!! Form::file('image', ['id' => 'upload_image', 'accept' => 'image/*']); !!}
             <small><p class="help-block">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)]) <br> @lang('lang_v1.aspect_ratio_should_be_1_1')</p></small>
           </div>
+
+
+      <!-- Module Type -->
+      <div class="form-group">
+        {!! Form::label('module_type', __('lang_v1.module_type') . ':*') !!}
+        {!! Form::select('module_type', [''=>'select type','product' => 'Product', 'category' => 'Category'], null, ['class' => 'form-control', 'id' => 'module_type', 'required']); !!}
+      </div>
+
+      <!-- Module ID (Dynamic Select) -->
+      <div class="form-group" id="module_id_container" style="display: none;">
+        {!! Form::label('module_id', __('lang_v1.module_id') . ':*') !!}
+        {!! Form::select('module_id', [], null, ['class' => 'form-control', 'id' => 'module_id', 'required']); !!}
+      </div>
 
 
     </div>

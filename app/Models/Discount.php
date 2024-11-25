@@ -49,4 +49,8 @@ class Discount extends Model
 
         return $originalPrice;
     }
+
+    public function scopeBusinessId(){
+        return $this->where('business_id', auth()->user()->contact->business_id);
+    }
 }

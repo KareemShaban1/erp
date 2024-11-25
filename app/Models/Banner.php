@@ -21,7 +21,7 @@ class Banner extends Model
      *
      * @var array
      */
-    protected $fillable = ['name','image','business_id','active'];
+    protected $fillable = ['name','image','business_id','active','module_type','module_id'];
 
     public function getImageUrlAttribute()
     {

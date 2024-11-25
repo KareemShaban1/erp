@@ -28,6 +28,8 @@ class BannerResource extends JsonResource
                 return [
                     'image' => $this->image_url,
                     'active' => $this->active,
+                    'module_type' => $this->module_type,
+                    'module_id' => $this->module_id,
                 ];
             }),
         ];

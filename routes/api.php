@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BusinessLocationController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\DiscountController;
 use App\Http\Controllers\Api\OrderCancellationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\OrderRefundController;
@@ -97,6 +98,11 @@ Route::middleware('auth:sanctum-client')->group(function () {
           Route::post('client/mark-all-notifications-as-read', [ClientNotificationController::class, 'markAllNotificationsAsRead']);
         
 
+          Route::get('discounts', [DiscountController::class, 'listDiscounts']);
+          Route::get('flash_sales', [DiscountController::class, 'listFlashSales']);
+      
+      
+
           //   getClientNotifications
       });
     Route::middleware('auth:sanctum-delivery')->group(function () {
@@ -127,6 +133,8 @@ Route::middleware('auth:sanctum-client')->group(function () {
     });
 
     Route::get('banners', [BannerController::class, 'index']);
+
+
     Route::get('orders/{id}', [OrderController::class, 'show']);
 
     Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);

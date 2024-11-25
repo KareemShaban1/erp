@@ -4,6 +4,8 @@ namespace App\Http\Controllers\ApplicationDashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\Category;
+use App\Models\Product;
 use App\Utils\ProductUtil;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
@@ -84,16 +86,19 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
+     
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'active' => 'boolean',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048' // Image validation
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
+            'module_type'=>'required|string',
+            'module_id'=>'required',
         ]);
     
         try {
             $business_id = request()->session()->get('user.business_id');
     
-            $input = $request->only(['name', 'active']);
+            $input = $request->only(['name', 'active','module_type','module_id']);
             $input['business_id'] = $business_id;
 
             $input['active'] = $input['active'] ?? 0;
@@ -160,7 +165,9 @@ class BannerController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'active' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048' // Image validation
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
+            'module_type'=>'required|string',
+            'module_id'=>'required',
         ]);
     
         try {
@@ -238,6 +245,21 @@ class BannerController extends Controller
     }
 
     return response()->json($output);
+}
+
+public function getProducts(){
+    $products = Product::where('products.type', '!=', 'modifier')
+    ->businessId()
+    ->productForSales()->get(['id','name']);
+    return response()->json($products);
+
+}
+
+public function getCategories(){
+    // Category::with('sub_categories')->productType()->latest()
+    $categories = Category::with('sub_categories')->get(['id','name']);
+    return response()->json($categories);
+
 }
 
 }
