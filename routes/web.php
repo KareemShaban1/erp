@@ -268,7 +268,6 @@ Route::get('applicationDashboard/home', [HomeController::class,'index'])
     Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
 
-    Route::resource('applicationDashboard/expenses', 'ApplicationDashboard\ExpenseController');
 
 
 });
@@ -419,7 +418,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::resource('expense-categories', 'ExpenseCategoryController');
 
     //Expenses...
-    Route::resource('payment/expenses', 'ExpenseController');
+    Route::get('expenses', 'ExpenseController@index');
 
     //Transaction payments...
     // Route::get('/payments/opening-balance/{contact_id}', 'TransactionPaymentController@getOpeningBalancePayments');
