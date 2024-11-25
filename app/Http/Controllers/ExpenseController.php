@@ -12,12 +12,12 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
-use DB;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
 use App\Models\Contact;
 use App\Utils\CashRegisterUtil;
+use Illuminate\Support\Facades\DB;
 
 class ExpenseController extends Controller
 {
