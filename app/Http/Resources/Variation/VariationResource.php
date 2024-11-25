@@ -5,6 +5,7 @@ namespace App\Http\Resources\Variation;
 
 use App\Http\Resources\Discount\DiscountCollection;
 use App\Http\Resources\Media\MediaCollection;
+use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\ProductVariation\ProductVariationResource;
 use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
 use App\Http\Resources\VariationValue\VariationValueResource;
@@ -15,12 +16,15 @@ class VariationResource extends JsonResource
 {
     protected bool $withFullData = true;
     protected bool $isDiscount = true;
+    protected bool $isProduct = true;
+
 
     // Add the setter for the isDiscount flag
-    public function withFullData(bool $withFullData, bool $isDiscount = true): self
+    public function withFullData(bool $withFullData, bool $isDiscount = true, bool $isProduct = true): self
     {
         $this->withFullData = $withFullData;
-        $this->isDiscount = $isDiscount; // Set the isDiscount flag
+        $this->isDiscount = $isDiscount;
+        $this->isProduct = $isProduct;
 
         return $this;
     }
@@ -46,6 +50,10 @@ class VariationResource extends JsonResource
                     // Conditionally include discounts
                     'discounts' => $this->mergeWhen($this->isDiscount, function () {
                         return (new DiscountCollection($this->discounts))->withFullData(true);
+                    }),
+                    // 'product' => (new ProductResource($this->product))->withFullData(true),
+                    'product' => $this->mergeWhen($this->isProduct, function () {
+                        return (new ProductResource($this->product))->withFullData(true,false);
                     }),
                 ];
             }),

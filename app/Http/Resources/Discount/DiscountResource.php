@@ -61,7 +61,7 @@ class DiscountResource extends JsonResource
                     'is_active' => $this->is_active,
                     // 'variations'=>$this->variations,
                     'variations'=>(new VariationCollection( $this->variations))
-                    ->withFullData(true,false),
+                    ->withFullData(true,false,true),
                     // Additional fields if needed
                 ];
             }),

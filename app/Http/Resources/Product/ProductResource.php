@@ -16,15 +16,19 @@ class ProductResource extends JsonResource
 {
     protected bool $withFullData = true;
 
+    protected bool $isVariation = true;
+
     /**
      * Set whether to return full data or not.
      * 
      * @param bool $withFullData
      * @return self
      */
-    public function withFullData(bool $withFullData): self
+    public function withFullData(bool $withFullData , bool $isVariation): self
     {
         $this->withFullData = $withFullData;
+
+        $this->isVariation = $isVariation;
 
         return $this;
     }
@@ -68,7 +72,11 @@ class ProductResource extends JsonResource
                 'current_stock' => $current_stock,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
-                'variations' => (new VariationCollection($this->variations))->withFullData(true),
+                // 'variations' => (new VariationCollection($this->variations))->withFullData(true),
+                'variations' => $this->mergeWhen($this->isVariation, function () {
+                    return (new VariationCollection($this->variations))->withFullData(true,false);
+                }),
+            
             ]);
         }
 
