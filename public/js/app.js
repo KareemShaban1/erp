@@ -1481,22 +1481,22 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         aaSorting: [[1, 'desc']],
-        ajax: {
-            // url: '/expenses',
-            data: function(d) {
-                d.expense_for = $('select#expense_for').val();
-                d.contact_id = $('select#expense_contact_filter').val();
-                d.location_id = $('select#location_id').val();
-                d.expense_category_id = $('select#expense_category_id').val();
-                d.payment_status = $('select#expense_payment_status').val();
-                d.start_date = $('input#expense_date_range')
-                    .data('daterangepicker')
-                    .startDate.format('YYYY-MM-DD');
-                d.end_date = $('input#expense_date_range')
-                    .data('daterangepicker')
-                    .endDate.format('YYYY-MM-DD');
-            },
-        },
+        // ajax: {
+        //     // url: '/expenses',
+        //     data: function(d) {
+        //         d.expense_for = $('select#expense_for').val();
+        //         d.contact_id = $('select#expense_contact_filter').val();
+        //         d.location_id = $('select#location_id').val();
+        //         d.expense_category_id = $('select#expense_category_id').val();
+        //         d.payment_status = $('select#expense_payment_status').val();
+        //         d.start_date = $('input#expense_date_range')
+        //             .data('daterangepicker')
+        //             .startDate.format('YYYY-MM-DD');
+        //         d.end_date = $('input#expense_date_range')
+        //             .data('daterangepicker')
+        //             .endDate.format('YYYY-MM-DD');
+        //     },
+        // },
         columns: [
             { data: 'action', name: 'action', orderable: false, searchable: false },
             { data: 'transaction_date', name: 'transaction_date' },
