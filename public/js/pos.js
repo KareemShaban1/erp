@@ -2680,7 +2680,7 @@ $("#sales_order_ids").on("select2:unselect", function (e) {
 
 $(document).on('click', '#add_expense', function(){
     $.ajax({
-        url: '/payment/expenses/create',
+        url: '/expenses/create',
         data: { 
             location_id: $('#select_location_id').val()
         },

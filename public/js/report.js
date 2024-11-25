@@ -430,7 +430,7 @@ $(document).ready(function() {
             serverSide: true,
             aaSorting: [[0, 'desc']],
             ajax: {
-                url: '/payment/expenses',
+                url: '/expenses',
                 data: function(d) {
                     var start = $('input#sr_date_filter')
                         .data('daterangepicker')
