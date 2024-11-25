@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\Account;
@@ -26,13 +27,6 @@ class ExpenseController extends Controller
     protected $dummyPaymentLine;
     protected $cashRegisterUtil;
 
-
-    /**
-    * Constructor
-    *
-    * @param TransactionUtil $transactionUtil
-    * @return void
-    */
     public function __construct(TransactionUtil $transactionUtil, ModuleUtil $moduleUtil, CashRegisterUtil $cashRegisterUtil)
     {
         $this->transactionUtil = $transactionUtil;
@@ -49,9 +43,9 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        if (!auth()->user()->can('all_expense.access') && !auth()->user()->can('view_own_expense')) {
-            abort(403, 'Unauthorized action.');
-        }
+        // if (!auth()->user()->can('all_expense.access') && !auth()->user()->can('view_own_expense')) {
+        //     abort(403, 'Unauthorized action.');
+        // }
 
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
