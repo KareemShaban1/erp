@@ -253,7 +253,7 @@ class ExpenseController extends Controller
                 ->make(true);
         }
 
-        $business_id = request()->session()->get('user.business_id');
+        // $business_id = request()->session()->get('user.business_id');
 
         $categories = ExpenseCategory::where('business_id', $business_id)
                             ->pluck('name', 'id');
@@ -264,7 +264,7 @@ class ExpenseController extends Controller
 
         $contacts = Contact::contactDropdown($business_id, false, false);
 
-        return view('expense.list')
+        return view('expense.index')
             ->with(compact('categories', 'business_locations', 'users', 'contacts'));
     }
 
