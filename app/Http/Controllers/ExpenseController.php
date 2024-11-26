@@ -48,7 +48,7 @@ class ExpenseController extends Controller
         // }
 
         if (request()->ajax()) {
-            $business_id = auth()->user()->business_id;
+            $business_id = request()->session()->get('user.business_id');
 
             $expenses = Transaction::leftJoin('expense_categories AS ec', 'transactions.expense_category_id', '=', 'ec.id')
                         ->join(
@@ -253,7 +253,8 @@ class ExpenseController extends Controller
                 ->make(true);
         }
 
-        $business = auth()->user()->business_id;
+        $business = request()->session()->get('user.business_id');
+
         $categories = ExpenseCategory::where('business_id', $business)
                             ->pluck('name', 'id');
 
