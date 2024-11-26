@@ -10,10 +10,18 @@
 @if(empty($only) || in_array('sell_list_filter_customer_id', $only))
 <div class="col-md-3">
     <div class="form-group">
-        {!! Form::label('sell_list_filter_customer_id',  __('contact.customer') . ':') !!}
-        {!! Form::select('sell_list_filter_customer_id', $customers, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
+        <label for="sell_list_filter_customer_id">
+            {{ __('contact.customer') }}:
+        </label>
+        <select id="sell_list_filter_customer_id" name="sell_list_filter_customer_id" class="form-control select2" style="width: 100%;">
+            <option value="">{{ __('lang_v1.all') }}</option>
+            @foreach($customers as $value => $label)
+                <option value="{{ $value }}">{{ $label }}</option>
+            @endforeach
+        </select>
     </div>
 </div>
+
 @endif
 @if(empty($only) || in_array('sell_list_filter_payment_status', $only))
 <div class="col-md-3">
