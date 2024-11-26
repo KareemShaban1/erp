@@ -27,12 +27,12 @@
                             {!! Form::select('expense_for', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']); !!}
                         </div>
                     </div>
-                    <!-- <div class="col-md-3">
+                    <div class="col-md-3">
                         <div class="form-group">
                             {!! Form::label('expense_contact_filter',  __('contact.contact') . ':') !!}
                             {!! Form::select('expense_contact_filter', $contacts, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
                         </div>
-                    </div> -->
+                    </div>
                 @endif
                 <div class="col-md-3">
                     <div class="form-group">
