@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 class ProductCollection extends ResourceCollection
 {
     private bool $withFullData = true;
-    private bool $isVariation = true;
+    // private bool $isVariation = true;
 
     /**
      * Set whether to return full data or not.
@@ -15,10 +15,12 @@ class ProductCollection extends ResourceCollection
      * @param bool $withFullData
      * @return self
      */
-    public function withFullData(bool $withFullData, bool $isVariation = true): self
+    public function withFullData(bool $withFullData
+    // , bool $isVariation = true
+    ): self
     {
         $this->withFullData = $withFullData;
-        $this->isVariation = $isVariation;
+        // $this->isVariation = $isVariation;
 
         return $this;
     }
@@ -34,7 +36,9 @@ class ProductCollection extends ResourceCollection
         // Wrap each item in the collection with ProductResource
         return $this->collection->map(function ($product) use ($request) {
             // Pass the withFullData flag to the ProductResource
-            return (new ProductResource($product))->withFullData($this->withFullData,$this->isVariation)->toArray($request);
+            return (new ProductResource($product))->withFullData($this->withFullData
+            // ,$this->isVariation
+            )->toArray($request);
         })->all();
     }
 }

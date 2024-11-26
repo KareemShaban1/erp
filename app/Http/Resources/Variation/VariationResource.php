@@ -40,6 +40,7 @@ class VariationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
+                    'discounts'=> (new DiscountCollection($this->discounts))->withFullData(true),
                     'total_qty_available' => intval($this->total_qty_available),
                     'default_sell_price' => $this->default_sell_price,
                     'sell_price_inc_tax' => $this->sell_price_inc_tax,
@@ -48,13 +49,13 @@ class VariationResource extends JsonResource
                     'media' => (new MediaCollection($this->media))->withFullData(false),
                     'locations' => (new VariationLocationDetailsCollection($this->variation_location_details))->withFullData(true),
                     // Conditionally include discounts
-                    'discounts' => $this->mergeWhen($this->isDiscount, function () {
-                        return (new DiscountCollection($this->discounts))->withFullData(true);
-                    }),
+                    // 'discounts' => $this->mergeWhen($this->isDiscount, function () {
+                    //     return (new DiscountCollection($this->discounts))->withFullData(true);
+                    // }),
                     // 'product' => (new ProductResource($this->product))->withFullData(true),
-                    'product' => $this->mergeWhen($this->isProduct, function () {
-                        return (new ProductResource($this->product))->withFullData(true,false);
-                    }),
+                    // 'product' => $this->mergeWhen($this->isProduct, function () {
+                    //     return (new ProductResource($this->product))->withFullData(true,false);
+                    // }),
                 ];
             }),
         ];
