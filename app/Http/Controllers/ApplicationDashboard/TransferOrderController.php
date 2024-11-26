@@ -240,8 +240,11 @@ class TransferOrderController extends Controller
     $order = Order::with([
         'client.contact', 
         'businessLocation', 
-        'orderItems'
+        'orderItems',
+        'fromBusinessLocation',
+        'toBusinessLocation'
     ])->find($orderId);
+
 
     if ($order) {
         // Iterate through each order item and check for Transfer details

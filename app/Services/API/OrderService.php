@@ -168,87 +168,51 @@ class OrderService extends BaseService
         }
     }
 
-    /**
-     * Handle quantity transfer between locations based on client needs.
-     */
     protected function handleQuantityTransfer($cart, $client, $order, $orderItem)
     {
         $requiredQuantity = $cart->quantity;
-        $quantityTransferred = 0;
-        $transferDetails = [];
+        $clientLocationId = $client->business_location_id;
     
-        // Step 1: Attempt to fulfill from client's business location
-        foreach ($cart->variation->variation_location_details as $locationDetail) {
-            if ($locationDetail->location->id === $client->business_location_id) {
-                $availableQty = $locationDetail->qty_available;
+        // Step 1: Check if the required quantity exists in the client's location
+        $clientLocationDetail = $cart->variation->variation_location_details
+            ->firstWhere('location.id', $clientLocationId);
     
-                // Determine how much can be transferred from this location
-                $transferQty = min($requiredQuantity, $availableQty);
+        $availableAtClientLocation = $clientLocationDetail ? $clientLocationDetail->qty_available : 0;
     
-                if ($transferQty > 0) {
-                    // Track the transfer details, but don't update stock yet
-                    $transferDetails[] = [
-                        'location_id' => $locationDetail->location->id,
-                        'transfer_qty' => $transferQty
-                    ];
+        if ($availableAtClientLocation >= $requiredQuantity) {
+            // If sufficient stock exists, update stock directly
+            $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
+        } else {
+            // Step 2: Calculate deficit and transfer stock if necessary
+            $deficit = $requiredQuantity - $availableAtClientLocation;
     
-                    // Reduce the required quantity by the transferred quantity
-                    $requiredQuantity -= $transferQty;
-    
-                    // Track the quantity transferred
-                    $quantityTransferred += $transferQty;
-    
-                    // If fulfilled, break out of the loop and return
-                    if ($requiredQuantity <= 0) {
-                        break; // All required quantity fulfilled from client's location
-                    }
-                }
-            }
-        }
-    
-        // Step 2: Attempt to fulfill remaining quantity from other locations
-        if ($requiredQuantity > 0) {
             foreach ($cart->variation->variation_location_details as $locationDetail) {
-                if ($locationDetail->location->id !== $client->business_location_id && $locationDetail->qty_available > 0) {
+                if ($locationDetail->location->id !== $clientLocationId && $deficit > 0) {
                     $availableQty = $locationDetail->qty_available;
-                    $transferQty = min($requiredQuantity, $availableQty);
     
-                    if ($transferQty > 0) {
-                        // Track the transfer details, but don't update stock yet
-                        $transferDetails[] = [
-                            'location_id' => $locationDetail->location->id,
-                            'transfer_qty' => $transferQty
-                        ];
+                    if ($availableQty > 0) {
+                        $transferQty = min($deficit, $availableQty);
     
-                        $requiredQuantity -= $transferQty;
-                        $quantityTransferred += $transferQty;
+                        // Perform the stock transfer
+                        $this->transferQuantity(
+                            $order,
+                            $orderItem,
+                            $client,
+                            $locationDetail->location->id,
+                            $clientLocationId,
+                            $transferQty
+                        );
     
-                        // If fulfilled, break out
-                        if ($requiredQuantity <= 0) {
-                            break;
-                        }
+                        $deficit -= $transferQty;
+    
+                        // Break if the deficit is covered
+                        if ($deficit <= 0) break;
                     }
                 }
             }
-        }
     
-        // Step 3: If insufficient stock even after all transfers, throw an exception
-        if ($requiredQuantity > 0) {
-            throw new \Exception(
-                sprintf(
-                    'Insufficient stock for product ID %d. Missing quantity: %d.',
-                    $cart->product_id,
-                    $requiredQuantity
-                )
-            );
-        }
-    
-        
-        \Log::info("",$transferDetails);
-
-        // Step 4: Update stock only after all transfers are confirmed
-        foreach ($transferDetails as $detail) {
-            $this->updateStock($orderItem, $detail['location_id'], $detail['transfer_qty']);
+            // Step 3: Finalize by updating stock at the client's location
+            $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
         }
     }
     
@@ -320,6 +284,8 @@ class OrderService extends BaseService
                 );
             }
 
+
+            \Log::info("transfer quantity",[$quantity]);
             $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
 
             DB::commit();
@@ -344,8 +310,6 @@ class OrderService extends BaseService
             $quantity
         );
     }
-
-
 
     protected function makeSale($order, $client, $carts)
     {
@@ -404,7 +368,6 @@ class OrderService extends BaseService
 
             $transaction = $this->transactionUtil->createSellTransaction($business_id, $transactionData, $invoice_total, $user_id);
 
-            // Log::info($transaction);
             // Create or update sell lines using $carts instead of $input['products']
             $products = $carts->map(function ($cart) {
                 return [
@@ -702,9 +665,11 @@ class OrderService extends BaseService
             // Calculate subtotal for the transfer
             $subTotal = $quantity * $orderItem->price;
     
+            \Log::info('sub_total',[$quantity * $orderItem->price]);
             // Check if a transfer order already exists for the parent order
-            $transferOrder = Order::where('parent_order_id', $order->id)->first();
-    
+            $transferOrder = Order::where('parent_order_id', $order->id)
+            ->where('order_type','order_transfer')->first();
+            
             if ($transferOrder) {
                 // Update existing transfer order
                 $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
@@ -735,9 +700,11 @@ class OrderService extends BaseService
     
     private function createTransferOrder($order, $subTotal,$fromLocationId,$toLocationId)
     {
+
         // Fetch client details
         $client = Client::findOrFail($order->client_id);
     
+        \Log::info('inside sub total',[$subTotal]);
         // Create a new transfer order
         return Order::create([
             'parent_order_id' => $order->id,
@@ -747,8 +714,8 @@ class OrderService extends BaseService
             'payment_method' => 'Cash on delivery', // Modify as needed
             'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
             'business_location_id' => $client->business_location_id,
-            'from_location_id'=> $fromLocationId,
-            'to_location_id'=>$toLocationId
+            'from_business_location_id'=> $fromLocationId,
+            'to_business_location_id'=>$toLocationId
         ]);
     }
     
@@ -765,10 +732,10 @@ class OrderService extends BaseService
             'sub_total' => $subTotal,
         ]);
     
-        // Update order totals
-        $order->sub_total += $subTotal;
-        $order->total += $subTotal; // Adjust for taxes or other calculations
-        $order->save();
+        // // Update order totals
+        // $order->sub_total += $subTotal;
+        // $order->total += $subTotal; // Adjust for taxes or other calculations
+        // $order->save();
     }
     
     

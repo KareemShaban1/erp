@@ -23,7 +23,8 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'order_uuid','number','client_id','parent_order_id','business_location_id','payment_method','order_type','order_status','payment_status','shipping_cost','sub_total','total'];
+        'order_uuid','number','client_id','parent_order_id','business_location_id','payment_method','order_type','order_status','payment_status','shipping_cost','sub_total','total'
+    ,'from_business_location_id','to_business_location_id'];
 
         protected static function boot()
         {

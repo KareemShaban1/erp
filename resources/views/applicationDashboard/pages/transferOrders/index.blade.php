@@ -93,10 +93,10 @@
     </div>
 
     <!-- Delivery Assignment Modal -->
-    @include('applicationDashboard.pages.orders.assignDeliveryModal')
+    @include('applicationDashboard.pages.transferOrders.assignDeliveryModal')
 
     <!-- Order Information Modal -->
-    @include('applicationDashboard.pages.orders.orderInformationModal')
+    @include('applicationDashboard.pages.transferOrders.orderInformationModal')
 
 
 </section>
@@ -382,6 +382,14 @@
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
 
+                    $('#from_location_name').text(response.order.from_business_location?.name);
+                    $('#from_location_city').text(response.order.from_business_location?.city);
+                    $('#from_location_mobile').text(response.order.from_business_location?.mobile);
+
+                    $('#to_location_name').text(response.order.to_business_location?.name);
+                    $('#to_location_city').text(response.order.to_business_location?.city);
+                    $('#to_location_mobile').text(response.order.to_business_location?.mobile);
+                    
                     // Populate the order items
                     const itemsTable = $('#order_items_table tbody');
                     itemsTable.empty(); // Clear existing rows

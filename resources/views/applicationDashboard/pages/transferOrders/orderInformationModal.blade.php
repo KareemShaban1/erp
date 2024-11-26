@@ -82,6 +82,59 @@
                         </div>
 
                         <div class="row">
+                        <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.from_location'):</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_name'):</label>
+                                    <p id="from_location_name"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_city'):</label>
+                                    <p id="from_location_city"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_mobile'):</label>
+                                    <p id="from_location_mobile"></p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                        <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.to_location'):</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_name'):</label>
+                                    <p id="to_location_name"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_city'):</label>
+                                    <p id="to_location_city"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.location_mobile'):</label>
+                                    <p id="to_location_mobile"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.order_items'):</label>
