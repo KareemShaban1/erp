@@ -262,10 +262,10 @@ class ExpenseController extends Controller
 
         $business_locations = BusinessLocation::forDropdown($business_id, true);
 
-        // $contacts = Contact::contactDropdown($business_id, false, false);
+        $contacts_data = Contact::contactDropdown($business_id, false, false);
 
         return view('expense.index')
-            ->with(compact('categories', 'business_locations', 'users', 'contacts'));
+            ->with(compact('categories', 'business_locations', 'users', 'contacts_data'));
     }
 
     /**
