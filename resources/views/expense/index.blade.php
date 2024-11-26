@@ -27,13 +27,11 @@
                             {!! Form::select('expense_for', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']); !!}
                         </div>
                     </div>
-                    @php
-                    dd($contacts_data);
-                    @endphp
                     <div class="col-md-3">
                         <div class="form-group">
                             {!! Form::label('expense_contact_filter',  __('contact.contact') . ':') !!}
-                            {!! Form::select('expense_contact_filter', $contacts_data, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
+                            {!! Form::select('expense_contact_filter', $contacts_data, null, ['placeholder' =>
+                        __('report.all'), 'class' => 'form-control select2', 'style' => 'width:100%', 'id' => 'expense_contact_filter']); !!}
                         </div>
                     </div>
                 @endif
