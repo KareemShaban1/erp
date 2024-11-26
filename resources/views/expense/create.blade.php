@@ -63,11 +63,19 @@
 					</div>
 				</div>
 				<div class="col-sm-4">
-					<div class="form-group">
-						{!! Form::label('contact_id', __('lang_v1.expense_for_contact').':') !!} 
-						{!! Form::select('contact_id', $contacts, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
-					</div>
+				<div class="form-group">
+				<label for="contact_id">
+					{{ __('lang_v1.expense_for_contact') }}:
+				</label>
+				<select id="contact_id" name="contact_id" class="form-control select2">
+					<option value="">{{ __('messages.please_select') }}</option>
+					@foreach($contacts as $value => $label)
+					<option value="{{ $value }}">{{ $label }}</option>
+					@endforeach
+				</select>
 				</div>
+				</div>
+
 				<div class="clearfix"></div>
 				<div class="col-sm-4">
                     <div class="form-group">
