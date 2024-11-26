@@ -269,7 +269,7 @@ class ExpenseController extends Controller
 
         $contacts = Contact::contactDropdown($business_id, false, false);
 
-        return view('expense.index')
+        return view('expense.list')
             ->with(compact('categories', 'business_locations', 'users', 'contacts'));
     }
 

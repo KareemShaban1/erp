@@ -68,7 +68,7 @@
                     @endslot
                 @endcan
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="expenses_table">
+                    <table class="table table-bordered table-striped" id="expense_table">
                         <thead>
                             <tr>
                                 <th>@lang('messages.action')</th>
