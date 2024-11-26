@@ -27,6 +27,9 @@
                             {!! Form::select('expense_for', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']); !!}
                         </div>
                     </div>
+                    @php
+                    dd($contacts_data);
+                    @endphp
                     <div class="col-md-3">
                         <div class="form-group">
                             {!! Form::label('expense_contact_filter',  __('contact.contact') . ':') !!}
