@@ -279,34 +279,34 @@ class ExpenseController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $business_id = request()->session()->get('user.business_id');
+        $business = request()->session()->get('user.business_id');
         
         //Check if subscribed or not
-        if (!$this->moduleUtil->isSubscribed($business_id)) {
-            return $this->moduleUtil->expiredResponse(action('ExpenseController@index'));
-        }
+        // if (!$this->moduleUtil->isSubscribed($business_id)) {
+        //     return $this->moduleUtil->expiredResponse(action('ExpenseController@index'));
+        // }
 
-        $business_locations = BusinessLocation::forDropdown($business_id, false, true);
+        $business_locations = BusinessLocation::forDropdown($business, false, true);
 
         $bl_attributes = $business_locations['attributes'];
         $business_locations = $business_locations['locations'];
 
-        $expense_categories = ExpenseCategory::where('business_id', $business_id)
+        $expense_categories = ExpenseCategory::where('business_id', $business)
                                 ->pluck('name', 'id');
-        $users = User::forDropdown($business_id, true, true);
+        $users = User::forDropdown($business, true, true);
 
-        $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
+        $taxes = TaxRate::forBusinessDropdown($business, true, true);
         
         $payment_line = $this->dummyPaymentLine;
 
         $payment_types = $this->transactionUtil->payment_types(null, false, $business_id);
 
-        $contacts = Contact::contactDropdown($business_id, false, false);
+        $contacts = Contact::contactDropdown($business, false, false);
 
         //Accounts
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true);
+            $accounts = Account::forDropdown($business, true, false, true);
         }
 
         if (request()->ajax()) {
