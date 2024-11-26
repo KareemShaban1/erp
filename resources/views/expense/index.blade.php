@@ -29,8 +29,8 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            {!! Form::label('expense_contact_filter',  __('contact.contact') . ':') !!}
-                            {!! Form::select('expense_contact_filter', $contacts, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
+                            {!! Form::label('expense_contact_filters',  __('contact.contact') . ':') !!}
+                            {!! Form::select('expense_contact_filters', $contacts, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]); !!}
                         </div>
                     </div>
                 @endif
