@@ -27,13 +27,21 @@
                             {!! Form::select('expense_for', $users, null, ['class' => 'form-control select2', 'style' => 'width:100%']); !!}
                         </div>
                     </div>
+
                     <div class="col-md-3">
-                        <div class="form-group">
-                            {!! Form::label('expense_contact_filter',  __('contact.contact') . ':') !!}
-                            {!! Form::select('expense_contact_filter', $contacts_data, null, ['placeholder' =>
-                        __('report.all'), 'class' => 'form-control select2', 'style' => 'width:100%', 'id' => 'expense_contact_filter']); !!}
-                        </div>
+                    <div class="form-group">
+                        <label for="expense_contact_filter">
+                            {{ __('contact.contact') }}:
+                        </label>
+                        <select id="expense_contact_filter" name="expense_contact_filter" class="form-control select2" style="width:100%;">
+                            <option value="">{{ __('report.all') }}</option>
+                            @foreach($contacts_data as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
                     </div>
+                </div>
+
                 @endif
                 <div class="col-md-3">
                     <div class="form-group">
