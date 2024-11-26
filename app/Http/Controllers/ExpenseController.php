@@ -253,16 +253,16 @@ class ExpenseController extends Controller
                 ->make(true);
         }
 
-        // $business_id = request()->session()->get('user.business_id');
+        $business = request()->session()->get('user.business_id');
 
-        $categories = ExpenseCategory::where('business_id', $business_id)
+        $categories = ExpenseCategory::where('business_id', $business)
                             ->pluck('name', 'id');
 
-        $users = User::forDropdown($business_id, false, true, true);
+        $users = User::forDropdown($business, false, true, true);
 
-        $business_locations = BusinessLocation::forDropdown($business_id, true);
+        $business_locations = BusinessLocation::forDropdown($business, true);
 
-        $contacts = Contact::contactDropdown($business_id, false, false);
+        $contacts = Contact::contactDropdown($business, false, false);
 
         return view('expense.index')
             ->with(compact('categories', 'business_locations', 'users', 'contacts'));
