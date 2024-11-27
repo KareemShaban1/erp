@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Variation;
+namespace App\Http\Resources\DiscountModule;
 
 use App\Http\Resources\Discount\DiscountCollection;
 use App\Http\Resources\Media\MediaCollection;
@@ -11,20 +11,14 @@ use App\Http\Resources\VariationValue\VariationValueResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class VariationResource extends JsonResource
+class VariationModuleResource extends JsonResource
 {
     protected bool $withFullData = true;
-    protected bool $isDiscount = true;
-    protected bool $isProduct = true;
-
 
     // Add the setter for the isDiscount flag
-    public function withFullData(bool $withFullData, bool $isDiscount = true, bool $isProduct = true): self
+    public function withFullData(bool $withFullData): self
     {
         $this->withFullData = $withFullData;
-        $this->isDiscount = $isDiscount;
-        $this->isProduct = $isProduct;
-
         return $this;
     }
 
@@ -39,7 +33,6 @@ class VariationResource extends JsonResource
             'name' => $this->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
-                    'discounts'=> (new DiscountCollection($this->discounts))->withFullData(true),
                     'total_qty_available' => intval($this->total_qty_available),
                     'default_sell_price' => $this->default_sell_price,
                     'sell_price_inc_tax' => $this->sell_price_inc_tax,
@@ -47,6 +40,8 @@ class VariationResource extends JsonResource
                     'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),
                     'media' => (new MediaCollection($this->media))->withFullData(false),
                     'locations' => (new VariationLocationDetailsCollection($this->variation_location_details))->withFullData(true),
+                    'product' => (new ProductModuleResource($this->product))->withFullData(true),
+
                     // Conditionally include discounts
                     // 'discounts' => $this->mergeWhen($this->isDiscount, function () {
                     //     return (new DiscountCollection($this->discounts))->withFullData(true);

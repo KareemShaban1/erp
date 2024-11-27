@@ -731,11 +731,7 @@ class OrderService extends BaseService
             'discount' => $orderItem->discount ?? 0,
             'sub_total' => $subTotal,
         ]);
-    
-        // // Update order totals
-        // $order->sub_total += $subTotal;
-        // $order->total += $subTotal; // Adjust for taxes or other calculations
-        // $order->save();
+
     }
     
     

@@ -4,6 +4,7 @@ namespace App\Services\API;
 
 use App\Http\Resources\Discount\DiscountCollection;
 use App\Http\Resources\Discount\DiscountResource;
+use App\Http\Resources\DiscountModule\DiscountModuleCollection;
 use App\Models\Discount;
 use App\Services\BaseService;
 use App\Traits\HelperTrait;
@@ -30,7 +31,7 @@ class DiscountService extends BaseService
 
             $Discounts = $this->withPagination($query, $request);
 
-            return (new DiscountCollection($Discounts))
+            return (new DiscountModuleCollection($Discounts))
             ->withFullData(!($request->full_data == 'false'));
 
 
@@ -53,7 +54,7 @@ class DiscountService extends BaseService
 
             $Discounts = $this->withPagination($query, $request);
 
-            return (new DiscountCollection($Discounts))
+            return (new DiscountModuleCollection($Discounts))
             ->withFullData(!($request->full_data == 'false'));
 
 
