@@ -47,14 +47,6 @@ class VariationResource extends JsonResource
                     'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),
                     'media' => (new MediaCollection($this->media))->withFullData(false),
                     'locations' => (new VariationLocationDetailsCollection($this->variation_location_details))->withFullData(true),
-                    // Conditionally include discounts
-                    // 'discounts' => $this->mergeWhen($this->isDiscount, function () {
-                    //     return (new DiscountCollection($this->discounts))->withFullData(true);
-                    // }),
-                    // 'product' => (new ProductResource($this->product))->withFullData(true),
-                    // 'product' => $this->mergeWhen($this->isProduct, function () {
-                    //     return (new ProductResource($this->product))->withFullData(true,false);
-                    // }),
                 ];
             }),
         ];

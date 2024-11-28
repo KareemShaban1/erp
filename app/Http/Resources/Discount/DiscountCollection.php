@@ -23,10 +23,19 @@ class DiscountCollection extends ResourceCollection
      */
     public function toArray($request): array
     {
-        // Wrap each item in the collection with DiscountResource
-        return $this->collection->map(function ($Discount) use ($request) {
-            // Pass the withFullData flag to the DiscountResource
-            return (new DiscountResource($Discount))->withFullData($this->withFullData)->toArray($request);
+        $today = now(); // Get the current date and time
+
+        // Filter discounts based on the end date
+        $filteredCollection = $this->collection->filter(function ($Discount) use ($today) {
+            return is_null($Discount->ends_at) || $Discount->ends_at > $today;
+        });
+
+        // Wrap each item in the filtered collection with DiscountResource
+        return $filteredCollection->map(function ($Discount) use ($request) {
+            return (new DiscountResource($Discount))
+                ->withFullData($this->withFullData)
+                ->toArray($request);
         })->all();
     }
+
 }
