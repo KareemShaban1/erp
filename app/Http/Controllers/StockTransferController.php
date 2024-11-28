@@ -211,6 +211,7 @@ class StockTransferController extends Controller
             $input_data['shipping_charges'] = $this->productUtil->num_uf($input_data['shipping_charges']);
             $input_data['payment_status'] = 'paid';
             $input_data['status'] = $status == 'completed' ? 'final' : $status;
+            $input_data['transfer_type'] = 'erp_transfer';
 
             //Update reference count
             $ref_count = $this->productUtil->setAndGetReferenceCount('stock_transfer');
@@ -813,7 +814,10 @@ class StockTransferController extends Controller
             $status = $request->input('status');
 
             DB::beginTransaction();
-            if ($status == 'completed' && $sell_transfer->status != 'completed' ) {
+            if ($status == 'completed' && 
+            $sell_transfer->status != 'completed' && 
+            $sell_transfer->transfer_type != 'application_transfer' &&
+            $purchase_transfer->transfer_type != 'application_transfer' ) {
 
                 foreach ($sell_transfer->sell_lines as $sell_line) {
                     if ($sell_line->product->enable_stock) {
@@ -850,6 +854,9 @@ class StockTransferController extends Controller
             $purchase_transfer->save();
             $sell_transfer->status = $status == 'completed' ? 'final' : $status;
             $sell_transfer->save();
+
+            $this->moduleUtil->activityLog($sell_transfer, 'change_status',null,['status'=>$status]);
+
 
             DB::commit();
 

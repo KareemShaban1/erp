@@ -29,11 +29,11 @@ use App\Utils\TransactionUtil;
 use App\Models\Variation;
 use App\Models\VariationLocationDetails;
 use Datatables;
-use DB;
 use Illuminate\Http\Request;
 use App\Models\TaxRate;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
@@ -3479,12 +3479,20 @@ class ReportController extends Controller
 
         if (request()->ajax()) {
             $activities = Activity::with(['subject'])
-                                ->leftjoin('users as u', 'u.id', '=', 'activity_log.causer_id')
-                                ->where('activity_log.business_id', $business_id)
-                                ->select(
-                                    'activity_log.*',
-                                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as created_by")
-                                );
+            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('contacts as contact', 'contact.id', '=', 'c.contact_id')
+            ->where('activity_log.business_id', $business_id)
+            ->select(
+                'activity_log.*',
+                DB::raw("
+                    CASE 
+                        WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
+                        WHEN c.id IS NOT NULL THEN contact.name
+                        ELSE 'Unknown'
+                    END as created_by
+                ")
+            );
 
             if (!empty(request()->start_date) && !empty(request()->end_date)) {
                 $start = request()->start_date;

@@ -238,6 +238,7 @@ class OrderService extends BaseService
                 'payment_status' => 'paid',
                 'status' => 'in_transit',
                 'total_before_tax' => $order->total,
+                'transfer_type'=>'application_transfer'
             ];
 
             // Generate reference number
@@ -428,7 +429,8 @@ class OrderService extends BaseService
             }
 
             // Media::uploadMedia($business_id, $transaction, request(), 'documents');
-            $this->transactionUtil->activityLog($transaction, 'added');
+            $this->transactionUtil->activityLog($transaction, 'added',null,
+            ['order_number'=>$order->number,'client'=>$client->contact->name]);
 
             DB::commit();
 
