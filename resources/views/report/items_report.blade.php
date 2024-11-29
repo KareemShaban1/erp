@@ -31,16 +31,22 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
-                    {!! Form::label('ir_customer_id', __('contact.customer') . ':') !!}
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <i class="fa fa-user"></i>
-                        </span>
-                        {!! Form::select('ir_customer_id', $customers, null, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.all')]); !!}
-                    </div>
-                </div>
-            </div>
+    <div class="form-group">
+        <label for="ir_customer_id">{{ __('contact.customer') }}:</label>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-user"></i>
+            </span>
+            <select id="ir_customer_id" name="ir_customer_id" class="form-control select2">
+                <option value="">{{ __('lang_v1.all') }}</option>
+                @foreach ($customers as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</div>
+
             <div class="col-md-3">
                 <div class="form-group">
                     {!! Form::label('ir_sale_date_filter', __('lang_v1.sell_date') . ':') !!}

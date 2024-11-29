@@ -14,17 +14,23 @@
         <div class="col-md-12">
            @component('components.filters', ['title' => __('report.filters')])
               {!! Form::open(['url' => '#', 'method' => 'get', 'id' => 'sell_payment_report_form' ]) !!}
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {!! Form::label('customer_id', __('contact.customer') . ':') !!}
-                        <div class="input-group">
-                            <span class="input-group-addon">
-                                <i class="fa fa-user"></i>
-                            </span>
-                            {!! Form::select('customer_id', $customers, null, ['class' => 'form-control select2', 'placeholder' => __('messages.all'), 'required']); !!}
-                        </div>
-                    </div>
-                </div>
+              <div class="col-md-3">
+    <div class="form-group">
+        <label for="customer_id">{{ __('contact.customer') }}:</label>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-user"></i>
+            </span>
+            <select id="customer_id" name="customer_id" class="form-control select2" required>
+                <option value="">{{ __('messages.all') }}</option>
+                @foreach ($customers as $key => $value)
+                    <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+</div>
+
                 <div class="col-md-3">
                     <div class="form-group">
                         {!! Form::label('location_id', __('purchase.business_location').':') !!}

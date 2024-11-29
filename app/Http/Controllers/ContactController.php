@@ -430,7 +430,7 @@ class ContactController extends Controller
                 $html = __('lang_v1.no_limit');
                 if (!is_null($row->credit_limit)) {
                     $html = '<span data-orig-value="' . $row->credit_limit . '">' . $this->transactionUtil->num_f($row->credit_limit, true) . '</span>';
-                }
+                } 
 
                 return $html;
             })

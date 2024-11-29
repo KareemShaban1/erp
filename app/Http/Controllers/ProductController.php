@@ -374,7 +374,7 @@ class ProductController extends Controller
         $is_woocommerce = $this->moduleUtil->isModuleInstalled('Woocommerce');
 
         if (request()->ajax()) {
-            $query = Product::with(['media'])
+            $query = Product::with(['media','variations.variation_location_details'])
                 ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
                 ->join('units', 'products.unit_id', '=', 'units.id')
                 ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
@@ -425,19 +425,36 @@ class ProductController extends Controller
                 'products.product_custom_field2',
                 'products.product_custom_field3',
                 'products.product_custom_field4',
-                DB::raw('SUM(vld.qty_available) as current_stock'),
+                'products.created_at',
+                DB::raw('SUM(vld.qty_available) as available_stock'),
                 DB::raw('MAX(v.sell_price_inc_tax) as max_price'),
                 DB::raw('MIN(v.sell_price_inc_tax) as min_price'),
                 DB::raw('MAX(v.dpp_inc_tax) as max_purchase_price'),
                 DB::raw('MIN(v.dpp_inc_tax) as min_purchase_price')
-                );
+                )->latest();
+
 
             //if woocomerce enabled add field to query
             if ($is_woocommerce) {
                 $products->addSelect('woocommerce_disable_sync');
             }
             
-            $products->groupBy('products.id');
+            $products->groupBy('products.id','v.id');
+
+            //       $products->get()->each(function ($product) {
+            // //     Log::info($product->variations->sum(function ($variation) {
+            // //         return $variation->variation_location_details->sum('qty_available');
+            // //     }) ); // Logs all variations with their loaded relationships
+            // // });
+            
+            // Handle current stock calculation dynamically
+            $products->get()->map(function ($product) {
+                $variations = $product->variations;
+                $product->available_stock = $variations->sum(function ($variation) {
+                    return $variation->variation_location_details->sum('qty_available');
+                });
+                return $product;
+            });
 
             $type = request()->get('type', null);
             if (!empty($type)) {
@@ -572,7 +589,17 @@ class ProductController extends Controller
                 ->addColumn('mass_delete', function ($row) {
                     return  '<input type="checkbox" class="row-select" value="' . $row->id .'">' ;
                 })
-                ->editColumn('current_stock', '@if($enable_stock == 1) {{@number_format($current_stock)}} @else -- @endif {{$unit}}')
+                // ->editColumn('current_stock', '@if($enable_stock == 1) {{@number_format($current_stock)}} @else -- @endif {{$unit}}')
+                ->editColumn('current_stock', function($row) {
+                    // Check if stock is enabled
+                    if ($row->enable_stock == 1) {
+                        // Format the current stock value and return it with the unit
+                        return number_format($row->available_stock) . ' ' . $row->unit;
+                    } else {
+                        // If stock is disabled, return '--' with the unit
+                        return '-- ' . $row->unit;
+                    }
+                }) 
                 ->addColumn(
                     'purchase_price',
                     '<div style="white-space: nowrap;">@format_currency($min_purchase_price) @if($max_purchase_price != $min_purchase_price && $type == "variable") -  @format_currency($max_purchase_price)@endif </div>'
@@ -622,6 +649,7 @@ class ProductController extends Controller
         //list product screen filter from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_filters_for_list_product_screen');
 
+        
         return view('product.index')
             ->with(compact(
                 'rack_enabled',
