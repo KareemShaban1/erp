@@ -1494,7 +1494,7 @@ return [
 "add_order_refund"=>"أضافة طلب استرجاع",
 "change_payment_status"=>"تغيير حالة الدفع",
 ""=>"",
-""=>"",
+"enable_active_in_app"=>"نشط في التطبيق",
 ""=>"",
 ""=>"",
 ""=>"",

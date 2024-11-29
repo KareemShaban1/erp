@@ -213,6 +213,15 @@
           </div>
         </div>
 
+        <div class="col-sm-4">
+          <div class="form-group">
+            <br>
+            <label>
+              {!! Form::checkbox('active_in_app', 1, !(empty($duplicate_product)) ? $duplicate_product->active_in_app : false, ['class' => 'input-icheck']); !!} <strong>@lang('lang_v1.enable_active_in_app')</strong>
+            </label> @show_tooltip(__('lang_v1.tooltip_sr_no'))
+          </div>
+        </div>
+
         <div class="clearfix"></div>
 
         <!-- Rack, Row & position number -->

@@ -32,6 +32,7 @@ class ProductService extends BaseService
                 ->where('products.type', '!=', 'modifier')
                 ->businessId()
                 ->productForSales()
+                ->activeInApp()
                 ->latest();
     
             // Check if a category_id is passed and apply the filter

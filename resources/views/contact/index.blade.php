@@ -97,7 +97,7 @@
                             <th>@lang('contact.total_purchase_due')</th>
                             <th>@lang('lang_v1.total_purchase_return_due')</th>
                         @elseif( $type == 'client' || $type == 'delivery')
-                            <th>@lang('business.business_name')</th>
+                            <!-- <th>@lang('business.business_name')</th> -->
                             <th>@lang('user.name')</th>
                             <th>@lang('business.email')</th>
                             <!-- <th>@lang('contact.tax_no')</th> -->
