@@ -430,7 +430,7 @@ class ContactController extends Controller
                 $html = __('lang_v1.no_limit');
                 if (!is_null($row->credit_limit)) {
                     $html = '<span data-orig-value="' . $row->credit_limit . '">' . $this->transactionUtil->num_f($row->credit_limit, true) . '</span>';
-                } 
+                }
 
                 return $html;
             })
@@ -794,9 +794,9 @@ class ContactController extends Controller
                         $html .= '<li><a href="' . action('TransactionPaymentController@getPayContactDue', [$row->id]) . '?type=sell_return" class="pay_purchase_due"><i class="fas fa-money-bill-alt" aria-hidden="true"></i>' . __("lang_v1.pay_sell_return_due") . '</a></li>';
                     }
                     
-                    if (auth()->user()->can('customer.view') || auth()->user()->can('customer.view_own')) {
-                        $html .= '<li><a href="' . action('ContactController@show', [$row->id]) . '"><i class="fas fa-eye" aria-hidden="true"></i>' . __("messages.view") . '</a></li>';
-                    }
+                    // if (auth()->user()->can('customer.view') || auth()->user()->can('customer.view_own')) {
+                    //     $html .= '<li><a href="' . action('ContactController@show', [$row->id]) . '"><i class="fas fa-eye" aria-hidden="true"></i>' . __("messages.view") . '</a></li>';
+                    // }
                     if (auth()->user()->can('customer.update')) {
                         $html .= '<li><a href="' . action('ContactController@edit', [$row->id]) . '" class="edit_contact_button"><i class="glyphicon glyphicon-edit"></i>' .  __("messages.edit") . '</a></li>';
                     }
@@ -818,13 +818,13 @@ class ContactController extends Controller
 
                     $html .= '<li class="divider"></li>';
                     if (auth()->user()->can('customer.view')) {
-                        $html .= '
-                                <li>
-                                    <a href="' . action('ContactController@show', [$row->id]). '?view=ledger">
-                                        <i class="fas fa-scroll" aria-hidden="true"></i>
-                                        ' . __("lang_v1.ledger") . '
-                                    </a>
-                                </li>';
+                        // $html .= '
+                        //         <li>
+                        //             <a href="' . action('ContactController@show', [$row->id]). '?view=ledger">
+                        //                 <i class="fas fa-scroll" aria-hidden="true"></i>
+                        //                 ' . __("lang_v1.ledger") . '
+                        //             </a>
+                        //         </li>';
 
                         if (in_array($row->type, ["both", "supplier"])) {
                             $html .= '<li>
@@ -850,12 +850,12 @@ class ContactController extends Controller
                             </li>';
                         }
 
-                        $html .= '<li>
-                                <a href="' . action('ContactController@show', [$row->id]) . '?view=documents_and_notes">
-                                    <i class="fas fa-paperclip" aria-hidden="true"></i>
-                                     ' . __("lang_v1.documents_and_notes") . '
-                                </a>
-                            </li>';
+                        // $html .= '<li>
+                        //         <a href="' . action('ContactController@show', [$row->id]) . '?view=documents_and_notes">
+                        //             <i class="fas fa-paperclip" aria-hidden="true"></i>
+                        //              ' . __("lang_v1.documents_and_notes") . '
+                        //         </a>
+                        //     </li>';
                     }
                     $html .= '</ul></div>';
 

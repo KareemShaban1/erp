@@ -440,12 +440,6 @@ class ProductController extends Controller
             }
             
             $products->groupBy('products.id','v.id');
-
-            //       $products->get()->each(function ($product) {
-            // //     Log::info($product->variations->sum(function ($variation) {
-            // //         return $variation->variation_location_details->sum('qty_available');
-            // //     }) ); // Logs all variations with their loaded relationships
-            // // });
             
             // Handle current stock calculation dynamically
             $products->get()->map(function ($product) {
