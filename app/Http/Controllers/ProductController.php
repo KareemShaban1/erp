@@ -592,7 +592,7 @@ class ProductController extends Controller
                     } else {
                         // If stock is disabled, return '--' with the unit
                         // return '-- ' . $row->unit;
-                        return 'Not Enabled Stock';
+                        return __('lang_v1.not_enabled_stock');
                     }
                 }) 
                 ->addColumn(

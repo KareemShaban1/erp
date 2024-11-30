@@ -1495,7 +1495,7 @@ return [
 "change_payment_status"=>"تغيير حالة الدفع",
 ""=>"",
 "enable_active_in_app"=>"نشط في التطبيق",
-""=>"",
+"not_enabled_stock"=>"ليس لدية أدارة مخزون",
 ""=>"",
 ""=>"",
 ""=>"",
