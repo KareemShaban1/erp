@@ -3474,7 +3474,7 @@ class ReportController extends Controller
             'sell_transfer' => __('lang_v1.stock_transfer'),
             'stock_adjustment' => __('stock_adjustment.stock_adjustment'),
             'expense' => __('lang_v1.expense'),
-            'order' => __('lang_v1.order'),
+            'order' => __('lang_v1.orders'),
         ];
 
         if (request()->ajax()) {
