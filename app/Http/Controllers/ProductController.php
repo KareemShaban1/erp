@@ -591,7 +591,8 @@ class ProductController extends Controller
                         return number_format($row->available_stock) . ' ' . $row->unit;
                     } else {
                         // If stock is disabled, return '--' with the unit
-                        return '-- ' . $row->unit;
+                        // return '-- ' . $row->unit;
+                        return 'Not Enabled Stock';
                     }
                 }) 
                 ->addColumn(
