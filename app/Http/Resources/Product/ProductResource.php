@@ -41,12 +41,6 @@ class ProductResource extends JsonResource
      * @param Request $request
      * @return array
      */
-
-    //  'name','business_id','type','unit_id','sub_unit_ids','brand_id',
-    // 'category_id','sub_category_id','tax','tax_type','enable_stock','alert_quantity','sku',
-    // 'barcode_type','expiry_period','expiry_period_type','enable_sr_no','weight',
-    // 'product_custom_field1','product_custom_field2','product_custom_field3','product_custom_field4',
-    // 'image','product_description','created_by','warranty_id','is_inactive','not_for_selling'
     public function toArray($request): array
     {
         // Basic data to always return
@@ -54,34 +48,36 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
         ];
-
+    
         // Conditionally merge the full data if the flag is set to true
         if ($this->withFullData) {
             $variations = $this->variations;
-
+    
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
-            }); 
+            });
+    
+            // If current_stock > 0, return an empty array
+            if ($current_stock > 0) {
+                return [];
+            }
+    
+            // Otherwise, return full data
             $data = array_merge($data, [
                 'description' => $this->product_description,
+                'active_in_app'=>$this->active_in_app,
                 'type' => $this->type,
-                'business_id'=> $this->business_id,
-                'brand' =>  (new BrandResource($this->brand))->withFullData(false),
-                // 'category' => (new CategoryResource($this->category))->withFullData(false),
-                // 'warranty' => $this->warranty ?? null,
-                // 'sub_category' => $this->sub_category->name ?? null,
+                'business_id' => $this->business_id,
+                'brand' => (new BrandResource($this->brand))->withFullData(false),
                 'tax' => $this->product_tax->amount ?? null,
                 'current_stock' => $current_stock,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
                 'variations' => (new VariationCollection($this->variations))->withFullData(true),
-                // 'variations' => $this->mergeWhen($this->isVariation, function () {
-                //     return (new VariationCollection($this->variations))->withFullData(true,false);
-                // }),
-            
             ]);
         }
-
+    
         return $data;
     }
+    
 }
