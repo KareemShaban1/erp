@@ -62,6 +62,8 @@ class OrderController extends Controller
      */
     private function fetchOrders($status, $startDate = null, $endDate = null, $search = null)
     {
+        $business_id = request()->session()->get('user.business_id');
+
         $query = Order::with('client')
                 ->where('order_type','order')
                 ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])

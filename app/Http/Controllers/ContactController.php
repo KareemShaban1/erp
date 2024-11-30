@@ -1025,9 +1025,9 @@ public function store(Request $request)
         $business_id = $request->session()->get('user.business_id');
 
         // Check if business is subscribed
-        if (!$this->moduleUtil->isSubscribed($business_id)) {
-            return $this->moduleUtil->expiredResponse();
-        }
+        // if (!$this->moduleUtil->isSubscribed($business_id)) {
+        //     return $this->moduleUtil->expiredResponse();
+        // }
 
         // Retrieve validated input fields
         $input = $request->only([
@@ -1076,7 +1076,6 @@ public function store(Request $request)
         // Client-specific data and creation
         if ($request->input('type') === 'client') {
             $request->validate([
-                
                 'email_address' => 'required|email|unique:clients,email_address',
                 'password' => 'required|string|min:8',
                 'business_location_id' => 'required|integer',
@@ -1317,6 +1316,9 @@ public function store(Request $request)
                     return $this->moduleUtil->expiredResponse();
                 }
     
+                if($request->client_customer_group_id){
+                    $input['customer_group_id'] = $request->client_customer_group_id; 
+                }
                 // Update contact details
                 $output = $this->contactUtil->updateContact($input, $id, $business_id);
     

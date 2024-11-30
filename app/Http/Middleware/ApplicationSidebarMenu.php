@@ -144,11 +144,13 @@ class ApplicationSidebarMenu
                 __('lang_v1.orders'),
                 function ($sub) {
                     // Link for All Orders (no status)
+                    if (auth()->user()->can('orders.view')) {
                     $sub->url(
                         action('ApplicationDashboard\OrderController@index'),
                         __('lang_v1.all_orders'),
                         ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
                     );
+                }
 
                     $sub->url(
                         action('ApplicationDashboard\RefundOrderController@index'),

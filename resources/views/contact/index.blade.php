@@ -109,7 +109,7 @@
                             @if($reward_enabled)
                                 <th id="rp_col">{{session('business.rp_name')}}</th>
                             @endif
-                            <!-- <th>@lang('lang_v1.customer_group')</th> -->
+                            <th>@lang('lang_v1.customer_group')</th>
                             <th>@lang('business.address')</th>
                             <th>@lang('contact.mobile')</th>
                             <th>@lang('contact.total_sale_due')</th>

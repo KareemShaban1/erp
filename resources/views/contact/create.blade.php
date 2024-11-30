@@ -213,6 +213,17 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-4">
+            <div class="form-group">
+                  {!! Form::label('customer_group_id', __('lang_v1.customer_group') . ':') !!}
+                  <div class="input-group">
+                      <span class="input-group-addon">
+                          <i class="fa fa-users"></i>
+                      </span>
+                      {!! Form::select('customer_group_id', $customer_groups, '', ['class' => 'form-control']); !!}
+                  </div>
+                </div>
+            </div>
            </div>
 
            <div class="row">
