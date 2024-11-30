@@ -57,8 +57,8 @@ class ProductResource extends JsonResource
                 return $variation->variation_location_details->sum('qty_available');
             });
     
-            // If current_stock > 0, return an empty array
-            if ($current_stock > 0) {
+            // If current_stock < 0, return an empty array
+            if ($current_stock < 0) {
                 return [];
             }
     
