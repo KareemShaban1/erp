@@ -66,7 +66,7 @@ class ProductController extends Controller
             return $product;
         }
 
-        return $this->returnJSON($product, __('message.Product has been created successfully'));
+        return $this->returnJSON($product, __('message.Product has been showed successfully'));
 
     }
 

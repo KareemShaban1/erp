@@ -93,11 +93,13 @@ class ProductService extends BaseService
             ], 404);
         }
 
-        // Return the product
-        return response()->json([
-            'success' => true,
-            'data' => $product,
-        ], 200);
+        return new ProductResource($product);
+
+        // // Return the product
+        // return response()->json([
+        //     'success' => true,
+        //     'data' => $product,
+        // ], 200);
 
     } catch (\Exception $e) {
         // Handle the exception
