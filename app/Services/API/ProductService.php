@@ -67,21 +67,48 @@ class ProductService extends BaseService
     }
     
 
-    public function show($id) {
+    public function show($id)
+{
+    try {
+        // Fetch product with relationships and filters
+        $product = Product::with([
+            'media', 
+            'unit:id,actual_name,short_name',
+            'brand:id,name',
+            'category:id,name',
+            'sub_category:id,name',
+            'warranty:id,name,duration,duration_type'
+        ])
+        ->where('type', '!=', 'modifier') // Simplified column reference
+        ->businessId() // Assuming this is a global scope or local query scope
+        ->productForSales() // Assuming this is a local query scope
+        ->activeInApp() // Assuming this is a local query scope
+        ->find($id);
 
-        try {
-            $product = Product::businessId()->find($id);
-
-            if(!$product) {
-                return null;
-            }
-            return $product;
-
-
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while showing Product'));
+        // Check if product exists
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.Product not found'),
+            ], 404);
         }
+
+        // Return the product
+        return response()->json([
+            'success' => true,
+            'data' => $product,
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Handle the exception
+        return response()->json([
+            'success' => false,
+            'message' => __('messages.Error happened while showing Product'),
+            'error' => $e->getMessage(), // Optional: Include error details for debugging
+        ], 500);
     }
+}
+
 
 
     public function categoryProducts($request, $id) {

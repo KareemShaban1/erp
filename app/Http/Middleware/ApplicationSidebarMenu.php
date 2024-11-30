@@ -32,8 +32,6 @@ class ApplicationSidebarMenu
             $menu->url(action('ApplicationDashboard\HomeController@index'), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
 
 
-
-
             //Products dropdown
             if (
                 auth()->user()->can('product.view') || auth()->user()->can('product.create') ||
@@ -143,62 +141,30 @@ class ApplicationSidebarMenu
             $menu->dropdown(
                 __('lang_v1.orders'),
                 function ($sub) {
-                    // Link for All Orders (no status)
                     if (auth()->user()->can('orders.view')) {
-                    $sub->url(
-                        action('ApplicationDashboard\OrderController@index'),
-                        __('lang_v1.all_orders'),
-                        ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
-                    );
-                }
+                        $sub->url(
+                            action('ApplicationDashboard\OrderController@index'),
+                            __('lang_v1.all_orders'),
+                            ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
+                        );
+                    }
 
+                    if (auth()->user()->can('orders_refund.view')) {
                     $sub->url(
                         action('ApplicationDashboard\RefundOrderController@index'),
                         __('lang_v1.all_refund_orders'),
                         ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
                     );
+                }
 
+                if (auth()->user()->can('orders_transfer
+                .view')) {
                     $sub->url(
                         action('ApplicationDashboard\TransferOrderController@index'),
                         __('lang_v1.all_transfer_orders'),
                         ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
                     );
-
-                    // // Link for Pending Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'pending']),
-                    //     __('lang_v1.pending_orders'),
-                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'pending']
-                    // );
-
-                    // // Link for Processing Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'processing']),
-                    //     __('lang_v1.processing_orders'),
-                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'processing']
-                    // );
-
-                    // // Link for shipped Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'shipped']),
-                    //     __('lang_v1.shipped_orders'),
-                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'shipped']
-                    // );
-
-                    // // Link for completed Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'completed']),
-                    //     __('lang_v1.completed_orders'),
-                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'completed']
-                    // );
-
-                    // // Link for canceled Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderController@index', ['status' => 'cancelled']),
-                    //     __('lang_v1.canceled_orders'),
-                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'cancelled']
-                    // );
-
+                }
 
                 },
                 ['icon' => 'fa fa-cart-arrow-down']
@@ -214,28 +180,6 @@ class ApplicationSidebarMenu
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
                     );
 
-                    // // Link for Pending Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'requested']),
-                    //     __('lang_v1.requested_order_cancellations'),
-                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
-                    // );
-
-                    // // Link for Processing Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'approved']),
-                    //     __('lang_v1.approved_order_cancellations'),
-                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
-                    // );
-
-                    // // Link for shipped Orders
-                    // $sub->url(
-                    //     action('ApplicationDashboard\OrderCancellationController@index', ['status' => 'rejected']),
-                    //     __('lang_v1.rejected_order_cancellations'),
-                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
-                    // );
-
-
                 },
                 ['icon' => 'fa fa-cart-arrow-down']
             )->order(23);
@@ -250,36 +194,6 @@ class ApplicationSidebarMenu
                         __('lang_v1.all_order_refunds'),
                         ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_refunds' && !request()->segment(2)]
                     );
-
-                    // // Link for Pending Orders
-                    // $sub->url(
-                    //     route('order-refunds.index', ['status' => 'requested']),
-                    //     __('lang_v1.requested_order_refunds'),
-                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'requested']
-                    // );
-
-
-                    // $sub->url(
-                    //     route('order-refunds.index', ['status' => 'processed']),
-                    //     __('lang_v1.requested_order_refunds'),
-                    //     ['icon' => 'fa fas fa-clock', 'active' => request()->input('status') == 'processed']
-                    // );
-
-                    // // Link for Processing Orders
-                    // $sub->url(
-                    //     route('order-refunds.index', ['status' => 'approved']),
-                    //     __('lang_v1.approved_order_refunds'),
-                    //     ['icon' => 'fa fas fa-sync', 'active' => request()->input('status') == 'approved']
-                    // );
-
-                    // // Link for shipped Orders
-                    // $sub->url(
-                    //     route('order-refunds.index', ['status' => 'rejected']),
-                    //     __('lang_v1.rejected_order_refunds'),
-                    //     ['icon' => 'fa fas fa-check', 'active' => request()->input('status') == 'rejected']
-                    // );
-
-
                 },
                 ['icon' => 'fa fa-cart-arrow-down']
             )->order(24);

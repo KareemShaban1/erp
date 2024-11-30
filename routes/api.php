@@ -43,6 +43,7 @@ Route::get('units', [UnitController::class, 'index']);
 
 Route::get('products/{category_id?}', [ProductController::class, 'index']);
 Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
+Route::get('products/{product_id}', [ProductController::class, 'show']);
 
 Route::get('warranties', [WarrantyController::class, 'index']);
 

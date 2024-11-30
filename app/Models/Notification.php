@@ -11,5 +11,12 @@ class Notification extends Model
 
     public $incrementing = false;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['type','notifiable_id','notifiable_type','data','read_at'];
+
 
 }

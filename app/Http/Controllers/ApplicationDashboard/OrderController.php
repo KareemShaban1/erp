@@ -38,6 +38,9 @@ class OrderController extends Controller
 
     public function index()
     {
+        if (!auth()->user()->can('orders.view')) {
+            abort(403, 'Unauthorized action.');
+        }
         if (request()->ajax()) {
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');

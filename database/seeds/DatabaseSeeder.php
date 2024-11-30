@@ -11,9 +11,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call([BarcodesTableSeeder::class,
+        $this->call([
+                    // BarcodesTableSeeder::class,
                     PermissionsTableSeeder::class,
-                    CurrenciesTableSeeder::class
+                    // CurrenciesTableSeeder::class
                     ]);
     }
 }

@@ -80,15 +80,39 @@ class PermissionsTableSeeder extends Seeder
 
             ['name' => 'access_all_locations'],
             ['name' => 'dashboard.data'],
+
+            ['name' => 'banners.view'],
+            ['name' => 'banners.create'],
+            ['name' => 'banners.update'],
+            ['name' => 'banners.delete'],
+
+            ['name' => 'orders.view'],
+            ['name' => 'orders.create'],
+            ['name' => 'orders.update'],
+            ['name' => 'orders.delete'],
+
+            ['name' => 'orders_refund.view'],
+            ['name' => 'orders_refund.create'],
+            ['name' => 'orders_refund.update'],
+            ['name' => 'orders_refund.delete'],
+
+            ['name' => 'orders_transfer.view'],
+            ['name' => 'orders_transfer.create'],
+            ['name' => 'orders_transfer.update'],
+            ['name' => 'orders_transfer.delete'],
+
+            ['name' => 'orders_cancellation.view'],
+            ['name' => 'orders_cancellation.create'],
+            ['name' => 'orders_cancellation.update'],
+            ['name' => 'orders_cancellation.delete'],
+
         ];
 
-        $insert_data = [];
-        $time_stamp = \Carbon::now()->toDateTimeString();
         foreach ($data as $d) {
-            $d['guard_name'] = 'web';
-            $d['created_at'] = $time_stamp;
-            $insert_data[] = $d;
+            Permission::firstOrCreate(
+                ['name' => $d['name'], 'guard_name' => 'web'],
+                ['created_at' => now()]
+            );
         }
-        Permission::insert($insert_data);
     }
 }

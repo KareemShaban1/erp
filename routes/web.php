@@ -23,7 +23,7 @@ use App\Models\Transaction;
 |
 */
 
-if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
+if (version_compare(PHP_VERSION, '7.2.0', '>=')) {
     error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 }
 
@@ -31,71 +31,71 @@ if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
 
-Route::get('routes', function() {
+Route::get('routes', function () {
     $routeCollection = Route::getRoutes();
 
     echo "<table style='width:100%'>";
+    echo "<tr>";
+    echo "<td width='10%'><h4>HTTP Method</h4></td>";
+    echo "<td width='10%'><h4>Route</h4></td>";
+    echo "<td width='10%'><h4>Name</h4></td>";
+    echo "<td width='70%'><h4>Corresponding Action</h4></td>";
+    echo "</tr>";
+    foreach ($routeCollection as $value) {
         echo "<tr>";
-            echo "<td width='10%'><h4>HTTP Method</h4></td>";
-            echo "<td width='10%'><h4>Route</h4></td>";
-            echo "<td width='10%'><h4>Name</h4></td>";
-            echo "<td width='70%'><h4>Corresponding Action</h4></td>";
+        echo "<td>" . $value->getMethods()[0] . "</td>";
+        echo "<td>" . $value->getPath() . "</td>";
+        echo "<td>" . $value->getName() . "</td>";
+        echo "<td>" . $value->getActionName() . "</td>";
         echo "</tr>";
-        foreach ($routeCollection as $value) {
-            echo "<tr>";
-                echo "<td>" . $value->getMethods()[0] . "</td>";
-                echo "<td>" . $value->getPath() . "</td>";
-                echo "<td>" . $value->getName() . "</td>";
-                echo "<td>" . $value->getActionName() . "</td>";
-            echo "</tr>";
-        }
+    }
     echo "</table>";
 });
 
-Route::get('/helpdevelopertosavedata',function(){
+Route::get('/helpdevelopertosavedata', function () {
 
     try {
-    // DB::transaction(function () {
+        // DB::transaction(function () {
         // \DB::table('transactions')->delete();
 
         $handle = fopen(database_path('seeds/file.csv'), 'r');
 
-            //code...
+        //code...
 
         if ($handle) {
             $headers = fgetcsv($handle);
 
-// dd( $headers);
+            // dd( $headers);
             while (($data = fgetcsv($handle)) !== false) {
                 $record = new Transaction;
                 foreach ($headers as $index => $header) {
-                    
-                    
-                    $sacand =$header == 'recur_stopped_on' || $header == 'business_id' ||$header == 'repair_job_sheet_id' || $header == 'pay_term_type' || $header == 'recur_interval_type' || $header == 'packing_charge_type' || $header == 'import_time' || $header == 'res_order_status' || $header == 'adjustment_type' || $header == 'discount_type' || $header == 'repair_completed_on' || $header == 'repair_due_date' ? null : 0;
-                    
-                    if($header == 'transaction_date')
-                     $data[$index] =time() ; 
+
+
+                    $sacand = $header == 'recur_stopped_on' || $header == 'business_id' || $header == 'repair_job_sheet_id' || $header == 'pay_term_type' || $header == 'recur_interval_type' || $header == 'packing_charge_type' || $header == 'import_time' || $header == 'res_order_status' || $header == 'adjustment_type' || $header == 'discount_type' || $header == 'repair_completed_on' || $header == 'repair_due_date' ? null : 0;
+
+                    if ($header == 'transaction_date')
+                        $data[$index] = time();
                     // $data[$index] =$data[$index] ?  Carbon::createFromFormat('m/d/Y H:i', $data[$index])->toDateTimeString(): null;
-                
+
                     // var_dump($data[$index] );
-                    $record->{$header} = $data[$index] ? $data[$index] : $sacand  ;
+                    $record->{$header} = $data[$index] ? $data[$index] : $sacand;
 
                 }
 
-            //     // dd('dd');
+                //     // dd('dd');
                 // return $record;
                 $record->save();
             }
 
             fclose($handle);
         }
-    // });
+        // });
 
-return 1;
-} catch (\Throwable $th) {
-    throw $th;
-    return $th->getMessage();
-}
+        return 1;
+    } catch (\Throwable $th) {
+        throw $th;
+        return $th->getMessage();
+    }
 });
 
 
@@ -109,7 +109,7 @@ Route::middleware(['setData'])->group(function () {
 
     // Auth::routes();
 
-  
+
 
 
     Route::get('/business/register', 'BusinessController@getRegister')->name('business.getRegister');
@@ -128,150 +128,8 @@ Route::middleware(['setData'])->group(function () {
         ->name('confirm_payment');
 });
 
-Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'ApplicationSidebarMenu', 'CheckUserLogin'])->group(function () {
+require __DIR__.'/applicationDashboard.php';
 
-Route::get('applicationDashboard/home', [HomeController::class,'index'])
-->name('application.home');
-
-    Route::resource('products', 'ProductController');
-
-    Route::get('/products/stock-history/{id}', 'ProductController@productStockHistory');
-    Route::get('/delete-media/{media_id}', 'ProductController@deleteMedia');
-    Route::post('/products/mass-deactivate', 'ProductController@massDeactivate');
-    Route::get('/products/activate/{id}', 'ProductController@activate');
-    Route::get('/products/view-product-group-price/{id}', 'ProductController@viewGroupPrice');
-    Route::get('/products/add-selling-prices/{id}', 'ProductController@addSellingPrices');
-    Route::post('/products/save-selling-prices', 'ProductController@saveSellingPrices');
-    Route::post('/products/mass-delete', 'ProductController@massDestroy');
-    Route::get('/products/view/{id}', 'ProductController@view');
-    Route::get('/getProducts', 'ProductController@getProducts');
-    Route::get('/products/list-no-variation', 'ProductController@getProductsWithoutVariations');
-    Route::post('/products/bulk-edit', 'ProductController@bulkEdit');
-    Route::post('/products/bulk-update', 'ProductController@bulkUpdate');
-    Route::post('/products/bulk-update-location', 'ProductController@updateProductLocation');
-    Route::get('/products/get-product-to-edit/{product_id}', 'ProductController@getProductToEdit');
-    
-    Route::post('/products/get_sub_categories', 'ProductController@getSubCategories');
-    Route::get('/products/get_sub_units', 'ProductController@getSubUnits');
-    Route::post('/products/product_form_part', 'ProductController@getProductVariationFormPart');
-    Route::post('/products/get_product_variation_row', 'ProductController@getProductVariationRow');
-    Route::post('/products/get_variation_template', 'ProductController@getVariationTemplate');
-    Route::get('/products/get_variation_value_row', 'ProductController@getVariationValueRow');
-    Route::post('/products/check_product_sku', 'ProductController@checkProductSku');
-    Route::get('/products/quick_add', 'ProductController@quickAdd');
-    Route::post('/products/save_quick_product', 'ProductController@saveQuickProduct');
-    Route::get('/products/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
-    Route::post('/products/toggle-woocommerce-sync', 'ProductController@toggleWooCommerceSync');
-
-    Route::get('taxonomies-ajax-index-page', 'TaxonomyController@getTaxonomyIndexPage');
-    Route::resource('taxonomies', 'TaxonomyController');
-
-    Route::resource('brands', 'BrandController');
-
-    Route::resource('units', 'UnitController');
-
-    Route::resource('variation-templates', 'VariationTemplateController');
-
-        //Print Labels
-        Route::get('/labels/show', 'LabelsController@show');
-        Route::get('/labels/add-product-row', 'LabelsController@addProductRow');
-        Route::get('/labels/preview', 'LabelsController@preview');
-
-            //Import products
-    Route::get('/import-products', 'ImportProductsController@index');
-    Route::post('/import-products/store', 'ImportProductsController@store');
-
-
-    //Import opening stock
-    Route::get('/import-opening-stock', 'ImportOpeningStockController@index');
-    Route::post('/import-opening-stock/store', 'ImportOpeningStockController@store');
-
-    Route::get('selling-price-group/activate-deactivate/{id}', 'SellingPriceGroupController@activateDeactivate');
-    Route::get('export-selling-price-group', 'SellingPriceGroupController@export');
-    Route::post('import-selling-price-group', 'SellingPriceGroupController@import');
-
-    Route::resource('selling-price-group', 'SellingPriceGroupController');
-
-    Route::resource('warranties', 'WarrantyController');
-    
-    Route::get('applicationDashboard/client-orders-report', 'ApplicationDashboard\OrderReportsController@index')->name('orders.reports');
-    Route::get('applicationDashboard/client-orders/{id}', 'ApplicationDashboard\OrderReportsController@clientOrders')->name('client.orders');
-
-
-    Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
-    Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
-
-    Route::resource('applicationDashboard/refundOrders', 'ApplicationDashboard\RefundOrderController');
-    Route::get('applicationDashboard/refundOrders/{orderId}/details', 'ApplicationDashboard\RefundOrderController@getOrderDetails')->name('orders.details');
-    Route::post('applicationDashboard/refundOrders/{orderId}/change-order-status', 'ApplicationDashboard\RefundOrderController@changeOrderStatus');
-    Route::post('applicationDashboard/refundOrders/{orderId}/change-payment-status', 'ApplicationDashboard\RefundOrderController@changePaymentStatus');
-
-
-    Route::resource('applicationDashboard/transferOrders', 'ApplicationDashboard\TransferOrderController');
-    Route::get('applicationDashboard/transferOrders/{orderId}/details', 'ApplicationDashboard\TransferOrderController@getOrderDetails')->name('orders.details');
-    Route::post('applicationDashboard/transferOrders/{orderId}/change-order-status', 'ApplicationDashboard\TransferOrderController@changeOrderStatus');
-    Route::post('applicationDashboard/transferOrders/{orderId}/change-payment-status', 'ApplicationDashboard\TransferOrderController@changePaymentStatus');
-
-
-    // Route::get('applicationDashboard/orderDeliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries');
-
-    Route::get('/order-deliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries')->name('order.deliveries');
-
-    Route::get('applicationDashboard/allDeliveries', 'ApplicationDashboard\DeliveryController@allDeliveries');
-
-
-    Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
-
-    Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');
-    Route::post('applicationDashboard/deliveries/{orderId}/change-payment-status', 'ApplicationDashboard\DeliveryController@changePaymentStatus');
-
-
-    Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
-    Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
-
-
-    // changePaymentStatus
-    Route::resource('applicationDashboard/order-cancellations', 'ApplicationDashboard\OrderCancellationController');
-    Route::post('applicationDashboard/order-cancellations/{orderCancellationId}/change-status', 
-    'ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus');
-
-
-    Route::resource('applicationDashboard/order-refunds', 'ApplicationDashboard\OrderRefundController');
-    Route::post('applicationDashboard/order-refunds/{orderRefundId}/change-status', 
-    'ApplicationDashboard\OrderRefundController@changeOrderRefundStatus');
-
-    Route::post('applicationDashboard/order-refunds/{orderRefundId}/change-refund-status', 
-    'ApplicationDashboard\OrderRefundController@changeRefundStatus');
-
-    Route::resource('applicationDashboard/banners', 'ApplicationDashboard\BannerController');
-
-    Route::get('banners/products', 'ApplicationDashboard\BannerController@getProducts');
-    Route::get('banners/categories', 'ApplicationDashboard\BannerController@getCategories');
-
-    // Route::resource('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController');
-    Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
-    ->name('application_settings.index');
-
-    Route::get('applicationDashboard/settings/create', 'ApplicationDashboard\ApplicationSettingsController@create')
-    ->name('application_settings.create');
-
-    Route::get('applicationDashboard/settings/show/{id}', 'ApplicationDashboard\ApplicationSettingsController@show')
-    ->name('application_settings.show');
-
-
-    Route::post('applicationDashboard/settings/store', 'ApplicationDashboard\ApplicationSettingsController@store')
-    ->name('application_settings.store');
-
-    Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
-    ->name('application_settings.update');
-
-    Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
-    ->name('application_settings.destroy');
-
-    Route::resource('applicationDashboard/expenses', 'ApplicationDashboard\ExpenseController');
-
-
-});
 
 //Routes for authenticated users only
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
@@ -282,7 +140,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/home/sales-payment-dues', 'HomeController@getSalesPaymentDues');
     Route::post('/attach-medias-to-model', 'HomeController@attachMediasToGivenModel')->name('attach.medias.to.model');
     Route::get('/calendar', 'HomeController@getCalendar')->name('calendar');
-    
+
     Route::post('/test-email', 'BusinessController@testEmailConfiguration');
     Route::post('/test-sms', 'BusinessController@testSmsConfiguration');
     Route::get('/business/settings', 'BusinessController@getBusinessSettings')->name('business.getBusinessSettings');
@@ -291,7 +149,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/user/update', 'UserController@updateProfile')->name('user.updateProfile');
     Route::post('/user/update-password', 'UserController@updatePassword')->name('user.updatePassword');
 
-    
+
 
     Route::resource('tax-rates', 'TaxRateController');
 
@@ -355,8 +213,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/invoice-schemes/set_default/{id}', 'InvoiceSchemeController@setDefault');
     Route::resource('invoice-schemes', 'InvoiceSchemeController');
 
-      //Customer Groups
-      Route::resource('customer-group', 'CustomerGroupController');
+    //Customer Groups
+    Route::resource('customer-group', 'CustomerGroupController');
 
 
     //Reports...
@@ -399,7 +257,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/reports/get-profit/{by?}', 'ReportController@getProfit');
     Route::get('/reports/items-report', 'ReportController@itemsReport');
     Route::get('/reports/get-stock-value', 'ReportController@getStockValue');
-    
+
     Route::get('business-location/activate-deactivate/{location_id}', 'BusinessLocationController@activateDeactivateLocation');
 
     //Business Location Settings...
@@ -462,15 +320,19 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('sell-return/get-product-row', 'SellReturnController@getProductRow');
     Route::get('/sell-return/print/{id}', 'SellReturnController@printInvoice');
     Route::get('/sell-return/add/{id}', 'SellReturnController@add');
-    
+
     //Backup
     Route::get('backup/download/{file_name}', 'BackUpController@download');
     Route::get('backup/delete/{file_name}', 'BackUpController@delete');
-    Route::resource('backup', 'BackUpController', ['only' => [
-        'index', 'create', 'store'
-    ]]);
+    Route::resource('backup', 'BackUpController', [
+        'only' => [
+            'index',
+            'create',
+            'store'
+        ]
+    ]);
 
- 
+
 
     Route::resource('notification-templates', 'NotificationTemplateController')->only(['index', 'store']);
     Route::get('notification/get-template/{transaction_id}/{template_for}', 'NotificationController@getTemplate');
@@ -505,7 +367,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::post('/link-account', 'AccountReportsController@postLinkAccount');
         Route::get('/cash-flow', 'AccountController@cashFlow');
     });
-    
+
     Route::resource('account-types', 'AccountTypeController');
 
     //Restaurant module
@@ -534,7 +396,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
 
     Route::get('bookings/get-todays-bookings', 'Restaurant\BookingController@getTodaysBookings');
     Route::resource('bookings', 'Restaurant\BookingController');
-    
+
     Route::resource('types-of-service', 'TypesOfServiceController');
     Route::get('sells/edit-shipping/{id}', 'SellController@editShipping');
     Route::put('sells/update-shipping/{id}', 'SellController@updateShipping');
@@ -545,7 +407,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         ->only(['index', 'destroy', 'update']);
 
     Route::resource('dashboard-configurator', 'DashboardConfiguratorController')
-    ->only(['edit', 'update']);
+        ->only(['edit', 'update']);
 
     Route::get('view-media/{model_id}', 'SellController@viewMedia');
 

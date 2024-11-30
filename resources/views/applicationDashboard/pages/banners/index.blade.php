@@ -54,7 +54,9 @@
     var banners_table = $('#banners_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ action("ApplicationDashboard\BannerController@index") }}',
+        "ajax": {
+            "url": "/banners"
+        },
         columnDefs: [
             {
                 targets: 2,
