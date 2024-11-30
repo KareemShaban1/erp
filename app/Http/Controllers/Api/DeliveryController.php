@@ -26,9 +26,10 @@ class DeliveryController extends Controller
         $this->firebaseService = $firebaseService;
     }
 
-    public function getNotAssignedOrders()
+    public function getNotAssignedOrders($orderType)
     {
-        $delivery = Delivery::where('id', Auth::user()->id)->first();
+        // Retrieve the authenticated delivery user
+        $delivery = Delivery::find(Auth::user()->id);
 
         if (!$delivery) {
             return response()->json(['message' => 'Delivery user not found'], 404);
@@ -36,24 +37,29 @@ class DeliveryController extends Controller
 
         // Retrieve all order IDs already assigned to the delivery user in DeliveryOrder
         $assignedOrderIds = DeliveryOrder::where('delivery_id', $delivery->id)
-            ->pluck('order_id'); // Assuming there is an 'order_id' column in DeliveryOrder
+            ->pluck('order_id');
 
-        // Get orders that belong to the delivery's business location but are not assigned in DeliveryOrder
-        $orders = Order::
-            where('order_status', 'processing')->
-            where('business_location_id', $delivery->business_location_id)
-            ->whereNotIn('id', $assignedOrderIds)
-            ->get();
+        // Start building the query for unassigned orders
+        $query = Order::where('order_status', 'processing')
+            ->where('business_location_id', $delivery->business_location_id)
+            ->whereNotIn('id', $assignedOrderIds);
+
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
+        }
+
+        // Execute the query
+        $orders = $query->get();
 
         if ($orders->isEmpty()) {
             return $this->returnJSON([], 'No unassigned orders found for your location');
-
         }
 
         return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
-        // return ;
     }
-    public function getAssignedOrders()
+
+    public function getAssignedOrders($orderType)
     {
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
@@ -62,11 +68,19 @@ class DeliveryController extends Controller
         }
 
         // Retrieve assigned orders based on the delivery ID in DeliveryOrder
-        $assignedOrders = Order::
+        $query = Order::
             where('order_status', 'processing')->
             whereHas('deliveries', function ($query) use ($delivery) {
                 $query->where('delivery_id', $delivery->id);
-            })->get();
+            });
+
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
+        }
+
+        // Execute the query
+        $assignedOrders = $query->get();
 
         if ($assignedOrders->isEmpty()) {
             return $this->returnJSON([], 'No assigned orders found for you');
@@ -226,7 +240,7 @@ class DeliveryController extends Controller
                 $delivery->status = 'available';
                 $delivery->save();
 
-                 // Send and store push notification
+                // Send and store push notification
                 app(FirebaseService::class)->sendAndStoreNotification(
                     $client->id,
                     $client->fcm_token,
