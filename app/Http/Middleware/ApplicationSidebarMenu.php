@@ -124,125 +124,152 @@ class ApplicationSidebarMenu
                 )->order(20);
             }
 
+            if (auth()->user()->can('banners.view')) {
+                $menu->dropdown(
+                    __('lang_v1.banners'),
+                    function ($sub) {
 
-            $menu->dropdown(
-                __('lang_v1.banners'),
-                function ($sub) {
 
-                    $sub->url(
-                        action('ApplicationDashboard\BannerController@index'),
-                        __('lang_v1.banners'),
-                        ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
-                    );
-                },
-                ['icon' => 'fa fa-flag']
-            )->order(21);
 
-            $menu->dropdown(
-                __('lang_v1.orders'),
-                function ($sub) {
-                    if (auth()->user()->can('orders.view')) {
                         $sub->url(
-                            action('ApplicationDashboard\OrderController@index'),
-                            __('lang_v1.all_orders'),
-                            ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
+                            action('ApplicationDashboard\BannerController@index'),
+                            __('lang_v1.banners'),
+                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
                         );
-                    }
+                    },
+                    ['icon' => 'fa fa-flag']
+                )->order(21);
+            }
 
-                    if (auth()->user()->can('orders_refund.view')) {
-                    $sub->url(
-                        action('ApplicationDashboard\RefundOrderController@index'),
-                        __('lang_v1.all_refund_orders'),
-                        ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
-                    );
-                }
+            if (auth()->user()->can('orders.view') || auth()->user()->can('orders_refund.view') || auth()->user()->can('orders_transfer.view')) {
 
-                if (auth()->user()->can('orders_transfer
-                .view')) {
-                    $sub->url(
-                        action('ApplicationDashboard\TransferOrderController@index'),
-                        __('lang_v1.all_transfer_orders'),
-                        ['icon' => 'fa fas fa-list', 'active' =>request()->input('status') == 'all']
-                    );
-                }
+                $menu->dropdown(
+                    __('lang_v1.orders'),
+                    function ($sub) {
+                        if (auth()->user()->can('orders.view')) {
+                            $sub->url(
+                                action('ApplicationDashboard\OrderController@index'),
+                                __('lang_v1.all_orders'),
+                                ['icon' => 'fa fas fa-list', 'active' => request()->input('status') == 'all']
+                            );
+                        }
 
-                },
-                ['icon' => 'fa fa-cart-arrow-down']
-            )->order(22);
+                        if (auth()->user()->can('orders_refund.view')) {
+                            $sub->url(
+                                action('ApplicationDashboard\RefundOrderController@index'),
+                                __('lang_v1.all_refund_orders'),
+                                ['icon' => 'fa fas fa-list', 'active' => request()->input('status') == 'all']
+                            );
+                        }
 
-            $menu->dropdown(
-                __('lang_v1.order_cancellations'),
-                function ($sub) {
-                    // Link for All Orders (no status)
-                    $sub->url(
-                        action('ApplicationDashboard\OrderCancellationController@index'),
-                        __('lang_v1.all_order_cancellations'),
-                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
-                    );
+                        if (
+                            auth()->user()->can('orders_transfer
+                .view')
+                        ) {
+                            $sub->url(
+                                action('ApplicationDashboard\TransferOrderController@index'),
+                                __('lang_v1.all_transfer_orders'),
+                                ['icon' => 'fa fas fa-list', 'active' => request()->input('status') == 'all']
+                            );
+                        }
 
-                },
-                ['icon' => 'fa fa-cart-arrow-down']
-            )->order(23);
+                    },
+                    ['icon' => 'fa fa-cart-arrow-down']
+                )->order(22);
+            }
+
+            if (auth()->user()->can('order_cancellations.view')) {
+
+                $menu->dropdown(
+                    __('lang_v1.order_cancellations'),
+                    function ($sub) {
+
+                        $sub->url(
+                            action('ApplicationDashboard\OrderCancellationController@index'),
+                            __('lang_v1.all_order_cancellations'),
+                            ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
+                        );
 
 
-            $menu->dropdown(
-                __('lang_v1.order_refunds'),
-                function ($sub) {
-                    // Link for All Orders (no status)
-                    $sub->url(
-                        route('order-refunds.index'),
-                        __('lang_v1.all_order_refunds'),
-                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_refunds' && !request()->segment(2)]
-                    );
-                },
-                ['icon' => 'fa fa-cart-arrow-down']
-            )->order(24);
+                    },
+                    ['icon' => 'fa fa-cart-arrow-down']
+                )->order(23);
+            }
 
-            $menu->dropdown(
-                __('lang_v1.orderDeliveries'),
-                function ($sub) {
-                    // Link for All Deliveries (no specific delivery_id)
-                    $sub->url(
-                        action('ApplicationDashboard\DeliveryController@allDeliveries'),
-                        __('lang_v1.allDeliveries'),
-                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
-                    );
+            if (auth()->user()->can('order_refunds.view')) {
 
-                    // Conditionally handle the URL for orderDeliveries with optional delivery_id
-                    // Check if there's a specific delivery_id (you could determine this based on the context)
-                    $delivery_id = request()->get('delivery_id'); // Or some other logic to get the delivery_id
+                $menu->dropdown(
+                    __('lang_v1.order_refunds'),
+                    function ($sub) {
+                        $sub->url(
+                            route('order-refunds.index'),
+                            __('lang_v1.all_order_refunds'),
+                            ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_refunds' && !request()->segment(2)]
+                        );
+                    },
+                    ['icon' => 'fa fa-cart-arrow-down']
+                )->order(24);
+            }
+
+
+            if (auth()->user()->can('deliveries.view_all') || auth()->user()->can('deliveries.orders')) {
+                $menu->dropdown(
+                    __('lang_v1.orderDeliveries'),
+                    function ($sub) {
+                        if (auth()->user()->can('deliveries.view_all')) {
+
+                            $sub->url(
+                                action('ApplicationDashboard\DeliveryController@allDeliveries'),
+                                __('lang_v1.allDeliveries'),
+                                ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
+                            );
+                        }
+
+                        // Conditionally handle the URL for orderDeliveries with optional delivery_id
+                        // Check if there's a specific delivery_id (you could determine this based on the context)
+                        $delivery_id = request()->get('delivery_id'); // Or some other logic to get the delivery_id
     
-                    // If delivery_id exists, include it in the URL
-                    $orderDeliveriesUrl = $delivery_id
-                        ? action('ApplicationDashboard\DeliveryController@orderDeliveries', ['delivery_id' => $delivery_id])
-                        : action('ApplicationDashboard\DeliveryController@orderDeliveries'); // Default to no delivery_id
+                        // If delivery_id exists, include it in the URL
+                        $orderDeliveriesUrl = $delivery_id
+                            ? action('ApplicationDashboard\DeliveryController@orderDeliveries', ['delivery_id' => $delivery_id])
+                            : action('ApplicationDashboard\DeliveryController@orderDeliveries'); // Default to no delivery_id
     
-                    $sub->url(
-                        $orderDeliveriesUrl,
-                        __('lang_v1.orderDeliveries'),
-                        ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
-                    );
-                },
-                ['icon' => 'fa fa-cart-arrow-down']
-            )->order(25);
+                        if (auth()->user()->can('deliveries.orders')) {
 
+                            $sub->url(
+                                $orderDeliveriesUrl,
+                                __('lang_v1.orderDeliveries'),
+                                ['icon' => 'fa fas fa-list', 'active' => request()->segment(1)]
+                            );
+                        }
+                    },
+                    ['icon' => 'fa fa-cart-arrow-down']
+                )->order(25);
 
-            $menu->url(action('ApplicationDashboard\ApplicationSettingsController@index'), __('lang_v1.application_settings'), [
-                'icon' => 'fa fas fa-cogs',
-                'active' => request()->segment(1)
-            ])->order(80);
+            }
 
-            $menu->dropdown(
-                __('lang_v1.order_reports'),
-                function ($sub) {
-                    $sub->url(
-                        action('ApplicationDashboard\OrderReportsController@index'),
-                        __('lang_v1.client_orders_reports'),
-                        ['icon' => 'fa fas fa-list']
-                    );
-                },
-                ['icon' => 'fa fas fa-chart-bar']
-            )->order(26);
+            if (auth()->user()->can('applicationSettings.view')) {
+
+                $menu->url(action('ApplicationDashboard\ApplicationSettingsController@index'), __('lang_v1.application_settings'), [
+                    'icon' => 'fa fas fa-cogs',
+                    'active' => request()->segment(1)
+                ])->order(80);
+
+            }
+
+            if (auth()->user()->can('orders.reports')) {
+                $menu->dropdown(
+                    __('lang_v1.order_reports'),
+                    function ($sub) {
+                        $sub->url(
+                            action('ApplicationDashboard\OrderReportsController@index'),
+                            __('lang_v1.client_orders_reports'),
+                            ['icon' => 'fa fas fa-list']
+                        );
+                    },
+                    ['icon' => 'fa fas fa-chart-bar']
+                )->order(26);
+            }
 
             // ApplicationDashboard\OrderReportsController@index
         });

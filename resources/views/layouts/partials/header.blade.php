@@ -25,9 +25,12 @@
             لوحة تحكم التطبيق
           </button> -->
 
+          @can('view_cash_register')
+
           <a href="{{ action('ApplicationDashboard\HomeController@index')}}"  data-toggle="tooltip" data-placement="bottom" class="btn btn-warning btn-flat pull-left m-8 btn-sm mt-10" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             لوحة تحكم التطبيق
           </a>
+          @endcan
 
         @if(Module::has('Essentials'))
           @includeIf('essentials::layouts.partials.header_part')
