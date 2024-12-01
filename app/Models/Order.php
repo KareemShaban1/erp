@@ -79,9 +79,23 @@ class Order extends Model
      public function deliveries(): BelongsToMany
      {
          return $this->belongsToMany(Delivery::class, 'delivery_orders')
+                     ->with('contact')
                      ->withPivot('status', 'assigned_at', 'delivered_at')
                      ->withTimestamps();
      }
+
+     public function delivery()
+     {
+         return $this->hasOneThrough(
+             Delivery::class,           // Final related model
+             DeliveryOrder::class,      // Intermediate model (junction table)
+             'order_id',                // Foreign key on the delivery_orders table
+             'id',                      // Foreign key on the deliveries table
+             'id',                      // Local key on the orders table
+             'delivery_id'              // Local key on the delivery_orders table
+         )->with('contact');
+     }
+     
 
      public function getHasDeliveryAttribute()
 {

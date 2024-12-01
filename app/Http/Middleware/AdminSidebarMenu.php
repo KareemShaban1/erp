@@ -17,6 +17,7 @@ class AdminSidebarMenu
      */
     public function handle($request, Closure $next)
     {
+
         if ($request->ajax()) {
             return $next($request);
         }

@@ -1454,6 +1454,59 @@
         @endif
         <hr>
 
+        <!-- ----------------------------------------------- -->
+
+        <!-- banners -->
+        <div class="row check_group">
+        <div class="col-md-1">
+          <h4>@lang( 'role.banners' )</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'banners.view', in_array('banners.view', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.banners_view' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'banners.create', in_array('banners.create', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.banners_create' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'banners.update', in_array('banners.update', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.banners_update' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'banners.delete', in_array('banners.delete', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.banners_delete' ) }}
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <hr>
+
+        <!-- orders -->
         <div class="row check_group">
         <div class="col-md-1">
           <h4>@lang( 'role.orders' )</h4>
@@ -1495,6 +1548,30 @@
               <label>
                 {!! Form::checkbox('permissions[]', 'orders.delete', in_array('orders.delete', $role_permissions), 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_delete' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders.changeStatus', in_array('orders.changeStatus', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_change_status' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders.changePayment', in_array('orders.changePayment', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_change_payment' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders.reports', in_array('orders.reports', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_reports' ) }}
               </label>
             </div>
           </div>
@@ -1548,59 +1625,227 @@
               </label>
             </div>
           </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_refund.changeStatus', in_array('orders_refund.changeStatus', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_change_status' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_refund.changePayment', in_array('orders_refund.changePayment', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_change_payment' ) }}
+              </label>
+            </div>
+          </div>
         </div>
         </div>
 
 
         <hr>
 
-<div class="row check_group">
-<div class="col-md-1">
-  <h4>@lang( 'role.orders_transfer' )</h4>
-</div>
-<div class="col-md-2">
-    <div class="checkbox">
-      <label>
-        <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
-      </label>
-    </div>
-</div>
-<div class="col-md-9">
-  <div class="col-md-12">
-    <div class="checkbox">
-      <label>
-        {!! Form::checkbox('permissions[]', 'orders_transfer.view', in_array('orders_transfer.view', $role_permissions), 
-        [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_view' ) }}
-      </label>
-    </div>
-  </div>
-  <div class="col-md-12">
-    <div class="checkbox">
-      <label>
-        {!! Form::checkbox('permissions[]', 'orders_transfer.create', in_array('orders_transfer.create', $role_permissions), 
-        [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_create' ) }}
-      </label>
-    </div>
-  </div>
-  <div class="col-md-12">
-    <div class="checkbox">
-      <label>
-        {!! Form::checkbox('permissions[]', 'orders_transfer.update', in_array('orders_transfer.update', $role_permissions), 
-        [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_update' ) }}
-      </label>
-    </div>
-  </div>
-  <div class="col-md-12">
-    <div class="checkbox">
-      <label>
-        {!! Form::checkbox('permissions[]', 'orders_transfer.delete', in_array('orders_transfer.delete', $role_permissions), 
-        [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_delete' ) }}
-      </label>
-    </div>
-  </div>
-</div>
-</div>
+        <div class="row check_group">
+        <div class="col-md-1">
+          <h4>@lang( 'role.orders_transfer' )</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.view', in_array('orders_transfer.view', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_view' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.create', in_array('orders_transfer.create', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_create' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.update', in_array('orders_transfer.update', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_update' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.delete', in_array('orders_transfer.delete', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_delete' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.changeStatus', in_array('orders_transfer.changeStatus', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_change_status' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_transfer.changePayment', in_array('orders_transfer.changePayment', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_change_payment' ) }}
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
 
+
+        <hr>
+        <!-- order cancellation -->
+        <div class="row check_group">
+        <div class="col-md-1">
+          <h4>@lang( 'role.orders_cancellation' )</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.view', in_array('orders_cancellation.view', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_view' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.create', in_array('orders_cancellation.create', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_create' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.update', in_array('orders_cancellation.update', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_update' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.delete', in_array('orders_cancellation.delete', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_delete' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.changeStatus', in_array('orders_cancellation.changeStatus', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_change_status' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_cancellation.changePayment', in_array('orders_cancellation.changePayment', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_cancellation_change_payment' ) }}
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
+
+
+        <hr>
+        <!-- deliveries -->
+        <div class="row check_group">
+        <div class="col-md-1">
+          <h4>@lang( 'role.deliveries' )</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'deliveries.view_all', in_array('deliveries.view_all', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.deliveries_view_all' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'deliveries.orders', in_array('deliveries.orders', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.deliveries_orders' ) }}
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
+
+
+        <hr>
+        <!-- application settings -->
+        <div class="row check_group">
+        <div class="col-md-1">
+          <h4>@lang( 'role.applicationSettings' )</h4>
+        </div>
+        <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+        </div>
+        <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'applicationSettings.view', in_array('applicationSettings.view', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.application_settings_view' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'applicationSettings.dashboard', in_array('applicationSettings.dashboard', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.application_settings_dashboard' ) }}
+              </label>
+            </div>
+          </div>
+        </div>
+        </div>
+
+
+        <!-- -------------------------- -->
 
         @include('role.partials.module_permissions')
         <div class="row">

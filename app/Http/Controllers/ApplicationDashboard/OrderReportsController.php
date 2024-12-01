@@ -9,8 +9,13 @@ use Yajra\DataTables\Facades\DataTables;
 
 class OrderReportsController extends Controller
 {
+    
           public function index()
           {
+
+            if (!auth()->user()->can('orders.reports')) {
+                abort(403, 'Unauthorized action.');
+            }
               // Fetch total and canceled amounts grouped by client
               $orderStats = Order::select(
                   'client_id',
@@ -31,6 +36,9 @@ class OrderReportsController extends Controller
 
           public function clientOrders($clientId, $startDate = null, $endDate = null)
 {
+    if (!auth()->user()->can('orders.reports')) {
+        abort(403, 'Unauthorized action.');
+    }
     $orders = Order::with(['client', 'businessLocation'])
         ->select([
             'id', 

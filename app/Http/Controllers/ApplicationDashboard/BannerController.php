@@ -34,9 +34,11 @@ class BannerController extends Controller
      */
     public function index()
     {
+        if (!auth()->user()->can('banners.view')) {
+            abort(403, 'Unauthorized action.');
+        }
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
-
 
             $banners = Banner::
                 select(['id', 'name','image', 'business_id', 'active']);
@@ -70,10 +72,10 @@ class BannerController extends Controller
      */
     public function create()
     {
-        //
-        // if (!auth()->user()->can('brand.create')) {
-        //     abort(403, 'Unauthorized action.');
-        // }
+
+        if (!auth()->user()->can('banners.create')) {
+            abort(403, 'Unauthorized action.');
+        }
 
         return view('applicationDashboard.pages.banners.create');
     }
@@ -86,6 +88,10 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
+
+        if (!auth()->user()->can('banners.create')) {
+            abort(403, 'Unauthorized action.');
+        }
      
         $this->validate($request, [
             'name' => 'required|string|max:255',
@@ -148,6 +154,9 @@ class BannerController extends Controller
     public function edit(Banner $banner)
     {
         //
+        if (!auth()->user()->can('banners.update')) {
+            abort(403, 'Unauthorized action.');
+        }
         return view('applicationDashboard.pages.banners.edit')
         ->with(compact('banner'));
 
@@ -162,6 +171,9 @@ class BannerController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (!auth()->user()->can('banners.update')) {
+            abort(403, 'Unauthorized action.');
+        }
         $this->validate($request, [
             'name' => 'required|string|max:255',
             'active' => 'boolean',
@@ -222,6 +234,11 @@ class BannerController extends Controller
     public function destroy($id)
 {
     try {
+
+        if (!auth()->user()->can('banners.delete')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $banner = Banner::findOrFail($id); // Find the banner by ID
 
         // Delete the associated image if it exists

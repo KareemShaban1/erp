@@ -11,6 +11,7 @@ use App\Services\API\OrderService;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -37,6 +38,9 @@ class OrderRefundController extends Controller
 
     public function index()
     {
+        if (!auth()->user()->can('orders_refund.view')) {
+            abort(403, 'Unauthorized action.');
+        }
         if (request()->ajax()) {
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
@@ -61,12 +65,21 @@ class OrderRefundController extends Controller
      */
     private function fetchOrderRefunds($status, $startDate = null, $endDate = null, $search = null)
     {
+        $user_locations = Auth::user()->permitted_locations();
+
         $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status','order_item.product:id,name', 'order_item'])  // Added product relationship
         ->select(['id', 'order_id', 'client_id','order_item_id', 'status','refund_status', 'amount', 'created_at']);
 
         // Apply status filter
         if ($status !== 'all') {
             $query->where('status', $status);
+        }
+
+         // Apply user locations filter
+         if ($user_locations !== "all") {
+            $query->whereHas('order', function ($q) use ($user_locations) {
+                $q->whereIn('business_location_id', $user_locations);
+            });
         }
 
         // Apply date filter
@@ -120,6 +133,9 @@ class OrderRefundController extends Controller
 
     public function changeOrderRefundStatus($orderRefundId)
     {
+        if (!auth()->user()->can('orders_refund.changeStatus')) {
+            abort(403, 'Unauthorized action.');
+        }
         $status = request()->input('status'); // Retrieve status from the request
 
         $orderRefund = OrderRefund::findOrFail($orderRefundId);
@@ -157,6 +173,9 @@ class OrderRefundController extends Controller
 
     public function changeRefundStatus($orderRefundId)
     {
+        if (!auth()->user()->can('orders_refund.changeStatus')) {
+            abort(403, 'Unauthorized action.');
+        }
         $status = request()->input('refund_status');
 
         $orderRefund = OrderRefund::findOrFail($orderRefundId);
@@ -221,31 +240,12 @@ class OrderRefundController extends Controller
     }
 
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        if (!auth()->user()->can('Order.create')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $quick_add = false;
-        if (!empty(request()->input('quick_add'))) {
-            $quick_add = true;
-        }
-
-        $is_repair_installed = $this->moduleUtil->isModuleInstalled('Repair');
-
-        return view('Order.create')
-            ->with(compact('quick_add', 'is_repair_installed'));
-    }
-
 
     public function store(Request $request)
 {
+    if (!auth()->user()->can('orders_refund.create')) {
+        abort(403, 'Unauthorized action.');
+    }
     $data = $request->validate([
         'order_id' => 'required|exists:orders,id',
         'items' => 'required|array',
@@ -308,6 +308,9 @@ class OrderRefundController extends Controller
      */
     public function show($id)
     {
+        if (!auth()->user()->can('orders_refund.view')) {
+            abort(403, 'Unauthorized action.');
+        }
         //
         $orderRefund = OrderRefund::findOrFail($id);
 
@@ -323,7 +326,7 @@ class OrderRefundController extends Controller
      */
     public function edit($id)
     {
-        if (!auth()->user()->can('Order.update')) {
+        if (!auth()->user()->can('orders_refund.update')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -342,7 +345,7 @@ class OrderRefundController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!auth()->user()->can('Order.update')) {
+        if (!auth()->user()->can('orders_refund.update')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -374,10 +377,6 @@ class OrderRefundController extends Controller
                     );
                 }
 
-                // $output = [
-                //     'success' => true,
-                //     'msg' => __("Order.updated_success")
-                // ];
 
                 return response()->json(['success' => true, 'message' => 'Order Refund updated successfully.']);
 
@@ -394,57 +393,4 @@ class OrderRefundController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        if (!auth()->user()->can('Order.delete')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (request()->ajax()) {
-            try {
-                $business_id = request()->user()->business_id;
-
-                $Order = Order::where('business_id', $business_id)->findOrFail($id);
-                $Order->delete();
-
-                $output = [
-                    'success' => true,
-                    'msg' => __("Order.deleted_success")
-                ];
-            } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-                $output = [
-                    'success' => false,
-                    'msg' => __("messages.something_went_wrong")
-                ];
-            }
-
-            return $output;
-        }
-    }
-
-    public function getOrderApi()
-    {
-        try {
-            $api_token = request()->header('API-TOKEN');
-
-            $api_settings = $this->moduleUtil->getApiSettings($api_token);
-
-            $orders = Order::where('business_id', $api_settings->business_id)
-                ->get();
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-            return $this->respondWentWrong($e);
-        }
-
-        return $this->respond($orders);
-    }
 }

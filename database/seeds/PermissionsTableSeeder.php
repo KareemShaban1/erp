@@ -90,21 +90,41 @@ class PermissionsTableSeeder extends Seeder
             ['name' => 'orders.create'],
             ['name' => 'orders.update'],
             ['name' => 'orders.delete'],
+            ['name' => 'orders.changeStatus'],
+            ['name' => 'orders.changePayment'],
+            ['name' => 'orders.reports'],
 
             ['name' => 'orders_refund.view'],
             ['name' => 'orders_refund.create'],
             ['name' => 'orders_refund.update'],
             ['name' => 'orders_refund.delete'],
+            ['name' => 'orders_refund.changeStatus'],
+            ['name' => 'orders_refund.changePayment'],
 
             ['name' => 'orders_transfer.view'],
             ['name' => 'orders_transfer.create'],
             ['name' => 'orders_transfer.update'],
             ['name' => 'orders_transfer.delete'],
+            ['name' => 'orders_transfer.changeStatus'],
+            ['name' => 'orders_transfer.changePayment'],
 
             ['name' => 'orders_cancellation.view'],
             ['name' => 'orders_cancellation.create'],
             ['name' => 'orders_cancellation.update'],
             ['name' => 'orders_cancellation.delete'],
+            ['name' => 'orders_cancellation.changeStatus'],
+            ['name' => 'orders_cancellation.changePayment'],
+
+            ['name' => 'clients.view'],
+
+
+            ['name' => 'deliveries.view'],
+            ['name' => 'deliveries.view_all'],
+            ['name' => 'deliveries.orders'],
+
+            ['name' => 'applicationSettings.view'],
+            ['name' => 'applicationSettings.dashboard'],
+
 
         ];
 

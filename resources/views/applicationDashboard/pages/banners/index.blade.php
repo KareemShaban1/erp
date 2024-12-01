@@ -13,7 +13,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('lang_v1.create')
+    @can('banners.create')
         @slot('tool')
         <div class="box-tools">
             <button type="button" class="btn btn-block btn-primary btn-modal add_banner_button"
@@ -22,7 +22,7 @@
         </div>
         @endslot
     @endcan
-    @can('lang_v1.view')
+    @can('banners.view')
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="banners_table">
                 <thead>
@@ -54,9 +54,7 @@
     var banners_table = $('#banners_table').DataTable({
         processing: true,
         serverSide: true,
-        "ajax": {
-            "url": "/banners"
-        },
+        ajax: '{{ action("ApplicationDashboard\BannerController@index") }}',
         columnDefs: [
             {
                 targets: 2,

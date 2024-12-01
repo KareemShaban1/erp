@@ -13,24 +13,17 @@ use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
 
 class OrderController extends Controller
 {
-    /**
-     * All Utils instance.
-     *
-     */
+
     protected $moduleUtil;
 
-    /**
-     * Constructor
-     *
-     * @param ProductUtils $product
-     * @return void
-     */
     public function __construct(ModuleUtil $moduleUtil)
     {
         $this->moduleUtil = $moduleUtil;
@@ -67,6 +60,9 @@ class OrderController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
 
+        $user_locations = Auth::user()->permitted_locations();
+
+
         $query = Order::with('client')
                 ->where('order_type','order')
                 ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])
@@ -75,6 +71,10 @@ class OrderController extends Controller
         // Apply status filter
         if ($status !== 'all') {
             $query->where('order_status', $status);
+        }
+
+        if($user_locations !== "all"){
+            $query->whereIn('business_location_id',$user_locations);
         }
 
         // Apply date filter
@@ -128,6 +128,9 @@ class OrderController extends Controller
 
     public function changeOrderStatus($orderId)
     {
+        if (!auth()->user()->can('orders.changeStatus')) {
+            abort(403, 'Unauthorized action.');
+        }
         $status = request()->input('order_status');
 
         $order = Order::findOrFail($orderId);
@@ -159,7 +162,7 @@ class OrderController extends Controller
                     ['order_id' => $order->id,
                     'status'=>$order->status]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->order, 'status'=>'processing']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'processing']);
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
@@ -205,6 +208,9 @@ class OrderController extends Controller
 
     public function changePaymentStatus($orderId)
     {
+        if (!auth()->user()->can('orders.changePayment')) {
+            abort(403, 'Unauthorized action.');
+        }
         $status = request()->input('payment_status'); // Retrieve status from the request
 
         $order = Order::findOrFail($orderId);
@@ -238,234 +244,60 @@ class OrderController extends Controller
 
 
     public function getOrderDetails($orderId)
-{
-    // Fetch the order along with related data
-    $order = Order::with([
-        'client.contact', 
-        'businessLocation', 
-        'orderItems'
-    ])->find($orderId);
-
-    if ($order) {
-        // Iterate through each order item and check for refund details
-        foreach ($order->orderItems as $item) {
-            // Check if there are any records in the order_refund table for this order item
-            $refund = OrderRefund::where('order_item_id', $item->id)->get(); // Assuming 'refund_amount' stores the refunded quantity or amount
-
-            $refund_amount = $refund->sum('amount') ?? 0;
-            // Calculate the difference between the order item quantity and the refunded amount
-            $item->remaining_quantity = $item->quantity - $refund_amount;
+    {
+        // Fetch activity logs related to the order
+        $activityLogs = Activity::with(['subject'])
+            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('contacts as contact', 'contact.id', '=', 'c.contact_id')
+            ->where('subject_type', 'App\Models\Order')
+            ->where('subject_id', $orderId)
+            ->select(
+                'activity_log.*',
+                DB::raw("
+                    CASE 
+                        WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
+                        WHEN c.id IS NOT NULL THEN contact.name
+                        ELSE 'Unknown'
+                    END as created_by
+                ")
+            )
+            ->get(); // Fetch logs (use ->paginate($perPage) for pagination)
+    
+        // Fetch the order along with related data
+        $order = Order::with([
+            'client.contact', 
+            'businessLocation', 
+            'orderItems',
+            'delivery'
+        ])->find($orderId);
+    
+        if ($order) {
+            // Iterate through each order item and check for refund details
+            foreach ($order->orderItems as $item) {
+                // Check if there are any records in the order_refund table for this order item
+                $refund = OrderRefund::where('order_item_id', $item->id)->get();
+    
+                $refund_amount = $refund->sum('amount') ?? 0;
+                // Calculate the difference between the order item quantity and the refunded amount
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+            }
+    
+            // Return the order details and activity logs
+            return response()->json([
+                'success' => true,
+                'order' => $order,
+                'activityLogs' => $activityLogs,
+            ]);
         }
-
+    
+        // If the order is not found
         return response()->json([
-            'success' => true,
-            'order' => $order
+            'success' => false,
+            'message' => 'Order not found'
         ]);
     }
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Order not found'
-    ]);
-}
-
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        if (!auth()->user()->can('Order.create')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $quick_add = false;
-        if (!empty(request()->input('quick_add'))) {
-            $quick_add = true;
-        }
-
-        $is_repair_installed = $this->moduleUtil->isModuleInstalled('Repair');
-
-        return view('Order.create')
-            ->with(compact('quick_add', 'is_repair_installed'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        if (!auth()->user()->can('Order.create')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        try {
-            $input = $request->only(['name', 'description']);
-            $business_id = $request->session()->get('user.business_id');
-            $input['business_id'] = $business_id;
-            $input['created_by'] = $request->session()->get('user.id');
-
-            if ($this->moduleUtil->isModuleInstalled('Repair')) {
-                $input['use_for_repair'] = !empty($request->input('use_for_repair')) ? 1 : 0;
-            }
-
-            $Order = Order::create($input);
-            $output = [
-                'success' => true,
-                'data' => $Order,
-                'msg' => __("Order.added_success")
-            ];
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-            $output = [
-                'success' => false,
-                'msg' => __("messages.something_went_wrong")
-            ];
-        }
-
-        return $output;
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        if (!auth()->user()->can('Order.update')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (request()->ajax()) {
-            $business_id = request()->session()->get('user.business_id');
-            $Order = Order::where('business_id', $business_id)->find($id);
-
-            $is_repair_installed = $this->moduleUtil->isModuleInstalled('Repair');
-
-            return view('Order.edit')
-                ->with(compact('Order', 'is_repair_installed'));
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        if (!auth()->user()->can('Order.update')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (request()->ajax()) {
-            try {
-                $input = $request->only(['name', 'description']);
-                $business_id = $request->session()->get('user.business_id');
-
-                $Order = Order::where('business_id', $business_id)->findOrFail($id);
-                $Order->name = $input['name'];
-                $Order->description = $input['description'];
-
-                if ($this->moduleUtil->isModuleInstalled('Repair')) {
-                    $Order->use_for_repair = !empty($request->input('use_for_repair')) ? 1 : 0;
-                }
-
-                $Order->save();
-
-                $output = [
-                    'success' => true,
-                    'msg' => __("Order.updated_success")
-                ];
-            } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-                $output = [
-                    'success' => false,
-                    'msg' => __("messages.something_went_wrong")
-                ];
-            }
-
-            return $output;
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        if (!auth()->user()->can('Order.delete')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        if (request()->ajax()) {
-            try {
-                $business_id = request()->user()->business_id;
-
-                $Order = Order::where('business_id', $business_id)->findOrFail($id);
-                $Order->delete();
-
-                $output = [
-                    'success' => true,
-                    'msg' => __("Order.deleted_success")
-                ];
-            } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-                $output = [
-                    'success' => false,
-                    'msg' => __("messages.something_went_wrong")
-                ];
-            }
-
-            return $output;
-        }
-    }
-
-    public function getOrderApi()
-    {
-        try {
-            $api_token = request()->header('API-TOKEN');
-
-            $api_settings = $this->moduleUtil->getApiSettings($api_token);
-
-            $orders = Order::where('business_id', $api_settings->business_id)
-                ->get();
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-            return $this->respondWentWrong($e);
-        }
-
-        return $this->respond($orders);
-    }
-
+    
      /**
      * Update the delivery contact balance based on the order total.
      *

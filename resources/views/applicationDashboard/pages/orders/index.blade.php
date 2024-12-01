@@ -17,7 +17,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('lang_v1.create')
+    @can('orders.create')
         @slot('tool')
         <div class="box-tools">
         </div>
@@ -63,7 +63,7 @@
 
         @endslot
     @endcan
-    @can('lang_v1.view')
+    @can('orders.view')
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orders_table">
                 <thead>
@@ -375,6 +375,8 @@
                     $('#total').text(response.order.total);
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
+                    $('#delivery_name').text(response.order.delivery?.contact.name);
+
 
                     // Populate the order items
                     const itemsTable = $('#order_items_table tbody');
@@ -392,6 +394,27 @@
                     `;
                         itemsTable.append(row);
                     });
+
+
+                      // Populate the order items
+                      const activityLogsTable = $('#activity_logs_table tbody');
+                      activityLogsTable.empty(); // Clear existing rows
+
+                    response.activityLogs.forEach(item => {
+                        const row = `
+                        <tr>
+                            <td>${item.subject.number}</td>
+                            <td>
+                            ${item.description}
+                            </td>
+
+                            <td>${item.properties.status}</td>
+                            <td>${item.created_by}</td>
+                        </tr>
+                    `;
+                    activityLogsTable.append(row);
+                    });
+
 
                     // Show the modal
                     $('#viewOrderInfoModal').modal('show');

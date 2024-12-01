@@ -124,7 +124,7 @@
         @endif
         
         <script>UST_CT = [];UST = { s: Date.now(), addTag: function(tag) { UST_CT.push(tag) } };UST.addEvent = UST.addTag;</script>
-<script src="https://onoo.online/tra/server/ust-rr.min.js?v=4.0.0" async></script>
+<!-- <script src="https://onoo.online/tra/server/ust-rr.min.js?v=4.0.0" async></script> -->
         
     </body>
 

@@ -6,12 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Delivery;
 use App\Models\DeliveryOrder;
 use App\Models\Order;
+use App\Utils\ModuleUtil;
 use Datatables;
 use Illuminate\Http\Request;
 
 class DeliveryController extends Controller
 {
 
+    protected $moduleUtil;
+
+    public function __construct(ModuleUtil $moduleUtil)
+    {
+        $this->moduleUtil = $moduleUtil;
+    }
 
     public function getAvailableDeliveries($orderId)
     {
@@ -43,6 +50,7 @@ class DeliveryController extends Controller
         $deliveryId = $request->input('delivery_id');
         $orderId = $request->input('order_id');
 
+        $order = Order::find($orderId);
 
         // Validate the delivery ID to ensure it exists and is available
         $delivery = Delivery::where('id', $deliveryId)
@@ -68,6 +76,9 @@ class DeliveryController extends Controller
             'assigned_at' => now(), // Timestamp of assignment
         ]);
 
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name'=> $delivery->contact->name]);
+
+
         return response()->json([
             'success' => true,
             'message' => 'Delivery assigned successfully to the order.',
@@ -76,6 +87,9 @@ class DeliveryController extends Controller
 
     public function allDeliveries()
     {
+        if (!auth()->user()->can('deliveries.view_all')) {
+            abort(403, 'Unauthorized action.');
+        }
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
     
@@ -107,8 +121,10 @@ class DeliveryController extends Controller
 
     public function orderDeliveries(Request $request)
     {
+        if (!auth()->user()->can('deliveries.orders')) {
+            abort(403, 'Unauthorized action.');
+        }
         $business_id = request()->session()->get('user.business_id');
-        // $delivery_id = $request->input('delivery_id'); // Get delivery_id from the POST request
 
         $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
 
@@ -151,6 +167,8 @@ class DeliveryController extends Controller
         $deliveryOrder = DeliveryOrder::findOrFail($orderId);
         $deliveryOrder->payment_status = $status;
 
+        $order = Order::find($orderId);
+
 
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
@@ -162,8 +180,12 @@ class DeliveryController extends Controller
                 }
 
                 $deliveryOrder->paid_at = now();
+
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'paid']);
+
                 break;
             case 'not_paid':
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'not_paid']);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

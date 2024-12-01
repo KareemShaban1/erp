@@ -9,6 +9,7 @@ use App\Models\OrderTracking;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -20,21 +21,17 @@ class OrderCancellationController extends Controller
      */
     protected $moduleUtil;
 
-    /**
-     * Constructor
-     *
-     * @param ProductUtils $product
-     * @return void
-     */
+
     public function __construct(ModuleUtil $moduleUtil)
     {
         $this->moduleUtil = $moduleUtil;
     }
 
-
-
     public function index()
     {
+        if (!auth()->user()->can('orders_cancellation.view')) {
+            abort(403, 'Unauthorized action.');
+        }
         if (request()->ajax()) {
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
@@ -59,12 +56,21 @@ class OrderCancellationController extends Controller
      */
     private function fetchOrderCancellations($status, $startDate = null, $endDate = null, $search = null)
     {
+        $user_locations = Auth::user()->permitted_locations();
+
         $query = OrderCancellation::with(['client.contact:id,name', 'order:id,number,order_status'])
             ->select(['id', 'order_id', 'client_id', 'status', 'created_at']);
 
         // Apply status filter
         if ($status !== 'all') {
             $query->where('status', $status);
+        }
+
+        // Apply user locations filter
+        if ($user_locations !== "all") {
+            $query->whereHas('order', function ($q) use ($user_locations) {
+                $q->whereIn('business_location_id', $user_locations);
+            });
         }
 
         // Apply date filter
@@ -116,27 +122,30 @@ class OrderCancellationController extends Controller
 
     public function changeOrderCancellationStatus($orderCancellationId)
     {
+        if (!auth()->user()->can('orders_cancellation.changeStatus')) {
+            abort(403, 'Unauthorized action.');
+        }
         $status = request()->input('status'); // Retrieve status from the request
 
         $orderCancellation = OrderCancellation::findOrFail($orderCancellationId);
         $orderCancellation->status = $status;
 
-        $order = Order::where('id',$orderCancellation->order_id)->first();
+        $order = Order::where('id', $orderCancellation->order_id)->first();
 
 
         // Set the tracking status timestamp based on the status provided
         switch ($status) {
             case 'requested':
                 $orderCancellation->requested_at = now();
-                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'requested']);
+                $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'requested']);
                 break;
             case 'approved':
                 $orderCancellation->processed_at = now();
-                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'approved']);
+                $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'approved']);
                 break;
             case 'rejected':
-                $this->moduleUtil->activityLog($orderCancellation, 'change_status', null, ['order_number' => $order->number, 'status'=>'rejected']);
-                break;        
+                $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
+                break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
         }
@@ -144,29 +153,6 @@ class OrderCancellationController extends Controller
         $orderCancellation->save();
 
         return response()->json(['success' => true, 'message' => 'Order Cancellation status updated successfully.']);
-    }
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        if (!auth()->user()->can('Order.create')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $quick_add = false;
-        if (!empty(request()->input('quick_add'))) {
-            $quick_add = true;
-        }
-
-        $is_repair_installed = $this->moduleUtil->isModuleInstalled('Repair');
-
-        return view('Order.create')
-            ->with(compact('quick_add', 'is_repair_installed'));
     }
 
 
@@ -193,7 +179,7 @@ class OrderCancellationController extends Controller
      */
     public function edit($id)
     {
-        if (!auth()->user()->can('Order.update')) {
+        if (!auth()->user()->can('order_cancellation.update')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -212,39 +198,55 @@ class OrderCancellationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!auth()->user()->can('Order.update')) {
+        if (!auth()->user()->can('order_cancellation.update')) {
             abort(403, 'Unauthorized action.');
         }
 
         if (request()->ajax()) {
             try {
-                $input = $request->only(['status', 'reason','admin_response']);
+                $input = $request->only(['status', 'reason', 'admin_response']);
 
                 $orderCancellation = OrderCancellation::findOrFail($id);
-                $orderCancellation->status = $input['status'];
+                // $orderCancellation->status = $input['status'];
+                // Set the tracking status timestamp based on the status provided
+                switch ($input['status']) {
+                    case 'requested':
+                        $orderCancellation->requested_at = now();
+                        $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'requested']);
+                        break;
+                    case 'approved':
+                        $orderCancellation->processed_at = now();
+                        $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'approved']);
+                        break;
+                    case 'rejected':
+                        $this->moduleUtil->activityLog($orderCancellation, 'change_order_cancellation_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
+                        break;
+                    default:
+                        throw new \InvalidArgumentException("Invalid status");
+                }
                 $orderCancellation->reason = $input['reason'];
                 $orderCancellation->admin_response = $input['admin_response'];
-                $order = Order::where('id',$orderCancellation->order_id)->first();
+                $order = Order::where('id', $orderCancellation->order_id)->first();
 
-                if($input['admin_response']){
+                if ($input['admin_response']) {
                     // Send and store push notification
                     app(FirebaseService::class)->sendAndStoreNotification(
-                       $order->client->id,
-                       $order->client->fcm_token,
-                       'Order Cancellation Admin Response',
-                       'Your order has been shipped successfully.',
-                       ['order_id' => $order->id, 
-                       'order_cancellation_id'=>$orderCancellation->id,
-                       'admin_response' => $input['admin_response']]
-                   );
-               }
+                        $order->client->id,
+                        $order->client->fcm_token,
+                        'Order Cancellation Admin Response',
+                        'Your order has been shipped successfully.',
+                        [
+                            'order_id' => $order->id,
+                            'order_cancellation_id' => $orderCancellation->id,
+                            'admin_response' => $input['admin_response']
+                        ]
+                    );
+
+                    $this->moduleUtil->activityLog($orderCancellation, 'order_cancellation_admin_response', null, ['order_number' => $order->number, 'admin_response' => $input['admin_response']]);
+
+                }
 
                 $orderCancellation->save();
-
-                // $output = [
-                //     'success' => true,
-                //     'msg' => __("Order.updated_success")
-                // ];
 
                 return response()->json(['success' => true, 'message' => 'Order Cancellation updated successfully.']);
 
@@ -261,57 +263,5 @@ class OrderCancellationController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        if (!auth()->user()->can('Order.delete')) {
-            abort(403, 'Unauthorized action.');
-        }
 
-        if (request()->ajax()) {
-            try {
-                $business_id = request()->user()->business_id;
-
-                $Order = Order::where('business_id', $business_id)->findOrFail($id);
-                $Order->delete();
-
-                $output = [
-                    'success' => true,
-                    'msg' => __("Order.deleted_success")
-                ];
-            } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-                $output = [
-                    'success' => false,
-                    'msg' => __("messages.something_went_wrong")
-                ];
-            }
-
-            return $output;
-        }
-    }
-
-    public function getOrderApi()
-    {
-        try {
-            $api_token = request()->header('API-TOKEN');
-
-            $api_settings = $this->moduleUtil->getApiSettings($api_token);
-
-            $orders = Order::where('business_id', $api_settings->business_id)
-                ->get();
-        } catch (\Exception $e) {
-            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-            return $this->respondWentWrong($e);
-        }
-
-        return $this->respond($orders);
-    }
 }

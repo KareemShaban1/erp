@@ -12,6 +12,7 @@ use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Services\FirebaseService;
+use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,10 +21,14 @@ class DeliveryController extends Controller
 {
 
     protected $firebaseService;
+    protected $moduleUtil;
 
-    public function __construct(FirebaseService $firebaseService)
+
+    public function __construct(FirebaseService $firebaseService, ModuleUtil $moduleUtil)
     {
         $this->firebaseService = $firebaseService;
+        $this->moduleUtil = $moduleUtil;
+
     }
 
     public function getNotAssignedOrders($orderType)
@@ -135,6 +140,7 @@ class DeliveryController extends Controller
         $deliveryId = Auth::user()->id;
         $orderId = $request->order_id;
 
+        $order = Order::find($orderId);
 
         // Validate the delivery ID to ensure it exists and is available
         $delivery = Delivery::where('id', $deliveryId)
@@ -159,6 +165,8 @@ class DeliveryController extends Controller
             'status' => 'assigned', // The status could be 'assigned' initially
             'assigned_at' => now(), // Timestamp of assignment
         ]);
+
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name'=> $delivery->contact->name]);
 
         return response()->json([
             'success' => true,
@@ -213,8 +221,6 @@ class DeliveryController extends Controller
                 }
                 $orderTracking->shipped_at = now();
 
-                \Log::info($order);
-                \Log::warning($delivery);
                 // Update delivery contact balance
                 $this->updateDeliveryBalance($order, $delivery);
 
@@ -226,6 +232,9 @@ class DeliveryController extends Controller
                     'Your order has been shipped successfully.',
                     ['order_id' => $order->id, 'status' => $status]
                 );
+
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=> 'shipped']);
+
                 break;
 
             case 'completed':
@@ -248,6 +257,8 @@ class DeliveryController extends Controller
                     'Your order has been completed successfully.',
                     ['order_id' => $order->id, 'status' => $status]
                 );
+
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=> 'completed']);
 
                 break;
         }

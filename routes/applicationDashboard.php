@@ -5,13 +5,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(
           [
-                    // 'setData', 
-                    // 'auth', 
-                    // 'SetSessionData', 
-                    // 'language', 
-                    // 'timezone', 
+                    'setData', 
+                    'auth', 
+                    'SetSessionData', 
+                    'language', 
+                    'timezone', 
                     'ApplicationSidebarMenu', 
-                    // 'CheckUserLogin'
+                    'CheckUserLogin'
                     ]
           )->group(function () {
 
