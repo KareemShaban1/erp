@@ -176,7 +176,7 @@
 
                 // AJAX call to fetch module data
                 $.ajax({
-                    url: `/banners/${type}`, // Backend API endpoint
+                    url: `/get_${type}`, // Backend API endpoint
                     method: 'GET',
                     success: function (response) {
                         moduleIdSelect.empty().append('<option value="">@lang("lang_v1.select_module_id")</option>');
@@ -314,7 +314,7 @@
                         }
             // AJAX call to fetch module data
             $.ajax({
-                url: `/banners/${type}`, // Backend API endpoint
+                url: `/get_${type}`, // Backend API endpoint
                 method: 'GET',
                 success: function (response) {
                     // Remove the loading option

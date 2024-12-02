@@ -264,19 +264,26 @@ class BannerController extends Controller
     return response()->json($output);
 }
 
-public function getProducts(){
+
+public function getProducts()
+{
+    \Log::info('Fetching products');
     $products = Product::where('products.type', '!=', 'modifier')
-    ->businessId()
-    ->productForSales()->get(['id','name']);
+        ->businessId()
+        ->productForSales()
+        ->get(['id', 'name']);
+
+    \Log::info('Products fetched: ' . $products->count());
     return response()->json($products);
-
 }
 
-public function getCategories(){
-    // Category::with('sub_categories')->productType()->latest()
-    $categories = Category::with('sub_categories')->get(['id','name']);
+public function getCategories()
+{
+    \Log::info('Fetching categories');
+    $categories = Category::with('sub_categories')->get(['id', 'name']);
+    \Log::info('Categories fetched: ' . $categories->count());
     return response()->json($categories);
-
 }
+
 
 }

@@ -87,13 +87,13 @@ Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderContro
 Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
 
 Route::resource('applicationDashboard/refundOrders', 'ApplicationDashboard\RefundOrderController');
-Route::get('applicationDashboard/refundOrders/{orderId}/details', 'ApplicationDashboard\RefundOrderController@getOrderDetails')->name('orders.details');
+Route::get('applicationDashboard/refundOrders/{orderId}/details', 'ApplicationDashboard\RefundOrderController@getOrderDetails')->name('orders_refund.details');
 Route::post('applicationDashboard/refundOrders/{orderId}/change-order-status', 'ApplicationDashboard\RefundOrderController@changeOrderStatus');
 Route::post('applicationDashboard/refundOrders/{orderId}/change-payment-status', 'ApplicationDashboard\RefundOrderController@changePaymentStatus');
 
 
 Route::resource('applicationDashboard/transferOrders', 'ApplicationDashboard\TransferOrderController');
-Route::get('applicationDashboard/transferOrders/{orderId}/details', 'ApplicationDashboard\TransferOrderController@getOrderDetails')->name('orders.details');
+Route::get('applicationDashboard/transferOrders/{orderId}/details', 'ApplicationDashboard\TransferOrderController@getOrderDetails')->name('orders_transfer.details');
 Route::post('applicationDashboard/transferOrders/{orderId}/change-order-status', 'ApplicationDashboard\TransferOrderController@changeOrderStatus');
 Route::post('applicationDashboard/transferOrders/{orderId}/change-payment-status', 'ApplicationDashboard\TransferOrderController@changePaymentStatus');
 
@@ -134,9 +134,9 @@ Route::post(
     'ApplicationDashboard\OrderRefundController@changeRefundStatus'
 );
 
+Route::get('get_products', 'ApplicationDashboard\BannerController@getProducts');
+Route::get('get_categories', 'ApplicationDashboard\BannerController@getCategories');
 Route::resource('banners', 'ApplicationDashboard\BannerController');
-Route::get('banners/products', 'ApplicationDashboard\BannerController@getProducts');
-Route::get('banners/categories', 'ApplicationDashboard\BannerController@getCategories');
 
 // Route::resource('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController');
 Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
@@ -157,8 +157,6 @@ Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\Ap
 
 Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
-
-Route::resource('applicationDashboard/expenses', 'ApplicationDashboard\ExpenseController');
 
 
 });

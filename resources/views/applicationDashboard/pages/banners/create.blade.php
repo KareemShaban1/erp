@@ -1,8 +1,6 @@
 <div class="modal-dialog" role="document">
   <div class="modal-content">
 
-    <!-- {!! Form::open(['url' => action('ApplicationDashboard\BannerController@store'), 'method' => 'post', 'id' => $quick_add ? 'quick_add_banner_form' : 'banner_add_form' ]) !!} -->
-
     {!! Form::open(['url' => action('ApplicationDashboard\BannerController@store'), 'method' => 'post', 'id' => 'banner_add_form' ]) !!}
 
     <div class="modal-header">
