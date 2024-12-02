@@ -163,8 +163,7 @@ class ApplicationSidebarMenu
                         }
 
                         if (
-                            auth()->user()->can('orders_transfer
-                .view')
+                            auth()->user()->can('orders_transfer.view')
                         ) {
                             $sub->url(
                                 action('ApplicationDashboard\TransferOrderController@index'),
