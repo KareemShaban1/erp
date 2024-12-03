@@ -249,6 +249,7 @@ class OrderController extends Controller
         $activityLogs = Activity::with(['subject'])
             ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
             ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
             ->leftJoin('contacts as contact', 'contact.id', '=', 'c.contact_id')
             ->where('subject_type', 'App\Models\Order')
             ->where('subject_id', $orderId)
@@ -258,6 +259,7 @@ class OrderController extends Controller
                     CASE 
                         WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
                         WHEN c.id IS NOT NULL THEN contact.name
+                        WHEN d.id IS NOT NULL THEN contact.name
                         ELSE 'Unknown'
                     END as created_by
                 ")
