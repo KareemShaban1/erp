@@ -64,17 +64,17 @@ class OrderController extends Controller
 
 
         $query = Order::with('client')
-                ->where('order_type','order')
-                ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])
-                ->latest();
+            ->where('order_type', 'order')
+            ->select(['id', 'number', 'order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total', 'created_at'])
+            ->latest();
 
         // Apply status filter
         if ($status !== 'all') {
             $query->where('order_status', $status);
         }
 
-        if($user_locations !== "all"){
-            $query->whereIn('business_location_id',$user_locations);
+        if ($user_locations !== "all") {
+            $query->whereIn('business_location_id', $user_locations);
         }
 
         // Apply date filter
@@ -85,7 +85,7 @@ class OrderController extends Controller
             } else {
                 // Adjust endDate to include the entire day
                 $endDate = Carbon::parse($endDate)->endOfDay();
-        
+
                 // Filter for a range of dates
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
@@ -149,7 +149,7 @@ class OrderController extends Controller
         switch ($status) {
             case 'pending':
                 $orderTracking->pending_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'pending']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'pending']);
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
@@ -159,28 +159,32 @@ class OrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been processed successfully.',
-                    ['order_id' => $order->id,
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'processing']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'processing']);
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
-                 // Send and store push notification
+                // Send and store push notification
                 app(FirebaseService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been shipped successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
                 $orderTracking->shipped_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'shipped']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
                 break;
             case 'cancelled':
                 $orderTracking->cancelled_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'cancelled']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'cancelled']);
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
@@ -190,10 +194,12 @@ class OrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been completed successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'completed']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -227,17 +233,17 @@ class OrderController extends Controller
 
         switch ($status) {
             case 'pending':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'pending']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'pending']);
                 break;
             case 'paid':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'paid']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'paid']);
                 break;
             case 'failed':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'failed']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'failed']);
                 break;
             default:
-                throw new \InvalidArgumentException("Invalid status: $status");    
-            }
+                throw new \InvalidArgumentException("Invalid status: $status");
+        }
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
@@ -250,41 +256,43 @@ class OrderController extends Controller
             ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
             ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
             ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
-            ->leftJoin('contacts as contact', 'contact.id', '=', 'c.contact_id')
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
             ->where('subject_type', 'App\Models\Order')
             ->where('subject_id', $orderId)
             ->select(
                 'activity_log.*',
                 DB::raw("
-                    CASE 
-                        WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
-                        WHEN c.id IS NOT NULL THEN contact.name
-                        WHEN d.id IS NOT NULL THEN contact.name
-                        ELSE 'Unknown'
-                    END as created_by
-                ")
+            CASE 
+                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
+                WHEN c.id IS NOT NULL OR d.id IS NOT NULL THEN contact.name
+                ELSE 'Unknown'
+            END as created_by
+        ")
             )
-            ->get(); // Fetch logs (use ->paginate($perPage) for pagination)
-    
+            ->get();
+
         // Fetch the order along with related data
         $order = Order::with([
-            'client.contact', 
-            'businessLocation', 
+            'client.contact',
+            'businessLocation',
             'orderItems',
             'delivery'
         ])->find($orderId);
-    
+
         if ($order) {
             // Iterate through each order item and check for refund details
             foreach ($order->orderItems as $item) {
                 // Check if there are any records in the order_refund table for this order item
                 $refund = OrderRefund::where('order_item_id', $item->id)->get();
-    
+
                 $refund_amount = $refund->sum('amount') ?? 0;
                 // Calculate the difference between the order item quantity and the refunded amount
                 $item->remaining_quantity = $item->quantity - $refund_amount;
             }
-    
+
             // Return the order details and activity logs
             return response()->json([
                 'success' => true,
@@ -292,15 +300,15 @@ class OrderController extends Controller
                 'activityLogs' => $activityLogs,
             ]);
         }
-    
+
         // If the order is not found
         return response()->json([
             'success' => false,
             'message' => 'Order not found'
         ]);
     }
-    
-     /**
+
+    /**
      * Update the delivery contact balance based on the order total.
      *
      * @param Order $order
