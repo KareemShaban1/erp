@@ -410,6 +410,8 @@
 
                             <td>${item.properties.status}</td>
                             <td>${item.created_by}</td>
+                            <td>${item.created_at}
+                            </td>
                         </tr>
                     `;
                     activityLogsTable.append(row);
