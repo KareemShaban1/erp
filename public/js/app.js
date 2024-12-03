@@ -446,7 +446,7 @@ $(document).ready(function() {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
         Array.prototype.push.apply(columns, [
-            // { data: 'customer_group', name: 'cg.name' },
+            { data: 'customer_group', name: 'cg.name' },
             { data: 'address', name: 'address', orderable: false },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
@@ -472,7 +472,7 @@ $(document).ready(function() {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
         Array.prototype.push.apply(columns, [
-            // { data: 'customer_group', name: 'cg.name' },
+            { data: 'customer_group', name: 'cg.name' },
             { data: 'address', name: 'address', orderable: false },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },

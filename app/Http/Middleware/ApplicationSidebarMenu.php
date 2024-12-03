@@ -177,7 +177,7 @@ class ApplicationSidebarMenu
                 )->order(22);
             }
 
-            if (auth()->user()->can('order_cancellations.view')) {
+            if (auth()->user()->can('orders_cancellations.view')) {
 
                 $menu->dropdown(
                     __('lang_v1.order_cancellations'),
@@ -195,7 +195,7 @@ class ApplicationSidebarMenu
                 )->order(23);
             }
 
-            if (auth()->user()->can('order_refunds.view')) {
+            if (auth()->user()->can('orders_refunds.view')) {
 
                 $menu->dropdown(
                     __('lang_v1.order_refunds'),
