@@ -417,7 +417,7 @@
                             ${item.description}
                             </td>
 
-                            <td>${item.properties.status}</td>
+                            <td>${item.properties.status || ''}</td>
                             <td>${item.created_by}</td>
                             <td>${formattedDate}
                             </td>
