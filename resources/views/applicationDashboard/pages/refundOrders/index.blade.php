@@ -96,7 +96,7 @@
     @include('applicationDashboard.pages.orders.assignDeliveryModal')
 
     <!-- Order Information Modal -->
-    @include('applicationDashboard.pages.orders.orderInformationModal')
+    @include('applicationDashboard.pages.refundOrders.orderInformationModal')
 
 
 </section>
@@ -228,7 +228,7 @@
                 name: 'id',
                 render: function (data, type, row) {
                     // Generate the "View Order Info" button
-                    let buttons = `<button class="btn btn-info view-order-info-btn" data-order-id="${row.id}">
+                    let buttons = `<button class="btn btn-info view-order-refund-info-btn" data-order-id="${row.id}">
                           @lang('lang_v1.view_order_info')
                        </button>`;
 
@@ -360,16 +360,17 @@
         });
     });
 
-    // Event listener for the 'View Order Info' button
-    $(document).on('click', '.view-order-info-btn', function () {
+    $(document).on('click', '.view-order-refund-info-btn', function () {
         var orderId = $(this).data('order-id'); // Get the order ID
 
         // Fetch the order details
         $.ajax({
-            url: `{{ action("ApplicationDashboard\RefundOrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            url: `{{ action("ApplicationDashboard\RefundOrderController@getOrderRefundDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
             type: 'GET',
             success: function (response) {
                 if (response.success) {
+                    const date = new Date(response.order.created_at);
+                    const orderRefundDate = date.toLocaleString();
                     // Populate the modal with the order details
                     $('#view_order_id').val(response.order.id);
                     $('#order_number').text(response.order.number);
@@ -381,6 +382,10 @@
                     $('#total').text(response.order.total);
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
+                    $('#delivery_name').text(response.order.delivery?.contact.name);
+                    $('#order_type').text(response.order.order_type);
+                    $('#order_refund_date').text(orderRefundDate);
+
 
                     // Populate the order items
                     const itemsTable = $('#order_items_table tbody');
@@ -399,8 +404,34 @@
                         itemsTable.append(row);
                     });
 
+
+                      // Populate the order items
+                      const activityLogsTable = $('#activity_logs_table tbody');
+                      activityLogsTable.empty(); // Clear existing rows
+
+                    response.activityLogs.forEach(item => {
+                        const date = new Date(item.created_at);
+                        const formattedDate = date.toLocaleString();
+
+                        const row = `
+                        <tr>
+                            <td>${item.properties?.order_number || item.properties?.number} </td>
+                            <td>
+                            ${item.description}
+                            </td>
+
+                            <td>${item.properties.status}</td>
+                            <td>${item.created_by}</td>
+                            <td>${formattedDate}
+                            </td>
+                        </tr>
+                    `;
+                    activityLogsTable.append(row);
+                    });
+
+
                     // Show the modal
-                    $('#viewOrderInfoModal').modal('show');
+                    $('#viewOrderRefundInfoModal').modal('show');
                 } else {
                     alert('Failed to fetch order details.');
                 }

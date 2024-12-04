@@ -72,7 +72,7 @@
                         <th>@lang('lang_v1.order_refund_status')</th>
                         <th>@lang('lang_v1.refund_status')</th>
                         <!-- <th>@lang('lang_v1.order_status')</th> -->
-                         <th>@lang('lang_v1.delivery_assign')</th>
+                         <th>@lang('lang_v1.delivery_assigned')</th>
                         <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.actions')</th> <!-- New Actions column -->
                     </tr>
@@ -123,6 +123,9 @@
             </div>
         </div>
     </div>
+
+    @include('applicationDashboard.pages.orderRefunds.orderInformationModal')
+
 </section>
 
 @stop
@@ -169,7 +172,7 @@
             
             // Check if the parsed data and product properties exist
             if (orderItem && orderItem.product && orderItem.product.name && orderItem.quantity) {
-                return `${orderItem.product.name} - ${orderItem.quantity}`;
+                return `${orderItem.product.name} (${orderItem.quantity})`;
             }
         } catch (e) {
             console.error('Error parsing order_item:', e);
@@ -284,9 +287,33 @@
         orderable: false,
         searchable: false,
         render: function (data, type, row) {
-            return `<button class="btn btn-sm btn-primary edit-order-refund" 
-            data-id="${row.id}">@lang('lang_v1.edit')</button>`;
+            // Initialize an empty string to accumulate buttons
+            let buttons = '';
+
+            // Add the "Edit Order Refund" button
+            buttons += `<button class="btn btn-sm btn-primary edit-order-refund" 
+                        data-id="${row.id}">
+                        @lang('lang_v1.edit')
+                        </button>`;
+
+            // Add the "View Order Info" button
+            buttons += `<button class="btn btn-info view-order-refund-info-btn" 
+                        data-order-id="${row.id}">
+                        @lang('lang_v1.view_order_info')
+                        </button>`;
+
+            // // Conditionally add the "Refund Order" button if the status is completed
+            // if (row.order_status === 'completed') {
+            //     buttons += `<button class="btn btn-warning refund-order-btn" 
+            //                 data-order-id="${row.id}">
+            //                 @lang('lang_v1.refund_order')
+            //                 </button>`;
+            // }
+
+            // Return all buttons as a single string
+            return buttons;
         }
+
     }
             // other columns as needed
         ]
@@ -322,13 +349,13 @@
 
     $(document).on('change', '.change-refund-status', function () {
         var orderRefundId = $(this).data('order-refund-id');
-        var status = $(this).val();
+        var refund_status = $(this).val();
 
         $.ajax({
             url: `{{ action("ApplicationDashboard\OrderRefundController@changeRefundStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
-                status: status,
+                refund_status: refund_status,
                 _token: '{{ csrf_token() }}' // CSRF token for security
             },
             success: function (response) {
@@ -404,6 +431,89 @@ $('#editOrderRefundForm').submit(function (e) {
         }
     });
 });
+
+
+$(document).on('click', '.view-order-refund-info-btn', function () {
+        var orderRefundId = $(this).data('order-id'); // Get the order ID
+
+        // Fetch the order details
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderRefundController@getRefundDetails", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId),
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    const date = new Date(response.order_refund.order.created_at);
+                    const orderRefundDate = date.toLocaleString();
+                    // Populate the modal with the order details
+                    $('#view_order_id').val(response.order_refund.order.id);
+                    $('#order_number').text(response.order_refund.order.number);
+                    $('#business_location').text(response.order_refund.order.business_location.name);
+                    $('#client_name').text(response.order_refund.order.client.contact.name);
+                    $('#payment_method').text(response.order_refund.order.payment_method);
+                    $('#shipping_cost').text(response.order_refund.order.shipping_cost);
+                    $('#sub_total').text(response.order_refund.order.sub_total);
+                    $('#total').text(response.order_refund.order.total);
+                    $('#order_status').text(response.order_refund.order.order_status);
+                    $('#payment_status').text(response.order_refund.order.payment_status);
+                    $('#delivery_name').text(response.order_refund.order.delivery?.contact.name);
+                    $('#order_type').text(response.order_refund.order.order_type);
+                    $('#order_refund_date').text(orderRefundDate);
+
+
+                    // Populate the order items
+                    const itemsTable = $('#order_items_table tbody');
+                    itemsTable.empty(); // Clear existing rows
+
+                    response.order_refund.order.order_items.forEach(item => {
+                        const row = `
+                        <tr>
+                            <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                            <td>${item.product.name}</td>
+                            <td>${response.order_refund.amount}</td>
+                            <td>${item.price}</td>
+                            <td>${response.order_refund.amount * item.price}</td>
+                        </tr>
+                    `;
+                        itemsTable.append(row);
+                    });
+
+
+                      // Populate the order items
+                      const activityLogsTable = $('#activity_logs_table tbody');
+                      activityLogsTable.empty(); // Clear existing rows
+
+                    response.activityLogs.forEach(item => {
+                        const date = new Date(item.created_at);
+                        const formattedDate = date.toLocaleString();
+
+                        const row = `
+                        <tr>
+                            <td>${item.properties?.order_number || item.properties?.number} </td>
+                            <td>
+                            ${item.description}
+                            </td>
+
+                            <td>${item.properties.status}</td>
+                            <td>${item.created_by}</td>
+                            <td>${formattedDate}
+                            </td>
+                        </tr>
+                    `;
+                    activityLogsTable.append(row);
+                    });
+
+
+                    // Show the modal
+                    $('#viewOrderRefundInfoModal').modal('show');
+                } else {
+                    alert('Failed to fetch order details.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the order details.');
+            }
+        });
+    });
 
 
 

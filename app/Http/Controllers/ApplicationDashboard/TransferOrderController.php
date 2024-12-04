@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
 
 class TransferOrderController extends Controller
@@ -250,40 +251,67 @@ class TransferOrderController extends Controller
     }
 
 
-    public function getOrderDetails($orderId)
-{
-    // Fetch the order along with related data
-    $order = Order::with([
-        'client.contact', 
-        'businessLocation', 
-        'orderItems',
-        'fromBusinessLocation',
-        'toBusinessLocation'
-    ])->find($orderId);
+    public function getOrderTransferDetails($orderId){
+        
+        // Fetch activity logs related to the order
+        $activityLogs = Activity::with(['subject'])
+            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
+            ->where('subject_type', 'App\Models\OrderTransfer')
+            ->where('subject_id', $orderId)
+            ->select(
+                'activity_log.*',
+                DB::raw("
+            CASE 
+                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
+                ELSE 'Unknown'
+            END as created_by
+        ")
+            )
+            ->get();
 
+        // Fetch the order along with related data
+        $order = Order::with([
+            'client.contact',
+            'businessLocation',
+            'orderItems',
+            'delivery',
+            'fromBusinessLocation',
+            'toBusinessLocation'
+        ])->find($orderId);
 
-    if ($order) {
-        // Iterate through each order item and check for Transfer details
-        foreach ($order->orderItems as $item) {
-            // Check if there are any records in the order_Transfer table for this order item
-            $refund = OrderRefund::where('order_item_id', $item->id)->first(); // Assuming 'Transfer_amount' stores the Transfered quantity or amount
+        if ($order) {
+            // Iterate through each order item and check for refund details
+            foreach ($order->orderItems as $item) {
+                // Check if there are any records in the order_refund table for this order item
+                $refund = OrderRefund::where('order_item_id', $item->id)->get();
 
-            $refund_amount = $refund->amount ?? 0;
-            // Calculate the difference between the order item quantity and the Transfered amount
-            $item->remaining_quantity = $item->quantity - $refund_amount;
+                $refund_amount = $refund->sum('amount') ?? 0;
+                // Calculate the difference between the order item quantity and the refunded amount
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+            }
+
+            // Return the order details and activity logs
+            return response()->json([
+                'success' => true,
+                'order' => $order,
+                'activityLogs' => $activityLogs,
+            ]);
         }
 
+        // If the order is not found
         return response()->json([
-            'success' => true,
-            'order' => $order
+            'success' => false,
+            'message' => 'Order not found'
         ]);
     }
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Order not found'
-    ]);
-}
 
      /**
      * Update the delivery contact balance based on the order total.

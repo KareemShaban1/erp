@@ -1,4 +1,4 @@
-<div class="modal fade" id="viewOrderInfoModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderInfoLabel">
+<div class="modal fade" id="viewOrderTransferInfoModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderInfoLabel">
         <div class="modal-dialog  modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -157,6 +157,27 @@
                         </div>
 
 
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.activity_logs'):</label>
+                                    <table class="table table-bordered" id="activity_logs_table">
+                                        <thead>
+                                            <tr>
+                                                <th>@lang('lang_v1.order_number')</th>
+                                                <th>@lang('lang_v1.action')</th>
+                                                <th>@lang('lang_v1.status')</th>
+                                                <th>@lang('lang_v1.created_by')</th>
+                                                <th>@lang('lang_v1.activity_date_time')</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be dynamically inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
 
 

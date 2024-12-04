@@ -266,8 +266,9 @@ class OrderController extends Controller
                 'activity_log.*',
                 DB::raw("
             CASE 
-                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))
-                WHEN c.id IS NOT NULL OR d.id IS NOT NULL THEN contact.name
+                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
                 ELSE 'Unknown'
             END as created_by
         ")

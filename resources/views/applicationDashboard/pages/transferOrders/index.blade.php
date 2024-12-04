@@ -366,10 +366,12 @@
 
         // Fetch the order details
         $.ajax({
-            url: `{{ action("ApplicationDashboard\TransferOrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            url: `{{ action("ApplicationDashboard\TransferOrderController@getOrderTransferDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
             type: 'GET',
             success: function (response) {
                 if (response.success) {
+                    const date = new Date(response.order.created_at);
+                    const transferOrderDate = date.toLocaleString();
                     // Populate the modal with the order details
                     $('#view_order_id').val(response.order.id);
                     $('#order_number').text(response.order.number);
@@ -381,6 +383,8 @@
                     $('#total').text(response.order.total);
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
+                    $('#order_type').text(response.order.order_type);
+                    $('#order_refund_date').text(transferOrderDate);
 
                     $('#from_location_name').text(response.order.from_business_location?.name);
                     $('#from_location_city').text(response.order.from_business_location?.city);
@@ -407,8 +411,31 @@
                         itemsTable.append(row);
                     });
 
+                    const activityLogsTable = $('#activity_logs_table tbody');
+                      activityLogsTable.empty(); // Clear existing rows
+
+                    response.activityLogs.forEach(item => {
+                        const date = new Date(item.created_at);
+                        const formattedDate = date.toLocaleString();
+
+                        const row = `
+                        <tr>
+                            <td>${item.properties?.order_number || item.properties?.number} </td>
+                            <td>
+                            ${item.description}
+                            </td>
+
+                            <td>${item.properties.status}</td>
+                            <td>${item.created_by}</td>
+                            <td>${formattedDate}
+                            </td>
+                        </tr>
+                    `;
+                    activityLogsTable.append(row);
+                    });
+
                     // Show the modal
-                    $('#viewOrderInfoModal').modal('show');
+                    $('#viewOrderTransferInfoModal').modal('show');
                 } else {
                     alert('Failed to fetch order details.');
                 }

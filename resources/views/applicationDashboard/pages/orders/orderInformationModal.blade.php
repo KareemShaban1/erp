@@ -1,5 +1,5 @@
 <div class="modal fade" id="viewOrderInfoModal" tabindex="-1" role="dialog" aria-labelledby="viewOrderInfoLabel">
-        <div class="modal-dialog  modal-lg" role="document">
+<div class="modal-dialog  modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="viewOrderInfoLabel">@lang('lang_v1.order_details')</h4>
@@ -8,54 +8,57 @@
                     <form id="viewOrderInfoForm">
                         <input type="hidden" name="order_id" id="view_order_id">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.order_number'):</label>
                                     <p id="order_number"></p>
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.business_location'):</label>
                                     <p id="business_location"></p>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.client'):</label>
                                     <p id="client_name"></p>
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.order_type'):</label>
+                                    <p id="order_type"></p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.payment_method'):</label>
                                     <p id="payment_method"></p>
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.shipping_cost'):</label>
                                     <p id="shipping_cost"></p>
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.sub_total'):</label>
                                     <p id="sub_total"></p>
                                 </div>
-
+                                
                             </div>
-                        </div>
 
-
-                        <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.total'):</label>
                                     <p id="total">
@@ -63,7 +66,12 @@
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                        </div>
+
+
+                        <div class="row">
+                            
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.order_status'):</label>
                                     <p id="order_status">
@@ -71,10 +79,18 @@
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.payment_status'):</label>
                                     <p id="payment_status">
+                                    </p>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.order_date_time'):</label>
+                                    <p id="order_date">
                                     </p>
                                 </div>
 
@@ -125,6 +141,7 @@
                                                 <th>@lang('lang_v1.action')</th>
                                                 <th>@lang('lang_v1.status')</th>
                                                 <th>@lang('lang_v1.created_by')</th>
+                                                <th>@lang('lang_v1.activity_date_time')</th>
                                             </tr>
                                         </thead>
                                         <tbody>

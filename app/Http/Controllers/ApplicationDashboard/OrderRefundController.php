@@ -13,6 +13,7 @@ use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
 
 class OrderRefundController extends Controller
@@ -391,6 +392,68 @@ class OrderRefundController extends Controller
 
             return $output;
         }
+    }
+
+
+    public function getRefundDetails($orderId)
+    {
+        $activityLogs = Activity::with(['subject'])
+        ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+        ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+        ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+        ->leftJoin('contacts as contact', function ($join) {
+            $join->on('contact.id', '=', 'c.contact_id')
+                 ->orOn('contact.id', '=', 'd.contact_id');
+        })
+        ->where('subject_type', 'App\Models\Order')
+        ->where('subject_id', $orderId)
+        ->select(
+            'activity_log.*',
+            DB::raw("
+                CASE 
+                    WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                    WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                    WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
+                    ELSE 'Unknown'
+                END as created_by
+            ")
+        )
+        ->get();
+    
+
+        // Fetch the order along with related data
+        $orderRefund = OrderRefund::
+        with([
+            'order.client.contact',
+            'order.businessLocation',
+            'order.orderItems',
+            'order.delivery'
+        ])->find($orderId);
+
+        if ($orderRefund) {
+            // Iterate through each order item and check for refund details
+            foreach ($orderRefund->order->orderItems as $item) {
+                // Check if there are any records in the order_refund table for this order item
+                $refund = OrderRefund::where('order_item_id', $item->id)->get();
+
+                $refund_amount = $refund->sum('amount') ?? 0;
+                // Calculate the difference between the order item quantity and the refunded amount
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+            }
+
+            // Return the order details and activity logs
+            return response()->json([
+                'success' => true,
+                'order_refund' => $orderRefund,
+                'activityLogs' => $activityLogs,
+            ]);
+        }
+
+        // If the order is not found
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ]);
     }
 
 }

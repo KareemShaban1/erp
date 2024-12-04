@@ -1432,6 +1432,7 @@ return [
 "delivery_name"=>"أسم الدليفرى",
 "order_total_price"=>"سعر الطلب الكلى",
 "order_date_time"=>"تاريخ و وقت الطلب",
+"activity_date_time"=>"تاريخ ووقت السجل",
 "orderDeliveries"=>"طلبات الدليفرى",
 "client_name"=>"أسم العميل",
 

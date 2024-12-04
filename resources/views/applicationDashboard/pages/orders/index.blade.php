@@ -364,6 +364,8 @@
             type: 'GET',
             success: function (response) {
                 if (response.success) {
+                    const date = new Date(response.order.created_at);
+                    const orderDate = date.toLocaleString();
                     // Populate the modal with the order details
                     $('#view_order_id').val(response.order.id);
                     $('#order_number').text(response.order.number);
@@ -376,6 +378,8 @@
                     $('#order_status').text(response.order.order_status);
                     $('#payment_status').text(response.order.payment_status);
                     $('#delivery_name').text(response.order.delivery?.contact.name);
+                    $('#order_type').text(response.order.order_type);
+                    $('#order_date').text(orderDate);
 
 
                     // Populate the order items
@@ -401,6 +405,9 @@
                       activityLogsTable.empty(); // Clear existing rows
 
                     response.activityLogs.forEach(item => {
+                        const date = new Date(item.created_at);
+                        const formattedDate = date.toLocaleString();
+
                         const row = `
                         <tr>
                             <td>${item.subject.number}</td>
@@ -410,7 +417,7 @@
 
                             <td>${item.properties.status}</td>
                             <td>${item.created_by}</td>
-                            <td>${item.created_at}
+                            <td>${formattedDate}
                             </td>
                         </tr>
                     `;
