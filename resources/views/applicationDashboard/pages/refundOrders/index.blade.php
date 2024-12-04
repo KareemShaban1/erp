@@ -385,6 +385,8 @@
                     $('#delivery_name').text(response.order.delivery?.contact.name);
                     $('#order_type').text(response.order.order_type);
                     $('#order_refund_date').text(orderRefundDate);
+                    $('#invoice_no').text(response.order.transaction?.invoice_no);
+
 
 
                     // Populate the order items
@@ -443,6 +445,19 @@
     });
 
 
+    $('#viewOrderRefundInfoModal').on('hide.bs.modal', function () {
+        // Clear all input fields
+        $('#view_order_id').val('');
+
+        // Clear text content
+        $('#order_number, #business_location, #client_name, #payment_method, #shipping_cost, #sub_total, #total, #order_status, #payment_status, #delivery_name, #order_type, #order_date, #invoice_no').text('');
+
+        // Clear the order items table
+        $('#order_items_table tbody').empty();
+
+        // Clear the activity logs table
+        $('#activity_logs_table tbody').empty();
+    });
 
 
 </script>

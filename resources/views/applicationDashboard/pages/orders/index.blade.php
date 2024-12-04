@@ -34,8 +34,8 @@
                 <div class="form-group">
                     <div class="input-group">
                         <!-- <span class="input-group-addon">
-                                        <i class="fa fa-user"></i>
-                                    </span> -->
+                                            <i class="fa fa-user"></i>
+                                        </span> -->
                         {!! Form::select('status', [
             'all' => __('All'),
             'pending' => __('Pending'),
@@ -380,6 +380,8 @@
                     $('#delivery_name').text(response.order.delivery?.contact.name);
                     $('#order_type').text(response.order.order_type);
                     $('#order_date').text(orderDate);
+                    $('#invoice_no').text(response.order.transaction?.invoice_no);
+
 
 
                     // Populate the order items
@@ -400,9 +402,9 @@
                     });
 
 
-                      // Populate the order items
-                      const activityLogsTable = $('#activity_logs_table tbody');
-                      activityLogsTable.empty(); // Clear existing rows
+                    // Populate the order items
+                    const activityLogsTable = $('#activity_logs_table tbody');
+                    activityLogsTable.empty(); // Clear existing rows
 
                     response.activityLogs.forEach(item => {
                         const date = new Date(item.created_at);
@@ -421,7 +423,7 @@
                             </td>
                         </tr>
                     `;
-                    activityLogsTable.append(row);
+                        activityLogsTable.append(row);
                     });
 
 
@@ -437,24 +439,39 @@
         });
     });
 
+    $('#viewOrderInfoModal').on('hide.bs.modal', function () {
+        // Clear all input fields
+        $('#view_order_id').val('');
+
+        // Clear text content
+        $('#order_number, #business_location, #client_name, #payment_method, #shipping_cost, #sub_total, #total, #order_status, #payment_status, #delivery_name, #order_type, #order_date, #invoice_no').text('');
+
+        // Clear the order items table
+        $('#order_items_table tbody').empty();
+
+        // Clear the activity logs table
+        $('#activity_logs_table tbody').empty();
+    });
+
+
     // Show refund modal
     $(document).on('click', '.refund-order-btn', function () {
-    var orderId = $(this).data('order-id');
+        var orderId = $(this).data('order-id');
 
-    // Populate hidden order ID field in the refund modal
-    $('#refund_order_id').val(orderId);
+        // Populate hidden order ID field in the refund modal
+        $('#refund_order_id').val(orderId);
 
-    // Fetch the order details
-    $.ajax({
-        url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
-        type: 'GET',
-        success: function (response) {
-            if (response.success) {
-                const itemsTable = $('#order_items_table tbody');
-                itemsTable.empty(); // Clear existing rows
+        // Fetch the order details
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    const itemsTable = $('#order_items_table tbody');
+                    itemsTable.empty(); // Clear existing rows
 
-                response.order.order_items.forEach(item => {
-                    const row = `
+                    response.order.order_items.forEach(item => {
+                        const row = `
                     <tr>
                         <td>
                             <img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;">
@@ -483,47 +500,47 @@
                         </td>
                     </tr>
                     `;
-                    // Append the row to the table
-                    $('#order_items_table tbody').append(row);
+                        // Append the row to the table
+                        $('#order_items_table tbody').append(row);
 
-                    // Dynamically set the max value for refund amount based on remaining quantity
-                    $(`input[name="refund_amount_${item.id}"]`).attr('max', item.remaining_quantity);
-                });
+                        // Dynamically set the max value for refund amount based on remaining quantity
+                        $(`input[name="refund_amount_${item.id}"]`).attr('max', item.remaining_quantity);
+                    });
 
-                // Show the modal
-                $('#refundOrderModal').modal('show');
-            } else {
-                alert('Failed to fetch order details.');
+                    // Show the modal
+                    $('#refundOrderModal').modal('show');
+                } else {
+                    alert('Failed to fetch order details.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the order details.');
             }
-        },
-        error: function () {
-            alert('An error occurred while fetching the order details.');
+        });
+    });
+
+    // Event handler for incrementing refund amount
+    $(document).on('click', '.increment-btn', function () {
+        var itemId = $(this).data('item-id');
+        var $input = $(`input[name="refund_amount_${itemId}"]`);
+        var currentValue = parseInt($input.val(), 10) || 0;
+        var maxQuantity = parseInt($input.attr('max'), 10);
+
+        if (currentValue < maxQuantity) {
+            $input.val(currentValue + 1);
         }
     });
-});
 
-// Event handler for incrementing refund amount
-$(document).on('click', '.increment-btn', function () {
-    var itemId = $(this).data('item-id');
-    var $input = $(`input[name="refund_amount_${itemId}"]`);
-    var currentValue = parseInt($input.val(), 10) || 0;
-    var maxQuantity = parseInt($input.attr('max'), 10);
+    // Event handler for decrementing refund amount
+    $(document).on('click', '.decrement-btn', function () {
+        var itemId = $(this).data('item-id');
+        var $input = $(`input[name="refund_amount_${itemId}"]`);
+        var currentValue = parseInt($input.val(), 10) || 0;
 
-    if (currentValue < maxQuantity) {
-        $input.val(currentValue + 1);
-    }
-});
-
-// Event handler for decrementing refund amount
-$(document).on('click', '.decrement-btn', function () {
-    var itemId = $(this).data('item-id');
-    var $input = $(`input[name="refund_amount_${itemId}"]`);
-    var currentValue = parseInt($input.val(), 10) || 0;
-
-    if (currentValue > 0) {
-        $input.val(currentValue - 1);
-    }
-});
+        if (currentValue > 0) {
+            $input.val(currentValue - 1);
+        }
+    });
 
 
     $('#saveRefund').click(function () {
@@ -531,21 +548,21 @@ $(document).on('click', '.decrement-btn', function () {
 
         $('#order_items_table tbody tr').each(function () {
             const itemId = $(this).find('.refund-reason').data('item-id');
-        const reason = $(this).find('.refund-reason').val().trim();
-        const amount = $(this).find('.refund-amount').val().trim();  // Ensure to trim any extra spaces
-        const status = $(this).find('.refund-status').val();
-        const adminResponse = $(this).find('.refund-admin-response').val().trim();
+            const reason = $(this).find('.refund-reason').val().trim();
+            const amount = $(this).find('.refund-amount').val().trim();  // Ensure to trim any extra spaces
+            const status = $(this).find('.refund-status').val();
+            const adminResponse = $(this).find('.refund-admin-response').val().trim();
 
-        // Skip rows where any required data is empty
-        if (itemId && reason && amount && status && adminResponse) {
-            items.push({
-                id: itemId,
-                refund_reason: reason,
-                refund_amount: amount,
-                refund_status: status,
-                refund_admin_response: adminResponse,
-            });
-        }
+            // Skip rows where any required data is empty
+            if (itemId && reason && amount && status && adminResponse) {
+                items.push({
+                    id: itemId,
+                    refund_reason: reason,
+                    refund_amount: amount,
+                    refund_status: status,
+                    refund_admin_response: adminResponse,
+                });
+            }
         });
 
         if (items.length === 0) {

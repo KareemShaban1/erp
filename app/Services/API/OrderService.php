@@ -320,6 +320,7 @@ class OrderService extends BaseService
             $transactionData = [
                 "business_id" => $client->contact->business_id,
                 "location_id" => $client->business_location_id,
+                "order_id" => $order->id,
                 'final_total' => $order->total,
                 "type" => "sell",
                 "status" => "final",
@@ -447,16 +448,6 @@ class OrderService extends BaseService
         }
     }
 
-
-
-    // protected function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    // {
-    //     // Dispatch the job with a 10-minute delay
-    //     TransferProductJob::dispatch($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    //         ->delay(now());
-
-    //     \Log::info("TransferProductJob dispatched for Order: {$order->id}, OrderItem: {$orderItem->id}");
-    // }
 
 
     public function storeRefundOrder($order, $items)

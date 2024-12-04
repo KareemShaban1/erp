@@ -120,6 +120,9 @@
             </div>
         </div>
     </div>
+
+    @include('applicationDashboard.pages.orderCancellations.orderInformationModal')
+
 </section>
 
 @stop
@@ -213,8 +216,23 @@
         orderable: false,
         searchable: false,
         render: function (data, type, row) {
-            return `<button class="btn btn-sm btn-primary edit-order-cancellation" 
-            data-id="${row.id}">@lang('lang_v1.edit')</button>`;
+            // Initialize an empty string to accumulate buttons
+            let buttons = '';
+
+            // Add the "Edit Order Refund" button
+            buttons += `<button class="btn btn-sm btn-primary edit-order-cancellation" 
+                        data-id="${row.id}">
+                        @lang('lang_v1.edit')
+                        </button>`;
+
+            // Add the "View Order Info" button
+            buttons += `<button class="btn btn-info view-order-cancellation-info-btn" 
+                        data-order-id="${row.id}">
+                        @lang('lang_v1.view_order_info')
+                        </button>`;
+
+            // Return all buttons as a single string
+            return buttons;
         }
     }
             // other columns as needed
@@ -308,6 +326,89 @@ $('#editOrderCancellationForm').submit(function (e) {
     });
 });
 
+$(document).on('click', '.view-order-cancellation-info-btn', function () {
+        var orderCancellationId = $(this).data('order-id'); // Get the order ID
+
+        // Fetch the order details
+        $.ajax({
+            url: `{{ action("ApplicationDashboard\OrderCancellationController@getCancellationDetails", 
+            ['orderCancellationId' => ':orderCancellationId']) }}`.replace(':orderCancellationId', orderCancellationId),
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    const date = new Date(response.order_cancellation.order.created_at);
+                    const orderCancellationDate = date.toLocaleString();
+                    // Populate the modal with the order details
+                    $('#order_cancellation_status').text(response.order_cancellation.status);
+                    $('#view_order_id').val(response.order_cancellation.order.id);
+                    $('#order_number').text(response.order_cancellation.order.number);
+                    $('#business_location').text(response.order_cancellation.order.business_location.name);
+                    $('#client_name').text(response.order_cancellation.order.client.contact.name);
+                    $('#payment_method').text(response.order_cancellation.order.payment_method);
+                    $('#shipping_cost').text(response.order_cancellation.order.shipping_cost);
+                    $('#sub_total').text(response.order_cancellation.order.sub_total);
+                    $('#total').text(response.order_cancellation.order.total);
+                    $('#order_status').text(response.order_cancellation.order.order_status);
+                    $('#payment_status').text(response.order_cancellation.order.payment_status);
+                    // $('#delivery_name').text(response.order_cancellation.order.delivery?.contact.name);
+                    $('#order_type').text(response.order_cancellation.order.order_type);
+                    $('#order_cancellation_date').text(orderCancellationDate);
+
+
+                    // Populate the order items
+                    const itemsTable = $('#order_items_table tbody');
+                    itemsTable.empty(); // Clear existing rows
+
+                    response.order_cancellation.order.order_items.forEach(item => {
+                        const row = `
+                        <tr>
+                            <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                            <td>${item.product.name}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price}</td>
+                            <td>${item.sub_total}</td>
+                        </tr>
+                    `;
+                        itemsTable.append(row);
+                    });
+
+
+                      // Populate the order items
+                      const activityLogsTable = $('#activity_logs_table tbody');
+                      activityLogsTable.empty(); // Clear existing rows
+
+                    response.activityLogs.forEach(item => {
+                        const date = new Date(item.created_at);
+                        const formattedDate = date.toLocaleString();
+
+                        const row = `
+                        <tr>
+                            <td>${item.properties?.order_number || item.properties?.number} </td>
+                            <td>
+                            ${item.description}
+                            </td>
+
+                            <td>${item.properties.status}</td>
+                            <td>${item.created_by}</td>
+                            <td>${formattedDate}
+                            </td>
+                        </tr>
+                    `;
+                    activityLogsTable.append(row);
+                    });
+
+
+                    // Show the modal
+                    $('#viewOrderCancellationInfoModal').modal('show');
+                } else {
+                    alert('Failed to fetch order details.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the order details.');
+            }
+        });
+    });
 
 
   

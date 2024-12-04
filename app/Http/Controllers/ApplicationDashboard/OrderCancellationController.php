@@ -5,12 +5,14 @@ namespace App\Http\Controllers\ApplicationDashboard;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderCancellation;
+use App\Models\OrderRefund;
 use App\Models\OrderTracking;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
 
 class OrderCancellationController extends Controller
@@ -107,14 +109,14 @@ class OrderCancellationController extends Controller
     private function formatDatatableResponse($query)
     {
         return Datatables::of($query)
-            ->addColumn('client_contact_name', function ($orderRefund) {
-                return optional($orderRefund->client->contact)->name ?? 'N/A';
+            ->addColumn('client_contact_name', function ($orderCancellation) {
+                return optional($orderCancellation->client->contact)->name ?? 'N/A';
             })
-            ->addColumn('order_number', function ($orderRefund) {
-                return optional($orderRefund->order)->number ?? 'N/A';
+            ->addColumn('order_number', function ($orderCancellation) {
+                return optional($orderCancellation->order)->number ?? 'N/A';
             })
-            ->addColumn('order_status', function ($orderRefund) {
-                return optional($orderRefund->order)->order_status ?? 'N/A';
+            ->addColumn('order_status', function ($orderCancellation) {
+                return optional($orderCancellation->order)->order_status ?? 'N/A';
             })
             ->make(true);
     }
@@ -261,6 +263,68 @@ class OrderCancellationController extends Controller
 
             return $output;
         }
+    }
+
+
+    public function getCancellationDetails($orderId)
+    {
+        $activityLogs = Activity::with(['subject'])
+        ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+        ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+        ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+        ->leftJoin('contacts as contact', function ($join) {
+            $join->on('contact.id', '=', 'c.contact_id')
+                 ->orOn('contact.id', '=', 'd.contact_id');
+        })
+        ->where('subject_type', 'App\Models\OrderCancellation')
+        ->where('subject_id', $orderId)
+        ->select(
+            'activity_log.*',
+            DB::raw("
+                CASE 
+                    WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                    WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                    WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
+                    ELSE 'Unknown'
+                END as created_by
+            ")
+        )
+        ->get();
+    
+
+        // Fetch the order along with related data
+        $orderCancellation = OrderCancellation::
+        with([
+            'order.client.contact',
+            'order.businessLocation',
+            'order.orderItems',
+            'order.delivery'
+        ])->find($orderId);
+
+        if ($orderCancellation) {
+            // Iterate through each order item and check for refund details
+            foreach ($orderCancellation->order->orderItems as $item) {
+                // Check if there are any records in the order_cancellation table for this order item
+                $refund = OrderRefund::where('order_item_id', $item->id)->get();
+
+                $refund_amount = $refund->sum('amount') ?? 0;
+                // Calculate the difference between the order item quantity and the refunded amount
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+            }
+
+            // Return the order details and activity logs
+            return response()->json([
+                'success' => true,
+                'order_cancellation' => $orderCancellation,
+                'activityLogs' => $activityLogs,
+            ]);
+        }
+
+        // If the order is not found
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ]);
     }
 
 

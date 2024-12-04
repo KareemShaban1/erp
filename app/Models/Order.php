@@ -63,6 +63,9 @@ class Order extends Model
         ->with(['product','variation']);
     }
 
+    public function transaction(){
+        return $this->hasOne(Transaction::class,'order_id','id');
+    }
     public function orderTracking(){
         return $this->hasOne(OrderTracking::class,'order_id','id');
     }

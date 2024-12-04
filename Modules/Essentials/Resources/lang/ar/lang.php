@@ -309,6 +309,7 @@ return[
 "work_duration_hour"=>":duration المدة",
 "total_leaves_days"=>":total_leaves يوم",
 "show_all_payroll"=>"عرض كل كشوفات الرواتب",
+"show_all_payroll_groups"=>"عرض جميع مجموعات كشوفات المرتبات",
 "delete_leave"=>"حذف الأجازة",
 
 "new_client_notification" => ":client_name تم تسجيل عميل جديد بأسم <br> البرد الألكترونى - :client_email",

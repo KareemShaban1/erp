@@ -51,6 +51,7 @@ class TransactionUtil extends Util
         $transaction = Transaction::create([
             'business_id' => $business_id,
             'location_id' => $input['location_id'],
+            'order_id'=>$input['order_id'],
             'type' => $sale_type,
             'status' => $input['status'],
             'sub_status' => !empty($input['sub_status']) ? $input['sub_status'] : null,

@@ -19,7 +19,7 @@
                             @lang('essentials::lang.all_payrolls')
                         </a>
                     </li>
-                    @if($is_admin)
+                    @if($is_admin || auth()->user()->can('essentials.all_payroll_groups'))
                         <li>
                             <a href="#payroll_group_tab" data-toggle="tab" aria-expanded="true">
                                 <i class="fas fa-layer-group" aria-hidden="true"></i>
@@ -103,7 +103,7 @@
                             </div>
                         </div>
                     </div>
-                    @if($is_admin)
+                    @if($is_admin  || auth()->user()->can('essentials.all_payroll_groups'))
                         <div class="tab-pane" id="payroll_group_tab">
                             <div class="row">
                                 <div class="col-md-12">
@@ -352,7 +352,7 @@
                 });
             @endif
             //payroll groups
-            @if($is_admin)
+            @if($is_admin || auth()->user()->can('essentials.all_payroll_groups'))
                 payroll_group_table = $('#payroll_group_table').DataTable({
                         processing: true,
                         serverSide: true,

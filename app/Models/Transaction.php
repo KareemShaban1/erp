@@ -177,6 +177,11 @@ class Transaction extends Model
         return $this->belongsTo(\App\Models\Contact::class, 'contact_id');
     }
 
+    public function order()
+    {
+        return $this->belongsTo(\App\Models\Order::class, 'order_id');
+    }
+
     public function payment_lines()
     {
         return $this->hasMany(\App\Models\TransactionPayment::class, 'transaction_id');

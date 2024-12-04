@@ -7,6 +7,9 @@
                 <div class="modal-body">
                     <form id="viewOrderInfoForm">
                         <input type="hidden" name="order_id" id="view_order_id">
+
+                        <div class="box box-primary">
+                        <div class="box-body">
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -108,6 +111,9 @@
                             </div>
                         </div>
 
+                        </div>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">

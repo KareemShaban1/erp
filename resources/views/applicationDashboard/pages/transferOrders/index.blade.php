@@ -232,13 +232,6 @@
                           @lang('lang_v1.view_order_info')
                        </button>`;
 
-                    // Conditionally add the "Transfer Order" button
-                    // if (row.order_status === 'completed') {
-                    //     buttons += `<button class="btn btn-warning refund-order-btn" data-order-id="${data}">
-                    //         @lang('lang_v1.refund_order')
-                    //     </button>`;
-                    // }
-
                     return buttons;
                 },
                 orderable: false,
@@ -385,6 +378,7 @@
                     $('#payment_status').text(response.order.payment_status);
                     $('#order_type').text(response.order.order_type);
                     $('#order_refund_date').text(transferOrderDate);
+                    $('#invoice_no').text(response.order.transaction?.invoice_no);
 
                     $('#from_location_name').text(response.order.from_business_location?.name);
                     $('#from_location_city').text(response.order.from_business_location?.city);
@@ -447,6 +441,19 @@
     });
 
 
+    $('#viewOrderTransferInfoModal').on('hide.bs.modal', function () {
+        // Clear all input fields
+        $('#view_order_id').val('');
+
+        // Clear text content
+        $('#order_number, #business_location, #client_name, #payment_method, #shipping_cost, #sub_total, #total, #order_status, #payment_status, #delivery_name, #order_type, #order_date, #invoice_no, #from_location_name, #from_location_city, #from_location_mobile, #to_location_name, #to_location_city, #to_location_mobile').text('');
+
+        // Clear the order items table
+        $('#order_items_table tbody').empty();
+
+        // Clear the activity logs table
+        $('#activity_logs_table tbody').empty();
+    });
 
 
 </script>

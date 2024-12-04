@@ -18,8 +18,8 @@ Route::middleware(
 Route::get('applicationDashboard/home', [HomeController::class, 'index'])
     ->name('application.home');
 
+// products routes
 Route::resource('products', 'ProductController');
-
 Route::get('/products/stock-history/{id}', 'ProductController@productStockHistory');
 Route::get('/delete-media/{media_id}', 'ProductController@deleteMedia');
 Route::post('/products/mass-deactivate', 'ProductController@massDeactivate');
@@ -35,7 +35,6 @@ Route::post('/products/bulk-edit', 'ProductController@bulkEdit');
 Route::post('/products/bulk-update', 'ProductController@bulkUpdate');
 Route::post('/products/bulk-update-location', 'ProductController@updateProductLocation');
 Route::get('/products/get-product-to-edit/{product_id}', 'ProductController@getProductToEdit');
-
 Route::post('/products/get_sub_categories', 'ProductController@getSubCategories');
 Route::get('/products/get_sub_units', 'ProductController@getSubUnits');
 Route::post('/products/product_form_part', 'ProductController@getProductVariationFormPart');
@@ -47,29 +46,40 @@ Route::get('/products/quick_add', 'ProductController@quickAdd');
 Route::post('/products/save_quick_product', 'ProductController@saveQuickProduct');
 Route::get('/products/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
 Route::post('/products/toggle-woocommerce-sync', 'ProductController@toggleWooCommerceSync');
+// ----------------------------------------------
 
+// categories routes
 Route::get('taxonomies-ajax-index-page', 'TaxonomyController@getTaxonomyIndexPage');
 Route::resource('taxonomies', 'TaxonomyController');
+// ----------------------------------------------
 
+// brands routes
 Route::resource('brands', 'BrandController');
+// ----------------------------------------------
 
+// unites routes
 Route::resource('units', 'UnitController');
+// ----------------------------------------------
 
+// variation templates routes
 Route::resource('variation-templates', 'VariationTemplateController');
+// ----------------------------------------------
 
-//Print Labels
+// Print Labels
 Route::get('/labels/show', 'LabelsController@show');
 Route::get('/labels/add-product-row', 'LabelsController@addProductRow');
 Route::get('/labels/preview', 'LabelsController@preview');
+// ----------------------------------------------
 
 //Import products
 Route::get('/import-products', 'ImportProductsController@index');
 Route::post('/import-products/store', 'ImportProductsController@store');
-
+// ----------------------------------------------
 
 //Import opening stock
 Route::get('/import-opening-stock', 'ImportOpeningStockController@index');
 Route::post('/import-opening-stock/store', 'ImportOpeningStockController@store');
+// ----------------------------------------------
 
 Route::get('selling-price-group/activate-deactivate/{id}', 'SellingPriceGroupController@activateDeactivate');
 Route::get('export-selling-price-group', 'SellingPriceGroupController@export');
@@ -78,53 +88,61 @@ Route::post('import-selling-price-group', 'SellingPriceGroupController@import');
 Route::resource('selling-price-group', 'SellingPriceGroupController');
 
 Route::resource('warranties', 'WarrantyController');
+// ----------------------------------------------
 
+// client orders
 Route::get('applicationDashboard/client-orders-report', 'ApplicationDashboard\OrderReportsController@index')->name('orders.reports');
 Route::get('applicationDashboard/client-orders/{id}', 'ApplicationDashboard\OrderReportsController@clientOrders')->name('client.orders');
+// ----------------------------------------------
 
-
+// orders 
 Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
 Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
+Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
+Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
+// ----------------------------------------------
 
+// refund orders
 Route::resource('applicationDashboard/refundOrders', 'ApplicationDashboard\RefundOrderController');
 Route::get('applicationDashboard/refundOrders/{orderId}/details', 'ApplicationDashboard\RefundOrderController@getOrderRefundDetails')
 ->name('orders_refund.details');
 Route::post('applicationDashboard/refundOrders/{orderId}/change-order-status', 'ApplicationDashboard\RefundOrderController@changeOrderStatus');
 Route::post('applicationDashboard/refundOrders/{orderId}/change-payment-status', 'ApplicationDashboard\RefundOrderController@changePaymentStatus');
+// ----------------------------------------------
 
-
+// transfer orders
 Route::resource('applicationDashboard/transferOrders', 'ApplicationDashboard\TransferOrderController');
 Route::get('applicationDashboard/transferOrders/{orderId}/details', 'ApplicationDashboard\TransferOrderController@getOrderTransferDetails')
 ->name('orders_transfer.details');
 Route::post('applicationDashboard/transferOrders/{orderId}/change-order-status', 'ApplicationDashboard\TransferOrderController@changeOrderStatus');
 Route::post('applicationDashboard/transferOrders/{orderId}/change-payment-status', 'ApplicationDashboard\TransferOrderController@changePaymentStatus');
+// ----------------------------------------------
 
 
 // Route::get('applicationDashboard/orderDeliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries');
 
+// deliveries
 Route::get('/order-deliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries')->name('order.deliveries');
-
 Route::get('applicationDashboard/allDeliveries', 'ApplicationDashboard\DeliveryController@allDeliveries');
-
-
 Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
-
 Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');
 Route::post('applicationDashboard/deliveries/{orderId}/change-payment-status', 'ApplicationDashboard\DeliveryController@changePaymentStatus');
+// ----------------------------------------------
 
 
-Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
-Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
 
-
-// changePaymentStatus
+// order cancellations
 Route::resource('applicationDashboard/order-cancellations', 'ApplicationDashboard\OrderCancellationController');
 Route::post(
     'applicationDashboard/order-cancellations/{orderCancellationId}/change-status',
     'ApplicationDashboard\OrderCancellationController@changeOrderCancellationStatus'
 );
+Route::get('applicationDashboard/order-cancellations/{orderCancellationId}/details', 
+'ApplicationDashboard\OrderCancellationController@getCancellationDetails');
+// ----------------------------------------------
 
 
+// order refunds
 Route::resource('applicationDashboard/order-refunds', 'ApplicationDashboard\OrderRefundController');
 Route::post(
     'applicationDashboard/order-refunds/{orderRefundId}/change-status',
@@ -135,30 +153,28 @@ Route::post(
     'ApplicationDashboard\OrderRefundController@changeRefundStatus'
 );
 Route::get('applicationDashboard/order-refunds/{orderRefundId}/details', 'ApplicationDashboard\OrderRefundController@getRefundDetails');
+// ----------------------------------------------
 
+// banners
 Route::get('get_products', 'ApplicationDashboard\BannerController@getProducts');
 Route::get('get_categories', 'ApplicationDashboard\BannerController@getCategories');
 Route::resource('banners', 'ApplicationDashboard\BannerController');
+// ----------------------------------------------
 
-// Route::resource('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController');
+// settings
 Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
     ->name('application_settings.index');
-
 Route::get('applicationDashboard/settings/create', 'ApplicationDashboard\ApplicationSettingsController@create')
     ->name('application_settings.create');
-
 Route::get('applicationDashboard/settings/show/{id}', 'ApplicationDashboard\ApplicationSettingsController@show')
     ->name('application_settings.show');
-
-
 Route::post('applicationDashboard/settings/store', 'ApplicationDashboard\ApplicationSettingsController@store')
     ->name('application_settings.store');
-
 Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
     ->name('application_settings.update');
-
 Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
+// ----------------------------------------------
 
 
 });

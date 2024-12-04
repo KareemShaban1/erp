@@ -405,7 +405,7 @@ class OrderRefundController extends Controller
             $join->on('contact.id', '=', 'c.contact_id')
                  ->orOn('contact.id', '=', 'd.contact_id');
         })
-        ->where('subject_type', 'App\Models\Order')
+        ->where('subject_type', 'App\Models\OrderRefund')
         ->where('subject_id', $orderId)
         ->select(
             'activity_log.*',

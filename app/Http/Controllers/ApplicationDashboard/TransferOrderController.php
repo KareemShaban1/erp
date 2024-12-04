@@ -157,7 +157,8 @@ class TransferOrderController extends Controller
         switch ($status) {
             case 'pending':
                 $orderTracking->pending_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'pending']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, 
+                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
@@ -170,7 +171,8 @@ class TransferOrderController extends Controller
                     ['order_id' => $order->id,
                     'status'=>$order->status]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->order, 'status'=>'processing']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, 
+                ['order_number' => $order->order, 'status'=>'processing','order_type',$order->order_type]);
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
@@ -184,11 +186,13 @@ class TransferOrderController extends Controller
                     'status'=>$order->status]
                 );
                 $orderTracking->shipped_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'shipped']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, 
+                ['order_number' => $order->number, 'status'=>'shipped','order_type',$order->order_type]);
                 break;
             case 'cancelled':
                 $orderTracking->cancelled_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'cancelled']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, 
+                ['order_number' => $order->number, 'status'=>'cancelled','order_type',$order->order_type]);
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
@@ -201,7 +205,8 @@ class TransferOrderController extends Controller
                     ['order_id' => $order->id, 
                     'status'=>$order->status]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=>'completed']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, 
+                ['order_number' => $order->number, 'status'=>'completed','order_type',$order->order_type]);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -235,13 +240,16 @@ class TransferOrderController extends Controller
 
         switch ($status) {
             case 'pending':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'pending']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
+                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
                 break;
             case 'paid':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'paid']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
+                ['order_number' => $order->number, 'status'=>'paid','order_type',$order->order_type]);
                 break;
             case 'failed':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'failed']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
+                ['order_number' => $order->number, 'status'=>'failed','order_type',$order->order_type]);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");    
@@ -262,7 +270,7 @@ class TransferOrderController extends Controller
                 $join->on('contact.id', '=', 'c.contact_id')
                     ->orOn('contact.id', '=', 'd.contact_id');
             })
-            ->where('subject_type', 'App\Models\OrderTransfer')
+            ->where('subject_type', 'App\Models\Order')
             ->where('subject_id', $orderId)
             ->select(
                 'activity_log.*',
@@ -284,7 +292,8 @@ class TransferOrderController extends Controller
             'orderItems',
             'delivery',
             'fromBusinessLocation',
-            'toBusinessLocation'
+            'toBusinessLocation',
+            'transaction'
         ])->find($orderId);
 
         if ($order) {

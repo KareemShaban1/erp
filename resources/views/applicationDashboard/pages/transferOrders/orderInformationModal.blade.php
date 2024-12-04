@@ -7,6 +7,9 @@
                 <div class="modal-body">
                     <form id="viewOrderInfoForm">
                         <input type="hidden" name="order_id" id="view_order_id">
+
+                        <div class="box box-primary">
+                        <div class="box-body">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -55,7 +58,7 @@
 
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.total'):</label>
                                     <p id="total">
@@ -63,7 +66,7 @@
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.order_status'):</label>
                                     <p id="order_status">
@@ -71,7 +74,7 @@
                                 </div>
 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label>@lang('lang_v1.payment_status'):</label>
                                     <p id="payment_status">
@@ -79,8 +82,20 @@
                                 </div>
 
                             </div>
-                        </div>
 
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>@lang('lang_v1.invoice_no'):</label>
+                                    <p id="invoice_no">
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                        </div></div>
+
+                     <div class="box">
+                        <div class="box-body">
                         <div class="row">
                         <div class="col-md-3">
                                 <div class="form-group">
@@ -107,7 +122,6 @@
                             </div>
                         </div>
 
-
                         <div class="row">
                         <div class="col-md-3">
                                 <div class="form-group">
@@ -133,6 +147,11 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
+                     </div>
+
+
+                     
 
                         <div class="row">
                             <div class="col-md-12">

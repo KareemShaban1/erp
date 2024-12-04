@@ -280,7 +280,8 @@ class OrderController extends Controller
             'client.contact',
             'businessLocation',
             'orderItems',
-            'delivery'
+            'delivery',
+            'transaction'
         ])->find($orderId);
 
         if ($order) {

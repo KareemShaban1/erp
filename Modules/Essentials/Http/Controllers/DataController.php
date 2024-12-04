@@ -213,6 +213,11 @@ class DataController extends Controller
                 'default' => false
             ],
             [
+                'value' => 'essentials.all_payroll_groups',
+                'label' => __('essentials::lang.show_all_payroll_groups'),
+                'default' => false
+            ],
+            [
                 'value' => 'essentials.crud_leave_type',
                 'label' => __('essentials::lang.crud_leave_type'),
                 'default' => false
