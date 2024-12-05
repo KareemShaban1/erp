@@ -67,16 +67,16 @@ class PayrollController extends Controller
                 ->leftJoin('categories as dsgn', 'u.essentials_designation_id', '=', 'dsgn.id')
                 ->leftJoin('essentials_payroll_group_transactions as epgt', 'transactions.id', '=', 'epgt.transaction_id')
                 ->select([
-                        'transactions.id',
-                        DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
-                        'final_total',
-                        'transaction_date',
-                        'ref_no',
-                        'transactions.payment_status',
-                        'dept.name as department',
-                        'dsgn.name as designation',
-                        'epgt.payroll_group_id'
-                    ]);
+                    'transactions.id',
+                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
+                    'final_total',
+                    'transaction_date',
+                    'ref_no',
+                    'transactions.payment_status',
+                    'dept.name as department',
+                    'dsgn.name as designation',
+                    'epgt.payroll_group_id'
+                ]);
 
 
 
@@ -116,7 +116,7 @@ class PayrollController extends Controller
                         $html = '<div class="btn-group">
                                     <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
                                         data-toggle="dropdown" aria-expanded="false">' .
-                        __("messages.actions") .
+                            __("messages.actions") .
                             '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                         </span>
                                     </button>
@@ -426,6 +426,7 @@ class PayrollController extends Controller
         $payroll = Transaction::where('business_id', $business_id)
             ->with(['transaction_for', 'payment_lines'])
             ->findOrFail($id);
+
         $transaction_date = \Carbon::parse($payroll->transaction_date);
 
         $department = Category::where('category_type', 'hrm_department')
@@ -445,21 +446,6 @@ class PayrollController extends Controller
         $start_of_month = \Carbon::parse($payroll->transaction_date);
         $end_of_month = \Carbon::parse($payroll->transaction_date)->endOfMonth();
 
-        // Fetch employee expense transactions for the month
-        $expense_transactions = Transaction::where('business_id', $business_id)
-            ->where('expense_for', $payroll->transaction_for->id)
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d')])
-            ->get();
-
-        // Add expense transactions to deductions
-        foreach ($expense_transactions as $expense) {
-            $deductions['deduction_names'][] = __('essentials::lang.expense');
-            $deductions['deduction_amounts'][] = $expense->final_total;
-            $deductions['deduction_types'][] = 'fixed';
-            $deductions['deduction_percents'][] = 0;
-        }
-
         $leaves = EssentialsLeave::where('business_id', $business_id)
             ->where('user_id', $payroll->transaction_for->id)
             ->whereDate('start_date', '>=', $start_of_month)
@@ -467,21 +453,46 @@ class PayrollController extends Controller
             ->get();
 
         $total_leaves = 0;
-        $days_in_a_month = \Carbon::parse($start_of_month)->daysInMonth;
-        foreach ($leaves as $key => $leave) {
+        $days_in_a_month = $start_of_month->daysInMonth;
+        foreach ($leaves as $leave) {
             $start_date = \Carbon::parse($leave->start_date);
             $end_date = \Carbon::parse($leave->end_date);
-
-            $diff = $start_date->diffInDays($end_date);
-            $diff += 1;
-            $total_leaves += $diff;
+            $total_leaves += $start_date->diffInDays($end_date) + 1;
         }
 
         $total_work_duration = $this->essentialsUtil->getTotalWorkDuration('hour', $payroll->transaction_for->id, $business_id, $start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d'));
 
+        // Fetch expense transactions
+        $expense_transactions = Transaction::where('business_id', $business_id)
+            ->where('expense_for', $payroll->transaction_for->id)
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d')])
+            ->get();
+
+        foreach ($expense_transactions as $expense) {
+            // Check if this expense is already in deductions
+            $exists = false;
+            if (isset($deductions['deduction_names'])) {
+                foreach ($deductions['deduction_names'] as $index => $name) {
+                    if ($name === __('essentials::lang.expense') && $deductions['deduction_amounts'][$index] == $expense->final_total) {
+                        $exists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$exists) {
+                $deductions['deduction_names'][] = __('essentials::lang.expense');
+                $deductions['deduction_amounts'][] = $expense->final_total;
+                $deductions['deduction_types'][] = 'fixed';
+                $deductions['deduction_percents'][] = 0;
+            }
+        }
+
         return view('essentials::payroll.show')
             ->with(compact('payroll', 'month_name', 'allowances', 'deductions', 'year', 'payment_types', 'bank_details', 'designation', 'department', 'final_total_in_words', 'total_leaves', 'days_in_a_month', 'total_work_duration'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
