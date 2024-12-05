@@ -22,7 +22,6 @@ use App\Models\TransactionPayment;
 use App\Events\TransactionPaymentAdded;
 
 class PayrollController extends Controller
-
 {
     /**
      * All Utils instance.
@@ -68,18 +67,18 @@ class PayrollController extends Controller
                 ->leftJoin('categories as dsgn', 'u.essentials_designation_id', '=', 'dsgn.id')
                 ->leftJoin('essentials_payroll_group_transactions as epgt', 'transactions.id', '=', 'epgt.transaction_id')
                 ->select([
-                    'transactions.id',
-                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
-                    'final_total',
-                    'transaction_date',
-                    'ref_no',
-                    'transactions.payment_status',
-                    'dept.name as department',
-                    'dsgn.name as designation',
-                    'epgt.payroll_group_id'
-                ]);
+                        'transactions.id',
+                        DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
+                        'final_total',
+                        'transaction_date',
+                        'ref_no',
+                        'transactions.payment_status',
+                        'dept.name as department',
+                        'dsgn.name as designation',
+                        'epgt.payroll_group_id'
+                    ]);
 
-            
+
 
             if ($is_admin) {
                 if (!empty(request()->input('user_id'))) {
@@ -106,7 +105,7 @@ class PayrollController extends Controller
                     $month = $month_year_arr[0];
                     $year = $month_year_arr[1];
 
-                    $payrolls->whereDate('transaction_date', $year . '-' .$month . '-01');
+                    $payrolls->whereDate('transaction_date', $year . '-' . $month . '-01');
                 }
             }
 
@@ -117,8 +116,8 @@ class PayrollController extends Controller
                         $html = '<div class="btn-group">
                                     <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
                                         data-toggle="dropdown" aria-expanded="false">' .
-                                        __("messages.actions") .
-                                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                        __("messages.actions") .
+                            '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                         </span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">';
@@ -131,7 +130,7 @@ class PayrollController extends Controller
                         }
 
                         // $html .= '<li><a href="' . action('TransactionPaymentController@show', [$row->id]) . '" class="view_payment_modal"><i class="fa fa-money"></i> ' . __("purchase.view_payments") . '</a></li>';
-
+        
                         if (empty($row->payroll_group_id) && $row->payment_status != "paid" && $is_admin) {
                             $html .= '<li><a href="' . action('TransactionPaymentController@addPayment', [$row->id]) . '" class="add_payment_modal"><i class="fa fa-money"></i> ' . __("purchase.add_payment") . '</a></li>';
                         }
@@ -143,7 +142,7 @@ class PayrollController extends Controller
                 )
                 ->addColumn('transaction_date', function ($row) {
                     $transaction_date = \Carbon::parse($row->transaction_date);
-                    
+
                     return $transaction_date->format('F Y');
                 })
                 ->editColumn('final_total', '<span class="display_currency" data-currency_symbol="true">{{$final_total}}</span>')
@@ -194,14 +193,14 @@ class PayrollController extends Controller
 
         //check if payrolls exists for the month year
         $payrolls = Transaction::where('business_id', $business_id)
-                    ->whereIn('expense_for', $employee_ids)
-                    ->whereDate('transaction_date', $transaction_date)
-                    ->get();
+            ->whereIn('expense_for', $employee_ids)
+            ->whereDate('transaction_date', $transaction_date)
+            ->get();
 
 
         $add_payroll_for = array_diff($employee_ids, $payrolls->pluck('expense_for')->toArray());
 
-    
+
         if (!empty($add_payroll_for)) {
 
             //initialize required data
@@ -210,7 +209,7 @@ class PayrollController extends Controller
             $month_name = $end_date->format('F');
 
             $employees = User::where('business_id', $business_id)
-                            ->find($add_payroll_for);
+                ->find($add_payroll_for);
 
             $payrolls = [];
             foreach ($employees as $employee) {
@@ -240,7 +239,7 @@ class PayrollController extends Controller
                 foreach ($allowances_and_deductions as $ad) {
                     if ($ad->type == 'allowance') {
                         $payrolls[$employee->id]['allowances']['allowance_names'][] = $ad->description;
-                        $payrolls[$employee->id]['allowances']['allowance_amounts'][] = $ad->amount_type == 'fixed' ?$ad->amount : 0;
+                        $payrolls[$employee->id]['allowances']['allowance_amounts'][] = $ad->amount_type == 'fixed' ? $ad->amount : 0;
                         $payrolls[$employee->id]['allowances']['allowance_types'][] = $ad->amount_type;
                         $payrolls[$employee->id]['allowances']['allowance_percents'][] = $ad->amount_type == 'percent' ? $ad->amount : 0;
                     } else {
@@ -248,31 +247,32 @@ class PayrollController extends Controller
                         $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $ad->amount_type == 'fixed' ? $ad->amount : 0;
                         $payrolls[$employee->id]['deductions']['deduction_types'][] = $ad->amount_type;
                         $payrolls[$employee->id]['deductions']['deduction_percents'][] = $ad->amount_type == 'percent' ? $ad->amount : 0;
-                    } 
+                    }
                 }
 
-                 // Get transactions of type 'expense' for employee and add to deductions
+                // Get transactions of type 'expense' for employee and add to deductions
                 $expense_transactions = Transaction::where('business_id', $business_id)
-                ->where('expense_for', $employee->id)
-                ->where('type', 'expense')
-                ->whereBetween('transaction_date', [$start_date, $end_date->format('Y-m-d')])
-                ->get();
+                    ->where('expense_for', $employee->id)
+                    ->where('type', 'expense')
+                    ->whereBetween('transaction_date', [$start_date, $end_date->format('Y-m-d')])
+                    ->get();
 
-                    foreach ($expense_transactions as $expense) {
-                        $payrolls[$employee->id]['deductions']['deduction_names'][] = __('essentials::lang.expense');
-                        $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $expense->final_total;
-                        $payrolls[$employee->id]['deductions']['deduction_types'][] = 'fixed';
-                        $payrolls[$employee->id]['deductions']['deduction_percents'][] = 0;
-                    }
+                foreach ($expense_transactions as $expense) {
+                    $payrolls[$employee->id]['deductions']['deduction_names'][] = __('essentials::lang.expense');
+                    $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $expense->final_total;
+                    $payrolls[$employee->id]['deductions']['deduction_types'][] = 'fixed';
+                    $payrolls[$employee->id]['deductions']['deduction_percents'][] = 0;
+                }
             }
 
             $action = 'create';
 
             return view('essentials::payroll.create')
-                    ->with(compact('month_name', 'transaction_date', 'year', 'payrolls', 'action'));
+                ->with(compact('month_name', 'transaction_date', 'year', 'payrolls', 'action'));
         } else {
             return redirect()->action('\Modules\Essentials\Http\Controllers\PayrollController@index')
-                ->with('status',
+                ->with(
+                    'status',
                     [
                         'success' => true,
                         'msg' => __("essentials::lang.payroll_already_added_for_given_user")
@@ -304,7 +304,7 @@ class PayrollController extends Controller
             $payroll_group['status'] = $request->input('payroll_group_status');
             $payroll_group['gross_total'] = $this->transactionUtil->num_uf($request->input('total_gross_amount'));
             $payroll_group['created_by'] = auth()->user()->id;
-            
+
             DB::beginTransaction();
 
             $payroll_group = PayrollGroup::create($payroll_group);
@@ -326,7 +326,7 @@ class PayrollController extends Controller
                 //Update reference count
                 $ref_count = $this->moduleUtil->setAndGetReferenceCount('payroll');
 
-                    //Generate reference number
+                //Generate reference number
                 if (empty($payroll['ref_no'])) {
                     $settings = request()->session()->get('business.essentials_settings');
                     $settings = !empty($settings) ? json_decode($settings, true) : [];
@@ -348,14 +348,16 @@ class PayrollController extends Controller
 
             DB::commit();
 
-            $output = ['success' => true,
+            $output = [
+                'success' => true,
                 'msg' => __("lang_v1.added_success")
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
                 'msg' => __("messages.something_went_wrong")
             ];
         }
@@ -364,7 +366,7 @@ class PayrollController extends Controller
     }
 
     private function getAllowanceAndDeductionJson($payroll)
-    {   
+    {
         $allowance_names = $payroll['allowance_names'];
         $allowance_types = $payroll['allowance_types'];
         $allowance_percents = $payroll['allowance_percent'];
@@ -395,17 +397,17 @@ class PayrollController extends Controller
         }
 
         $output['essentials_allowances'] = json_encode([
-                'allowance_names' => $allowance_names_array,
-                'allowance_amounts' => $allowance_amounts,
-                'allowance_types' => $allowance_types,
-                'allowance_percents' => $allowance_percent_array
-            ]);
+            'allowance_names' => $allowance_names_array,
+            'allowance_amounts' => $allowance_amounts,
+            'allowance_types' => $allowance_types,
+            'allowance_percents' => $allowance_percent_array
+        ]);
         $output['essentials_deductions'] = json_encode([
-                'deduction_names' => $deduction_names_array,
-                'deduction_amounts' => $deduction_amounts,
-                'deduction_types' => $deduction_types,
-                'deduction_percents' => $deduction_percents_array
-            ]);
+            'deduction_names' => $deduction_names_array,
+            'deduction_amounts' => $deduction_amounts,
+            'deduction_types' => $deduction_types,
+            'deduction_percents' => $deduction_percents_array
+        ]);
 
         return $output;
     }
@@ -422,15 +424,15 @@ class PayrollController extends Controller
         }
 
         $payroll = Transaction::where('business_id', $business_id)
-                                ->with(['transaction_for', 'payment_lines'])
-                                ->findOrFail($id);
+            ->with(['transaction_for', 'payment_lines'])
+            ->findOrFail($id);
         $transaction_date = \Carbon::parse($payroll->transaction_date);
 
         $department = Category::where('category_type', 'hrm_department')
-                        ->find($payroll->transaction_for->essentials_department_id);
+            ->find($payroll->transaction_for->essentials_department_id);
 
         $designation = Category::where('category_type', 'hrm_designation')
-                        ->find($payroll->transaction_for->essentials_designation_id);
+            ->find($payroll->transaction_for->essentials_designation_id);
 
         $month_name = $transaction_date->format('F');
         $year = $transaction_date->format('Y');
@@ -442,12 +444,27 @@ class PayrollController extends Controller
 
         $start_of_month = \Carbon::parse($payroll->transaction_date);
         $end_of_month = \Carbon::parse($payroll->transaction_date)->endOfMonth();
-        
+
+        // Fetch employee expense transactions for the month
+        $expense_transactions = Transaction::where('business_id', $business_id)
+            ->where('expense_for', $payroll->transaction_for->id)
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d')])
+            ->get();
+
+        // Add expense transactions to deductions
+        foreach ($expense_transactions as $expense) {
+            $deductions['deduction_names'][] = __('essentials::lang.expense');
+            $deductions['deduction_amounts'][] = $expense->final_total;
+            $deductions['deduction_types'][] = 'fixed';
+            $deductions['deduction_percents'][] = 0;
+        }
+
         $leaves = EssentialsLeave::where('business_id', $business_id)
-                        ->where('user_id', $payroll->transaction_for->id)
-                        ->whereDate('start_date', '>=', $start_of_month)
-                        ->whereDate('end_date', '<=', $end_of_month)
-                        ->get();
+            ->where('user_id', $payroll->transaction_for->id)
+            ->whereDate('start_date', '>=', $start_of_month)
+            ->whereDate('end_date', '<=', $end_of_month)
+            ->get();
 
         $total_leaves = 0;
         $days_in_a_month = \Carbon::parse($start_of_month)->daysInMonth;
@@ -463,7 +480,7 @@ class PayrollController extends Controller
         $total_work_duration = $this->essentialsUtil->getTotalWorkDuration('hour', $payroll->transaction_for->id, $business_id, $start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d'));
 
         return view('essentials::payroll.show')
-        ->with(compact('payroll', 'month_name', 'allowances', 'deductions', 'year', 'payment_types', 'bank_details', 'designation', 'department', 'final_total_in_words', 'total_leaves', 'days_in_a_month', 'total_work_duration'));
+            ->with(compact('payroll', 'month_name', 'allowances', 'deductions', 'year', 'payment_types', 'bank_details', 'designation', 'department', 'final_total_in_words', 'total_leaves', 'days_in_a_month', 'total_work_duration'));
     }
 
     /**
@@ -480,9 +497,9 @@ class PayrollController extends Controller
         }
 
         $payroll = Transaction::where('business_id', $business_id)
-                                ->with(['transaction_for'])
-                                ->where('type', 'payroll')
-                                ->findOrFail($id);
+            ->with(['transaction_for'])
+            ->where('type', 'payroll')
+            ->findOrFail($id);
 
         $transaction_date = \Carbon::parse($payroll->transaction_date);
         $month_name = $transaction_date->format('F');
@@ -530,25 +547,27 @@ class PayrollController extends Controller
 
             DB::beginTransaction();
             $payroll = Transaction::where('business_id', $business_id)
-                                ->where('type', 'payroll')
-                                ->findOrFail($id);
+                ->where('type', 'payroll')
+                ->findOrFail($id);
 
             $payroll->update($input);
 
             $payroll->action = 'updated';
             $payroll->transaction_for->notify(new PayrollNotification($payroll));
 
-            $output = ['success' => true,
-                            'msg' => __("lang_v1.updated_success")
-                        ];
+            $output = [
+                'success' => true,
+                'msg' => __("lang_v1.updated_success")
+            ];
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __("messages.something_went_wrong")
+            ];
         }
 
         return redirect()->action('\Modules\Essentials\Http\Controllers\PayrollController@index')->with('status', $output);
@@ -572,24 +591,27 @@ class PayrollController extends Controller
 
                 if ($is_admin) {
                     $payroll = Transaction::where('business_id', $business_id)
-                                ->where('type', 'payroll')
-                                ->where('id', $id)
-                                ->delete();
+                        ->where('type', 'payroll')
+                        ->where('id', $id)
+                        ->delete();
 
-                    $output = ['success' => true,
-                                'msg' => __("lang_v1.deleted_success")
-                            ];
+                    $output = [
+                        'success' => true,
+                        'msg' => __("lang_v1.deleted_success")
+                    ];
                 } else {
-                    $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
+                    $output = [
+                        'success' => false,
+                        'msg' => __("messages.something_went_wrong")
+                    ];
                 }
             } catch (\Exception $e) {
-                \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-                $output = ['success' => false,
-                            'msg' => __("messages.something_went_wrong")
-                        ];
+                \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+                $output = [
+                    'success' => false,
+                    'msg' => __("messages.something_went_wrong")
+                ];
             }
 
             return $output;
@@ -603,8 +625,8 @@ class PayrollController extends Controller
             $type = $request->input('type');
 
             $ad_row = View::make('essentials::payroll.allowance_and_deduction_row')
-                        ->with(compact('type', 'employee'))
-                        ->render();
+                ->with(compact('type', 'employee'))
+                ->render();
 
             return $ad_row;
         }
@@ -614,16 +636,22 @@ class PayrollController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $is_admin = $this->moduleUtil->is_admin(auth()->user(), $business_id);
-        if (!(auth()->user()->can('superadmin') || $is_admin|| $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
+        if (!(auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
             abort(403, 'Unauthorized action.');
         }
 
         if ($request->ajax()) {
             $payroll_groups = PayrollGroup::where('essentials_payroll_groups.business_id', $business_id)
-                                ->join('users as u', 'u.id', '=', 'essentials_payroll_groups.created_by')
-                                ->select('essentials_payroll_groups.id as id', 'name', 'essentials_payroll_groups.status as status', 'essentials_payroll_groups.created_at as created_at',
-                                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as added_by"), 'essentials_payroll_groups.payment_status as payment_status', 'essentials_payroll_groups.gross_total as gross_total'
-                                );
+                ->join('users as u', 'u.id', '=', 'essentials_payroll_groups.created_by')
+                ->select(
+                    'essentials_payroll_groups.id as id',
+                    'name',
+                    'essentials_payroll_groups.status as status',
+                    'essentials_payroll_groups.created_at as created_at',
+                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as added_by"),
+                    'essentials_payroll_groups.payment_status as payment_status',
+                    'essentials_payroll_groups.gross_total as gross_total'
+                );
 
             return Datatables::of($payroll_groups)
                 ->addColumn(
@@ -632,8 +660,8 @@ class PayrollController extends Controller
                         $html = '<div class="btn-group">
                                     <button type="button" class="btn btn-info dropdown-toggle btn-xs" 
                                         data-toggle="dropdown" aria-expanded="false">' .
-                                        __("messages.actions") .
-                                        '<span class="caret"></span><span class="sr-only">Toggle Dropdown
+                            __("messages.actions") .
+                            '<span class="caret"></span><span class="sr-only">Toggle Dropdown
                                         </span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">';
@@ -641,23 +669,23 @@ class PayrollController extends Controller
                         $html .= '<li>
                                     <a href="' . action('\Modules\Essentials\Http\Controllers\PayrollController@viewPayrollGroup', [$row->id]) . '" target="_blank">
                                             <i class="fa fa-eye" aria-hidden="true"></i> '
-                                            . __("messages.view") .
-                                    '</a>
+                            . __("messages.view") .
+                            '</a>
                                 </li>';
 
                         $html .= '<li>
                                     <a href="' . action('\Modules\Essentials\Http\Controllers\PayrollController@getEditPayrollGroup', [$row->id]) . '" target="_blank">
                                             <i class="fas fa-edit" aria-hidden="true"></i> '
-                                            . __("messages.edit") .
-                                    '</a>
+                            . __("messages.edit") .
+                            '</a>
                                 </li>';
 
                         if ($row->status == 'final' && $row->payment_status != 'paid') {
                             $html .= '<li>
                                     <a href="' . action('\Modules\Essentials\Http\Controllers\PayrollController@addPayment', [$row->id]) . '" target="_blank">
                                             <i class="fas fa-money-check" aria-hidden="true"></i> '
-                                            . __("purchase.add_payment") .
-                                    '</a>
+                                . __("purchase.add_payment") .
+                                '</a>
                                 </li>';
                         }
 
@@ -696,10 +724,10 @@ class PayrollController extends Controller
         if (!(auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $payroll_group = PayrollGroup::where('business_id', $business_id)
-                            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
-                            ->findOrFail($id);
+            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
+            ->findOrFail($id);
 
         $payrolls = [];
         $month_name = null;
@@ -717,12 +745,12 @@ class PayrollController extends Controller
             $payrolls[$transaction->expense_for]['transaction_id'] = $transaction->id;
             $payrolls[$transaction->expense_for]['final_total'] = $transaction->final_total;
             $payrolls[$transaction->expense_for]['payment_status'] = $transaction->payment_status;
-            
+
             //get employee info
             $payrolls[$transaction->expense_for]['employee'] = $transaction->transaction_for->user_full_name;
             $payrolls[$transaction->expense_for]['bank_details'] = json_decode($transaction->transaction_for->bank_details, true);
         }
-        
+
         return view('essentials::payroll.view_payroll_group')
             ->with(compact('payroll_group', 'month_name', 'year', 'payrolls'));
     }
@@ -734,10 +762,10 @@ class PayrollController extends Controller
         if (!(auth()->user()->can('superadmin') || $is_admin || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'essentials_module'))) {
             abort(403, 'Unauthorized action.');
         }
-        
+
         $payroll_group = PayrollGroup::where('business_id', $business_id)
-                            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
-                            ->findOrFail($id);
+            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
+            ->findOrFail($id);
 
         $payrolls = [];
         $transaction_date = null;
@@ -763,7 +791,7 @@ class PayrollController extends Controller
             $payrolls[$transaction->expense_for]['essentials_duration_unit'] = $transaction->essentials_duration_unit;
             $payrolls[$transaction->expense_for]['total_leaves'] = $this->essentialsUtil->getTotalLeavesForGivenDateOfAnEmployee($business_id, $transaction->expense_for, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
             $payrolls[$transaction->expense_for]['total_days_worked'] = $this->essentialsUtil->getTotalDaysWorkedForGivenDateOfAnEmployee($business_id, $transaction->expense_for, $start_date, $end_date);
-            
+
             //get total work duration of employee(attendance)
             $payrolls[$transaction->expense_for]['total_work_duration'] = $this->essentialsUtil->getTotalWorkDuration('hour', $transaction->expense_for, $business_id, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
 
@@ -816,46 +844,48 @@ class PayrollController extends Controller
             $pg_input['gross_total'] = $this->transactionUtil->num_uf($request->input('total_gross_amount'));
 
             DB::beginTransaction();
-                $payroll_group = PayrollGroup::where('business_id', $business_id)
-                                    ->findOrFail($payroll_group_id);
+            $payroll_group = PayrollGroup::where('business_id', $business_id)
+                ->findOrFail($payroll_group_id);
 
-                $payroll_group->update($pg_input);
+            $payroll_group->update($pg_input);
 
-                foreach ($payrolls as $key => $payroll) {
+            foreach ($payrolls as $key => $payroll) {
 
-                    $transaction_id = $payroll['transaction_id'];
+                $transaction_id = $payroll['transaction_id'];
 
-                    $payroll['total_before_tax'] = $payroll['final_total'];
-                    $payroll['essentials_amount_per_unit_duration'] = $this->moduleUtil->num_uf($payroll['essentials_amount_per_unit_duration']);
+                $payroll['total_before_tax'] = $payroll['final_total'];
+                $payroll['essentials_amount_per_unit_duration'] = $this->moduleUtil->num_uf($payroll['essentials_amount_per_unit_duration']);
 
-                    $allowances_and_deductions = $this->getAllowanceAndDeductionJson($payroll);
-                    $payroll['essentials_allowances'] = $allowances_and_deductions['essentials_allowances'];
-                    $payroll['essentials_deductions'] = $allowances_and_deductions['essentials_deductions'];
+                $allowances_and_deductions = $this->getAllowanceAndDeductionJson($payroll);
+                $payroll['essentials_allowances'] = $allowances_and_deductions['essentials_allowances'];
+                $payroll['essentials_deductions'] = $allowances_and_deductions['essentials_deductions'];
 
-                    unset($payroll['allowance_names'], $payroll['allowance_types'], $payroll['allowance_percent'], $payroll['allowance_amounts'], $payroll['deduction_names'], $payroll['deduction_types'], $payroll['deduction_percent'], $payroll['deduction_amounts'], $payroll['total'], $payroll['transaction_id']);
+                unset($payroll['allowance_names'], $payroll['allowance_types'], $payroll['allowance_percent'], $payroll['allowance_amounts'], $payroll['deduction_names'], $payroll['deduction_types'], $payroll['deduction_percent'], $payroll['deduction_amounts'], $payroll['total'], $payroll['transaction_id']);
 
-                    $payroll_trans = Transaction::where('business_id', $business_id)
-                                        ->where('type', 'payroll')
-                                        ->find($transaction_id);
+                $payroll_trans = Transaction::where('business_id', $business_id)
+                    ->where('type', 'payroll')
+                    ->find($transaction_id);
 
-                    if (!empty($payroll_trans)) {
-                        $payroll_trans->update($payroll);
+                if (!empty($payroll_trans)) {
+                    $payroll_trans->update($payroll);
 
-                        if ($notify_employee && $payroll_group->status == 'final') {
-                            $payroll_trans->action = 'updated';
-                            $payroll_trans->transaction_for->notify(new PayrollNotification($payroll_trans));
-                        }
+                    if ($notify_employee && $payroll_group->status == 'final') {
+                        $payroll_trans->action = 'updated';
+                        $payroll_trans->transaction_for->notify(new PayrollNotification($payroll_trans));
                     }
                 }
+            }
             DB::commit();
-            $output = ['success' => true,
+            $output = [
+                'success' => true,
                 'msg' => __("lang_v1.updated_success")
             ];
         } catch (Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
                 'msg' => __("messages.something_went_wrong")
             ];
         }
@@ -871,8 +901,8 @@ class PayrollController extends Controller
         }
 
         $payroll_group = PayrollGroup::where('business_id', $business_id)
-                            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
-                            ->findOrFail($id);
+            ->with(['payrollGroupTransactions', 'payrollGroupTransactions.transaction_for'])
+            ->findOrFail($id);
 
         $payrolls = [];
         $month_name = null;
@@ -916,7 +946,7 @@ class PayrollController extends Controller
 
             $payments = $request->input('payments');
             $payroll_group_id = $request->input('payroll_group_id');
-            
+
             foreach ($payments as $employee_id => $payment) {
                 $transaction = Transaction::where('business_id', $business_id)->findOrFail($payment['transaction_id']);
                 $transaction_before = $transaction->replicate();
@@ -951,18 +981,18 @@ class PayrollController extends Controller
                     }
 
                     DB::beginTransaction();
-                        $ref_count = $this->transactionUtil->setAndGetReferenceCount('purchase_payment');
-                        // Generate reference number
-                        $input['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber('purchase_payment', $ref_count);
+                    $ref_count = $this->transactionUtil->setAndGetReferenceCount('purchase_payment');
+                    // Generate reference number
+                    $input['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber('purchase_payment', $ref_count);
 
-                        $tp = TransactionPayment::create($input);
-                        $input['transaction_type'] = $transaction->type;
-                        event(new TransactionPaymentAdded($tp, $input));
+                    $tp = TransactionPayment::create($input);
+                    $input['transaction_type'] = $transaction->type;
+                    event(new TransactionPaymentAdded($tp, $input));
 
-                        //update payment status
-                        $payment_status = $this->transactionUtil->updatePaymentStatus($input['transaction_id']);
-                        $transaction->payment_status = $payment_status;
-                        $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+                    //update payment status
+                    $payment_status = $this->transactionUtil->updatePaymentStatus($input['transaction_id']);
+                    $transaction->payment_status = $payment_status;
+                    $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
                     DB::commit();
 
                     //unset transaction type after insert data
@@ -972,14 +1002,16 @@ class PayrollController extends Controller
 
             $this->_updatePayrollGroupPaymentStatus($payroll_group_id, $business_id);
 
-            $output = ['success' => true,
+            $output = [
+                'success' => true,
                 'msg' => __('purchase.payment_added_success')
             ];
         } catch (Exception $e) {
             DB::rollBack();
-            \Log::emergency("File:" . $e->getFile(). "Line:" . $e->getLine(). "Message:" . $e->getMessage());
-            
-            $output = ['success' => false,
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
                 'msg' => __("messages.something_went_wrong")
             ];
         }
@@ -989,8 +1021,8 @@ class PayrollController extends Controller
     protected function _updatePayrollGroupPaymentStatus($payroll_group_id, $business_id)
     {
         $payroll_group = PayrollGroup::where('business_id', $business_id)
-                            ->with(['payrollGroupTransactions'])
-                            ->findOrFail($payroll_group_id);
+            ->with(['payrollGroupTransactions'])
+            ->findOrFail($payroll_group_id);
 
         $total_transaction = count($payroll_group->payrollGroupTransactions);
         $total_paid = $payroll_group->payrollGroupTransactions->where('payment_status', 'paid')->count();
@@ -1003,7 +1035,7 @@ class PayrollController extends Controller
         } else {
             $payment_status = 'partial';
         }
-        
+
         $payroll_group->payment_status = $payment_status;
         $payroll_group->save();
     }
