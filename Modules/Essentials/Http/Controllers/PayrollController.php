@@ -201,6 +201,7 @@ class PayrollController extends Controller
 
         $add_payroll_for = array_diff($employee_ids, $payrolls->pluck('expense_for')->toArray());
 
+    
         if (!empty($add_payroll_for)) {
 
             //initialize required data
@@ -236,7 +237,6 @@ class PayrollController extends Controller
 
                 //get earnings & deductions of employee
                 $allowances_and_deductions = $this->essentialsUtil->getEmployeeAllowancesAndDeductions($business_id, $employee->id, $start_date, $end_date);
-                // dd($allowances_and_deductions);
                 foreach ($allowances_and_deductions as $ad) {
                     if ($ad->type == 'allowance') {
                         $payrolls[$employee->id]['allowances']['allowance_names'][] = $ad->description;
@@ -250,6 +250,20 @@ class PayrollController extends Controller
                         $payrolls[$employee->id]['deductions']['deduction_percents'][] = $ad->amount_type == 'percent' ? $ad->amount : 0;
                     } 
                 }
+
+                 // Get transactions of type 'expense' for employee and add to deductions
+                $expense_transactions = Transaction::where('business_id', $business_id)
+                ->where('expense_for', $employee->id)
+                ->where('type', 'expense')
+                ->whereBetween('transaction_date', [$start_date, $end_date->format('Y-m-d')])
+                ->get();
+
+                    foreach ($expense_transactions as $expense) {
+                        $payrolls[$employee->id]['deductions']['deduction_names'][] = __('essentials::lang.expense');
+                        $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $expense->final_total;
+                        $payrolls[$employee->id]['deductions']['deduction_types'][] = 'fixed';
+                        $payrolls[$employee->id]['deductions']['deduction_percents'][] = 0;
+                    }
             }
 
             $action = 'create';

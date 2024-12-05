@@ -314,7 +314,7 @@ return[
 
 "new_client_notification" => ":client_name تم تسجيل عميل جديد بأسم <br> البرد الألكترونى - :client_email",
 
-""=>"",
+"expense"=>"مصروف",
 ""=>"",
 ""=>"",
 ""=>"",
