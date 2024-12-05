@@ -188,6 +188,7 @@ class OrderService extends BaseService
             $deficit = $requiredQuantity - $availableAtClientLocation;
     
             foreach ($cart->variation->variation_location_details as $locationDetail) {
+                // if location not same location of client
                 if ($locationDetail->location->id !== $clientLocationId && $deficit > 0) {
                     $availableQty = $locationDetail->qty_available;
     
@@ -203,7 +204,8 @@ class OrderService extends BaseService
                             $clientLocationId,
                             $transferQty
                         );
-    
+                        
+                        // 2
                         $deficit -= $transferQty;
     
                         // Break if the deficit is covered
@@ -639,8 +641,7 @@ class OrderService extends BaseService
         }
     }
 
-    public function 
-    storeTransferOrder($order, $orderItem, $quantity,$fromLocationId,$toLocationId)
+    public function storeTransferOrder($order, $orderItem, $quantity,$fromLocationId,$toLocationId)
     {
         DB::beginTransaction();
     
@@ -662,7 +663,10 @@ class OrderService extends BaseService
             \Log::info('sub_total',[$quantity * $orderItem->price]);
             // Check if a transfer order already exists for the parent order
             $transferOrder = Order::where('parent_order_id', $order->id)
-            ->where('order_type','order_transfer')->first();
+            ->where('order_type','order_transfer')
+            ->where('from_business_location_id',$fromLocationId)
+            ->where('to_business_location_id',$toLocationId)
+            ->first();
             
             if ($transferOrder) {
                 // Update existing transfer order
