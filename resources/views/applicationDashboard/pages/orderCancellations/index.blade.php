@@ -12,7 +12,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('lang_v1.create')
+    @can('orders_refund.create')
         @slot('tool')
         <div class="box-tools">
             <!-- Button to add new order_cancellations if needed -->
@@ -59,7 +59,7 @@
         @endslot
     @endcan
     
-    @can('lang_v1.view')
+    @can('orders_refund.view')
     <!-- <input type="hidden" value="{{$status}}" id="status"> -->
 
         <div class="table-responsive">
