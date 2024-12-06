@@ -9,8 +9,11 @@ use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderRefund;
 use App\Models\OrderTracking;
+use App\Models\Transaction;
+use App\Models\TransactionSellLine;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
+use App\Utils\TransactionUtil;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,15 +30,14 @@ class RefundOrderController extends Controller
      */
     protected $moduleUtil;
 
-    /**
-     * Constructor
-     *
-     * @param ProductUtils $product
-     * @return void
-     */
-    public function __construct(ModuleUtil $moduleUtil)
+    protected $transactionUtil;
+
+
+    public function __construct(ModuleUtil $moduleUtil, TransactionUtil $transactionUtil)
     {
         $this->moduleUtil = $moduleUtil;
+
+        $this->transactionUtil = $transactionUtil;
     }
 
     public function index()
@@ -70,18 +72,18 @@ class RefundOrderController extends Controller
         $user_locations = Auth::user()->permitted_locations();
 
         $query = Order::with('client')
-                ->where('order_type','order_refund')
-                ->select(['id', 'number','order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total','created_at'])
-                ->latest();
+            ->where('order_type', 'order_refund')
+            ->select(['id', 'number', 'order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total', 'created_at'])
+            ->latest();
 
-                
+
         // Apply status filter
         if ($status !== 'all') {
             $query->where('order_status', $status);
         }
 
-        if($user_locations !== "all"){
-            $query->whereIn('business_location_id',$user_locations);
+        if ($user_locations !== "all") {
+            $query->whereIn('business_location_id', $user_locations);
         }
 
         // Apply date filter
@@ -92,7 +94,7 @@ class RefundOrderController extends Controller
             } else {
                 // Adjust endDate to include the entire day
                 $endDate = Carbon::parse($endDate)->endOfDay();
-        
+
                 // Filter for a range of dates
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
@@ -156,8 +158,12 @@ class RefundOrderController extends Controller
         switch ($status) {
             case 'pending':
                 $orderTracking->pending_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'pending', 'order_type', $order->order_type]
+                );
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
@@ -167,31 +173,47 @@ class RefundOrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been processed successfully.',
-                    ['order_id' => $order->id,
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->order, 'status'=>'processing','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->order, 'status' => 'processing', 'order_type', $order->order_type]
+                );
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
-                 // Send and store push notification
+                // Send and store push notification
                 app(FirebaseService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been shipped successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
                 $orderTracking->shipped_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'shipped','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'shipped', 'order_type', $order->order_type]
+                );
                 break;
             case 'cancelled':
                 $orderTracking->cancelled_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'cancelled','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'cancelled', 'order_type', $order->order_type]
+                );
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
@@ -201,11 +223,52 @@ class RefundOrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been completed successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'completed','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'completed', 'order_type', $order->order_type]
+                );
+                // Handle product details from order->order_items
+
+                $business_id = $order->client->contact->business->id;
+                $parent_sell_transaction = Transaction::
+                    where('order_id', $order->parent_order_id)
+                    ->where('type', 'sell')
+                    ->first();
+                $products = [];
+                foreach ($order->orderItems as $item) {
+
+                    $transaction_sell_line = TransactionSellLine::
+                    where('product_id',$item->product_id)
+                    ->where('transaction_id',$parent_sell_transaction->id)
+                    ->first();
+                    $products[] = [
+                        'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
+                        'quantity' => $item->quantity,
+                        'unit_price_inc_tax' => $item->price, // Include price if applicable
+                    ];
+                }
+
+
+                $input = [
+                    'transaction_id' => $parent_sell_transaction->id,
+                    'invoice_no' => null,
+                    'transaction_date' => Carbon::now()->format('d-m-Y h:i A'), // Format to "06-12-2024 02:39 PM"
+                    'products' => $products,
+                    "discount_type" => null,
+                    "discount_amount" => "0.00",
+                    "tax_id" => null,
+                    "tax_amount" => "0",
+                    "tax_percent" => "0",
+                ];
+
+                $this->transactionUtil->addSellReturn($input, $business_id, 1);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -239,35 +302,47 @@ class RefundOrderController extends Controller
 
         switch ($status) {
             case 'pending':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'pending', 'order_type', $order->order_type]
+                );
                 break;
             case 'paid':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'paid','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'paid', 'order_type', $order->order_type]
+                );
                 break;
             case 'failed':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'failed','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'failed', 'order_type', $order->order_type]
+                );
                 break;
             default:
-                throw new \InvalidArgumentException("Invalid status: $status");    
-            }
+                throw new \InvalidArgumentException("Invalid status: $status");
+        }
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
 
 
-   
 
 
-     /**
-     * Update the delivery contact balance based on the order total.
-     
-     *
-     * @param Order $order
-     * @return void
-     */
+
+    /**
+    * Update the delivery contact balance based on the order total.
+    
+    *
+    * @param Order $order
+    * @return void
+    */
     private function updateDeliveryBalance($order, $delivery)
     {
         Log::info($delivery);
@@ -281,8 +356,9 @@ class RefundOrderController extends Controller
 
     }
 
-    public function getOrderRefundDetails($orderId){
-        
+    public function getOrderRefundDetails($orderId)
+    {
+
         // Fetch activity logs related to the order
         $activityLogs = Activity::with(['subject'])
             ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')

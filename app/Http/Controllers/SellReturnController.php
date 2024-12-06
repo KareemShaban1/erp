@@ -263,6 +263,7 @@ class SellReturnController extends Controller
         if (!auth()->user()->can('access_sell_return') && !auth()->user()->can('access_own_sell_return')) {
             abort(403, 'Unauthorized action.');
         }
+        dd($request->all());
 
         try {
             $input = $request->except('_token');

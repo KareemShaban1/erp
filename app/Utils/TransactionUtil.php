@@ -5405,7 +5405,7 @@ class TransactionUtil extends Util
     }
 
     public function addSellReturn($input, $business_id, $user_id, $uf_number = true)
-    {
+    { 
         $discount = [
                 'discount_type' => $input['discount_type'] ?? 'fixed',
                 'discount_amount' => $input['discount_amount'] ?? 0
@@ -5430,12 +5430,13 @@ class TransactionUtil extends Util
                 ->where('return_parent_id', $sell->id)
                 ->first();
 
+                \Log::info($invoice_total);
         $sell_return_data = [
             'invoice_no' => $input['invoice_no'] ?? null,
             'discount_type' => $discount['discount_type'],
             'discount_amount' => $uf_number ? $this->num_uf($discount['discount_amount']) : $discount['discount_amount'],
             'tax_id' => $input['tax_id'],
-            'tax_amount' => $invoice_total['tax'],
+            'tax_amount' => $invoice_total['tax'] ?? '0.0000',
             'total_before_tax' => $invoice_total['total_before_tax'],
             'final_total' => $invoice_total['final_total']
         ];

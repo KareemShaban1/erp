@@ -69,16 +69,6 @@
             // </select>`;
             //     }
             // },
-            // {
-            //     data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
-            //         return `
-            // <select class="form-control change-payment-status" data-order-id="${row.id}">
-            //     <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-            //     <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-            //     <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-            // </select>`;
-            //     }
-            // },
             {
                 data: 'order_status',
                 name: 'order_status',
@@ -110,6 +100,16 @@
             </select>`;
                 }
             },
+            {
+                 data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+                     return `
+             <select class="form-control change-payment-status" data-order-id="${row.id}">
+                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                 <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                 <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+             </select>`;
+                 }
+             },
 
             { data: 'shipping_cost', name: 'shipping_cost' },
             { data: 'sub_total', name: 'sub_total' },
