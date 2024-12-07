@@ -6,6 +6,10 @@
     $('#clear_date').click(function () {
         $('#start_date').val('');
         $('#end_date').val('');
+        $('#business_location').val('');
+        $('#delivery_name').val('');
+        $('#status').val('all');
+        $('#payment_status').val('all');
         orders_table.ajax.reload();
     });
 
@@ -20,68 +24,50 @@
                 d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
+                d.business_location = $('#business_location').val();
+                d.delivery_name = $('#delivery_name').val();
+                d.payment_status = $('#payment_status').val();
             }
         },
         columnDefs: [
             {
-                targets: 2,
-                orderable: false,
-                searchable: false,
+                // targets: 2,
+                orderable: true,
+                searchable: true,
             },
         ],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order_type', name: 'order_type' },
-
+            { data: 'business_location_name', name: 'business_location_name'
+             },
             { data: 'number', name: 'number' },
-            { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
-            { data: 'payment_method', name: 'payment_method' },
-            // {
-            //     data: 'order_status', name: 'order_status', render: function (data, type, row) {
-            //         let badgeClass;
-            //         switch (data) {
-            //             case 'pending': badgeClass = 'badge btn-warning'; break;
-            //             case 'processing': badgeClass = 'badge btn-info'; break;
-            //             case 'shipped': badgeClass = 'badge btn-primary'; break;
-            //             case 'completed': badgeClass = 'badge btn-success'; break;
-            //             case 'cancelled': badgeClass = 'badge btn-danger'; break;
-            //             default: badgeClass = 'badge badge-secondary'; // For any other statuses
-            //         }
+            { data: 'client_contact_name', name: 'client_contact_name',orderable: true,
+                searchable: true }, // Ensure this matches the added column name
+                { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
-            //         return `
-            //         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    
-            // <select class="form-control change-order-status" data-order-id="${row.id}">
-            //     <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-            //     <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-            //     <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-            //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-            //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Canceled</option>
-            // </select>`;
-            //     }
-            // },
+            // { data: 'payment_method', name: 'payment_method' },
 
             {
-    data: 'order_status',
-    name: 'order_status',
-    render: function (data, type, row) {
-        let badgeClass;
-        switch (data) {
-            case 'pending': badgeClass = 'badge btn-warning'; break;
-            case 'processing': badgeClass = 'badge btn-info'; break;
-            case 'shipped': badgeClass = 'badge btn-primary'; break;
-            case 'completed': badgeClass = 'badge btn-success'; break;
-            case 'cancelled': badgeClass = 'badge btn-danger'; break;
-            default: badgeClass = 'badge badge-secondary'; // For any other statuses
-        }
+                data: 'order_status',
+                name: 'order_status',
+                render: function (data, type, row) {
+                    let badgeClass;
+                    switch (data) {
+                        case 'pending': badgeClass = 'badge btn-warning'; break;
+                        case 'processing': badgeClass = 'badge btn-info'; break;
+                        case 'shipped': badgeClass = 'badge btn-primary'; break;
+                        case 'completed': badgeClass = 'badge btn-success'; break;
+                        case 'cancelled': badgeClass = 'badge btn-danger'; break;
+                        default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                    }
 
-        // Display only the badge for completed or cancelled statuses
-        if (data === 'completed' || data === 'cancelled') {
-            return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-        }
+                    // Display only the badge for completed or cancelled statuses
+                    if (data === 'completed' || data === 'cancelled') {
+                        return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                    }
 
-        // Otherwise, display both the badge and the select dropdown
-        return `
+                    // Otherwise, display both the badge and the select dropdown
+                    return `
             <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
             <select class="form-control change-order-status" data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
@@ -90,8 +76,8 @@
                 <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
                 <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>`;
-    }
-},
+                }
+            },
 
             {
                 data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
@@ -119,11 +105,12 @@
                 }
             },
             {
-                data: 'order_status',
-                name: 'order_status',
+                data: 'has_delivery',
+                name: 'has_delivery',
                 render: function (data, type, row) {
+                    console.log(data, type, row)
                     // Case 1: If the order status is 'processing' and has no delivery assigned
-                    if (data === 'processing' && row.has_delivery === false) {
+                    if (row.order_status === 'processing' && row.has_delivery === false) {
                         return `<button class="btn btn-primary assign-delivery-btn" 
                     data-order-id="${row.id}" 
                     data-contact-name="${row.client_contact_name
@@ -132,15 +119,20 @@
                 </button > `;
                     }
                     if (row.has_delivery === true) {
-                        return `<span class="badge badge-success">
+                        return `<div>
+                        <span class="badge btn-secondary">
                         @lang('lang_v1.delivery_assigned')
-                    </span>`;
+                    </span>
+                    <span class="badge btn-success">
+                    ${row.delivery_name}
+                    </span>
+                        </div>`;
                     }
 
                     return '';
                 },
-                orderable: false,
-                searchable: false
+                orderable: true,
+                searchable: true
             },
             {
                 data: 'id',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ApplicationDashboard;
 
 use App\Http\Controllers\Controller;
+use App\Models\BusinessLocation;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\DeliveryOrder;
@@ -49,7 +50,10 @@ class RefundOrderController extends Controller
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
-            $search = request()->get('search.value');
+            $search =  request()->get('search')['value'];
+            $businessLocation = request()->get('business_location');
+            $deliveryName = request()->get('delivery_name');
+            $paymentStatus = request()->get('payment_status', 'all');
 
             // Validate status
             $validStatuses = ['all', 'pending', 'processing', 'shipped', 'cancelled', 'completed'];
@@ -58,61 +62,87 @@ class RefundOrderController extends Controller
             }
 
             // Fetch filtered data
-            return $this->fetchOrders($status, $startDate, $endDate, $search);
+            return $this->fetchOrders($status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
         }
 
-        return view('applicationDashboard.pages.refundOrders.index');
+        $business_locations = BusinessLocation::BusinessId()->active()->select('id','name')->get();
+
+        return view('applicationDashboard.pages.refundOrders.index',compact('business_locations'));
     }
 
     /**
      * Fetch order refunds based on filters.
      */
-    private function fetchOrders($status, $startDate = null, $endDate = null, $search = null)
+    private function fetchOrders($status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
     {
+        $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = Order::with('client')
-            ->where('order_type', 'order_refund')
-            ->select(['id', 'number', 'order_type', 'client_id', 'payment_method', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total', 'created_at'])
+        $query = Order::with(['client.contact', 'businessLocation'])
+            ->select([
+                'orders.id',
+                'orders.number',
+                'orders.order_type',
+                'orders.client_id',
+                'orders.business_location_id',
+                'orders.payment_method',
+                'orders.order_status',
+                'orders.payment_status',
+                'orders.shipping_cost',
+                'orders.sub_total',
+                'orders.total',
+                'orders.created_at'
+            ])
+            ->where('orders.order_type', 'order_refund')
             ->latest();
-
 
         // Apply status filter
         if ($status !== 'all') {
-            $query->where('order_status', $status);
+            $query->where('orders.order_status', $status);
+        }
+
+        if ($businessLocation) {
+            $query->where('orders.business_location_id', $businessLocation);
+        }
+
+        if ($paymentStatus !== 'all') {
+            $query->where('orders.payment_status', $paymentStatus);
         }
 
         if ($user_locations !== "all") {
-            $query->whereIn('business_location_id', $user_locations);
+            $query->where(function($query) use ($user_locations) {
+                $query->whereIn('orders.business_location_id', $user_locations);
+            });
+        }
+
+        if ($deliveryName) {
+            $query->whereHas('deliveries.contact', function($query) use ($deliveryName) {
+                $query->where('contacts.name', 'like', "%{$deliveryName}%");
+            });
         }
 
         // Apply date filter
         if ($startDate && $endDate) {
             if ($startDate === $endDate) {
-                // Filter for a single day
-                $query->whereDate('created_at', $startDate);
+                $query->whereDate('orders.created_at', $startDate);
             } else {
-                // Adjust endDate to include the entire day
                 $endDate = Carbon::parse($endDate)->endOfDay();
-
-                // Filter for a range of dates
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereBetween('orders.created_at', [$startDate, $endDate]);
             }
         }
 
         // Apply search filter
         if ($search) {
             $query->where(function ($query) use ($search) {
-                $query->where('id', 'like', "%$search%")
-                    ->orWhere('status', 'like', "%$search%")
-                    ->orWhereHas('order', function ($query) use ($search) {
-                        $query->where('number', 'like', "%$search%");
-                    })
-                    ->orWhereHas('client.contact', function ($query) use ($search) {
-                        $query->where('name', 'like', "%$search%");
+                $query->where('orders.id', 'like', "%{$search}%")
+                    ->orWhere('orders.number', 'like', "%{$search}%")
+                    ->orWhereHas('client.contact', function($query) use ($search) {
+                        $query->where('contacts.name', 'like', "%{$search}%")
+                        ->orWhere('contacts.mobile', 'like', "%{$search}%");
                     });
             });
         }
+
 
         return $this->formatDatatableResponse($query);
     }
@@ -124,11 +154,55 @@ class RefundOrderController extends Controller
     {
 
         return Datatables::of($query)
-            ->addColumn('client_contact_name', function ($order) {
-                return optional($order->client->contact)->name ?? 'N/A';
-            })
+        ->addColumn('business_location_name', function ($order) {
+            if ($order->businessLocation) {
+                return $order->businessLocation->name ?? 'N/A';
+            }
+        })
+        ->addColumn('client_contact_name', function ($order) {
+            try {
+                if ($order->client && $order->client->contact) {
+                    return $order->client->contact->name ?? 'N/A';
+                }
+                return 'N/A';
+            } catch (\Exception $e) {
+                \Log::error('Error getting client contact name: ' . $e->getMessage());
+                return 'Error';
+            }
+        })
+        ->addColumn('client_contact_mobile', function ($order) {
+            try {
+                if ($order->client && $order->client->contact) {
+                    return $order->client->contact->mobile ?? 'N/A';
+                }
+                return 'N/A';
+            } catch (\Exception $e) {
+                \Log::error('Error getting client contact mobile: ' . $e->getMessage());
+                return 'Error';
+            }
+        })
+        ->filterColumn('client_contact_name', function($query, $keyword) {
+            $query->whereHas('client', function($query) use ($keyword) {
+                $query->whereHas('contact', function($query) use ($keyword) {
+                    $query->where('contacts.name', 'like', "%{$keyword}%");
+                });
+            });
+        })
+        ->filterColumn('client_contact_mobile', function($query, $keyword) {
+            $query->whereHas('client', function($query) use ($keyword) {
+                $query->whereHas('contact', function($query) use ($keyword) {
+                    $query->where('contacts.mobile', 'like', "%{$keyword}%");
+                });
+            });
+        })
             ->addColumn('has_delivery', function ($order) {
                 return $order->has_delivery; // Add the delivery status here
+            })
+            ->addColumn('delivery_name', function ($order) {
+                     if ($order->has_delivery) {
+                    // Assuming `deliveries` is a relationship on the Order model
+                    return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
+                }
             })
             ->make(true);
     }

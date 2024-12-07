@@ -70,9 +70,9 @@
                         <th>@lang('lang_v1.order_item')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.order_refund_status')</th>
-                        <th>@lang('lang_v1.refund_status')</th>
+                        <!-- <th>@lang('lang_v1.refund_status')</th> -->
                         <!-- <th>@lang('lang_v1.order_status')</th> -->
-                         <th>@lang('lang_v1.delivery_assigned')</th>
+                         <!-- <th>@lang('lang_v1.delivery_assigned')</th> -->
                         <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.actions')</th> <!-- New Actions column -->
                     </tr>
@@ -206,69 +206,53 @@
             </select>`;
                 }
             },
-            {
-                data: 'refund_status', name: 'refund_status', render: function (data, type, row) {
-                    let badgeClass;
-        switch(data) {
-            case 'pending': badgeClass = 'badge btn-warning'; break;
-            case 'processed': badgeClass = 'badge btn-info'; break;
-            case 'delivering': badgeClass = 'badge btn-primary'; break;
-            case 'completed': badgeClass = 'badge btn-success'; break;
-            default: badgeClass = 'badge badge-secondary'; // For any other statuses
-        }
+        //     {
+        //         data: 'refund_status', name: 'refund_status', render: function (data, type, row) {
+        //             let badgeClass;
+        // switch(data) {
+        //     case 'pending': badgeClass = 'badge btn-warning'; break;
+        //     case 'processed': badgeClass = 'badge btn-info'; break;
+        //     case 'delivering': badgeClass = 'badge btn-primary'; break;
+        //     case 'completed': badgeClass = 'badge btn-success'; break;
+        //     default: badgeClass = 'badge badge-secondary'; // For any other statuses
+        // }
                     
-                    return `
-                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+        //             return `
+        //             <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                     
-            <select class="form-control change-refund-status" data-order-refund-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                 <option value="processed" ${data === 'processed' ? 'selected' : ''}>Processed</option>
-                <option value="delivering" ${data === 'delivering' ? 'selected' : ''}>Delivering</option>
-                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-            </select>`;
-                }
-            },
-            {
-                data: 'order_status',
-                name: 'order.order_status',
-                render: function (data, type, row) {
-                    // Case 1: If the order status is 'processing' and has no delivery assigned
-                    if (data === 'processing' && row.has_delivery === false) {
-                        return `<button class="btn btn-primary assign-delivery-btn" 
-                    data-order-id="${row.id}" 
-                    data-contact-name="${row.client_contact_name
-                            } ">
-                    @lang('lang_v1.assign_delivery')
-                </button > `;
-                    }
-                    if (row.has_delivery === true) {
-                        return `<span class="badge badge-success">
-                        @lang('lang_v1.delivery_assigned')
-                    </span>`;
-                    }
-
-                    return '';
-                },
-                orderable: false,
-                searchable: false
-            },
+        //     <select class="form-control change-refund-status" data-order-refund-id="${row.id}">
+        //         <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+        //          <option value="processed" ${data === 'processed' ? 'selected' : ''}>Processed</option>
+        //         <option value="delivering" ${data === 'delivering' ? 'selected' : ''}>Delivering</option>
+        //         <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+        //     </select>`;
+        //         }
+        //     },
             // {
-            //     data: 'order.order_status', name: 'order.order_status', render: function (data, type, row) {
-            //         let badgeClass;
-            //         switch(data) {
-            //             case 'pending': badgeClass = 'badge btn-warning'; break;
-            //             case 'processing': badgeClass = 'badge btn-info'; break;
-            //             case 'shipped': badgeClass = 'badge btn-primary'; break;
-            //             case 'completed': badgeClass = 'badge btn-success'; break;
-            //             case 'canceled': badgeClass = 'badge btn-danger'; break;
-            //             default: badgeClass = 'badge badge-secondary'; // For any other statuses
+            //     data: 'order_status',
+            //     name: 'order.order_status',
+            //     render: function (data, type, row) {
+            //         // Case 1: If the order status is 'processing' and has no delivery assigned
+            //         if (data === 'processing' && row.has_delivery === false) {
+            //             return `<button class="btn btn-primary assign-delivery-btn" 
+            //         data-order-id="${row.id}" 
+            //         data-contact-name="${row.client_contact_name
+            //                 } ">
+            //         @lang('lang_v1.assign_delivery')
+            //     </button > `;
             //         }
-                    
-            //         return `
-            //         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-            //         `;
-            //     }
+            //         if (row.has_delivery === true) {
+            //             return `<span class="badge badge-success">
+            //             @lang('lang_v1.delivery_assigned')
+            //         </span>`;
+            //         }
+
+            //         return '';
+            //     },
+            //     orderable: false,
+            //     searchable: false
             // },
+            
             {
                 data: 'created_at',
                 name: 'created_at',

@@ -169,15 +169,15 @@
            <div class="row">
            <div class="col-md-4" >
                 <div class="form-group">
-                    {!! Form::label('email_address', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::label('client_email_address', __( 'business.email_address' ) . ':') !!}
+                    {!! Form::email('client_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
-                    {!! Form::label('password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::label('client_password', __( 'business.password' ) . ':') !!}
+                    {!! Form::text('client_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
                 </div>
             </div>
 
@@ -188,7 +188,7 @@
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('account_status', ['active','deleted'], null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('client_account_status', ['active','deleted'], null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>
@@ -197,19 +197,19 @@
            <div class="row">
            <div class="col-md-4">
                 <div class="form-group">
-                    {!! Form::label('location', __( 'business.location' ) . ':') !!}
-                    {!! Form::text('location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                    {!! Form::label('client_location', __( 'business.location' ) . ':') !!}
+                    {!! Form::text('client_location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('business_location', __('business.business_location') . ':*' ) !!}
+                    {!! Form::label('client_business_location_id', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('business_location_id', $business_locations, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('client_business_location_id', $business_locations, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>
@@ -252,15 +252,15 @@
            <div class="row">
            <div class="col-md-4" >
                 <div class="form-group">
-                    {!! Form::label('email_address', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::label('delivery_email_address', __( 'business.email_address' ) . ':') !!}
+                    {!! Form::email('delivery_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
-                    {!! Form::label('password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::label('delivery_password', __( 'business.password' ) . ':') !!}
+                    {!! Form::text('delivery_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
                 </div>
             </div>
            </div>
@@ -268,19 +268,19 @@
            <div class="row">
            <div class="col-md-4">
                 <div class="form-group">
-                    {!! Form::label('location', __( 'business.location' ) . ':') !!}
-                    {!! Form::text('location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
+                    {!! Form::label('delivery_location', __( 'business.location' ) . ':') !!}
+                    {!! Form::text('delivery_location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('business_location', __('contact.business_location') . ':*' ) !!}
+                    {!! Form::label('delivery_business_location_id', __('contact.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('business_location_id', $business_locations, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('delivery_business_location_id', $business_locations, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>

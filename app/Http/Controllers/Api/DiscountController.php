@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Discount\StoreDiscountRequest;
-use App\Http\Requests\Discount\UpdateDiscountRequest;
-use App\Models\Discount;
+
 use App\Services\API\DiscountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\SellingPriceGroup;
 use App\Models\Variation;
 use App\Scopes\BusinessIdScope;
+use Illuminate\Support\Facades\Auth;
 
 class BusinessLocation extends Model
 {
@@ -126,6 +127,24 @@ class BusinessLocation extends Model
     {
         return $query->where('is_active', 1);
     }
+
+
+        /**
+     * Scope a query to only include active location.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeBusinessId($query)
+    {
+        // return $query->where('is_active', 1);
+        $business_id = Auth::user()->business_id ?? null;
+        if ($business_id) {
+            return $query->where('business_id', $business_id);
+        }
+
+    }
+
 
     /**
      * Get the featured products.

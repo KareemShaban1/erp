@@ -46,7 +46,7 @@ class OrderRefundController extends Controller
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
-            $search = request()->get('search.value');
+            $search =  request()->get('search')['value'];
 
             // Validate status
             $validStatuses = ['all', 'requested', 'processed', 'approved', 'rejected'];

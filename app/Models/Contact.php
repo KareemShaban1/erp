@@ -335,9 +335,11 @@ class Contact extends Authenticatable
         return implode(' ', $name_array);
     }
 
-    public function client(){
-        return $this->hasOne(Client::class);
+    public function client()
+    {
+        return $this->hasOne(Client::class, 'contact_id'); // Adjust the foreign key if necessary
     }
+    
 
     public function delivery(){
         return $this->hasOne(Delivery::class);

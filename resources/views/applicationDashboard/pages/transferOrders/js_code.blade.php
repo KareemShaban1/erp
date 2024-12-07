@@ -1,17 +1,21 @@
 <script>
     $('#filter_date').click(function () {
-        orders_table.ajax.reload(); // Reload DataTable with the new date filters
+        order_transfer_table.ajax.reload(); // Reload DataTable with the new date filters
     });
 
     $('#clear_date').click(function () {
         $('#start_date').val('');
         $('#end_date').val('');
-        orders_table.ajax.reload();
+        $('#business_location').val('');
+        $('#delivery_name').val('');
+        $('#status').val('all');
+        $('#payment_status').val('all');
+        order_transfer_table.ajax.reload();
     });
 
 
     //Orders table
-    var orders_table = $('#orders_table').DataTable({
+    var order_transfer_table = $('#order_transfer_table').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
@@ -20,75 +24,46 @@
                 d.status = $('#status').val();
                 d.start_date = $('#start_date').val();
                 d.end_date = $('#end_date').val();
+                d.business_location = $('#business_location').val();
+                d.delivery_name = $('#delivery_name').val();
+                d.payment_status = $('#payment_status').val();
             }
         },
         columnDefs: [
             {
                 targets: 2,
-                orderable: false,
-                searchable: false,
+                orderable: true,
+                searchable: true,
             },
         ],
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order_type', name: 'order_type',
-                render: function (data) {
-                    console.log(data)
-                    if (data == 'order_refund') {
-                        return '<span class="badge btn-danger">Transfer</span>';
-                        } else {
-                            return '<span class="badge btn-success">Order</span>';
-                            }
-                }
-             },
+            // { data: 'business_location.name', name: 'business_location.name' },
             { data: 'number', name: 'number' },
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
-            // { data: 'payment_method', name: 'payment_method' },
-            // {
-            //     data: 'order_status', name: 'order_status', render: function (data, type, row) {
-            //         let badgeClass;
-            //         switch (data) {
-            //             case 'pending': badgeClass = 'badge btn-warning'; break;
-            //             case 'processing': badgeClass = 'badge btn-info'; break;
-            //             case 'shipped': badgeClass = 'badge btn-primary'; break;
-            //             case 'completed': badgeClass = 'badge btn-success'; break;
-            //             case 'cancelled': badgeClass = 'badge btn-danger'; break;
-            //             default: badgeClass = 'badge badge-secondary'; // For any other statuses
-            //         }
+            { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
-            //         return `
-            //         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    
-            // <select class="form-control change-order-status" data-order-id="${row.id}">
-            //     <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-            //     <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-            //     <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-            //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-            //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Canceled</option>
-            // </select>`;
-            //     }
-            // },
             {
-    data: 'order_status',
-    name: 'order_status',
-    render: function (data, type, row) {
-        let badgeClass;
-        switch (data) {
-            case 'pending': badgeClass = 'badge btn-warning'; break;
-            case 'processing': badgeClass = 'badge btn-info'; break;
-            case 'shipped': badgeClass = 'badge btn-primary'; break;
-            case 'completed': badgeClass = 'badge btn-success'; break;
-            case 'cancelled': badgeClass = 'badge btn-danger'; break;
-            default: badgeClass = 'badge badge-secondary'; // For any other statuses
-        }
+                data: 'order_status',
+                name: 'order_status',
+                render: function (data, type, row) {
+                    let badgeClass;
+                    switch (data) {
+                        case 'pending': badgeClass = 'badge btn-warning'; break;
+                        case 'processing': badgeClass = 'badge btn-info'; break;
+                        case 'shipped': badgeClass = 'badge btn-primary'; break;
+                        case 'completed': badgeClass = 'badge btn-success'; break;
+                        case 'cancelled': badgeClass = 'badge btn-danger'; break;
+                        default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                    }
 
-        // Display only the badge for completed or cancelled statuses
-        if (data === 'completed' || data === 'cancelled') {
-            return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-        }
+                    // Display only the badge for completed or cancelled statuses
+                    if (data === 'completed' || data === 'cancelled') {
+                        return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                    }
 
-        // Otherwise, display both the badge and the select dropdown
-        return `
+                    // Otherwise, display both the badge and the select dropdown
+                    return `
             <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
             <select class="form-control change-order-status" data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
@@ -97,8 +72,8 @@
                 <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
                 <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>`;
-    }
-},
+                }
+            },
 
             {
                 data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
@@ -169,7 +144,7 @@
         ],
 
         fnDrawCallback: function (oSettings) {
-            __currency_convert_recursively($('#orders_table'));
+            __currency_convert_recursively($('#order_transfer_table'));
         },
     });
 
@@ -188,7 +163,7 @@
             success: function (response) {
                 if (response.success) {
                     toastr.success(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    order_transfer_table.ajax.reload(); // Reload DataTable to reflect the updated status
                 } else {
                     alert('Failed to update order status.');
                 }
@@ -213,7 +188,7 @@
             success: function (response) {
                 if (response.success) {
                     toastr.success(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    order_transfer_table.ajax.reload(); // Reload DataTable to reflect the updated status
                 } else {
                     alert('Failed to update payment status.');
                 }
@@ -267,7 +242,7 @@
             success: function (response) {
                 if (response.success) {
                     toastr.success(response.message);
-                    orders_table.ajax.reload();
+                    order_transfer_table.ajax.reload();
                     $('#assignDeliveryModal').modal('hide');
                 } else {
                     alert('Failed to assign delivery.');
@@ -313,7 +288,7 @@
                     $('#to_location_name').text(response.order.to_business_location?.name);
                     $('#to_location_city').text(response.order.to_business_location?.city);
                     $('#to_location_mobile').text(response.order.to_business_location?.mobile);
-                    
+
                     // Populate the order items
                     const itemsTable = $('#order_items_table tbody');
                     itemsTable.empty(); // Clear existing rows
@@ -332,7 +307,7 @@
                     });
 
                     const activityLogsTable = $('#activity_logs_table tbody');
-                      activityLogsTable.empty(); // Clear existing rows
+                    activityLogsTable.empty(); // Clear existing rows
 
                     response.activityLogs.forEach(item => {
                         const date = new Date(item.created_at);
@@ -351,7 +326,7 @@
                             </td>
                         </tr>
                     `;
-                    activityLogsTable.append(row);
+                        activityLogsTable.append(row);
                     });
 
                     // Show the modal

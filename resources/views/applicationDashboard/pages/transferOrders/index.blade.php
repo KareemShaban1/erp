@@ -9,7 +9,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1>@lang('lang_v1.orders')
+    <h1>@lang('lang_v1.order_transfer')
         <small>@lang('lang_v1.manage_your_orders')</small>
     </h1>
 </section>
@@ -22,56 +22,22 @@
         <div class="box-tools">
         </div>
         @component('components.filters', ['title' => __('report.filters')])
-        <div class="row">
-            <div class="col-md-3">
-                <input type="date" id="start_date" class="form-control" placeholder="Start Date">
-            </div>
-            <div class="col-md-3">
-                <input type="date" id="end_date" class="form-control" placeholder="End Date">
-            </div>
+        @include('applicationDashboard.pages.transferOrders.filters')
 
-            <div class="col-md-3">
-                <div class="form-group">
-                    <div class="input-group">
-                        <!-- <span class="input-group-addon">
-                                        <i class="fa fa-user"></i>
-                                    </span> -->
-                        {!! Form::select('status', [
-            'all' => __('All'),
-            'pending' => __('Pending'),
-            'processing' => __('Processing'),
-            'shipped' => __('Shipped'),
-            'completed' => __('Completed'),
-            'cancelled' => __('Cancelled')
-        ], 'all', [
-            'class' => 'form-control',
-            'id' => 'status',
-            'placeholder' => __('messages.please_select'),
-            'required'
-        ]) !!}
-
-                    </div>
-                </div>
-
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary" id="filter_date">Filter</button>
-                <button class="btn btn-primary" id="clear_date">Clear</button>
-            </div>
-        </div>
         @endcomponent
 
         @endslot
     @endcan
     @can('orders_refund.view')
         <div class="table-responsive">
-            <table class="table table-bordered table-striped" id="orders_table">
+            <table class="table table-bordered table-striped" id="order_transfer_table">
                 <thead>
                     <tr>
                         <th>@lang('lang_v1.id')</th>
-                        <th>@lang('lang_v1.order_type')</th>
+                        <!-- <th>@lang('lang_v1.business_location')</th> -->
                         <th>@lang('lang_v1.number')</th>
                         <th>@lang('lang_v1.client')</th>
+                        <th>@lang('lang_v1.client_number')</th>
                         <!-- <th>@lang('lang_v1.payment_method')</th> -->
                         <th>@lang('lang_v1.order_status')</th>
                         <th>@lang('lang_v1.payment_status')</th>
