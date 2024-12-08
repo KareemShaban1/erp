@@ -477,6 +477,8 @@ class OrderService extends BaseService
                     'quantity' => $cart->quantity,
                     'price' => $cart->price,
                     'discount' => $cart->discount,
+                    'line_discount_type' => $cart->discount_type,
+                    'line_discount_amount' => $cart->discount,
                     'enable_stock' => 1,
                     'unit_price' => $cart->price,
                     'item_tax' => 0,

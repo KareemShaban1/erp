@@ -137,6 +137,7 @@ class CartService extends BaseService
     
         // Calculate total price (quantity * price) - discount
         $cartItem->discount = $discountAmount;
+        $cartItem->discount_type = $latestDiscount->discount_type;
         $cartItem->total = ($cartItem->quantity * $cartItem->price) - $discountAmount;
     
         // Save the cart item with the updated total

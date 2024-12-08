@@ -31,7 +31,7 @@
         },
         columnDefs: [
             {
-                // targets: 2,
+                targets: 2,
                 orderable: true,
                 searchable: true,
             },

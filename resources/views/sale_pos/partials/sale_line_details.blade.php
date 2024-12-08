@@ -85,7 +85,9 @@
                 <span class="display_currency" data-currency_symbol="true">{{ $sell_line->unit_price_inc_tax }}</span>
             </td>
             <td>
-                <span class="display_currency" data-currency_symbol="true">{{ $sell_line->quantity * $sell_line->unit_price_inc_tax }}</span>
+                <!-- <span class="display_currency" data-currency_symbol="true">{{ $sell_line->quantity * $sell_line->unit_price_inc_tax }}</span> -->
+                <span class="display_currency" data-currency_symbol="true">{{ ($sell_line->quantity * $sell_line->unit_price_inc_tax) - $sell_line->get_discount_amount()  }}</span>
+
             </td>
         </tr>
         @if(!empty($sell_line->modifiers))
