@@ -353,7 +353,9 @@ class OrderController extends Controller
             'businessLocation',
             'orderItems',
             'delivery',
-            'transaction'
+            'transaction' => function ($query) {
+                $query->where('type', 'sell'); // Filter transactions with type 'sell'
+            }
         ])->find($orderId);
 
         if ($order) {
