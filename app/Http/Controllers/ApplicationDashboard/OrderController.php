@@ -222,6 +222,10 @@ class OrderController extends Controller
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
+                \Log::info('data',[
+                    $order->client->id,
+                    $order->client->fcm_token,
+                ]);
                 // Send and store push notification
                 app(FirebaseService::class)->sendAndStoreNotification(
                     $order->client->id,
