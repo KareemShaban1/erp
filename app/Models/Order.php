@@ -45,9 +45,10 @@ class Order extends Model
         return $this->belongsTo(Client::class, 'client_id')
             ->select(['id', 'contact_id'])
             ->with(['contact' => function ($query) {
-                $query->select('id', 'name', 'first_name', 'last_name');
+                $query->select('id', 'name', 'first_name', 'last_name','business_id');
             }]);
     }
+
 
     public function businessLocation()
     {

@@ -20,17 +20,17 @@ class OrderController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
+     * Display a listing of the orders.
      */
     public function index(Request $request)
     {
-        $categories = $this->service->list($request);
+        $orders = $this->service->list($request);
 
-        if ($categories instanceof JsonResponse) {
-            return $categories;
+        if ($orders instanceof JsonResponse) {
+            return $orders;
         }
 
-        return $categories->additional([
+        return $orders->additional([
             'code' => 200,
             'status' => 'success',
             'message' =>  __('message.Categories have been retrieved successfully'),

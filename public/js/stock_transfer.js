@@ -148,6 +148,7 @@ $(document).ready(function() {
         columns: [
             { data: 'transaction_date', name: 'transaction_date' },
             { data: 'ref_no', name: 'ref_no' },
+            { data: 'order_number', name: 'order_number' },
             { data: 'location_from', name: 'l1.name' },
             { data: 'location_to', name: 'l2.name' },
             { data: 'status', name: 'status' },
