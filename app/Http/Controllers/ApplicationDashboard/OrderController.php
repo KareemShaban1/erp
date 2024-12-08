@@ -223,6 +223,7 @@ class OrderController extends Controller
             case 'processing':
                 $orderTracking->processing_at = now();
                 \Log::info('data',[
+                    $order->id,
                     $order->client->id,
                     $order->client->fcm_token,
                 ]);
