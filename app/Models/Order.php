@@ -43,7 +43,7 @@ class Order extends Model
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id')
-            ->select(['id', 'contact_id'])
+            ->select(['id', 'contact_id','fcm_token'])
             ->with(['contact' => function ($query) {
                 $query->select('id', 'name', 'first_name', 'last_name','business_id');
             }]);
