@@ -1109,26 +1109,37 @@ class ContactController extends Controller
 
             // Client-specific data and creation
             if ($request->input('type') === 'client') {
-                $request->validate([
-                    'client_email_address' => 'required|email|unique:clients,email_address',
-                    'client_password' => 'required|string|min:8',
-                    'client_business_location_id' => 'required|integer',
-                    'client_location' => 'required|string',
-                    'latitude' => 'nullable|numeric',
-                    'longitude' => 'nullable|numeric'
-                ],
-            [
-                            'client_email_address.required' => 'البريد الإلكتروني مطلوب.',
-                            'client_email_address.email' => 'يرجى إدخال بريد إلكتروني صالح.',
-                            'client_email_address.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
-                            'client_password.min' => 'يجب أن تكون كلمة المرور مكونة من 8 أحرف على الأقل.',
-                            'client_business_location_id.required' => 'موقع العمل مطلوب.',
-                        ]);
+                $request->validate(
+                    [
+                        'client_email_address' => 'required|email|unique:clients,email_address',
+                        'client_password' => 'required|string|min:8',
+                        'client_business_location_id' => 'required|integer',
+                        'client_location' => 'required|string',
+                        'latitude' => 'nullable|numeric',
+                        'longitude' => 'nullable|numeric',
+                        'client_account_status' => 'required|in:active,deleted'
+                    ],
+                    [
+                        'client_email_address.required' => 'البريد الإلكتروني مطلوب.',
+                        'client_email_address.email' => 'يرجى إدخال بريد إلكتروني صالح.',
+                        'client_email_address.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
+                        'client_password.min' => 'يجب أن تكون كلمة المرور مكونة من 8 أحرف على الأقل.',
+                        'client_business_location_id.required' => 'موقع العمل مطلوب.',
+                        'client_account_status.required' => ' حالة الحساب مطلوب.',
+
+                    ]
+                );
 
                 // Prepare client data and create record
-                $clientData = $request->only(['client_email_address', 'client_password',
-                'client_account_status', 
-                'client_location', 'client_business_location_id', 'latitude', 'longitude']);
+                $clientData = $request->only([
+                    'client_email_address',
+                    'client_password',
+                    'client_account_status',
+                    'client_location',
+                    'client_business_location_id',
+                    'latitude',
+                    'longitude'
+                ]);
                 Client::create([
                     'email_address' => $clientData['client_email_address'],
                     'password' => Hash::make($clientData['client_password']),
@@ -1144,24 +1155,36 @@ class ContactController extends Controller
 
             // Client-specific data and creation
             if ($request->input('type') === 'delivery') {
-                $request->validate([
-                    'delivery_email_address' => 'required|email|unique:deliveries,email_address',
-                    'delivery_password' => 'required|string|min:8',
-                    'delivery_business_location_id' => 'required|integer',
-                    'delivery_location' => 'required|string',
-                ],
-                [
-                    'delivery_email_address.required' => 'البريد الإلكتروني مطلوب.',
-                    'delivery_email_address.email' => 'يرجى إدخال بريد إلكتروني صالح.',
-                    'delivery_email_address.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
-                    'delivery_password.min' => 'يجب أن تكون كلمة المرور مكونة من 8 أحرف على الأقل.',
-                    'delivery_business_location_id.required' => 'موقع العمل مطلوب.',
-                ]);
+                $request->validate(
+                    [
+                        'delivery_email_address' => 'required|email|unique:deliveries,email_address',
+                        'delivery_password' => 'required|string|min:8',
+                        'delivery_business_location_id' => 'required|integer',
+                        'delivery_location' => 'required|string',
+                        'delivery_account_status' => 'required|in:active,deleted'
+
+                    ],
+                    [
+                        'delivery_email_address.required' => 'البريد الإلكتروني مطلوب.',
+                        'delivery_email_address.email' => 'يرجى إدخال بريد إلكتروني صالح.',
+                        'delivery_email_address.unique' => 'البريد الإلكتروني مستخدم بالفعل.',
+                        'delivery_password.min' => 'يجب أن تكون كلمة المرور مكونة من 8 أحرف على الأقل.',
+                        'delivery_business_location_id.required' => 'موقع العمل مطلوب.',
+                        'delivery_account_status.required' => ' حالة الحساب مطلوب.',
+
+                    ]
+                );
 
                 // Prepare delivery data and create record
-                $deliveryData = $request->only(['delivery_email_address', 'delivery_password', 
-                'delivery_location', 'delivery_business_location_id','delivery_account_status', 
-                'latitude', 'longitude']);
+                $deliveryData = $request->only([
+                    'delivery_email_address',
+                    'delivery_password',
+                    'delivery_location',
+                    'delivery_business_location_id',
+                    'delivery_account_status',
+                    'latitude',
+                    'longitude'
+                ]);
                 Delivery::create([
                     'email_address' => $deliveryData['delivery_email_address'],
                     'password' => Hash::make($deliveryData['delivery_password']),
@@ -1538,8 +1561,8 @@ class ContactController extends Controller
 
             } catch (\Illuminate\Validation\ValidationException $e) {
                 // Retrieve validation errors
-                $errors = $e->errors(); 
-            
+                $errors = $e->errors();
+
                 // Format errors as an array of field-message pairs
                 $formattedErrors = [];
                 foreach ($errors as $field => $messages) {
@@ -1548,13 +1571,13 @@ class ContactController extends Controller
                         'message' => $messages[0] // Take the first message for simplicity
                     ];
                     // Prepare the output response
-                $output = [
-                    'success' => false,
-                    // 'msg' => __("messages.validation_error"), // General validation error message
-                    'msg' => $messages
-                ];
-                }                
-            
+                    $output = [
+                        'success' => false,
+                        // 'msg' => __("messages.validation_error"), // General validation error message
+                        'msg' => $messages
+                    ];
+                }
+
             } catch (\Exception $e) {
 
                 \Log::emergency($e);

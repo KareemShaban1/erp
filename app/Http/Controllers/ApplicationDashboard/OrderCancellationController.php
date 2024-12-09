@@ -61,7 +61,8 @@ class OrderCancellationController extends Controller
         $user_locations = Auth::user()->permitted_locations();
 
         $query = OrderCancellation::with(['client.contact:id,name', 'order:id,number,order_status'])
-            ->select(['id', 'order_id', 'client_id', 'status', 'created_at']);
+            ->select(['id', 'order_id', 'client_id', 'status', 'created_at'])
+            ->latest();
 
         // Apply status filter
         if ($status !== 'all') {

@@ -170,14 +170,14 @@
            <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('client_email_address', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('client_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::email('client_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) , 'required']); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('client_password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('client_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::text('client_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ), 'required' ]); !!}
                 </div>
             </div>
 
@@ -188,7 +188,9 @@
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('client_account_status', ['active','deleted'], null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('client_account_status', 
+                        ['active' => __('lang_v1.active'), 'deleted' => __('lang_v1.deleted')]
+                        , null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>
@@ -253,14 +255,28 @@
            <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('delivery_email_address', __( 'business.email_address' ) . ':') !!}
-                    {!! Form::email('delivery_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ) ]); !!}
+                    {!! Form::email('delivery_email_address', null, ['class' => 'form-control', 'placeholder' => __( 'business.email_placeholder' ),'required' ]); !!}
                 </div>
             </div>
 
             <div class="col-md-4" >
                 <div class="form-group">
                     {!! Form::label('delivery_password', __( 'business.password' ) . ':') !!}
-                    {!! Form::text('delivery_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ) ]); !!}
+                    {!! Form::text('delivery_password', null, ['class' => 'form-control', 'placeholder' => __( 'business.password_placeholder' ),'required' ]); !!}
+                </div>
+            </div>
+
+            <div class="col-md-4" >
+            <div class="form-group">
+                    {!! Form::label('delivery_account_status', __('business.account_status') . ':*' ) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('delivery_account_status', 
+                        ['active' => __('lang_v1.active'), 'deleted' => __('lang_v1.deleted')]
+                        , null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
                 </div>
             </div>
            </div>
@@ -275,7 +291,7 @@
 
             <div class="col-md-4" >
             <div class="form-group">
-                    {!! Form::label('delivery_business_location_id', __('contact.business_location') . ':*' ) !!}
+                    {!! Form::label('delivery_business_location_id', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>

@@ -79,6 +79,12 @@
 
                 {
                     data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+                        
+                         // Display only the badge for completed or cancelled statuses
+                         if (data === 'paid') {
+                            return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        }
+                        
                         return `
             <select class="form-control change-payment-status" data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>

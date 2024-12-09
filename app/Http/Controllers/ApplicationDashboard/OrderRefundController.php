@@ -69,7 +69,8 @@ class OrderRefundController extends Controller
         $user_locations = Auth::user()->permitted_locations();
 
         $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status','order_item.product:id,name', 'order_item'])  // Added product relationship
-        ->select(['id', 'order_id', 'client_id','order_item_id', 'status','refund_status', 'amount', 'created_at']);
+        ->select(['id', 'order_id', 'client_id','order_item_id', 'status','refund_status', 'amount', 'created_at'])
+        ->latest();
 
         // Apply status filter
         if ($status !== 'all') {
