@@ -1,4 +1,7 @@
 <script>
+
+$(document).ready(function(){
+
     $('#filter_date').click(function () {
         orders_table.ajax.reload(); // Reload DataTable with the new date filters
     });
@@ -366,5 +369,6 @@
         $('#activity_logs_table tbody').empty();
     });
 
+});
 
 </script>

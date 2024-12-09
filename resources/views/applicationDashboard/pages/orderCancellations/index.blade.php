@@ -128,6 +128,9 @@
 @stop
 @section('javascript')
 <script>
+
+$(document).ready(function(){
+
     
         $('#filter_date').click(function() {
         order_cancellations_table.ajax.reload(); // Reload DataTable with the new date filters
@@ -410,7 +413,7 @@ $(document).on('click', '.view-order-cancellation-info-btn', function () {
         });
     });
 
-
+});
   
 </script>
 @endsection

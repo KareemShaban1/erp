@@ -42,6 +42,9 @@
 @stop
 @section('javascript')
 <script>
+
+$(document).ready(function(){
+
     //Brand table
     var deliveries_table = $('#deliveries_table').DataTable({
         processing: true,
@@ -180,6 +183,7 @@
             }
         });
     });
+});
 
 </script>
 @endsection

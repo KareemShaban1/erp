@@ -7,11 +7,15 @@ use App\Http\Resources\OrderCancellation\OrderCancellationResource;
 use App\Models\Order;
 use App\Models\OrderCancellation;
 use App\Models\OrderTracking;
+use App\Models\Transaction;
+use App\Models\TransactionSellLine;
 use App\Services\BaseService;
 use App\Services\FirebaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
 use App\Utils\ProductUtil;
+use App\Utils\TransactionUtil;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,14 +23,17 @@ class OrderCancellationService extends BaseService
 {
     protected $orderService;
     protected $productUtil;
+    protected $transactionUtil;
 
     public function __construct(
         ProductUtil $productUtil,
-        OrderService $orderService
-        
+        OrderService $orderService, 
+        TransactionUtil $transactionUtil
+
     ) {
         $this->orderService = $orderService;
         $this->productUtil = $productUtil;
+        $this->transactionUtil = $transactionUtil;
     }
     /**
      * Get all OrderCancellations with filters and pagination for DataTables.
@@ -106,20 +113,19 @@ class OrderCancellationService extends BaseService
                 return $this->returnJSON(null, __('message.Order not found'), 404);
             }
 
-            $order_transfer = Order::where('parent_order_id',$order->id)
-            ->where('order_type','order_transfer')
-            ->whereIn('order_status',['pending','processing'])
-            ->get();
+            $order_transfer = Order::where('parent_order_id', $order->id)
+                ->where('order_type', 'order_transfer')
+                ->whereIn('order_status', ['pending', 'processing'])
+                ->get();
 
             // Check if the order status allows cancellation
             if (in_array($order->order_status, ['pending'])) {
                 // Set order status to 'cancelled' and save
                 $order->order_status = 'cancelled';
-                $order->save();
                 $orderTracking->cancelled_at = now();
-                $orderTracking->save();
 
-                foreach($order->orderItems as $item){
+
+                foreach ($order->orderItems as $item) {
 
                     $this->productUtil->updateProductQuantity(
                         $order->business_location_id,
@@ -129,21 +135,60 @@ class OrderCancellationService extends BaseService
                     );
                 }
 
-               foreach($order_transfer as $transfer){
-                foreach($transfer->orderItems as $item){
-                    $this->orderService->transferQuantityForCancellation(
-                        $transfer,
-                        $item,
-                        $transfer->client,
-                        $transfer->to_business_location_id,
-                        $transfer->from_business_location_id,
-                        $item->quantity);
-
+                foreach ($order_transfer as $transfer) {
+                    foreach ($transfer->orderItems as $item) {
+                        $this->orderService->transferQuantityForCancellation(
+                            $transfer,
+                            $item,
+                            $transfer->client,
+                            $transfer->to_business_location_id,
+                            $transfer->from_business_location_id,
+                            $item->quantity
+                        );
+                    }
+                    $transfer->order_status = 'cancelled';
+                    $transfer->save();
                 }
-                $transfer->order_status = 'cancelled';
-                $transfer->save();
-                
-               }
+
+                $business_id = $order->client->contact->business->id;
+
+                // dd($order->id);
+                $parent_sell_transaction = Transaction::
+                    where('order_id', $order->id)
+                    ->where('type', 'sell')
+                    ->first();
+                $products = [];
+                foreach ($order->orderItems as $item) {
+                    $transaction_sell_line = TransactionSellLine::
+                        where('product_id', $item->product_id)
+                        ->where('transaction_id', $parent_sell_transaction->id)
+                        ->first();
+                    $products[] = [
+                        'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
+                        'quantity' => $item->quantity,
+                        'unit_price_inc_tax' => $item->price, // Include price if applicable
+                    ];
+                }
+
+
+                $input = [
+                    'transaction_id' => $parent_sell_transaction->id,
+                    'order_id' => $order->id,
+                    'invoice_no' => null,
+                    'transaction_date' => Carbon::now()->format('d-m-Y h:i A'),
+                    'products' => $products,
+                    "discount_type" => null,
+                    "discount_amount" => "0.00",
+                    "tax_id" => null,
+                    "tax_amount" => "0",
+                    "tax_percent" => "0",
+                ];
+
+
+                $this->transactionUtil->addSellReturn($input, $business_id, 1,false);
+
+                $order->save();
+                $orderTracking->save();
             } else {
                 // Return a response indicating the status cannot be changed
                 return $this->returnJSON(null, __('message.Order status is :status, it can\'t be changed', ['status' => $order->order_status]));

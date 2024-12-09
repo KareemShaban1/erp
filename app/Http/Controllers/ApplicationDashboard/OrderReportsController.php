@@ -23,7 +23,7 @@ class OrderReportsController extends Controller
                 DB::raw('SUM(total) as total_amount'), // Total order amount for each client
                 DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount') // Total canceled order amount for each client
             )
-                ->with('client') // Eager load client relationship
+                ->with('client.business_location') // Eager load client relationship
                 ->groupBy('client_id');
 
             // Apply filters for start_date and end_date

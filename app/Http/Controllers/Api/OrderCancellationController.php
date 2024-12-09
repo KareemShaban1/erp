@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderCancellationController extends Controller
 {
-   
+
 
     protected $service;
 
@@ -36,7 +36,7 @@ class OrderCancellationController extends Controller
         return $OrderCancellations->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Order Cancellation have been retrieved successfully'),
+            'message' => __('message.Order Cancellation have been retrieved successfully'),
         ]);
     }
 
@@ -51,7 +51,7 @@ class OrderCancellationController extends Controller
         return $OrderCancellations->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Order Cancellation have been retrieved successfully'),
+            'message' => __('message.Order Cancellation have been retrieved successfully'),
         ]);
     }
 
@@ -60,29 +60,29 @@ class OrderCancellationController extends Controller
      */
     public function store(Request $request)
     {
-            // Validate request data
-    $validator = Validator::make($request->all(), [
-        'order_id' => 'required|exists:orders,id', // Ensure order exists
-        'reason' => 'required|max:1000', // Reason is required when requesting cancellation
-    ]);
+        // Validate request data
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id', // Ensure order exists
+            'reason' => 'required|max:1000', // Reason is required when requesting cancellation
+        ]);
 
-    if ($validator->fails()) {
-        // Get the first error message and return a response with it
-        $firstError = $validator->errors()->first();
-        return response()->json(['message' => $firstError], 422);
-    }
+        if ($validator->fails()) {
+            // Get the first error message and return a response with it
+            $firstError = $validator->errors()->first();
+            return response()->json(['message' => $firstError], 422);
+        }
 
-    // Retrieve validated data as an array
-    $validatedData = $validator->validated();
+        // Retrieve validated data as an array
+        $validatedData = $validator->validated();
 
-    // Pass only validated data to the service
-    $OrderCancellation = $this->service->store($validatedData);
+        // Pass only validated data to the service
+        $OrderCancellation = $this->service->store($validatedData);
 
-            if ($OrderCancellation instanceof JsonResponse) {
-                return $OrderCancellation;
-            }
+        if ($OrderCancellation instanceof JsonResponse) {
+            return $OrderCancellation;
+        }
 
-            return $this->returnJSON($OrderCancellation, __('message.OrderCancellation has been created successfully'));
+        return $this->returnJSON($OrderCancellation, __('message.OrderCancellation has been created successfully'));
     }
 
     /**
@@ -106,13 +106,13 @@ class OrderCancellationController extends Controller
      */
     public function update(UpdateOrderCancellationRequest $request, OrderCancellation $OrderCancellation)
     {
-            $OrderCancellation = $this->service->update($request,$OrderCancellation);
+        $OrderCancellation = $this->service->update($request, $OrderCancellation);
 
-            if ($OrderCancellation instanceof JsonResponse) {
-                return $OrderCancellation;
-            }
+        if ($OrderCancellation instanceof JsonResponse) {
+            return $OrderCancellation;
+        }
 
-            return $this->returnJSON($OrderCancellation, __('message.OrderCancellation has been updated successfully'));
+        return $this->returnJSON($OrderCancellation, __('message.OrderCancellation has been updated successfully'));
 
     }
 

@@ -131,6 +131,9 @@
 @stop
 @section('javascript')
 <script>
+
+$(document).ready(function(){
+
     
         $('#filter_date').click(function() {
         order_refunds_table.ajax.reload(); // Reload DataTable with the new date filters
@@ -499,8 +502,7 @@ $(document).on('click', '.view-order-refund-info-btn', function () {
         });
     });
 
-
-
+});
   
 </script>
 @endsection

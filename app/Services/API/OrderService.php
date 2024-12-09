@@ -386,7 +386,7 @@ class OrderService extends BaseService
 
 
             \Log::info("transfer quantity",[$quantity]);
-            $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
+            // $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
 
             DB::commit();
 

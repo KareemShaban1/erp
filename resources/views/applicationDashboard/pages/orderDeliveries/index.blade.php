@@ -42,6 +42,9 @@
 @stop
 @section('javascript')
 <script>
+
+$(document).ready(function(){
+
  var delivery_id = {{ $delivery_id ?? 'null' }}; // Ensure this value is passed from the backend
 
 var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
@@ -58,14 +61,13 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
     },
     columnDefs: [
         {
-            targets: 2,
-            orderable: false,
-            searchable: false,
+             orderable: true,
+            searchable: true,
         },
     ],
     columns: [
         { data: 'id', name: 'id' },
-        { data: 'delivery_name', name: 'delivery.name' },
+        { data: 'delivery_name', name: 'delivery_name' },
         { data: 'order.number', name: 'order.number' },
         { data: 'client_name', name: 'order.client.contact.name' },
         // { data: 'order.order_status', name: 'order.order_status' },
@@ -273,5 +275,6 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
         });
     });
 
+});
 </script>
 @endsection

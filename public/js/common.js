@@ -202,7 +202,7 @@ $(document).ready(function() {
     //Datables
     jQuery.extend($.fn.dataTable.defaults, {
         //Uncomment below line to enable save state of datatable.
-        //stateSave: true,
+        stateSave: true,
         fixedHeader: true,
         dom:
             '<"row margin-bottom-20 text-center"<"col-sm-2"l><"col-sm-7"B><"col-sm-3"f> r>tip',

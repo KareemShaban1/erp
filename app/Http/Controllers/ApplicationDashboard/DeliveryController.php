@@ -124,39 +124,55 @@ class DeliveryController extends Controller
         if (!auth()->user()->can('deliveries.orders')) {
             abort(403, 'Unauthorized action.');
         }
-        $business_id = request()->session()->get('user.business_id');
-
+    
+        $business_id = $request->session()->get('user.business_id');
         $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
-
-        if (request()->ajax()) {
-
+        $search = $request->get('search')['value'] ?? null;
+    
+        if ($request->ajax()) {
             // Load orders and related deliveries with their data
-            $ordersDeliveries = DeliveryOrder::with(['order.client.contact', 'delivery.contact'])
+            $query = DeliveryOrder::with(['order','order.client.contact', 'delivery.contact'])
                 ->whereHas('delivery.contact', function ($query) use ($business_id) {
                     $query->where('business_id', $business_id);
                 });
-
-            // If delivery_id is provided, filter the data based on the delivery_id
+    
+            // Filter by delivery_id if provided
             if (!empty($delivery_id)) {
-                $ordersDeliveries->where('delivery_id', $delivery_id);
+                $query->where('delivery_id', $delivery_id);
             }
-
-            return Datatables::of($ordersDeliveries)
+    
+            // Apply search filter if applicable
+            if ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('id', 'like', "%{$search}%") // Searching DeliveryOrder ID
+                        ->orWhereHas('order', function ($query) use ($search) {
+                            $query->where('number', 'like', "%{$search}%"); // Searching Order Number
+                        })
+                        ->orWhereHas('order.client.contact', function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%")  // Searching Client Name
+                                ->orWhere('mobile', 'like', "%{$search}%"); // Searching Client Mobile
+                        });
+                });
+            }
+    
+            return Datatables::of($query)
                 ->addColumn('id', function ($row) {
                     return $row->id;
                 })
                 ->addColumn('delivery_name', function ($row) {
-                    return $row->delivery->contact->name ?? '';
+                    return $row->delivery->contact->name ?? 'N/A';
                 })
                 ->addColumn('client_name', function ($row) {
-                    return $row->order->client->contact->name ?? '';
+                    return $row->order->client->contact->name ?? 'N/A';
                 })
+                ->rawColumns(['id', 'delivery_name', 'client_name']) // Use raw columns if needed for HTML
                 ->make(true);
         }
-
-        // Pass delivery_id to the view outside AJAX block
+    
+        // Pass delivery_id and other data to the view for non-AJAX requests
         return view('applicationDashboard.pages.orderDeliveries.index', compact('delivery_id'));
     }
+    
 
 
 

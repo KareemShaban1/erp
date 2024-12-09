@@ -80,6 +80,7 @@ class CartService extends BaseService
 
     public function addToCart($productId, $variantId, $quantity)
     {
+        
         // Fetch the product and variation
         $product = Product::findOrFail($productId);
         $variation = Variation::findOrFail($variantId);

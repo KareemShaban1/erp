@@ -269,18 +269,18 @@ class OrderCancellationController extends Controller
     public function getCancellationDetails($orderId)
     {
         $activityLogs = Activity::with(['subject'])
-        ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
-        ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
-        ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
-        ->leftJoin('contacts as contact', function ($join) {
-            $join->on('contact.id', '=', 'c.contact_id')
-                 ->orOn('contact.id', '=', 'd.contact_id');
-        })
-        ->where('subject_type', 'App\Models\OrderCancellation')
-        ->where('subject_id', $orderId)
-        ->select(
-            'activity_log.*',
-            DB::raw("
+            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
+            ->where('subject_type', 'App\Models\OrderCancellation')
+            ->where('subject_id', $orderId)
+            ->select(
+                'activity_log.*',
+                DB::raw("
                 CASE 
                     WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
                     WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
@@ -288,18 +288,18 @@ class OrderCancellationController extends Controller
                     ELSE 'Unknown'
                 END as created_by
             ")
-        )
-        ->get();
-    
+            )
+            ->get();
+
 
         // Fetch the order along with related data
         $orderCancellation = OrderCancellation::
-        with([
-            'order.client.contact',
-            'order.businessLocation',
-            'order.orderItems',
-            'order.delivery'
-        ])->find($orderId);
+            with([
+                'order.client.contact',
+                'order.businessLocation',
+                'order.orderItems',
+                'order.delivery'
+            ])->find($orderId);
 
         if ($orderCancellation) {
             // Iterate through each order item and check for refund details
