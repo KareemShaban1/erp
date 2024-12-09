@@ -24,16 +24,19 @@ class OrderCancellationService extends BaseService
     protected $orderService;
     protected $productUtil;
     protected $transactionUtil;
+    protected $transferQuantityService;
 
     public function __construct(
         ProductUtil $productUtil,
         OrderService $orderService, 
+        TransferQuantityService $transferQuantityService,
         TransactionUtil $transactionUtil
 
     ) {
         $this->orderService = $orderService;
         $this->productUtil = $productUtil;
         $this->transactionUtil = $transactionUtil;
+        $this->transferQuantityService = $transferQuantityService;
     }
     /**
      * Get all OrderCancellations with filters and pagination for DataTables.
@@ -137,7 +140,7 @@ class OrderCancellationService extends BaseService
 
                 foreach ($order_transfer as $transfer) {
                     foreach ($transfer->orderItems as $item) {
-                        $this->orderService->transferQuantityForCancellation(
+                        $this->transferQuantityService->transferQuantityForCancellation(
                             $transfer,
                             $item,
                             $transfer->client,
