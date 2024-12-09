@@ -153,39 +153,39 @@ class OrderCancellationService extends BaseService
                 $business_id = $order->client->contact->business->id;
 
                 // dd($order->id);
-                $parent_sell_transaction = Transaction::
-                    where('order_id', $order->id)
-                    ->where('type', 'sell')
-                    ->first();
-                $products = [];
-                foreach ($order->orderItems as $item) {
-                    $transaction_sell_line = TransactionSellLine::
-                        where('product_id', $item->product_id)
-                        ->where('transaction_id', $parent_sell_transaction->id)
-                        ->first();
-                    $products[] = [
-                        'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
-                        'quantity' => $item->quantity,
-                        'unit_price_inc_tax' => $item->price, // Include price if applicable
-                    ];
-                }
+                // $parent_sell_transaction = Transaction::
+                //     where('order_id', $order->id)
+                //     ->where('type', 'sell')
+                //     ->first();
+                // $products = [];
+                // foreach ($order->orderItems as $item) {
+                //     $transaction_sell_line = TransactionSellLine::
+                //         where('product_id', $item->product_id)
+                //         ->where('transaction_id', $parent_sell_transaction->id)
+                //         ->first();
+                //     $products[] = [
+                //         'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
+                //         'quantity' => $item->quantity,
+                //         'unit_price_inc_tax' => $item->price, // Include price if applicable
+                //     ];
+                // }
 
 
-                $input = [
-                    'transaction_id' => $parent_sell_transaction->id,
-                    'order_id' => $order->id,
-                    'invoice_no' => null,
-                    'transaction_date' => Carbon::now()->format('d-m-Y h:i A'),
-                    'products' => $products,
-                    "discount_type" => null,
-                    "discount_amount" => "0.00",
-                    "tax_id" => null,
-                    "tax_amount" => "0",
-                    "tax_percent" => "0",
-                ];
+                // $input = [
+                //     'transaction_id' => $parent_sell_transaction->id,
+                //     'order_id' => $order->id,
+                //     'invoice_no' => null,
+                //     'transaction_date' => Carbon::now()->format('d-m-Y h:i A'),
+                //     'products' => $products,
+                //     "discount_type" => null,
+                //     "discount_amount" => "0.00",
+                //     "tax_id" => null,
+                //     "tax_amount" => "0",
+                //     "tax_percent" => "0",
+                // ];
 
 
-                $this->transactionUtil->addSellReturn($input, $business_id, 1,false);
+                // $this->transactionUtil->addSellReturn($input, $business_id, 1,false);
 
                 $order->save();
                 $orderTracking->save();
