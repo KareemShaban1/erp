@@ -1067,8 +1067,6 @@ class Util
     public function get_business_users($business_id, $order)
 {
 
-    $user_locations = Auth::user()->permitted_locations();
-
     $users = User::where('business_id', $business_id)
         ->whereHas('roles', function ($query) use ($roles, $business_id) {
             $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
