@@ -88,7 +88,7 @@ class OrderService extends BaseService
     {
 
         try {
-            $order = Order::where('order_type','order')->findOrFail($id);
+            $order = Order::findOrFail($id);
 
             if (!$order) {
                 return null;
@@ -158,7 +158,7 @@ class OrderService extends BaseService
 
             // Notify admins about the order
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-            $users = $this->moduleUtil->get_business_users($client->contact->business_id);
+            $users = $this->moduleUtil->get_business_users($client->contact->business_id,$order);
 
             \Notification::send($admins, new OrderCreatedNotification($order));
             \Notification::send($users, new OrderCreatedNotification($order));

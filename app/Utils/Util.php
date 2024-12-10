@@ -1064,8 +1064,31 @@ class Util
         return $admins;
     }
 
-    public function get_business_users($business_id, array $roles = [])
+    public function get_business_users($business_id, $order)
 {
+
+    $user_locations = Auth::user()->permitted_locations();
+
+    $users = User::where('business_id', $business_id)
+        ->whereHas('roles', function ($query) use ($roles, $business_id) {
+            $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
+                  ->where(function ($roleQuery) use ($roles, $business_id) {
+                      foreach ($roles as $role) {
+                          $roleQuery->orWhere('name', $role . '#' . $business_id);
+                      }
+                  });
+        })
+        ->get();
+
+    return $users;
+}
+
+
+public function get_users_can_have_notifications($business_id, $order)
+{
+
+    $user_locations = Auth::user()->permitted_locations();
+
     $users = User::where('business_id', $business_id)
         ->whereHas('roles', function ($query) use ($roles, $business_id) {
             $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
