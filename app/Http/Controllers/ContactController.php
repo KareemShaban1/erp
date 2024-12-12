@@ -1000,9 +1000,13 @@ class ContactController extends Controller
 
         $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
 
+        $delivery_users = User::where('business_id',$business_id)
+        ->pluck('username', 'id');
+
         return view('contact.create')
             ->with(compact(
                 'types',
+                'delivery_users',
                 'account_statuses',
                 'business_locations',
                 'customer_groups',

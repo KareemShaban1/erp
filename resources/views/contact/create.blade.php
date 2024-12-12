@@ -308,7 +308,7 @@
                         <span class="input-group-addon">
                             <i class="fa fa-user"></i>
                         </span>
-                        {!! Form::select('delivery_user_id', $users, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                        {!! Form::select('delivery_user_id', $delivery_users, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
                     </div>
                 </div>
             </div>

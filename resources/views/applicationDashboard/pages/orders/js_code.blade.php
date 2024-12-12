@@ -261,8 +261,8 @@
 
                             // Return the badge with the translated label
                             return `
-            <span class="${badgeClass}">${data}</span>
-        `;
+                                <span class="${badgeClass}">${data}</span>
+                            `;
                         }
                     },
 
