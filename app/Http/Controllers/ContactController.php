@@ -1164,6 +1164,7 @@ class ContactController extends Controller
                         'delivery_email_address' => 'required|email|unique:deliveries,email_address',
                         'delivery_password' => 'required|string|min:8',
                         'delivery_business_location_id' => 'required|integer',
+                        'delivery_user_id' => 'required|integer',
                         'delivery_location' => 'required|string',
                         'delivery_account_status' => 'required|in:active,deleted'
 
@@ -1182,6 +1183,7 @@ class ContactController extends Controller
                 // Prepare delivery data and create record
                 $deliveryData = $request->only([
                     'delivery_email_address',
+                    'delivery_user_id',
                     'delivery_password',
                     'delivery_location',
                     'delivery_business_location_id',
@@ -1193,6 +1195,7 @@ class ContactController extends Controller
                     'email_address' => $deliveryData['delivery_email_address'],
                     'password' => Hash::make($deliveryData['delivery_password']),
                     'business_location_id' => $deliveryData['delivery_business_location_id'],
+                    'user_id' => $deliveryData['delivery_user_id'],
                     'contact_id' => $output['data']->id,
                     'location' => $deliveryData['delivery_location'] ?? null,
                     'account_status' => $deliveryData['delivery_account_status'] ?? null,
