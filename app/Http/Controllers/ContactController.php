@@ -1343,8 +1343,12 @@ class ContactController extends Controller
 
             $account_statuses = ['active', 'deleted'];
 
+            $delivery_users = User::where('business_id',$business_id)
+            ->pluck('username', 'id');
+            
+
             return view('contact.edit')
-                ->with(compact('contact', 'account_statuses', 'client', 'delivery', 'business_locations', 'types', 'customer_groups', 'opening_balance'));
+                ->with(compact('contact', 'delivery_users','account_statuses', 'client', 'delivery', 'business_locations', 'types', 'customer_groups', 'opening_balance'));
         }
     }
 
@@ -1516,6 +1520,7 @@ class ContactController extends Controller
                             'delivery_email_address' => 'required|email|unique:deliveries,email_address,' . $request->delivery_id, // Exclude current record
                             'delivery_password' => 'nullable|string|min:8', // Make password optional
                             'delivery_business_location_id' => 'required|integer',
+                            'delivery_user_id' => 'required|integer',
                             'delivery_location' => 'nullable|string',
                         ],
                         [
@@ -1530,6 +1535,7 @@ class ContactController extends Controller
                     // Prepare delivery data and update record
                     $deliveryData = $request->only([
                         'delivery_id',
+                        'delivery_user_id',
                         'delivery_location',
                         'delivery_email_address',
                         'delivery_password',
@@ -1543,9 +1549,9 @@ class ContactController extends Controller
                         'email_address' => $deliveryData['delivery_email_address'],
                         'business_location_id' => $deliveryData['delivery_business_location_id'],
                         'contact_id' => $output['data']->id,
+                        'user_id'=> $deliveryData['delivery_user_id'],
                         'location' => $deliveryData['delivery_location'] ?? null,
                         'account_status' => $deliveryData['delivery_account_status'],
-
                     ];
 
                     // Update password only if provided

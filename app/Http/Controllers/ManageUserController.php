@@ -51,6 +51,7 @@ class ManageUserController extends Controller
             $user_id = request()->session()->get('user.id');
 
             $users = User::where('business_id', $business_id)
+                        ->with('delivery.contact')
                         // ->user()
                         //->where('is_cmmsn_agnt', 0)
                         ->select(['id', 'username',
@@ -64,6 +65,12 @@ class ManageUserController extends Controller
                     function ($row) {
                         $role_name = $this->moduleUtil->getUserRoleName($row->id);
                         return $role_name;
+                    }
+                )
+                ->addColumn(
+                    'delivery',
+                    function ($row) {
+                        return $row->delivery->contact->name ?? '';
                     }
                 )
                 ->addColumn(

@@ -9,10 +9,13 @@ use App\Models\OrderCancellation;
 use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\TransactionSellLine;
+use App\Notifications\OrderCancellationCreatedNotification;
+use App\Notifications\OrderTransferCreatedNotification;
 use App\Services\BaseService;
 use App\Services\FirebaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
+use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use Carbon\Carbon;
@@ -21,18 +24,21 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderCancellationService extends BaseService
 {
+    protected $moduleUtil;
     protected $orderService;
     protected $productUtil;
     protected $transactionUtil;
     protected $transferQuantityService;
 
     public function __construct(
+        ModuleUtil $moduleUtil,
         ProductUtil $productUtil,
         OrderService $orderService, 
         TransferQuantityService $transferQuantityService,
         TransactionUtil $transactionUtil
 
     ) {
+        $this->moduleUtil = $moduleUtil;
         $this->orderService = $orderService;
         $this->productUtil = $productUtil;
         $this->transactionUtil = $transactionUtil;
@@ -199,6 +205,15 @@ class OrderCancellationService extends BaseService
 
             // Create the OrderCancellation record
             $orderCancellation = OrderCancellation::create($data);
+
+
+               // Notify admins and users about the order
+               $admins = $this->moduleUtil->get_admins($order->client->contact->business_id);
+               $users = $this->moduleUtil->getBusinessUsers($order->client->contact->business_id,$order);
+   
+               \Notification::send($admins, new OrderCancellationCreatedNotification($order));
+               \Notification::send($users, new OrderCancellationCreatedNotification($order));
+   
 
             // Return the created OrderCancellation as a resource
             return new OrderCancellationResource($orderCancellation);

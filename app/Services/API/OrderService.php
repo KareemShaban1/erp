@@ -14,6 +14,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Transaction;
 use App\Notifications\OrderCreatedNotification;
+use App\Notifications\OrderRefundCreatedNotification;
+use App\Notifications\OrderTransferCreatedNotification;
 use App\Services\BaseService;
 use App\Traits\CheckQuantityTrait;
 use App\Traits\HelperTrait;
@@ -66,6 +68,7 @@ class OrderService extends BaseService
     {
 
         try {
+
 
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
@@ -156,9 +159,9 @@ class OrderService extends BaseService
 
             DB::commit();
 
-            // Notify admins about the order
+            // Notify admins and users about the order
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-            $users = $this->moduleUtil->get_business_users($client->contact->business_id,$order);
+            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id,$order);
 
             \Notification::send($admins, new OrderCreatedNotification($order));
             \Notification::send($users, new OrderCreatedNotification($order));
@@ -627,6 +630,13 @@ class OrderService extends BaseService
 
             DB::commit();
 
+             // Notify admins and users about the order
+            $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id,$newRefundOrder);
+
+            \Notification::send($admins, new OrderRefundCreatedNotification($order));
+            \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
+
             return [
                 'success' => true,
                 'message' => 'Refund order created successfully.',
@@ -778,6 +788,13 @@ class OrderService extends BaseService
             }
     
             DB::commit();
+
+             // Notify admins and users about the order
+            $admins = $this->moduleUtil->get_admins($transferOrder->client->contact->business_id);
+            $users = $this->moduleUtil->getBusinessUsers($transferOrder->client->contact->business_id,$transferOrder);
+
+            \Notification::send($admins, new OrderTransferCreatedNotification($transferOrder));
+            \Notification::send($users, new OrderTransferCreatedNotification($transferOrder));
     
             return [
                 'success' => true,

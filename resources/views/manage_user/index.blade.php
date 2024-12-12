@@ -33,6 +33,7 @@
                         <tr>
                             <th>@lang( 'business.username' )</th>
                             <th>@lang( 'user.name' )</th>
+                            <th>@lang( 'lang_v1.delivery' )</th>
                             <th>@lang( 'user.role' )</th>
                             <th>@lang( 'business.email' )</th>
                             <th>@lang( 'messages.action' )</th>
@@ -66,6 +67,7 @@
                     "columns":[
                         {"data":"username"},
                         {"data":"full_name"},
+                        {"data":"delivery"},
                         {"data":"role"},
                         {"data":"email"},
                         {"data":"action"}

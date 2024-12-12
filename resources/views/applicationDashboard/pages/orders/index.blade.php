@@ -30,10 +30,13 @@
         @endslot
     @endcan
     @can('orders.view')
+    <input type="hidden" value="{{$order_status}}" id="order_status">
+
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orders_table">
                 <thead>
                     <tr>
+                        <th></th>
                         <th>@lang('lang_v1.id')</th>
                         <th>@lang('lang_v1.business_location')</th>
                         <th>@lang('lang_v1.number')</th>

@@ -27,9 +27,11 @@ class DataController extends Controller
     public function parse_notification($notification)
     {
         $notification_data = [];
-        if ($notification->type ==
-            'Modules\Essentials\Notifications\DocumentShareNotification') {
-            $notifiction_data = DocumentShare::documentShareNotificationData($notification->data); 
+        if (
+            $notification->type ==
+            'Modules\Essentials\Notifications\DocumentShareNotification'
+        ) {
+            $notifiction_data = DocumentShare::documentShareNotificationData($notification->data);
             $notification_data = [
                 'msg' => $notifiction_data['msg'],
                 'icon_class' => $notifiction_data['icon'],
@@ -37,8 +39,10 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\NewMessageNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\NewMessageNotification'
+        ) {
             $data = $notification->data;
             $msg = __('essentials::lang.new_message_notification', ['sender' => $data['from']]);
 
@@ -49,15 +53,19 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\NewLeaveNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\NewLeaveNotification'
+        ) {
             $data = $notification->data;
 
             $employee = User::find($data['applied_by']);
 
             if (!empty($employee)) {
-                $msg = __('essentials::lang.new_leave_notification', 
-                ['employee' => $employee->user_full_name, 'ref_no' => $data['ref_no']]);
+                $msg = __(
+                    'essentials::lang.new_leave_notification',
+                    ['employee' => $employee->user_full_name, 'ref_no' => $data['ref_no']]
+                );
 
                 $notification_data = [
                     'msg' => $msg,
@@ -67,8 +75,10 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\LeaveStatusNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\LeaveStatusNotification'
+        ) {
             $data = $notification->data;
 
             $admin = User::find($data['changed_by']);
@@ -84,8 +94,10 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\PayrollNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\PayrollNotification'
+        ) {
             $data = $notification->data;
 
             $month = \Carbon::createFromFormat('m', $data['month'])->format('F');
@@ -96,11 +108,11 @@ class DataController extends Controller
 
             if (!empty($created_by)) {
                 if ($data['action'] == 'created') {
-                    $msg = __('essentials::lang.payroll_added_notification', ['month_year' => $month . '/' . $data['year'], 'ref_no' => $data['ref_no'] , 'created_by' => $created_by->user_full_name]);
+                    $msg = __('essentials::lang.payroll_added_notification', ['month_year' => $month . '/' . $data['year'], 'ref_no' => $data['ref_no'], 'created_by' => $created_by->user_full_name]);
                 } elseif ($data['action'] == 'updated') {
                     $msg = __('essentials::lang.payroll_updated_notification', ['month_year' => $month . '/' . $data['year'], 'ref_no' => $data['ref_no'], 'created_by' => $created_by->user_full_name]);
                 }
-                
+
 
                 $notification_data = [
                     'msg' => $msg,
@@ -110,15 +122,19 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\NewTaskNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\NewTaskNotification'
+        ) {
             $data = $notification->data;
 
             $assigned_by = User::find($data['assigned_by']);
 
             if (!empty($assigned_by)) {
-                $msg = __('essentials::lang.new_task_notification', 
-                ['assigned_by' => $assigned_by->user_full_name, 'task_id' => $data['task_id']]);
+                $msg = __(
+                    'essentials::lang.new_task_notification',
+                    ['assigned_by' => $assigned_by->user_full_name, 'task_id' => $data['task_id']]
+                );
 
                 $notification_data = [
                     'msg' => $msg,
@@ -128,14 +144,18 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\NewTaskCommentNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\NewTaskCommentNotification'
+        ) {
             $data = $notification->data;
 
             $comment = EssentialsTodoComment::with(['task', 'added_by'])->find($data['comment_id']);
             if (!empty($comment)) {
-                $msg = __('essentials::lang.new_task_comment_notification',
-                 ['added_by' => $comment->added_by->user_full_name, 'task_id' => $comment->task->task_id]);
+                $msg = __(
+                    'essentials::lang.new_task_comment_notification',
+                    ['added_by' => $comment->added_by->user_full_name, 'task_id' => $comment->task->task_id]
+                );
 
                 $notification_data = [
                     'msg' => $msg,
@@ -145,15 +165,19 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        } elseif ($notification->type ==
-            'Modules\Essentials\Notifications\NewTaskDocumentNotification') {
+        } elseif (
+            $notification->type ==
+            'Modules\Essentials\Notifications\NewTaskDocumentNotification'
+        ) {
             $data = $notification->data;
 
             $uploaded_by = User::find($data['uploaded_by']);
 
             if (!empty($uploaded_by)) {
-                $msg = __('essentials::lang.new_task_document_notification', 
-                ['uploaded_by' => $uploaded_by->user_full_name, 'task_id' => $data['task_id']]);
+                $msg = __(
+                    'essentials::lang.new_task_document_notification',
+                    ['uploaded_by' => $uploaded_by->user_full_name, 'task_id' => $data['task_id']]
+                );
 
                 $notification_data = [
                     'msg' => $msg,
@@ -163,39 +187,109 @@ class DataController extends Controller
                     'created_at' => $notification->created_at->diffForHumans()
                 ];
             }
-        }elseif ($notification->type ==
-        'App\Notifications\OrderCreatedNotification') {
-        $data = $notification->data;
+        } elseif (
+            $notification->type ==
+            'App\Notifications\OrderCreatedNotification'
+        ) {
+            $data = $notification->data;
 
-          $msg = __('lang_v1.new_order_notification', 
-        ['client' => $data['client'], 'order_number' => $data['order_number']]);
+            $msg = __(
+                'lang_v1.new_order_notification',
+                ['client' => $data['client'], 'order_number' => $data['order_number']]
+            );
 
-        $notification_data = [
-            'msg' => $msg,
-            'icon_class' => 'fa fa-cube bg-green',
-            'link' =>action('ApplicationDashboard\OrderController@index', ['status' => 'all']),
-            'read_at' => $notification->read_at,
-            'created_at' => $notification->created_at->diffForHumans()
-        ];
-    } 
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ApplicationDashboard\OrderController@index', ['status' => 'all']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        }
 
-    elseif ($notification->type ==
-        'App\Notifications\ClientCreatedNotification') {
-        $data = $notification->data;
+        elseif (
+            $notification->type ==
+            'App\Notifications\OrderCancellationCreatedNotification'
+        ) {
+            $data = $notification->data;
 
-          $msg = __('essentials::lang.new_client_notification', 
-        ['client_name' => $data['client_name'], 
-        'client_email' => $data['client_email']]);
+            $msg = __(
+                'lang_v1.new_cancellation_order_notification',
+                ['client' => $data['client'], 'order_number' => $data['order_number']]
+            );
+
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ApplicationDashboard\OrderController@index', ['order_status' => 'cancelled']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        }
+
+        elseif (
+            $notification->type ==
+            'App\Notifications\OrderRefundCreatedNotification'
+        ) {
+            $data = $notification->data;
+
+            $msg = __(
+                'lang_v1.new_refund_order_notification',
+                ['client' => $data['client'], 'order_number' => $data['order_number']]
+            );
+
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ApplicationDashboard\RefundOrderController@index', ['status' => 'all']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        }
+
+        elseif (
+            $notification->type ==
+            'App\Notifications\OrderTransferCreatedNotification'
+        ) {
+            $data = $notification->data;
+
+            $msg = __(
+                'lang_v1.new_transfer_order_notification',
+                ['client' => $data['client'], 'order_number' => $data['order_number']]
+            );
+
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ApplicationDashboard\TransferOrderController@index', ['status' => 'all']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        }
+        
+        elseif (
+            $notification->type ==
+            'App\Notifications\ClientCreatedNotification'
+        ) {
+            $data = $notification->data;
+
+            $msg = __(
+                'essentials::lang.new_client_notification',
+                [
+                    'client_name' => $data['client_name'],
+                    'client_email' => $data['client_email']
+                ]
+            );
 
 
-        $notification_data = [
-            'msg' => $msg,
-            'icon_class' => 'fa fa-cube bg-green',
-            'link' =>action('ContactController@index', ['type' => 'client']),
-            'read_at' => $notification->read_at,
-            'created_at' => $notification->created_at->diffForHumans()
-        ];
-    } 
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ContactController@index', ['type' => 'client']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        }
 
         return $notification_data;
     }
@@ -317,44 +411,44 @@ class DataController extends Controller
     }
 
     /**
-    * Adds Essentials menus
-    * @return null
-    */
+     * Adds Essentials menus
+     * @return null
+     */
     public function modifyAdminMenu()
     {
         $module_util = new ModuleUtil();
-        
+
         $business_id = session()->get('user.business_id');
-        $is_essentials_enabled = (boolean)$module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
+        $is_essentials_enabled = (boolean) $module_util->hasThePermissionInSubscription($business_id, 'essentials_module');
 
         if ($is_essentials_enabled) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
                 $menu->url(
-                        action('\Modules\Essentials\Http\Controllers\DashboardController@hrmDashboard'),
-                        __('essentials::lang.hrm'),
-                        ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
-                    )
-                ->order(87);
-                    
+                    action('\Modules\Essentials\Http\Controllers\DashboardController@hrmDashboard'),
+                    __('essentials::lang.hrm'),
+                    ['icon' => 'fa fas fa-users', 'active' => request()->segment(1) == 'hrm', 'style' => config('app.env') == 'demo' ? 'background-color: #605ca8 !important;' : '']
+                )
+                    ->order(87);
+
                 $menu->url(
                     action('\Modules\Essentials\Http\Controllers\ToDoController@index'),
                     __('essentials::lang.essentials'),
                     ['icon' => 'fa fas fa-check-circle', 'active' => request()->segment(1) == 'essentials', 'style' => config('app.env') == 'demo' ? 'background-color: #001f3f !important;' : '']
                 )
-                ->order(87);
+                    ->order(87);
             });
         }
     }
 
     /**
-    * Function to add essential module taxonomies
-    * @return array
-    */
+     * Function to add essential module taxonomies
+     * @return array
+     */
     public function addTaxonomies()
     {
         return [
             'hrm_department' => [
-                'taxonomy_label' =>  __('essentials::lang.department'),
+                'taxonomy_label' => __('essentials::lang.department'),
                 'heading' => __('essentials::lang.departments'),
                 'sub_heading' => __('essentials::lang.manage_departments'),
                 'enable_taxonomy_code' => true,
@@ -365,7 +459,7 @@ class DataController extends Controller
             ],
 
             'hrm_designation' => [
-                'taxonomy_label' =>  __('essentials::lang.designation'),
+                'taxonomy_label' => __('essentials::lang.designation'),
                 'heading' => __('essentials::lang.designations'),
                 'sub_heading' => __('essentials::lang.manage_designations'),
                 'enable_taxonomy_code' => false,
@@ -377,10 +471,10 @@ class DataController extends Controller
     }
 
     /**
-    * Function to generate view parts
-    * @param array $data
-    *
-    */
+     * Function to generate view parts
+     * @param array $data
+     *
+     */
     public function moduleViewPartials($data)
     {
         if ($data['view'] == 'manage_user.create' || $data['view'] == 'manage_user.edit') {
@@ -396,9 +490,9 @@ class DataController extends Controller
             $allowance_deduction_ids = [];
             if (!empty($user)) {
                 $allowance_deduction_ids = EssentialsUserAllowancesAndDeduction::where('user_id', $user->id)
-                                            ->pluck('allowance_deduction_id')
-                                            ->toArray();
-            } 
+                    ->pluck('allowance_deduction_id')
+                    ->toArray();
+            }
 
             return view('essentials::partials.user_form_part', compact('departments', 'designations', 'user', 'pay_components', 'allowance_deduction_ids'))
                 ->render();
@@ -413,12 +507,12 @@ class DataController extends Controller
     }
 
     /**
-    * Function to process model after being saved
-    * @param array $data['event' => 'Event name', 'model_instance' => 'Model instance']
-    *
-    */
+     * Function to process model after being saved
+     * @param array $data['event' => 'Event name', 'model_instance' => 'Model instance']
+     *
+     */
     public function afterModelSaved($data)
-    {   
+    {
         if ($data['event'] = 'user_saved') {
             $user = $data['model_instance'];
             $user->essentials_department_id = request()->input('essentials_department_id');
@@ -432,8 +526,8 @@ class DataController extends Controller
 
             //delete  existing pay component
             EssentialsUserAllowancesAndDeduction::where('user_id', $user->id)
-                    ->whereNotIn('allowance_deduction_id', $non_deleteable_pc_ids)
-                    ->delete();
+                ->whereNotIn('allowance_deduction_id', $non_deleteable_pc_ids)
+                ->delete();
 
             //if pay component exist add to db
             if (!empty(request()->input('pay_components'))) {
@@ -494,7 +588,7 @@ class DataController extends Controller
         $end_date = null,
         $location_id = null,
         $user_id = null
-        ) {
+    ) {
         $transactionUtil = new TransactionUtil();
 
         $transaction_totals = $transactionUtil->getTransactionTotals(
@@ -504,7 +598,7 @@ class DataController extends Controller
             $end_date,
             $location_id,
             $user_id
-            );
+        );
 
         return $transaction_totals['total_payroll'];
     }
@@ -521,15 +615,15 @@ class DataController extends Controller
         $events = [];
         if (in_array('todo', $data['events'])) {
             $todos = ToDo::where('business_id', $data['business_id'])
-                            ->with(['users'])
-                            ->where(function ($query) use ($data) {
-                                $query->where('created_by', $data['user_id'])
-                                    ->orWhereHas('users', function ($q) use ($data) {
-                                        $q->where('user_id', $data['user_id']);
-                                    });
-                            })
-                            ->whereBetween(DB::raw('date(date)'), [$data['start_date'], $data['end_date']])
-                            ->get();
+                ->with(['users'])
+                ->where(function ($query) use ($data) {
+                    $query->where('created_by', $data['user_id'])
+                        ->orWhereHas('users', function ($q) use ($data) {
+                            $q->where('user_id', $data['user_id']);
+                        });
+                })
+                ->whereBetween(DB::raw('date(date)'), [$data['start_date'], $data['end_date']])
+                ->get();
 
             foreach ($todos as $todo) {
                 $events[] = [
@@ -540,7 +634,7 @@ class DataController extends Controller
                     'backgroundColor' => '#33006F',
                     'borderColor' => '#33006F',
                     'event_type' => 'todo',
-                    'allDay'          => false,
+                    'allDay' => false,
                 ];
             }
         }
@@ -563,10 +657,13 @@ class DataController extends Controller
                 $holidays_query->where('location_id', $data['location_id']);
             }
 
-            $holidays = $holidays_query->whereDate('start_date', '>=', 
-                            $data['start_date'])
-                            ->whereDate('start_date', '<=', $data['end_date'])
-                            ->get();
+            $holidays = $holidays_query->whereDate(
+                'start_date',
+                '>=',
+                $data['start_date']
+            )
+                ->whereDate('start_date', '<=', $data['end_date'])
+                ->get();
 
             foreach ($holidays as $holiday) {
                 $events[] = [
@@ -575,7 +672,7 @@ class DataController extends Controller
                     'end' => $holiday->end_date,
                     'url' => action('\Modules\Essentials\Http\Controllers\EssentialsHolidayController@index'),
                     'backgroundColor' => '#568203',
-                    'borderColor'     => '#568203',
+                    'borderColor' => '#568203',
                     'allDay' => true,
                     'event_type' => 'holiday'
                 ];
@@ -584,23 +681,23 @@ class DataController extends Controller
 
         if (in_array('leaves', $data['events'])) {
             $leaves_query = EssentialsLeave::where('essentials_leaves.business_id', $data['business_id'])
-                        ->join('users as u', 'u.id', '=', 'essentials_leaves.user_id')
-                        ->join('essentials_leave_types as lt', 'lt.id', '=', 'essentials_leaves.essentials_leave_type_id')
-                        ->select([
-                            'essentials_leaves.id',
-                            DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
-                            'lt.leave_type',
-                            'start_date',
-                            'end_date'
-                            ]);
+                ->join('users as u', 'u.id', '=', 'essentials_leaves.user_id')
+                ->join('essentials_leave_types as lt', 'lt.id', '=', 'essentials_leaves.essentials_leave_type_id')
+                ->select([
+                    'essentials_leaves.id',
+                    DB::raw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user"),
+                    'lt.leave_type',
+                    'start_date',
+                    'end_date'
+                ]);
 
             if (!empty($data['user_id'])) {
                 $leaves_query->where('essentials_leaves.user_id', $data['user_id']);
             }
 
             $leaves = $leaves_query->whereDate('essentials_leaves.start_date', '>=', $data['start_date'])
-                            ->whereDate('essentials_leaves.start_date', '<=', $data['end_date'])
-                            ->get();
+                ->whereDate('essentials_leaves.start_date', '<=', $data['end_date'])
+                ->get();
             foreach ($leaves as $leave) {
                 $events[] = [
                     'title' => $leave->user,
@@ -613,13 +710,13 @@ class DataController extends Controller
                     'allDay' => true,
                     'event_type' => 'leaves'
                 ];
-            } 
+            }
         }
 
         if (in_array('reminder', $data['events'])) {
             $reminder_events = Reminder::getReminders($data);
             $events = array_merge($events, $reminder_events);
-        }               
+        }
 
         return $events;
     }
@@ -631,12 +728,12 @@ class DataController extends Controller
      */
     public function eventTypes()
     {
-       return [
+        return [
             'todo' => [
                 'label' => __('essentials::lang.todo'),
                 'color' => '#33006F'
-            ], 
-            'holiday' => [ 
+            ],
+            'holiday' => [
                 'label' => __('essentials::lang.holidays'),
                 'color' => '#568203'
             ],
@@ -661,8 +758,8 @@ class DataController extends Controller
     {
         $additional_js = '';
         $additional_css = '';
-        $additional_html = 
-        '<div class="modal fade" id="task_modal" tabindex="-1" role="dialog" 
+        $additional_html =
+            '<div class="modal fade" id="task_modal" tabindex="-1" role="dialog" 
         aria-labelledby="gridSystemModalLabel">
         </div>';
         $additional_views = ['essentials::todo.todo_javascript'];
@@ -684,10 +781,10 @@ class DataController extends Controller
     public function getNonDeletablePayComponents($business_id, $user_id)
     {
         $ads = EssentialsAllowanceAndDeduction::join('essentials_user_allowance_and_deductions as euad', 'euad.allowance_deduction_id', '=', 'essentials_allowances_and_deductions.id')
-                ->whereNotNull('essentials_allowances_and_deductions.applicable_date')
-                ->where('business_id', $business_id)
-                ->where('euad.user_id', $user_id)
-                ->get();
+            ->whereNotNull('essentials_allowances_and_deductions.applicable_date')
+            ->where('business_id', $business_id)
+            ->where('euad.user_id', $user_id)
+            ->get();
 
         $ids = $ads->pluck('id')->toArray();
 
@@ -702,9 +799,9 @@ class DataController extends Controller
     public function getTodosDropdown($business_id)
     {
         $todos = ToDo::where('business_id', $business_id)
-                    ->select(DB::raw("CONCAT(task, ' (', task_id , ')') AS task_name"), 'id')
-                    ->pluck('task_name', 'id')
-                    ->toArray();
+            ->select(DB::raw("CONCAT(task, ' (', task_id , ')') AS task_name"), 'id')
+            ->pluck('task_name', 'id')
+            ->toArray();
 
         return $todos;
     }
@@ -719,9 +816,9 @@ class DataController extends Controller
     public function getAssignedTaskForUser($user_id)
     {
         $task_ids = DB::table('essentials_todos_users')
-                    ->where('user_id', $user_id)
-                    ->pluck('todo_id')
-                    ->toArray();
+            ->where('user_id', $user_id)
+            ->pluck('todo_id')
+            ->toArray();
 
         return $task_ids;
     }

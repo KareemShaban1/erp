@@ -19,7 +19,7 @@ class Delivery extends Authenticatable
      * @var array
      */
     protected $fillable = ['contact_id','business_location_id','email_address',
-    'password','location','status','account_status'];
+    'password','location','status','account_status','user_id'];
 
     public function business_location(){
         return $this->belongsTo(BusinessLocation::class);
@@ -27,6 +27,9 @@ class Delivery extends Authenticatable
 
     public function contact(){
         return $this->belongsTo(Contact::class);
+    }
+    public function user(){
+        return $this->belongsTo(User::class);
     }
 
     // Define relationship with the Order model

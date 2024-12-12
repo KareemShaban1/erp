@@ -40,6 +40,12 @@ class Order extends Model
         });
     }
 
+    public function relatedOrders()
+{
+    return $this->hasMany(Order::class, 'parent_order_id');
+}
+
+
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id')

@@ -1064,42 +1064,64 @@ class Util
         return $admins;
     }
 
-    public function get_business_users($business_id, $order)
-{
+    public function getBusinessUsers($business_id, $order)
+    {
+        // Extract the business location ID from the order
+        $business_location_id = $order->business_location_id;
 
-    $users = User::where('business_id', $business_id)
-        ->whereHas('roles', function ($query) use ($roles, $business_id) {
-            $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
-                  ->where(function ($roleQuery) use ($roles, $business_id) {
-                      foreach ($roles as $role) {
-                          $roleQuery->orWhere('name', $role . '#' . $business_id);
-                      }
-                  });
-        })
-        ->get();
+        // Fetch all roles
+        $roles = Role::pluck('name')->toArray();
 
-    return $users;
-}
+        $users = User::where('business_id', $business_id)
+            ->whereHas('roles', function ($query) use ($roles, $business_id) {
+                // Exclude Admin roles specific to this business
+                $query->where('name', '!=', 'Admin#' . $business_id)
+                    ->orWhere(function ($roleQuery) use ($roles, $business_id) {
+                    foreach ($roles as $role) {
+                        $roleQuery->orWhere('name', $business_id . '#' . $role);
+                    }
+                });
+            })
+            ->where(function ($query) use ($business_location_id) {
+                $query->whereHas('permissions', function ($permissionQuery) use ($business_location_id) {
+                    // Ensure the user's permissions match the specific location
+                    $permissionQuery->where('name', 'location.' . $business_location_id);
+                })
+                ->orWhere(function ($query) {
+                    // Include users with access to all locations
+                    $query->whereHas('permissions', function ($permissionQuery) {
+                        $permissionQuery->where('name', 'access_all_locations');
+                    });
+                });
+            })
+            ->get();
+
+        return $users;
+    }
 
 
-public function get_users_can_have_notifications($business_id, $order)
-{
 
-    $user_locations = Auth::user()->permitted_locations();
 
-    $users = User::where('business_id', $business_id)
-        ->whereHas('roles', function ($query) use ($roles, $business_id) {
-            $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
-                  ->where(function ($roleQuery) use ($roles, $business_id) {
-                      foreach ($roles as $role) {
-                          $roleQuery->orWhere('name', $role . '#' . $business_id);
-                      }
-                  });
-        })
-        ->get();
 
-    return $users;
-}
+
+    public function get_users_can_have_notifications($business_id, $order)
+    {
+
+        $user_locations = Auth::user()->permitted_locations();
+
+        $users = User::where('business_id', $business_id)
+            ->whereHas('roles', function ($query) use ($roles, $business_id) {
+                $query->where('name', '!=', 'Admin#' . $business_id) // Exclude Admin role
+                    ->where(function ($roleQuery) use ($roles, $business_id) {
+                        foreach ($roles as $role) {
+                            $roleQuery->orWhere('name', $role . '#' . $business_id);
+                        }
+                    });
+            })
+            ->get();
+
+        return $users;
+    }
 
 
 

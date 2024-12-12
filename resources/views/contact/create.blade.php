@@ -300,6 +300,18 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-4">
+            <div class="form-group">
+                    {!! Form::label('delivery_user_id', __('lang_v1.user')) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('delivery_user_id', $users, null , ['class' => 'form-control','placeholder' => __('messages.please_select'), 'required']); !!}
+                    </div>
+                </div>
+            </div>
            </div>
         </div>
 

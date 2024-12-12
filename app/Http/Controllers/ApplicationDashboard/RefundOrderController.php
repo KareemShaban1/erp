@@ -256,7 +256,7 @@ class RefundOrderController extends Controller
                     $order,
                     'change_status',
                     null,
-                    ['order_number' => $order->order, 'status' => 'processing', 'order_type', $order->order_type]
+                    ['order_number' => $order->number, 'status' => 'processing', 'order_type', $order->order_type]
                 );
                 break;
             case 'shipped':

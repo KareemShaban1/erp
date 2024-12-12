@@ -97,6 +97,7 @@ Route::get('applicationDashboard/client-orders/{id}', 'ApplicationDashboard\Orde
 
 // orders 
 Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
+Route::get('applicationDashboard/orders/{orderId}/related',  'ApplicationDashboard\OrderController@getRelatedOrders');
 Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
 Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
 Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');

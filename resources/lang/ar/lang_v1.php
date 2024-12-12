@@ -1425,9 +1425,19 @@ return [
 "order_details"=>"تفاصيل الطلب",
 
 "order_added_successfully"=>"تم اضافة الطلب بنجاح",
-"new_order_notification"=>"أشعار طلب جديد",
 
+"new_order_notification"=>"أشعار طلب جديد",
 "new_order_notification" => ":client تم طلب أوردر بواسطة. رقم الطلب - <i>:order_number </i>",
+
+"new_cancellation_order_notification"=>"أشعار ألغاء طلب جديد",
+"new_cancellation_order_notification" => ":client تم ألغاء أوردر بواسطة. رقم الطلب - <i>:order_number </i>",
+
+"new_refund_order_notification"=>"أشعار طلب استرجاع جديد",
+"new_refund_order_notification" => ":client تم طلب أوردر أسترجاع بواسطة. رقم طلب الأسترجاع - <i>:order_number </i>",
+
+"new_transfer_order_notification"=>"أشعار طلب تحويل جديد",
+"new_transfer_order_notification" => ":client تم طلب أوردر تحويل بواسطة. رقم طلب التحويل - <i>:order_number </i>",
+
 
 "delivery_name"=>"أسم الدليفرى",
 "order_total_price"=>"سعر الطلب الكلى",
@@ -1515,8 +1525,8 @@ return [
 "approved"=>"Approved",
 "rejected"=>" Rejected",
 ""=>"",
-""=>"",
-""=>"",
+"delivery"=>"دليفرى",
+"user"=>"مستخدم",
 ""=>"",
 ""=>"",
 ""=>"",

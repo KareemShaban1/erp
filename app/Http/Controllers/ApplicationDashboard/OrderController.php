@@ -35,6 +35,10 @@ class OrderController extends Controller
         if (!auth()->user()->can('orders.view')) {
             abort(403, 'Unauthorized action.');
         }
+
+        $order_status = request()->get('order_status');
+
+
         if (request()->ajax()) {
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
@@ -51,23 +55,27 @@ class OrderController extends Controller
             }
 
             // Fetch filtered data
-            return $this->fetchOrders($status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
+            return $this->fetchOrders($status,$order_status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
         }
 
         $business_locations = BusinessLocation::BusinessId()->active()->select('id', 'name')->get();
 
-        return view('applicationDashboard.pages.orders.index', compact('business_locations'));
+        return view('applicationDashboard.pages.orders.index', compact('order_status','business_locations'));
     }
 
-    /**
-     * Fetch order refunds based on filters.
-     */
-    private function fetchOrders($status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
+
+    private function fetchOrders($status,$order_status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
     {
         $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = Order::with(['client.contact', 'businessLocation'])
+        $query = Order::with([
+            'client.contact',
+            'businessLocation',
+            'relatedOrders' => function ($query) {
+                $query->whereIn('order_type', ['refund_orders', 'transfer_orders']);
+            }
+        ])
             ->select([
                 'orders.id',
                 'orders.number',
@@ -85,23 +93,26 @@ class OrderController extends Controller
             ->where('orders.order_type', 'order')
             ->latest();
 
-        // Apply status filter
+        // Apply filters as before
         if ($status !== 'all') {
             $query->where('orders.order_status', $status);
+        }
+
+
+        if ($order_status && $order_status !== 'all') {
+            $query->where('orders.order_status', $order_status);
         }
 
         if ($businessLocation) {
             $query->where('orders.business_location_id', $businessLocation);
         }
 
-        if ($paymentStatus !== 'all') {
+        if ($paymentStatus && $paymentStatus !== 'all') {
             $query->where('orders.payment_status', $paymentStatus);
         }
 
         if ($user_locations !== "all") {
-            $query->where(function ($query) use ($user_locations) {
-                $query->whereIn('orders.business_location_id', $user_locations);
-            });
+            $query->whereIn('orders.business_location_id', $user_locations);
         }
 
         if ($deliveryName) {
@@ -110,7 +121,6 @@ class OrderController extends Controller
             });
         }
 
-        // Apply date filter
         if ($startDate && $endDate) {
             if ($startDate === $endDate) {
                 $query->whereDate('orders.created_at', $startDate);
@@ -120,7 +130,6 @@ class OrderController extends Controller
             }
         }
 
-        // Apply search filter
         if ($search) {
             $query->where(function ($query) use ($search) {
                 $query->where('orders.id', 'like', "%{$search}%")
@@ -132,16 +141,11 @@ class OrderController extends Controller
             });
         }
 
-
         return $this->formatDatatableResponse($query);
     }
 
-    /**
-     * Format the response for DataTables.
-     */
     private function formatDatatableResponse($query)
     {
-
         return Datatables::of($query)
             ->addColumn('business_location_name', function ($order) {
                 if ($order->businessLocation) {
@@ -193,8 +197,64 @@ class OrderController extends Controller
                     return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
                 }
             })
+            ->addColumn('related_orders', function ($order) {
+                return $order->relatedOrders->map(function ($relatedOrder) {
+                    return [
+                        'id' => $relatedOrder->id,
+                        'type' => $relatedOrder->order_type,
+                        'total' => $relatedOrder->total
+                    ];
+                });
+            })
+            ->addColumn('related_orders_count', function ($order) {
+                return $order->relatedOrders->count();
+            })
+            ->rawColumns(['related_orders']) // Use raw HTML if necessary
             ->make(true);
     }
+
+    public function getRelatedOrders($id)
+    {
+        if (!auth()->user()->can('orders.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (request()->ajax()) {
+            // Fetch the parent order
+            $parentOrder = Order::findOrFail($id);
+
+            // Query related orders based on the same client ID (or your custom logic)
+            $query = Order::with([
+                'client.contact',
+                'businessLocation',
+            ])
+                ->select([
+                    'orders.id',
+                    'orders.number',
+                    'orders.order_type',
+                    'orders.client_id',
+                    'orders.business_location_id',
+                    'orders.payment_method',
+                    'orders.order_status',
+                    'orders.payment_status',
+                    'orders.shipping_cost',
+                    'orders.sub_total',
+                    'orders.total',
+                    'orders.created_at'
+                ])
+                ->where('client_id', $parentOrder->client_id)
+                ->where('id', '!=', $id) // Exclude the parent order itself
+                ->where('parent_order_id', $id)
+                ->whereIn('order_type', ['order_refund', 'order_transfer'])
+                ->latest();
+
+            return $this->formatDatatableResponse($query);
+        }
+
+        abort(404, 'Invalid Request.');
+    }
+
+
 
     public function changeOrderStatus($orderId)
     {
@@ -222,7 +282,7 @@ class OrderController extends Controller
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
-                \Log::info('data',[
+                \Log::info('data', [
                     $order->id,
                     $order->client->id,
                     $order->client->fcm_token,

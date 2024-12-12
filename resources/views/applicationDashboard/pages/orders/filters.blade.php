@@ -71,6 +71,7 @@
         ], 'all', [
             'class' => 'form-control',
             'id' => 'payment_status',
+            'required'
         ]) !!}
                 </div>
             </div>

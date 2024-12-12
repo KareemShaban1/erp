@@ -12,6 +12,7 @@
             $('#delivery_name').val('');
             $('#status').val('all');
             $('#payment_status').val('all');
+            $('#order_status').val('');
             orders_table.ajax.reload();
         });
 
@@ -24,6 +25,7 @@
                 url: '{{ action("ApplicationDashboard\OrderController@index") }}',
                 data: function (d) {
                     d.status = $('#status').val();
+                    d.order_status = $('#order_status').val();
                     d.start_date = $('#start_date').val();
                     d.end_date = $('#end_date').val();
                     d.business_location = $('#business_location').val();
@@ -32,6 +34,17 @@
                 }
             },
             columns: [
+                { 
+            data: null,
+            name: 'related_orders',
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row) {
+                return `<button class="btn btn-sm btn-primary show-related-orders-btn" data-order-id="${row.id}">
+                            View Related Orders
+                        </button>`;
+            }
+        },
                 { data: 'id', name: 'id' },
                 {
                     data: 'business_location_name', name: 'business_location_name'
@@ -79,12 +92,12 @@
 
                 {
                     data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
-                        
-                         // Display only the badge for completed or cancelled statuses
-                         if (data === 'paid') {
+
+                        // Display only the badge for completed or cancelled statuses
+                        if (data === 'paid') {
                             return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
-                        
+
                         return `
             <select class="form-control change-payment-status" data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
@@ -112,7 +125,6 @@
                     data: 'has_delivery',
                     name: 'has_delivery',
                     render: function (data, type, row) {
-                        console.log(data, type, row)
                         // Case 1: If the order status is 'processing' and has no delivery assigned
                         if (row.order_status === 'processing' && row.has_delivery === false) {
                             return `<button class="btn btn-primary assign-delivery-btn" 
@@ -136,7 +148,7 @@
                         return '';
                     },
                     orderable: true,
-                    searchable: true
+                    searchable: false
                 },
                 {
                     data: 'id',
@@ -166,6 +178,192 @@
         });
 
 
+
+      // Handle related orders button click
+$(document).on('click', '.show-related-orders-btn', function () {
+    const button = $(this);
+    const orderId = button.data('order-id');
+    const tr = button.closest('tr');
+    const row = orders_table.row(tr);
+
+    // Check if related orders are already shown
+    if (tr.next('.related-orders-row').length) {
+        // If already shown, remove it
+        tr.next('.related-orders-row').remove();
+        return;
+    }
+
+    // Create a new row for related orders
+    const relatedOrdersRow = $(`
+        <tr class="related-orders-row">
+            <td colspan="${orders_table.columns().count()}">
+                <div id="relatedOrdersWrapper-${orderId}">
+                    <table id="relatedOrdersTable-${orderId}" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>@lang('lang_v1.id')</th>
+                                <th>@lang('lang_v1.order_type')</th>
+                        <th>@lang('lang_v1.business_location')</th>
+                        <th>@lang('lang_v1.number')</th>
+                        <th>@lang('lang_v1.client')</th>
+                        <th>@lang('lang_v1.client_number')</th>
+                        <!-- <th>@lang('lang_v1.payment_method')</th> -->
+                        <th>@lang('lang_v1.order_status')</th>
+                        <th>@lang('lang_v1.payment_status')</th>
+                        <th>@lang('lang_v1.shipping_cost')</th>
+                        <th>@lang('lang_v1.sub_total')</th>
+                        <th>@lang('lang_v1.total')</th>
+                        <th>@lang('lang_v1.order_date_time')</th>
+                        <th>@lang('lang_v1.assign_delivery')</th>
+                        <th>@lang('lang_v1.actions')</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    `);
+
+    tr.after(relatedOrdersRow);
+
+    // Initialize DataTable for related orders
+    $(`#relatedOrdersTable-${orderId}`).DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: `{{ action("ApplicationDashboard\OrderController@getRelatedOrders", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
+            type: 'GET'
+        },
+        columns: [
+            { data: 'id', name: 'id' },
+            { data: 'order_type', name: 'order_type' },
+                {
+                    data: 'business_location_name', name: 'business_location_name'
+                },
+                { data: 'number', name: 'number' },
+                {
+                    data: 'client_contact_name', name: 'client_contact_name', orderable: true,
+                    searchable: true
+                }, // Ensure this matches the added column name
+                { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
+
+                {
+                    data: 'order_status',
+                    name: 'order_status',
+                    render: function (data, type, row) {
+                        let badgeClass;
+                        switch (data) {
+                            case 'pending': badgeClass = 'badge btn-warning'; break;
+                            case 'processing': badgeClass = 'badge btn-info'; break;
+                            case 'shipped': badgeClass = 'badge btn-primary'; break;
+                            case 'completed': badgeClass = 'badge btn-success'; break;
+                            case 'cancelled': badgeClass = 'badge btn-danger'; break;
+                            default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                        }
+
+                        // Display only the badge for completed or cancelled statuses
+                        if (data === 'completed' || data === 'cancelled') {
+                            return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        }
+
+                        // Otherwise, display both the badge and the select dropdown
+                        return `
+            <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+            <select class="form-control change-order-status" data-order-id="${row.id}">
+                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>`;
+                    }
+                },
+
+                {
+                    data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+
+                        // Display only the badge for completed or cancelled statuses
+                        if (data === 'paid') {
+                            return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        }
+
+                        return `
+            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+            </select>`;
+                    }
+                },
+                { data: 'shipping_cost', name: 'shipping_cost' },
+                { data: 'sub_total', name: 'sub_total' },
+                { data: 'total', name: 'total' },
+                {
+                    data: 'created_at',
+                    name: 'created_at',
+                    render: function (data) {
+                        // Format the date using JavaScript
+                        if (data) {
+                            const date = new Date(data);
+                            return date.toLocaleString(); // Adjust format as needed
+                        }
+                        return '';
+                    }
+                },
+                {
+                    data: 'has_delivery',
+                    name: 'has_delivery',
+                    render: function (data, type, row) {
+                        // Case 1: If the order status is 'processing' and has no delivery assigned
+                        if (row.order_status === 'processing' && row.has_delivery === false) {
+                            return `<button class="btn btn-primary assign-delivery-btn" 
+                    data-order-id="${row.id}" 
+                    data-contact-name="${row.client_contact_name
+                                } ">
+                    @lang('lang_v1.assign_delivery')
+                </button > `;
+                        }
+                        if (row.has_delivery === true) {
+                            return `<div>
+                        <span class="badge btn-secondary">
+                        @lang('lang_v1.delivery_assigned')
+                    </span>
+                    <span class="badge btn-success">
+                    ${row.delivery_name}
+                    </span>
+                        </div>`;
+                        }
+
+                        return '';
+                    },
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'id',
+                    name: 'id',
+                    render: function (data, type, row) {
+                        // Generate the "View Order Info" button
+                        let buttons = `<button class="btn btn-info view-order-info-btn" data-order-id="${row.id}">
+                          @lang('lang_v1.view_order_info')
+                       </button>`;
+
+                        // Conditionally add the "Refund Order" button
+                        if (row.order_status === 'completed') {
+                            buttons += `<button class="btn btn-warning refund-order-btn" data-order-id="${data}">
+                            @lang('lang_v1.refund_order')
+                        </button>`;
+                        }
+
+                        return buttons;
+                    },
+                    orderable: false,
+                    searchable: false
+                }
+        ]
+    });
+});
         $(document).on('change', '.change-order-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();

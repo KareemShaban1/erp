@@ -76,7 +76,7 @@ class DeliveryController extends Controller
             'assigned_at' => now(), // Timestamp of assignment
         ]);
 
-        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name'=> $delivery->contact->name]);
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number,'status'=>'delivery_assigned', 'delivery_name'=> $delivery->contact->name]);
 
 
         return response()->json([
