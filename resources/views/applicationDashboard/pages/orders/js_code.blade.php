@@ -79,14 +79,14 @@
 
                         // Otherwise, display both the badge and the select dropdown
                         return `
-            <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-            <select class="form-control change-order-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>`;
+                        <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                        <select class="form-control change-order-status" data-order-id="${row.id}">
+                            <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>`;
                     }
                 },
 
@@ -203,19 +203,19 @@ $(document).on('click', '.show-related-orders-btn', function () {
                             <tr>
                                 <th>@lang('lang_v1.id')</th>
                                 <th>@lang('lang_v1.order_type')</th>
-                        <th>@lang('lang_v1.business_location')</th>
-                        <th>@lang('lang_v1.number')</th>
-                        <th>@lang('lang_v1.client')</th>
-                        <th>@lang('lang_v1.client_number')</th>
-                        <!-- <th>@lang('lang_v1.payment_method')</th> -->
-                        <th>@lang('lang_v1.order_status')</th>
-                        <th>@lang('lang_v1.payment_status')</th>
-                        <th>@lang('lang_v1.shipping_cost')</th>
-                        <th>@lang('lang_v1.sub_total')</th>
-                        <th>@lang('lang_v1.total')</th>
-                        <th>@lang('lang_v1.order_date_time')</th>
-                        <th>@lang('lang_v1.assign_delivery')</th>
-                        <th>@lang('lang_v1.actions')</th>
+                                <th>@lang('lang_v1.business_location')</th>
+                                <th>@lang('lang_v1.number')</th>
+                                <th>@lang('lang_v1.client')</th>
+                                <th>@lang('lang_v1.client_number')</th>
+                                <!-- <th>@lang('lang_v1.payment_method')</th> -->
+                                <th>@lang('lang_v1.order_status')</th>
+                                <th>@lang('lang_v1.payment_status')</th>
+                                <th>@lang('lang_v1.shipping_cost')</th>
+                                <th>@lang('lang_v1.sub_total')</th>
+                                <th>@lang('lang_v1.total')</th>
+                                <th>@lang('lang_v1.order_date_time')</th>
+                                <th>@lang('lang_v1.assign_delivery')</th>
+                                <th>@lang('lang_v1.actions')</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -237,7 +237,16 @@ $(document).on('click', '.show-related-orders-btn', function () {
         },
         columns: [
             { data: 'id', name: 'id' },
-            { data: 'order_type', name: 'order_type' },
+            { data: 'order_type', name: 'order_type', render: function (data, type, row) {
+                let badgeClass;
+                        switch (data) {
+                            case 'order_transfer': badgeClass = 'badge btn-info'; break;
+                            case 'order_refund': badgeClass = 'badge btn-danger'; break;
+                            default: badgeClass = 'badge badge-secondary'; // For any other statuses
+                        }
+                           return `
+                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+            } },
                 {
                     data: 'business_location_name', name: 'business_location_name'
                 },
@@ -269,14 +278,14 @@ $(document).on('click', '.show-related-orders-btn', function () {
 
                         // Otherwise, display both the badge and the select dropdown
                         return `
-            <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-            <select class="form-control change-order-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>`;
+                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                    <select class="form-control change-order-status" data-order-id="${row.id}">
+                        <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                        <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                        <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                        <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>`;
                     }
                 },
 
