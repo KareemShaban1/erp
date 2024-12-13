@@ -279,23 +279,17 @@ class DeliveryController extends Controller
     }
 
     public function getDeliveryData(){
-        try {
-            $id = Auth::user()->id;
+        $id = Auth::user()->id;
 
-            $delivery = Delivery::businessId()->find($id);
+        $delivery = Delivery::businessId()->find($id);
 
-            if(!$delivery) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Delivery not found',
-                ], 404);
-            }
-            return $delivery;
-
-
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while showing Delivery'));
+        if(!$delivery) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Delivery not found',
+            ], 404);
         }
+        return $delivery;
     }
 
     public function changeDeliveryStatus(Request $request)

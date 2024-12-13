@@ -123,7 +123,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::get('delivery/getData', [DeliveryController::class, 'getDeliveryData']);
 
-        Route::post('delivery/changeDeliveryStatus', [AuthController::class, 'changeDeliveryStatus']);
+        Route::post('delivery/changeDeliveryStatus', [DeliveryController::class, 'changeDeliveryStatus']);
 
         Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
 
