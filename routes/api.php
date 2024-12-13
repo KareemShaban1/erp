@@ -121,6 +121,10 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
         Route::get('delivery/account-info', [AuthController::class, 'getDeliveryAccount']);
 
+        Route::get('delivery/getData', [DeliveryController::class, 'getDeliveryData']);
+
+        Route::post('delivery/changeDeliveryStatus', [AuthController::class, 'changeDeliveryStatus']);
+
         Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
 
         Route::get('delivery/all-notifications', [DeliveryNotificationController::class, 'getDeliveryNotifications']);

@@ -144,7 +144,7 @@ class DeliveryController extends Controller
 
         // Validate the delivery ID to ensure it exists and is available
         $delivery = Delivery::where('id', $deliveryId)
-            //->where('status', 'available')  // You can uncomment this if you need to check for an available status
+            ->where('status', 'available')  // You can uncomment this if you need to check for an available status
             ->first();
 
         if (!$delivery) {
@@ -278,6 +278,62 @@ class DeliveryController extends Controller
         ]);
     }
 
+    public function getDeliveryData(){
+        try {
+            $id = Auth::user()->id;
+
+            $delivery = Delivery::businessId()->find($id);
+
+            if(!$delivery) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Delivery not found',
+                ], 404);
+            }
+            return $delivery;
+
+
+        } catch (\Exception $e) {
+            return $this->handleException($e, __('message.Error happened while showing Delivery'));
+        }
+    }
+
+    public function changeDeliveryStatus(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:available,not_available',
+        ]);
+
+        // Define allowed statuses
+        $validStatuses = ['available', 'not_available'];
+
+        // Retrieve and validate the input status
+        $status = request()->input('status');
+        if (!in_array($status, $validStatuses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status provided.',
+            ], 400);
+        }
+
+        $deliveryId = Auth::user()->id;
+
+        // Validate the delivery ID to ensure it exists and is available
+        $delivery = Delivery::where('id', $deliveryId)
+            ->first();
+
+        if (!$delivery) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or unavailable delivery selected.',
+            ], 400);
+        }
+
+        // Update the delivery status to 'assigned'
+        $delivery->status = 'not_available';
+        $delivery->save();
+    }
+
     /**
      * Update the delivery contact balance based on the order total.
      *
@@ -296,6 +352,7 @@ class DeliveryController extends Controller
         Log::info("balance updated");
 
     }
+    
 
 
 
