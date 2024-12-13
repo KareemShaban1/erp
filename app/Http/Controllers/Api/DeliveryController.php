@@ -327,8 +327,7 @@ class DeliveryController extends Controller
             ], 400);
         }
 
-        // Update the delivery status to 'assigned'
-        $delivery->status = 'not_available';
+        $delivery->status = $status;
         $delivery->save();
         return response()->json([
             'success' => true,
