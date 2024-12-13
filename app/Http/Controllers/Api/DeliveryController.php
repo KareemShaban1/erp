@@ -289,7 +289,11 @@ class DeliveryController extends Controller
                 'message' => 'Delivery not found',
             ], 404);
         }
-        return $delivery;
+        return response()->json([
+            'success' => true,
+            'data'=>$delivery,
+            'message' => 'Delivery Data retrieved successfully.',
+            ], 200);
     }
 
     public function changeDeliveryStatus(Request $request)
@@ -326,6 +330,11 @@ class DeliveryController extends Controller
         // Update the delivery status to 'assigned'
         $delivery->status = 'not_available';
         $delivery->save();
+        return response()->json([
+            'success' => true,
+            'data'=>$delivery,
+            'message' => 'Delivery status updated successfully.',
+            ], 200);
     }
 
     /**
