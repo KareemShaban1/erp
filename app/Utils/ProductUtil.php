@@ -696,7 +696,9 @@ class ProductUtil extends Util
         
         //Calculate total
         $output['final_total'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
-        
+
+        $output['total_before_tax'] = $output['total_before_tax'] + $output['tax'] - $output['discount'];
+
         return $output;
     }
 

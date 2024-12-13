@@ -33,7 +33,7 @@ class OrderCancellationService extends BaseService
     public function __construct(
         ModuleUtil $moduleUtil,
         ProductUtil $productUtil,
-        OrderService $orderService, 
+        OrderService $orderService,
         TransferQuantityService $transferQuantityService,
         TransactionUtil $transactionUtil
 
@@ -162,39 +162,46 @@ class OrderCancellationService extends BaseService
                 $business_id = $order->client->contact->business->id;
 
                 // dd($order->id);
-                // $parent_sell_transaction = Transaction::
-                //     where('order_id', $order->id)
-                //     ->where('type', 'sell')
-                //     ->first();
-                // $products = [];
-                // foreach ($order->orderItems as $item) {
-                //     $transaction_sell_line = TransactionSellLine::
-                //         where('product_id', $item->product_id)
-                //         ->where('transaction_id', $parent_sell_transaction->id)
-                //         ->first();
-                //     $products[] = [
-                //         'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
-                //         'quantity' => $item->quantity,
-                //         'unit_price_inc_tax' => $item->price, // Include price if applicable
-                //     ];
-                // }
+                $parent_sell_transaction = Transaction::
+                    where('order_id', $order->id)
+                    ->where('type', 'sell')
+                    ->first();
+                \Log::info('parent_sell_transaction', [$parent_sell_transaction]);
+                $products = [];
+                foreach ($order->orderItems as $item) {
+                    $transaction_sell_line = TransactionSellLine::
+                        where('product_id', $item->product_id)
+                        ->where('transaction_id', $parent_sell_transaction->id)
+                        ->first();
+                    \Log::info('transaction_sell_line', [$transaction_sell_line]);
+
+                    $products[] = [
+                        'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
+                        'quantity' => $item->quantity,
+                        'unit_price_inc_tax' => $item->price, // Include price if applicable
+                    ];
+
+                    $transferOrder = Order::where('id',$item->order_id)
+                    ->first();
+                    $input = [
+                        'transaction_id' => $parent_sell_transaction->id,
+                        'order_id' => $transferOrder->id,
+                        'invoice_no' => null,
+                        // 'transaction_date' => Carbon::now(),
+                        'products' => $products,
+                        "discount_type" => null,
+                        "discount_amount" => $item->discount,
+                        "tax_id" => null,
+                        "tax_amount" => "0",
+                        "tax_percent" => "0",
+                    ];
+
+                    \Log::info('input', [$input]);
 
 
-                // $input = [
-                //     'transaction_id' => $parent_sell_transaction->id,
-                //     'order_id' => $order->id,
-                //     'invoice_no' => null,
-                //     'transaction_date' => Carbon::now()->format('d-m-Y h:i A'),
-                //     'products' => $products,
-                //     "discount_type" => null,
-                //     "discount_amount" => "0.00",
-                //     "tax_id" => null,
-                //     "tax_amount" => "0",
-                //     "tax_percent" => "0",
-                // ];
+                    $this->transactionUtil->addSellReturnForCancellation($input, $business_id, 1);
+                }
 
-
-                // $this->transactionUtil->addSellReturn($input, $business_id, 1,false);
 
                 $order->save();
                 $orderTracking->save();
@@ -207,13 +214,13 @@ class OrderCancellationService extends BaseService
             $orderCancellation = OrderCancellation::create($data);
 
 
-               // Notify admins and users about the order
-               $admins = $this->moduleUtil->get_admins($order->client->contact->business_id);
-               $users = $this->moduleUtil->getBusinessUsers($order->client->contact->business_id,$order);
-   
-               \Notification::send($admins, new OrderCancellationCreatedNotification($order));
-               \Notification::send($users, new OrderCancellationCreatedNotification($order));
-   
+            // Notify admins and users about the order
+            $admins = $this->moduleUtil->get_admins($order->client->contact->business_id);
+            $users = $this->moduleUtil->getBusinessUsers($order->client->contact->business_id, $order);
+
+            \Notification::send($admins, new OrderCancellationCreatedNotification($order));
+            \Notification::send($users, new OrderCancellationCreatedNotification($order));
+
 
             // Return the created OrderCancellation as a resource
             return new OrderCancellationResource($orderCancellation);

@@ -64,7 +64,7 @@
                 <td>{{@format_quantity($sell_line->quantity_returned)}} {{$unit_name}}</td>
                 <td>
                   @php
-                    $line_total = $sell_line->unit_price_inc_tax * $sell_line->quantity_returned;
+                    $line_total = ($sell_line->unit_price_inc_tax * $sell_line->quantity_returned) - $sell_line->line_discount_amount;
                     $total_before_tax += $line_total ;
                   @endphp
                   <span class="display_currency" data-currency_symbol="true">{{$line_total}}</span>

@@ -237,10 +237,6 @@ class OrderService extends BaseService
 
             $business_id = $client->contact->business_id;
 
-            \Log::info('data',[
-                $fromLocationId , $toLocationId,$quantity
-            ]);
-
             $inputData = [
                 'location_id' => $fromLocationId,
                 'order_id' => $order->id,
@@ -301,7 +297,12 @@ class OrderService extends BaseService
             }
 
 
-            \Log::info("transfer quantity",[$quantity]);
+            \Log::info("transfer quantity",[
+                $order,
+                $orderItem,
+                $quantity,
+                $fromLocationId,
+                $toLocationId]);
             $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
 
             DB::commit();
@@ -431,7 +432,6 @@ class OrderService extends BaseService
                 'payment_status' => 'paid',
                 "contact_id" => $client->contact_id,
                 "transaction_date" => now(),
-                "total_before_tax" => $order->total,
                 "tax_amount" => "0.0000",
                 "created_by" => 1,
                 'discount_amount' => 0,
@@ -457,7 +457,9 @@ class OrderService extends BaseService
 
             $invoice_total = $this->productUtil->calculateInvoiceTotal($cartsArray, $tax_id, $discount);
 
-            $invoice_total['total_before_tax'] = $invoice_total['total_before_tax'] ?? 0;
+            // $invoice_total['total_before_tax'] = $invoice_total['total_before_tax'] ?? 0;
+
+            $invoice_total['total_before_tax'] = $order->total;
 
             $transactionData['invoice_total'] = $invoice_total;
 
@@ -471,6 +473,8 @@ class OrderService extends BaseService
             $contact_id = $client->contact_id;
             $cg = $this->contactUtil->getCustomerGroup($business_id, $contact_id);
             $customerGroupId = (empty($cg) || empty($cg->id)) ? null : $cg->id;
+
+            \Log::info('transaction_data',[$transactionData]);
 
             $transaction = $this->transactionUtil->createSellTransaction($business_id, $transactionData, $invoice_total, $user_id);
 
