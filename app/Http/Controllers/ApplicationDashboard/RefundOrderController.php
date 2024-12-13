@@ -329,7 +329,6 @@ class RefundOrderController extends Controller
                     ];
                 }
 
-
                 $input = [
                     'transaction_id' => $parent_sell_transaction->id,
                     'invoice_no' => null,

@@ -397,7 +397,7 @@
             var status = $(this).val();
 
             $.ajax({
-                url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+                url: `{{ action("ApplicationDashboard\RefundOrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
                 type: 'POST',
                 data: {
                     order_status: status,
@@ -728,6 +728,7 @@
                     if (response.success) {
                         toastr.success(response.message);
                         $('#refundOrderModal').modal('hide');
+                        orders_table.ajax.reload();
                         // Reload DataTable or update UI
                     } else {
                         alert('Failed to process refund.');
