@@ -7,7 +7,8 @@
 	    </div>
 	    <div class="modal-body" >
 	    	<div class="table-responsive">
-		      	<table class="table table-bordered" id="payroll-view" style="width:100%">
+		      	<table class="table table-bordered" id="payroll-view" 
+			style="width:100%; height: 800px; direction:rtl">
 		      		<tr>
 		      			<td colspan="3">
 			      			@if(!empty(Session::get('business.logo')))
