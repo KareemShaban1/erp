@@ -377,12 +377,27 @@ class DeliveryController extends Controller
         $user = User::find($delivery->user_id);
         $business_id = $user->business_id;
 
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Delivery not assigned to user.',
+            ], 400);
+        }
+
 
         $payroll = Transaction::where('business_id', $business_id)
-            ->with(['transaction_for', 'payment_lines'])
-            ->where('expense_for',$user->id)
-            ->first();
+        ->with(['transaction_for', 'payment_lines'])
+        ->where('expense_for', $user->id)
+        ->orderBy('transaction_date', 'desc') // Order by transaction_date in descending order
+        ->first(); // Fetch the latest transaction
             // ->findOrFail($id);
+
+            if (!$payroll) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا يوجد كشف مرتبات لهذا الشهر',
+                ], 400);
+            }
 
         $transaction_date = \Carbon::parse($payroll->transaction_date);
 

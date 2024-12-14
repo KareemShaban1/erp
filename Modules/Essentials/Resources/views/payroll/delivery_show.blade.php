@@ -299,5 +299,6 @@
 	#payroll-view>tfoot>tr>th, #payroll-view>thead>tr>td,
 	#payroll-view>tbody>tr>td, #payroll-view>tfoot>tr>td {
 		border: 1px solid #1d1a1a;
+		font-size: 25px;
 	}
 </style>
