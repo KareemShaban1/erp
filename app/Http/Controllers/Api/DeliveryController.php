@@ -6,28 +6,41 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Delivery\DeliveryCollection;
 use App\Http\Resources\Delivery\DeliveryResource;
 use App\Http\Resources\Order\OrderCollection;
+use App\Models\Category;
 use App\Models\Client;
 use App\Models\Delivery;
 use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderTracking;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Services\FirebaseService;
 use App\Utils\ModuleUtil;
+use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Modules\Essentials\Entities\EssentialsLeave;
+use Modules\Essentials\Utils\EssentialsUtil;
 
 class DeliveryController extends Controller
 {
 
+
+
+    protected $essentialsUtil;
+    protected $commonUtil;
     protected $firebaseService;
     protected $moduleUtil;
 
 
-    public function __construct(FirebaseService $firebaseService, ModuleUtil $moduleUtil)
+    public function __construct(FirebaseService $firebaseService, ModuleUtil $moduleUtil,
+    EssentialsUtil $essentialsUtil, Util $commonUtil)
     {
         $this->firebaseService = $firebaseService;
         $this->moduleUtil = $moduleUtil;
+        $this->essentialsUtil = $essentialsUtil;
+        $this->commonUtil = $commonUtil;
 
     }
 
@@ -355,6 +368,87 @@ class DeliveryController extends Controller
 
     }
     
+
+    public function showData()
+    {
+        // $delivery_id = Auth::user()->id;
+        $delivery = Delivery::find(Auth::user()->id);
+        // $id = 
+        $user = User::find($delivery->user_id);
+        $business_id = $user->business_id;
+
+
+        $payroll = Transaction::where('business_id', $business_id)
+            ->with(['transaction_for', 'payment_lines'])
+            ->where('expense_for',$user->id)
+            ->first();
+            // ->findOrFail($id);
+
+        $transaction_date = \Carbon::parse($payroll->transaction_date);
+
+        $department = Category::where('category_type', 'hrm_department')
+            ->find($payroll->transaction_for->essentials_department_id);
+
+        $designation = Category::where('category_type', 'hrm_designation')
+            ->find($payroll->transaction_for->essentials_designation_id);
+
+        $month_name = $transaction_date->format('F');
+        $year = $transaction_date->format('Y');
+        $allowances = !empty($payroll->essentials_allowances) ? json_decode($payroll->essentials_allowances, true) : [];
+        $deductions = !empty($payroll->essentials_deductions) ? json_decode($payroll->essentials_deductions, true) : [];
+        $bank_details = json_decode($payroll->transaction_for->bank_details, true);
+        $payment_types = $this->moduleUtil->payment_types();
+        $final_total_in_words = $this->commonUtil->numToIndianFormat($payroll->final_total);
+
+        $start_of_month = \Carbon::parse($payroll->transaction_date);
+        $end_of_month = \Carbon::parse($payroll->transaction_date)->endOfMonth();
+
+        $leaves = EssentialsLeave::where('business_id', $business_id)
+            ->where('user_id', $payroll->transaction_for->id)
+            ->whereDate('start_date', '>=', $start_of_month)
+            ->whereDate('end_date', '<=', $end_of_month)
+            ->get();
+
+        $total_leaves = 0;
+        $days_in_a_month = $start_of_month->daysInMonth;
+        foreach ($leaves as $leave) {
+            $start_date = \Carbon::parse($leave->start_date);
+            $end_date = \Carbon::parse($leave->end_date);
+            $total_leaves += $start_date->diffInDays($end_date) + 1;
+        }
+
+        $total_work_duration = $this->essentialsUtil->getTotalWorkDuration('hour', $payroll->transaction_for->id, $business_id, $start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d'));
+
+        // Fetch expense transactions
+        $expense_transactions = Transaction::where('business_id', $business_id)
+            ->where('expense_for', $payroll->transaction_for->id)
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$start_of_month->format('Y-m-d'), $end_of_month->format('Y-m-d')])
+            ->get();
+
+        foreach ($expense_transactions as $expense) {
+            // Check if this expense is already in deductions
+            $exists = false;
+            if (isset($deductions['deduction_names'])) {
+                foreach ($deductions['deduction_names'] as $index => $name) {
+                    if ($name === __('essentials::lang.expense') && $deductions['deduction_amounts'][$index] == $expense->final_total) {
+                        $exists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$exists) {
+                $deductions['deduction_names'][] = __('essentials::lang.expense');
+                $deductions['deduction_amounts'][] = $expense->final_total;
+                $deductions['deduction_types'][] = 'fixed';
+                $deductions['deduction_percents'][] = 0;
+            }
+        }
+
+        return view('essentials::payroll.delivery_show')
+            ->with(compact('payroll', 'month_name', 'allowances', 'deductions', 'year', 'payment_types', 'bank_details', 'designation', 'department', 'final_total_in_words', 'total_leaves', 'days_in_a_month', 'total_work_duration'));
+    }
 
 
 
