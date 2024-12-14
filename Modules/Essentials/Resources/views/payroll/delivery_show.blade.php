@@ -18,7 +18,7 @@
 <div>
 <div class="table-responsive" style="margin-left: 20px;">
 		      	<table class="table table-bordered" id="payroll-view" 
-			style="width:70%; direction:rtl">
+			style="width:50%; direction:rtl">
 		      		<tr>
 		      			<td colspan="3">
 			      			
