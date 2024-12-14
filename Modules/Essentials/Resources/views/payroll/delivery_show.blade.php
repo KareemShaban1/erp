@@ -10,7 +10,6 @@
 	#payroll-view>tfoot>tr>th, #payroll-view>thead>tr>td,
 	#payroll-view>tbody>tr>td, #payroll-view>tfoot>tr>td {
 		border: 1px solid #1d1a1a;
-		font-size: 25px;
 	}
 </style>
 
@@ -26,7 +25,7 @@
 	    <div class="modal-body" >
 	    	<div class="table-responsive">
 		      	<table class="table table-bordered" id="payroll-view" 
-			style="width:100%; height: 800px; direction:rtl">
+			style="width:70%; direction:rtl">
 		      		<tr>
 		      			<td colspan="3">
 			      			@if(!empty(Session::get('business.logo')))
