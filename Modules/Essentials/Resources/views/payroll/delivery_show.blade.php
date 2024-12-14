@@ -15,31 +15,14 @@
 
 </head>
 <body>
-<div class="modal-dialog modal-lg" role="document" >
-  	<div class="modal-content">
-  		<div class="modal-header no-print">
-	      	<h4 class="modal-title no-print">
-	      		{!! __('essentials::lang.payroll_of_employee', ['employee' => $payroll->transaction_for->user_full_name, 'date' => $month_name . ' ' . $year]) !!}
-	      	</h4>
-	    </div>
-	    <div class="modal-body" >
-	    	<div class="table-responsive">
+<div>
+<div class="table-responsive" style="margin-left: 20px;">
 		      	<table class="table table-bordered" id="payroll-view" 
 			style="width:70%; direction:rtl">
 		      		<tr>
 		      			<td colspan="3">
-			      			@if(!empty(Session::get('business.logo')))
-			                  <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
-			                @endif
-			                <div class="pull-right text-center">
-			                	<strong class="font-23">
-			                		{{Session::get('business.name') ?? ''}}
-			                	</strong>
-			                	<br>
-			                	{!!Session::get('business.business_address') ?? ''!!}
-			                </div>
-			                <br>
-			                <div style="text-align: center;padding-top: 40px;">
+			      			
+			                <div style="text-align: center;padding-top: 10px;">
 			                	@lang('essentials::lang.payslip_for_the_month', ['month' => $month_name, 'year' => $year])
 			                </div>
 		                </td>
@@ -308,9 +291,7 @@
 					</tr>
 		      	</table>
 	      	</div>
-	    </div>
-  	</div><!-- /.modal-content -->
-</div><!-- /.modal-dialog -->
+</div>
 
 </body>
 </html>
