@@ -130,8 +130,6 @@ Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashb
 Route::post('applicationDashboard/deliveries/{orderId}/change-payment-status', 'ApplicationDashboard\DeliveryController@changePaymentStatus');
 // ----------------------------------------------
 
-
-
 // order cancellations
 Route::resource('applicationDashboard/order-cancellations', 'ApplicationDashboard\OrderCancellationController');
 Route::post(

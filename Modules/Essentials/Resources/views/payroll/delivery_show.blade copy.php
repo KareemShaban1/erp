@@ -1,13 +1,13 @@
-<div class="modal-dialog modal-lg" role="document" >
+<div class="modal-dialog modal-lg" role="document">
   	<div class="modal-content">
   		<div class="modal-header no-print">
 	      	<h4 class="modal-title no-print">
 	      		{!! __('essentials::lang.payroll_of_employee', ['employee' => $payroll->transaction_for->user_full_name, 'date' => $month_name . ' ' . $year]) !!}
 	      	</h4>
 	    </div>
-	    <div class="modal-body" >
+	    <div class="modal-body">
 	    	<div class="table-responsive">
-		      	<table class="table table-bordered" id="payroll-view" style="width:100%">
+		      	<table class="table table-bordered" id="payroll-view">
 		      		<tr>
 		      			<td colspan="3">
 			      			@if(!empty(Session::get('business.logo')))
