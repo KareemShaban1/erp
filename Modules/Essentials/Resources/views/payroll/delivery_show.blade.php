@@ -1,3 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<link rel="stylesheet" href="{{ asset('css/vendor.css?v='.$asset_v) }}">
+	<style type="text/css">
+	#payroll-view>thead>tr>th, #payroll-view>tbody>tr>th,
+	#payroll-view>tfoot>tr>th, #payroll-view>thead>tr>td,
+	#payroll-view>tbody>tr>td, #payroll-view>tfoot>tr>td {
+		border: 1px solid #1d1a1a;
+		font-size: 25px;
+	}
+</style>
+
+</head>
+<body>
 <div class="modal-dialog modal-lg" role="document" >
   	<div class="modal-content">
   		<div class="modal-header no-print">
@@ -294,11 +312,6 @@
 	    </div>
   	</div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
-<style type="text/css">
-	#payroll-view>thead>tr>th, #payroll-view>tbody>tr>th,
-	#payroll-view>tfoot>tr>th, #payroll-view>thead>tr>td,
-	#payroll-view>tbody>tr>td, #payroll-view>tfoot>tr>td {
-		border: 1px solid #1d1a1a;
-		font-size: 25px;
-	}
-</style>
+
+</body>
+</html>
