@@ -40,3 +40,7 @@
    - when client account is active 
    - when delivery change order status to shipped
    - when admin response on order cancel and order refund
+
+   cases of sell_return: 
+   - change refund order status to completed
+   - add

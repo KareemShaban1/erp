@@ -36,6 +36,7 @@
                         <th>@lang('lang_v1.id')</th>
                         <th>@lang('lang_v1.business_location')</th>
                         <th>@lang('lang_v1.number')</th>
+                        <th>@lang('lang_v1.invoice_no')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.client_number')</th>
                         <!-- <th>@lang('lang_v1.payment_method')</th> -->

@@ -78,7 +78,10 @@ class RefundOrderController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = Order::with(['client.contact', 'businessLocation'])
+        $query = Order::with(['client.contact', 'businessLocation',
+        'transaction' => function ($query) {
+                    $query->where('type', 'sell_return'); // Filter transactions with type 'sell'
+                }])
             ->select([
                 'orders.id',
                 'orders.number',
@@ -154,6 +157,11 @@ class RefundOrderController extends Controller
     {
 
         return Datatables::of($query)
+        ->addColumn('invoice_no', function ($order) {
+            if ($order->transaction) {
+                return $order->transaction->invoice_no ?? 'N/A';
+            }
+        })
         ->addColumn('business_location_name', function ($order) {
             if ($order->businessLocation) {
                 return $order->businessLocation->name ?? 'N/A';
@@ -332,6 +340,7 @@ class RefundOrderController extends Controller
                 $input = [
                     'transaction_id' => $parent_sell_transaction->id,
                     'invoice_no' => null,
+                    'order_id'=>$order->id,
                     'transaction_date' => Carbon::now()->format('d-m-Y h:i A'), // Format to "06-12-2024 02:39 PM"
                     'products' => $products,
                     "discount_type" => null,
@@ -341,7 +350,7 @@ class RefundOrderController extends Controller
                     "tax_percent" => "0",
                 ];
 
-                $this->transactionUtil->addSellReturn($input, $business_id, 1);
+                $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

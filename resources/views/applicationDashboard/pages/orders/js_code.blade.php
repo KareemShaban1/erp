@@ -50,6 +50,7 @@
                     data: 'business_location_name', name: 'business_location_name'
                 },
                 { data: 'number', name: 'number' },
+                { data: 'invoice_no', name: 'invoice_no' },
                 {
                     data: 'client_contact_name', name: 'client_contact_name', orderable: true,
                     searchable: true
@@ -205,6 +206,7 @@
                                 <th>@lang('lang_v1.order_type')</th>
                                 <th>@lang('lang_v1.business_location')</th>
                                 <th>@lang('lang_v1.number')</th>
+                                 <th>@lang('lang_v1.invoice_no')</th>
                                 <th>@lang('lang_v1.client')</th>
                                 <th>@lang('lang_v1.client_number')</th>
                                 <!-- <th>@lang('lang_v1.payment_method')</th> -->
@@ -270,6 +272,8 @@
                         data: 'business_location_name', name: 'business_location_name'
                     },
                     { data: 'number', name: 'number' },
+                    { data: 'invoice_no', name: 'invoice_no' },
+
                     {
                         data: 'client_contact_name', name: 'client_contact_name', orderable: true,
                         searchable: true
@@ -294,17 +298,18 @@
                             if (data === 'completed' || data === 'cancelled') {
                                 return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                             }
+                            
 
                             // Otherwise, display both the badge and the select dropdown
                             return `
-                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    <select class="form-control change-order-status" data-order-id="${row.id}">
-                        <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                        <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                        <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                        <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                        <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                    </select>`;
+                                <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                                <select class="form-control ${row.order_type === 'order_transfer' ? 'change-order-status' : 'change-refund-order-status'}" data-order-id="${row.id}">
+                                    <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>`;
                         }
                     },
 
@@ -392,10 +397,9 @@
                 ]
             });
         });
-        $(document).on('change', '.change-order-status', function () {
+        $(document).on('change', '.change-refund-order-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();
-
             $.ajax({
                 url: `{{ action("ApplicationDashboard\RefundOrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
                 type: 'POST',
@@ -416,6 +420,32 @@
                 }
             });
         });
+
+        $(document).on('change', '.change-order-status', function () {
+            var orderId = $(this).data('order-id');
+            var status = $(this).val();
+
+            $.ajax({
+                url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+                type: 'POST',
+                data: {
+                    order_status: status,
+                    _token: '{{ csrf_token() }}' // CSRF token for security
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    } else {
+                        alert('Failed to update order status.');
+                    }
+                },
+                error: function (xhr) {
+                    alert('An error occurred: ' + xhr.responseText);
+                }
+            });
+        });
+
 
         $(document).on('change', '.change-payment-status', function () {
             var orderId = $(this).data('order-id');

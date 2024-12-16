@@ -46,6 +46,7 @@
                     name: 'business_location_name'
                 },
                 { data: 'number', name: 'number' },
+                {data:'invoice_no',name:'invoice_no'},
                 { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
                 {

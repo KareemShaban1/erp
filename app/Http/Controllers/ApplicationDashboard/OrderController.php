@@ -74,6 +74,9 @@ class OrderController extends Controller
             'businessLocation',
             'relatedOrders' => function ($query) {
                 $query->whereIn('order_type', ['refund_orders', 'transfer_orders']);
+            },
+            'transaction' => function ($query) {
+                $query->where('type', 'sell'); // Filter transactions with type 'sell'
             }
         ])
             ->select([
@@ -147,6 +150,11 @@ class OrderController extends Controller
     private function formatDatatableResponse($query)
     {
         return Datatables::of($query)
+        ->addColumn('invoice_no', function ($order) {
+            if ($order->transaction) {
+                return $order->transaction->invoice_no ?? 'N/A';
+            }
+        })
             ->addColumn('business_location_name', function ($order) {
                 if ($order->businessLocation) {
                     return $order->businessLocation->name ?? 'N/A';
@@ -227,6 +235,9 @@ class OrderController extends Controller
             $query = Order::with([
                 'client.contact',
                 'businessLocation',
+                'transaction' => function ($query) {
+                    $query->where('type', 'sell_return'); // Filter transactions with type 'sell'
+                }
             ])
                 ->select([
                     'orders.id',
