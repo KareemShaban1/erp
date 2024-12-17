@@ -65,6 +65,8 @@ class CartService extends BaseService
                 ->withFullData(true)
                 ->setTotals($totalPrice, $totalDiscount, $totalAfterDiscount);
     
+            
+
             // Add multi-location message if applicable
             if ($multiLocationMessage) {
                 $cartCollection->setLocationMessage(__('message.Order will be shipped tomorrow due to multiple locations'));

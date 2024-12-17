@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\FcmController;
 use App\Http\Controllers\Api\ClientNotificationController;
 use App\Http\Controllers\Api\DeliveryNotificationController;
 use App\Http\Controllers\Api\PushNotificationController;
+use App\Http\Controllers\Api\SuggestionProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -102,6 +103,8 @@ Route::middleware('auth:sanctum-client')->group(function () {
           Route::get('discounts', [DiscountController::class, 'listDiscounts']);
           Route::get('flash_sales', [DiscountController::class, 'listFlashSales']);
       
+         Route::post('suggestionProducts', [SuggestionProductController::class, 'store']);
+
       
 
           //   getClientNotifications

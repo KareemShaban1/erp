@@ -247,6 +247,15 @@ class ApplicationSidebarMenu
 
             }
 
+            // <i class="fa-solid fa-magnifying-glass"></i>
+
+                $menu->url(action('ApplicationDashboard\suggestionProductController@index'),
+                 __('lang_v1.suggestion_products'), [
+                    'icon' => 'fa fa-search',
+                    'active' => request()->segment(1)
+                ])->order(80);
+
+
             if (auth()->user()->can('applicationSettings.view')) {
 
                 $menu->url(action('ApplicationDashboard\ApplicationSettingsController@index'), __('lang_v1.application_settings'), [

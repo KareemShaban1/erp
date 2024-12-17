@@ -158,6 +158,8 @@ Route::get('applicationDashboard/order-refunds/{orderRefundId}/details', 'Applic
 Route::get('get_products', 'ApplicationDashboard\BannerController@getProducts');
 Route::get('get_categories', 'ApplicationDashboard\BannerController@getCategories');
 Route::resource('banners', 'ApplicationDashboard\BannerController');
+Route::resource('suggestionProducts', 'ApplicationDashboard\suggestionProductController');
+
 // ----------------------------------------------
 
 // settings
