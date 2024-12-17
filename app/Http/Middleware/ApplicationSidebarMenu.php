@@ -249,7 +249,7 @@ class ApplicationSidebarMenu
 
             // <i class="fa-solid fa-magnifying-glass"></i>
 
-                $menu->url(action('ApplicationDashboard\suggestionProductController@index'),
+                $menu->url(action('ApplicationDashboard\SuggestionProductController@index'),
                  __('lang_v1.suggestion_products'), [
                     'icon' => 'fa fa-search',
                     'active' => request()->segment(1)
