@@ -42,7 +42,7 @@
     var suggestionProducts_table = $('#suggestionProducts_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ action("ApplicationDashboard\suggestionProductController@index") }}',
+        ajax: '{{ action("ApplicationDashboard\SuggestionProductController@index") }}',
         columnDefs: [
             {
                 targets: 2,
