@@ -20,7 +20,7 @@ class Delivery extends Authenticatable
      * @var array
      */
     protected $fillable = ['contact_id','business_location_id','email_address',
-    'password','location','status','account_status','user_id'];
+    'password','location','status','account_status','user_id','fcm_token'];
 
     public function business_location(){
         return $this->belongsTo(BusinessLocation::class);

@@ -288,6 +288,10 @@ class AuthController extends Controller
         // Generate Sanctum Token
         $token = $delivery->createToken('Personal Access Token')->plainTextToken;
 
+
+        $delivery->fcm_token = $request->fcm_token;
+        $delivery->save();
+        
         // Respond with delivery Data and Token
         return response()->json([
             'delivery' => $delivery,
