@@ -9,7 +9,7 @@ use App\Models\Order;
 use App\Utils\ModuleUtil;
 use Datatables;
 use Illuminate\Http\Request;
-use App\Notifications\FirebaseDeliveryService;
+use App\Services\FirebaseDeliveryService;
 
 class DeliveryController extends Controller
 {
