@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+
 
 class Delivery extends Authenticatable
 {
     use HasFactory;
     use HasApiTokens;
+    use Notifiable;
+    
 
     /**
      * The attributes that are mass assignable.
