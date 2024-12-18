@@ -14,7 +14,7 @@ use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
 use Illuminate\Http\Request;
@@ -30,14 +30,14 @@ class DeliveryController extends Controller
 
     protected $essentialsUtil;
     protected $commonUtil;
-    protected $firebaseService;
+    protected $FirebaseClientService;
     protected $moduleUtil;
 
 
-    public function __construct(FirebaseService $firebaseService, ModuleUtil $moduleUtil,
+    public function __construct(FirebaseClientService $FirebaseClientService, ModuleUtil $moduleUtil,
     EssentialsUtil $essentialsUtil, Util $commonUtil)
     {
-        $this->firebaseService = $firebaseService;
+        $this->FirebaseClientService = $FirebaseClientService;
         $this->moduleUtil = $moduleUtil;
         $this->essentialsUtil = $essentialsUtil;
         $this->commonUtil = $commonUtil;
@@ -238,7 +238,7 @@ class DeliveryController extends Controller
                 $this->updateDeliveryBalance($order, $delivery);
 
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $client->id,
                     $client->fcm_token,
                     'Order Status Updated',
@@ -263,7 +263,7 @@ class DeliveryController extends Controller
                 $delivery->save();
 
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $client->id,
                     $client->fcm_token,
                     'Order Status Updated',

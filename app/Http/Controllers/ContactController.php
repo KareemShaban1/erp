@@ -22,7 +22,7 @@ use Excel;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\TransactionPayment;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Models\Activity;
 
@@ -2289,7 +2289,7 @@ class ContactController extends Controller
             if ($contact->type == 'client') {
 
                 if ($contact->contact_status == 'active') {
-                    app(FirebaseService::class)->sendAndStoreNotification(
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
                         $client->fcm_token,
                         'Account Status',
@@ -2306,7 +2306,7 @@ class ContactController extends Controller
                     );
 
                 } else {
-                    app(FirebaseService::class)->sendAndStoreNotification(
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
                         $client->fcm_token,
                         'Account Status',

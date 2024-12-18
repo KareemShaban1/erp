@@ -1438,6 +1438,12 @@ return [
 "new_transfer_order_notification"=>"أشعار طلب تحويل جديد",
 "new_transfer_order_notification" => ":client تم طلب أوردر تحويل بواسطة. رقم طلب التحويل - <i>:order_number </i>",
 
+// new_order_refund_notification
+
+
+"new_order_refund_notification"=>"أشعار طلب تحويل جديد",
+"new_order_refund_notification" => ":client تم طلب أوردر تحويل بواسطة. رقم طلب الأسترجاع - <i>:order_number - حالة الاسترجاع :refund_status</i>",
+
 
 "delivery_name"=>"أسم الدليفرى",
 "order_total_price"=>"سعر الطلب الكلى",

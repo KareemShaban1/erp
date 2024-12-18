@@ -8,14 +8,14 @@ use App\Models\OrderItem;
 use App\Models\OrderRefund;
 use App\Models\OrderTracking;
 use App\Services\API\OrderService;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 use Yajra\DataTables\Facades\DataTables;
-
+use App\Notifications\MakeRefundNotification;
 class OrderRefundController extends Controller
 {
     /**
@@ -31,7 +31,7 @@ class OrderRefundController extends Controller
      * @param ProductUtils $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil , OrderService $orderService)
+    public function __construct(ModuleUtil $moduleUtil, OrderService $orderService)
     {
         $this->moduleUtil = $moduleUtil;
         $this->orderService = $orderService;
@@ -46,7 +46,7 @@ class OrderRefundController extends Controller
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
-            $search =  request()->get('search')['value'];
+            $search = request()->get('search')['value'];
 
             // Validate status
             $validStatuses = ['all', 'requested', 'processed', 'approved', 'rejected'];
@@ -68,17 +68,17 @@ class OrderRefundController extends Controller
     {
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status','order_item.product:id,name', 'order_item'])  // Added product relationship
-        ->select(['id', 'order_id', 'client_id','order_item_id', 'status','refund_status', 'amount', 'created_at'])
-        ->latest();
+        $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status', 'order_item.product:id,name', 'order_item'])  // Added product relationship
+            ->select(['id', 'order_id', 'client_id', 'order_item_id', 'status', 'refund_status', 'amount', 'created_at'])
+            ->latest();
 
         // Apply status filter
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
-         // Apply user locations filter
-         if ($user_locations !== "all") {
+        // Apply user locations filter
+        if ($user_locations !== "all") {
             $query->whereHas('order', function ($q) use ($user_locations) {
                 $q->whereIn('business_location_id', $user_locations);
             });
@@ -158,7 +158,7 @@ class OrderRefundController extends Controller
             case 'approved':
                 $orderRefund->processed_at = now();
                 $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'approved']);
-                $this->orderService->storeRefundOrderItem($order,$orderRefund);
+                $this->orderService->storeRefundOrderItem($order, $orderRefund);
                 break;
             case 'rejected':
                 $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
@@ -193,43 +193,16 @@ class OrderRefundController extends Controller
                 break;
             case 'processed':
                 // $orderRefund->processed_at = now();
-                // Send and store push notification
-                 app(FirebaseService::class)->sendAndStoreNotification(
-                    $order->client->id,
-                    $order->client->fcm_token,
-                    'Order Refund Status Changed',
-                    'Your order refund has been processed successfully.',
-                    ['order_id' => $order->id,
-                    'order_number'=>$order->order_number,
-                    'status'=>$orderRefund->status]
-                );
+               
                 $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'processed']);
                 break;
             case 'delivering':
                 // $orderRefund->processed_at = now();
                 $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'delivering']);
-                // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
-                    $order->client->id,
-                    $order->client->fcm_token,
-                    'Order Refund Status Changed',
-                    'Your order refund is delivering.',
-                    ['order_id' => $order->id,
-                    'order_number'=>$order->order_number,
-                    'status'=>$orderRefund->status]
-                );
+               
                 break;
             case 'completed':
-                // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
-                    $order->client->id,
-                    $order->client->fcm_token,
-                    'Order Refund Status Changed',
-                    'Your order refund has been returned to store successfully.',
-                    ['order_id' => $order->id,
-                    'order_number'=>$order->order_number,
-                    'status'=>$orderRefund->status]
-                );
+                
                 $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'completed']);
                 break;
             default:
@@ -244,61 +217,97 @@ class OrderRefundController extends Controller
 
 
     public function store(Request $request)
-{
-    if (!auth()->user()->can('orders_refund.create')) {
-        abort(403, 'Unauthorized action.');
-    }
-    $data = $request->validate([
-        'order_id' => 'required|exists:orders,id',
-        'items' => 'required|array',
-        'items.*.id' => 'required|exists:order_items,id',
-        'items.*.refund_reason' => 'required|string',
-        'items.*.refund_amount' => 'required|numeric|min:0',
-        'items.*.refund_status' => 'required|in:requested,processed,approved,rejected',
-        'items.*.refund_admin_response' => 'nullable|string',
-    ]);
-    $order = Order::find($request->order_id);
+    {
+        // Authorization
+        if (!auth()->user()->can('orders_refund.create')) {
+            abort(403, 'Unauthorized action.');
+        }
 
-    foreach ($data['items'] as $item) {
-        $orderRefund = OrderRefund::create([
+        // Validate input
+        $data = $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:order_items,id',
+            'items.*.refund_reason' => 'required|string',
+            'items.*.refund_amount' => 'required|numeric|min:0',
+            'items.*.refund_status' => 'required|in:requested,processed,approved,rejected',
+            'items.*.refund_admin_response' => 'nullable|string',
+        ]);
+
+        $order = Order::findOrFail($data['order_id']);
+
+        foreach ($data['items'] as $item) {
+            // Create refund entry
+            $orderRefund = $this->createRefund($order, $item);
+
+            // Handle status-specific logic
+            $this->handleRefundStatus($orderRefund, $order, $data['items']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Refund processed successfully.'),
+        ]);
+    }
+
+    private function createRefund($order, $item)
+    {
+        return OrderRefund::create([
             'reason' => $item['refund_reason'] ?? null,
             'admin_response' => $item['refund_admin_response'] ?? null,
             'amount' => $item['refund_amount'] ?? 0,
             'status' => $item['refund_status'],
-            'order_item_id'=>$item['id'],
-            'order_id'=>$order->id,
-            'client_id'=>$order->client->id
+            'order_item_id' => $item['id'],
+            'order_id' => $order->id,
+            'client_id' => $order->client->id,
         ]);
-
-        switch ($orderRefund->status) {
-            case 'requested':
-                $orderRefund->requested_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'add_order_refund', null, ['order_number' => $order->number, 'status' => 'requested']);
-                break;
-            case 'processed':
-                $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'add_order_refund', null, 
-                ['order_number' => $order->number, 'status' => 'processed']);
-                break;
-            case 'approved':
-                $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'add_order_refund', null, ['order_number' => $order->number, 'status' => 'approved']);
-                $this->orderService->storeRefundOrder($order,$data['items']);
-                break;
-            case 'rejected':
-                $this->moduleUtil->activityLog($orderRefund, 'add_order_refund', null, ['order_number' => $order->number, 'status' => 'rejected']);
-                break;
-            default:
-                throw new \InvalidArgumentException("Invalid status: $orderRefund->status");
-            }
-       
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => __('Refund processed successfully.'),
-    ]);
-}
+    private function handleRefundStatus($orderRefund, $order, $items)
+    {
+        switch ($orderRefund->status) {
+            case 'requested':
+                $orderRefund->update(['requested_at' => now()]);
+                $this->logAndNotify($orderRefund, $order, 'requested');
+                break;
+
+            case 'processed':
+                $orderRefund->update(['processed_at' => now()]);
+                $this->logAndNotify($orderRefund, $order, 'processed');
+                break;
+
+            case 'approved':
+                $orderRefund->update(['processed_at' => now()]);
+                $this->logAndNotify($orderRefund, $order, 'approved');
+                $this->orderService->storeRefundOrder($order, $items);
+                break;
+
+            case 'rejected':
+                $this->logAndNotify($orderRefund, $order, 'rejected');
+                break;
+
+            default:
+                throw new \InvalidArgumentException("Invalid status: $orderRefund->status");
+        }
+    }
+
+    private function logAndNotify($orderRefund, $order, $status)
+    {
+        // Log activity
+        $this->moduleUtil->activityLog($orderRefund, 'add_order_refund', null, [
+            'order_number' => $order->number,
+            'status' => $status
+        ]);
+
+        // Fetch admins and business users
+        $admins = $this->moduleUtil->get_admins($order->client->contact->business_id);
+        $users = $this->moduleUtil->getBusinessUsers($order->client->contact->business_id, $order);
+
+        // Send notifications
+        \Notification::send($admins, new MakeRefundNotification($orderRefund));
+        \Notification::send($users, new MakeRefundNotification($orderRefund));
+    }
+
 
 
 
@@ -366,7 +375,7 @@ class OrderRefundController extends Controller
 
                 if ($input['admin_response']) {
                     // Send and store push notification
-                    app(FirebaseService::class)->sendAndStoreNotification(
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Cancellation Admin Response',
@@ -399,18 +408,18 @@ class OrderRefundController extends Controller
     public function getRefundDetails($orderId)
     {
         $activityLogs = Activity::with(['subject'])
-        ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
-        ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
-        ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
-        ->leftJoin('contacts as contact', function ($join) {
-            $join->on('contact.id', '=', 'c.contact_id')
-                 ->orOn('contact.id', '=', 'd.contact_id');
-        })
-        ->where('subject_type', 'App\Models\OrderRefund')
-        ->where('subject_id', $orderId)
-        ->select(
-            'activity_log.*',
-            DB::raw("
+            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
+            ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
+            ->where('subject_type', 'App\Models\OrderRefund')
+            ->where('subject_id', $orderId)
+            ->select(
+                'activity_log.*',
+                DB::raw("
                 CASE 
                     WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
                     WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
@@ -418,18 +427,18 @@ class OrderRefundController extends Controller
                     ELSE 'Unknown'
                 END as created_by
             ")
-        )
-        ->get();
-    
+            )
+            ->get();
+
 
         // Fetch the order along with related data
         $orderRefund = OrderRefund::
-        with([
-            'order.client.contact',
-            'order.businessLocation',
-            'order.orderItems',
-            'order.delivery'
-        ])->find($orderId);
+            with([
+                'order.client.contact',
+                'order.businessLocation',
+                'order.orderItems',
+                'order.delivery'
+            ])->find($orderId);
 
         if ($orderRefund) {
             // Iterate through each order item and check for refund details

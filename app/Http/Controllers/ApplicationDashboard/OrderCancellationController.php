@@ -7,7 +7,7 @@ use App\Models\Order;
 use App\Models\OrderCancellation;
 use App\Models\OrderRefund;
 use App\Models\OrderTracking;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -233,7 +233,7 @@ class OrderCancellationController extends Controller
 
                 if ($input['admin_response']) {
                     // Send and store push notification
-                    app(FirebaseService::class)->sendAndStoreNotification(
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Cancellation Admin Response',

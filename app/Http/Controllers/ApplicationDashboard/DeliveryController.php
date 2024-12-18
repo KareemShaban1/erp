@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Utils\ModuleUtil;
 use Datatables;
 use Illuminate\Http\Request;
+use App\Notifications\FirebaseDeliveryService;
 
 class DeliveryController extends Controller
 {
@@ -69,7 +70,7 @@ class DeliveryController extends Controller
         $delivery->save();
 
         // Insert a record into the delivery_orders table to log this assignment
-        DeliveryOrder::create([
+        $delivery_order = DeliveryOrder::create([
             'delivery_id' => $deliveryId,
             'order_id' => $orderId,
             'status' => 'assigned', // The status could be 'assigned' initially
@@ -78,6 +79,16 @@ class DeliveryController extends Controller
 
         $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number,'status'=>'delivery_assigned', 'delivery_name'=> $delivery->contact->name]);
 
+        // Send and store push notification
+        app(FirebaseDeliveryService::class)->sendAndStoreNotification(
+            $delivery_order->delivery->id,
+            $delivery_order->delivery->fcm_token,
+            'Order Assigned to you',
+            'There is an order assigned to you.',
+            [
+                'order_id' => $order->id
+            ]
+        );
 
         return response()->json([
             'success' => true,

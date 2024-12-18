@@ -10,7 +10,7 @@ use Kreait\Firebase\Exception\Messaging\MessagingException;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Exception\MessagingException as ExceptionMessagingException;
 
-class FirebaseService
+class FirebaseClientService
 {
     protected $messaging;
 

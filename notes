@@ -44,3 +44,16 @@
    cases of sell_return: 
    - change refund order status to completed
    - add
+
+
+
+   = send notification to client in mobile 
+   - when admin/user change client status to active and inactive
+   - when delivery change order status to shipped and completed
+   - when admin/user response in client order cancellation request
+   - when admin/user change order status to processing , shipped , completed
+   - when admin/user change refund order status to processing , shipped , completed
+   - when admin/user change transfer order status to processing , shipped , completed
+   - 
+
+   = send notification to delivery in mobile 

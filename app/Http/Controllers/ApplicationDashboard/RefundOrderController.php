@@ -12,7 +12,7 @@ use App\Models\OrderRefund;
 use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\TransactionSellLine;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
 use Carbon\Carbon;
@@ -250,7 +250,7 @@ class RefundOrderController extends Controller
             case 'processing':
                 $orderTracking->processing_at = now();
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
@@ -270,7 +270,7 @@ class RefundOrderController extends Controller
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
@@ -300,7 +300,7 @@ class RefundOrderController extends Controller
             case 'completed':
                 $orderTracking->completed_at = now();
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',

@@ -38,7 +38,7 @@
 <script>
 
 
-    //Brand table
+    //suggestionProducts table
     var suggestionProducts_table = $('#suggestionProducts_table').DataTable({
         processing: true,
         serverSide: true,
@@ -54,26 +54,27 @@
             { data: 'id', name: 'id' },
             { data: 'name', name: 'name' },
             { data: 'client_name', name: 'client_name' },
-            { data: 'created_at', name: 'created_at',
+            {
+                data: 'created_at', name: 'created_at',
                 render: function (data) {
-                        // Format the date using JavaScript
-                        if (data) {
-                            const date = new Date(data);
-                            return date.toLocaleString(); // Adjust format as needed
-                        }
-                        return '';
+                    // Format the date using JavaScript
+                    if (data) {
+                        const date = new Date(data);
+                        return date.toLocaleString(); // Adjust format as needed
                     }
-             },
+                    return '';
+                }
+            },
         ]
     });
 
 
-    
 
 
-   
-  
-   
+
+
+
+
 
 </script>
 @endsection

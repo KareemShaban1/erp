@@ -205,9 +205,7 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        }
-
-        elseif (
+        } elseif (
             $notification->type ==
             'App\Notifications\OrderCancellationCreatedNotification'
         ) {
@@ -225,9 +223,7 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        }
-
-        elseif (
+        } elseif (
             $notification->type ==
             'App\Notifications\OrderRefundCreatedNotification'
         ) {
@@ -245,9 +241,7 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        }
-
-        elseif (
+        } elseif (
             $notification->type ==
             'App\Notifications\OrderTransferCreatedNotification'
         ) {
@@ -265,9 +259,29 @@ class DataController extends Controller
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans()
             ];
-        }
-        
-        elseif (
+        } elseif (
+            $notification->type ==
+            'App\Notifications\MakeRefundNotification'
+        ) {
+            $data = $notification->data;
+
+            $msg = __(
+                'lang_v1.new_order_refund_notification',
+                [
+                    'client' => $data['client'],
+                    'refund_status' => $data['refund_status'],
+                    'order_number' => $data['order_number']
+                ]
+            );
+
+            $notification_data = [
+                'msg' => $msg,
+                'icon_class' => 'fa fa-cube bg-green',
+                'link' => action('ApplicationDashboard\OrderRefundController@index', ['status' => 'all']),
+                'read_at' => $notification->read_at,
+                'created_at' => $notification->created_at->diffForHumans()
+            ];
+        } elseif (
             $notification->type ==
             'App\Notifications\ClientCreatedNotification'
         ) {

@@ -10,7 +10,7 @@ use App\Models\DeliveryOrder;
 use App\Models\Order;
 use App\Models\OrderRefund;
 use App\Models\OrderTracking;
-use App\Services\FirebaseService;
+use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -299,7 +299,7 @@ class OrderController extends Controller
                     $order->client->fcm_token,
                 ]);
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
@@ -314,7 +314,7 @@ class OrderController extends Controller
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
@@ -334,7 +334,7 @@ class OrderController extends Controller
             case 'completed':
                 $orderTracking->completed_at = now();
                 // Send and store push notification
-                app(FirebaseService::class)->sendAndStoreNotification(
+                app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',

@@ -638,7 +638,7 @@ class OrderService extends BaseService
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
             $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id,$newRefundOrder);
 
-            \Notification::send($admins, new OrderRefundCreatedNotification($order));
+            \Notification::send($admins, new OrderRefundCreatedNotification($newRefundOrder));
             \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
 
             return [
