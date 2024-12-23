@@ -72,7 +72,7 @@ class OrderService extends BaseService
 
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
-            ->where('order_type','order');
+            ->where('order_type','order')->latest();
 
             $query = $this->withTrashed($query, $request);
 

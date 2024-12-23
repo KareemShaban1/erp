@@ -71,7 +71,7 @@ class DataController extends Controller
             Menu::modify(
                 'admin-sidebar-menu',
                 function ($menu) use ($is_admin) {
-                    // $menu->url(action('\Modules\Crm\Http\Controllers\CrmDashboardController@index'), __('crm::lang.crm'), ['icon' => 'fas fa fa-broadcast-tower', 'active' => request()->segment(1) == 'crm' || request()->get('type') == 'life_stage' || request()->get('type') == 'source'])->order(86);
+                    $menu->url(action('\Modules\Crm\Http\Controllers\CrmDashboardController@index'), __('crm::lang.crm'), ['icon' => 'fas fa fa-broadcast-tower', 'active' => request()->segment(1) == 'crm' || request()->get('type') == 'life_stage' || request()->get('type') == 'source'])->order(86);
                 }
             );
         }

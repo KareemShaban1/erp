@@ -36,9 +36,9 @@ class ProductService extends BaseService
                 ->latest();
 
                   // Exclude products with negative stock
-        $query->whereHas('variations.variation_location_details', function ($q) {
-            $q->havingRaw('SUM(qty_available) >= 0');
-        });
+        // $query->whereHas('variations.variation_location_details', function ($q) {
+        //     $q->havingRaw('SUM(qty_available) >= 0');
+        // });
     
             // Check if a category_id is passed and apply the filter
             if (!empty($category_id)) {

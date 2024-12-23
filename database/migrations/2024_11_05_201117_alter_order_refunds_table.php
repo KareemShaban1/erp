@@ -13,8 +13,8 @@ class AlterOrderRefundsTable extends Migration
     public function up()
     {
         Schema::table('order_refunds', function (Blueprint $table) {
-            // $table->dropForeign(['product_id']);
-            // $table->dropForeign(['variation_id']);
+            $table->dropForeign(['product_id']);
+            $table->dropForeign(['variation_id']);
             $table->dropColumn(['product_id', 'variation_id']);
 
             // Add the new order_item_id column with foreign key constraint

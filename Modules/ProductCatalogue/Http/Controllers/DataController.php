@@ -35,12 +35,12 @@ class DataController extends Controller
 
         if ($is_productcatalogue_enabled) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
-                // $menu->url(
-                //         action('\Modules\ProductCatalogue\Http\Controllers\ProductCatalogueController@generateQr'),
-                //         __('productcatalogue::lang.catalogue_qr'),
-                //         ['icon' => 'fa fas fa-qrcode', 'active' => request()->segment(1) == 'product-catalogue', 'style' => config('app.env') == 'demo' ? 'background-color: #ff851b;' : '']
-                //     )
-                // ->order(95);
+                $menu->url(
+                        action('\Modules\ProductCatalogue\Http\Controllers\ProductCatalogueController@generateQr'),
+                        __('productcatalogue::lang.catalogue_qr'),
+                        ['icon' => 'fa fas fa-qrcode', 'active' => request()->segment(1) == 'product-catalogue', 'style' => config('app.env') == 'demo' ? 'background-color: #ff851b;' : '']
+                    )
+                ->order(95);
             });
         }
     }

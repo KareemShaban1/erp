@@ -42,7 +42,7 @@ Route::post('/products/get_product_variation_row', 'ProductController@getProduct
 Route::post('/products/get_variation_template', 'ProductController@getVariationTemplate');
 Route::get('/products/get_variation_value_row', 'ProductController@getVariationValueRow');
 Route::post('/products/check_product_sku', 'ProductController@checkProductSku');
-Route::get('/products/quick_add', 'ProductController@quickAdd');
+Route::get('/products/quick_add_product', 'ProductController@quickAddProduct');
 Route::post('/products/save_quick_product', 'ProductController@saveQuickProduct');
 Route::get('/products/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
 Route::post('/products/toggle-woocommerce-sync', 'ProductController@toggleWooCommerceSync');

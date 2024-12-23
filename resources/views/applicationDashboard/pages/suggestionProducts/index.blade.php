@@ -36,7 +36,7 @@
 @stop
 @section('javascript')
 <script>
-
+    $(document).ready(function () {
 
     //suggestionProducts table
     var suggestionProducts_table = $('#suggestionProducts_table').DataTable({
@@ -69,10 +69,7 @@
     });
 
 
-
-
-
-
+    });
 
 
 

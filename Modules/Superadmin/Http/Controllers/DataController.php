@@ -119,14 +119,14 @@ class DataController extends Controller
         }
 
         // if (auth()->user()->can('superadmin.access_package_subscriptions') && auth()->user()->can('business_settings.access')) {
-        //     $menu = Menu::instance('admin-sidebar-menu');
-        //     $menu->whereTitle(__('business.settings'), function ($sub) {
-        //         $sub->url(
-        //             action('\Modules\Superadmin\Http\Controllers\SubscriptionController@index'),
-        //             __('superadmin::lang.subscription'),
-        //             ['icon' => 'fa fas fa-sync', 'active' => request()->segment(1) == 'subscription']
-        //         );
-        //     });
+            // $menu = Menu::instance('admin-sidebar-menu');
+            // $menu->whereTitle(__('business.settings'), function ($sub) {
+            //     $sub->url(
+            //         action('\Modules\Superadmin\Http\Controllers\SubscriptionController@index'),
+            //         __('superadmin::lang.subscription'),
+            //         ['icon' => 'fa fas fa-sync', 'active' => request()->segment(1) == 'subscription']
+            //     );
+            // });
         // }
     }
 

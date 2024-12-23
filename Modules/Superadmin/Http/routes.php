@@ -2,7 +2,11 @@
 
 Route::get('/pricing', 'Modules\Superadmin\Http\Controllers\PricingController@index')->name('pricing');
 
-Route::group(['middleware' => ['web', 'auth', 'language', 'AdminSidebarMenu', 'superadmin'], 'prefix' => 'superadmin', 'namespace' => 'Modules\Superadmin\Http\Controllers'], function () {
+Route::group(['middleware' => [
+    'web', 'auth', 'language', 'AdminSidebarMenu', 
+    // 'superadmin'
+], 
+    'prefix' => 'superadmin', 'namespace' => 'Modules\Superadmin\Http\Controllers'], function () {
     Route::get('/install', 'InstallController@index');
     Route::get('/install/update', 'InstallController@update');
     Route::get('/install/uninstall', 'InstallController@uninstall');

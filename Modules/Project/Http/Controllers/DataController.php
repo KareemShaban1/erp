@@ -120,20 +120,20 @@ class DataController extends Controller
         
         $is_project_enabled = (boolean)$module_util->hasThePermissionInSubscription($business_id, 'project_module');
 
-        // if ($is_project_enabled) {
-        //     Menu::modify(
-        //         'admin-sidebar-menu',
-        //         function ($menu) use ($is_admin) {
-        //             $menu->url(
-        //                 action('\Modules\Project\Http\Controllers\ProjectController@index') . '?project_view=list_view',
-        //                 __('project::lang.project'),
-        //                 ['icon' => 'fa fa-project-diagram', 'active' => 
-        //                 request()->segment(1) == 'project' || request()->get('type') == 'project', 'style' => config('app.env') == 'demo' ? 'background-color: #e4186d !important;' : '']
-        //             )
-        //             ->order(86);
-        //         }
-        //     );
-        // }
+        if ($is_project_enabled) {
+            Menu::modify(
+                'admin-sidebar-menu',
+                function ($menu) use ($is_admin) {
+                    $menu->url(
+                        action('\Modules\Project\Http\Controllers\ProjectController@index') . '?project_view=list_view',
+                        __('project::lang.project'),
+                        ['icon' => 'fa fa-project-diagram', 'active' => 
+                        request()->segment(1) == 'project' || request()->get('type') == 'project', 'style' => config('app.env') == 'demo' ? 'background-color: #e4186d !important;' : '']
+                    )
+                    ->order(86);
+                }
+            );
+        }
     }
 
     /**

@@ -29,7 +29,7 @@ class ApplicationSidebarMenu
 
             $is_admin = auth()->user()->hasRole('Admin#' . session('business.id')) ? true : false;
             //Home
-            $menu->url(action('ApplicationDashboard\HomeController@index'), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
+            // $menu->url(action('ApplicationDashboard\HomeController@index'), __('home.home'), ['icon' => 'fa fas fa-tachometer-alt', 'active' => request()->segment(1) == 'home'])->order(5);
 
 
             //Products dropdown

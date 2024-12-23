@@ -27,6 +27,10 @@ class EventServiceProvider extends ServiceProvider
         \App\Events\TransactionPaymentDeleted::class => [
             \App\Listeners\DeleteAccountTransaction::class,
         ],
+
+        \Illuminate\Auth\Events\Authenticated::class => [
+            \App\Listeners\RefreshSessionData::class,
+        ],
     ];
 
     /**

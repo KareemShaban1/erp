@@ -90,6 +90,7 @@ class SubscriptionController extends BaseController
         try {
             DB::beginTransaction();
 
+
             $business_id = request()->session()->get('user.business_id');
 
             $package = Package::active()->find($package_id);

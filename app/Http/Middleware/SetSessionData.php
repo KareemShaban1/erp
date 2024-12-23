@@ -19,6 +19,8 @@ class SetSessionData
      */
     public function handle($request, Closure $next)
     {
+
+
         if (!$request->session()->has('user')) {
             $business_util = new BusinessUtil;
 

@@ -19,7 +19,6 @@ use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\FcmController;
 use App\Http\Controllers\Api\ClientNotificationController;
 use App\Http\Controllers\Api\DeliveryNotificationController;
-use App\Http\Controllers\Api\PushNotificationController;
 use App\Http\Controllers\Api\SuggestionProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,9 +80,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
           Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
   
           Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
-      
-          Route::post('send-push-notification', [PushNotificationController::class, 'sendPushNotification']);
-  
+        
           Route::get('client/delete-account', [AuthController::class, 'deleteClientAccount']);
 
           Route::get('client/account-info', [AuthController::class, 'getClientAccount']);

@@ -157,8 +157,8 @@ class HomeController extends Controller
 
             $month_number = date('m', $date);
 
-            $labels[] = \Carbon::createFromFormat('m-Y', $month_year)
-                            ->format('M-Y');
+            // $labels[] = \Carbon::createFromFormat('m-Y', $month_year)
+            //                 ->format('M-Y');
             $date = strtotime('+1 month', $date);
 
             if (!empty($sells_this_fy[$month_year])) {

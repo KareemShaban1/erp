@@ -175,12 +175,12 @@ class BusinessController extends Controller
             $business_details['fy_start_month'] = 1;
 
             $business_location = $request->only(['name', 'country', 'state', 'city', 'zip_code', 'landmark', 'website', 'mobile', 'alternate_number']);
-            
+             
             //Create the business
             $business_details['owner_id'] = $user->id;
-            if (!empty($business_details['start_date'])) {
-                $business_details['start_date'] = Carbon::createFromFormat(config('constants.default_date_format'), $business_details['start_date'])->toDateString();
-            }
+            // if (!empty($business_details['start_date'])) {
+            //     $business_details['start_date'] = Carbon::createFromFormat(config('constants.default_date_format'), $business_details['start_date'])->toDateString();
+            // }
             
             //upload logo
             $logo_name = $this->businessUtil->uploadFile($request, 'business_logo', 'business_logos', 'image');
