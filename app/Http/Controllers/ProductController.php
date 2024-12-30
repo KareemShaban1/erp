@@ -1604,7 +1604,7 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function quickAddProduct()
+    public function quickAdd()
     {
         
         if (!auth()->user()->can('product.create')) {
