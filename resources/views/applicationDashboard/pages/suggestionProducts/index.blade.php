@@ -21,6 +21,8 @@
                     <th>@lang('lang_v1.id')</th>
                     <th>@lang('lang_v1.suggest_name')</th>
                     <th>@lang('lang_v1.client')</th>
+                    <th>@lang('lang_v1.Client_Phone')</th>
+                    <th>@lang('lang_v1.Client_Location')</th>
                     <th>@lang('lang_v1.created_at')</th>
                 </tr>
             </thead>
@@ -54,6 +56,8 @@
             { data: 'id', name: 'id' },
             { data: 'name', name: 'name' },
             { data: 'client_name', name: 'client_name' },
+            { data: 'client_phone', name: 'client_phone' },
+            { data: 'client_location', name: 'client_location' },
             {
                 data: 'created_at', name: 'created_at',
                 render: function (data) {

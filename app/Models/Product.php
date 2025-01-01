@@ -178,7 +178,7 @@ class Product extends Model
      */
     public function scopeBusinessId($query)
     {
-        return $query->where('products.business_id', 273);
+        return $query->where('products.business_id', 1);
     }
 
     /**

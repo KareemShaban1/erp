@@ -1525,7 +1525,8 @@ return [
 "filter"=>"filter",
 "clear"=>"clear",
 "Client_Location"=>"فرع العميل",
-""=>"",
+"Client_Phone"=>"رقم العميل",
+
 "requested"=>"Requested",
 "processed"=>"Processed",
 "approved"=>"Approved",

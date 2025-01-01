@@ -97,8 +97,8 @@ class BannerController extends Controller
             'name' => 'required|string|max:255',
             'active' => 'boolean',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
-            'module_type'=>'required|string',
-            'module_id'=>'required',
+            'module_type'=>'nullable|string',
+            'module_id'=>'nullable',
         ]);
     
         try {
@@ -178,8 +178,8 @@ class BannerController extends Controller
             'name' => 'required|string|max:255',
             'active' => 'boolean',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Image validation
-            'module_type'=>'required|string',
-            'module_id'=>'required',
+            'module_type'=>'nullable|string',
+            'module_id'=>'nullable',
         ]);
     
         try {

@@ -30,13 +30,13 @@
       <!-- Module Type -->
       <div class="form-group">
         {!! Form::label('module_type', __('lang_v1.module_type') . ':*') !!}
-        {!! Form::select('module_type', [''=>'select type','product' => 'Product', 'category' => 'Category'], null, ['class' => 'form-control', 'id' => 'module_type', 'required']); !!}
+        {!! Form::select('module_type', [''=>'select type','product' => 'Product', 'category' => 'Category'], null, ['class' => 'form-control', 'id' => 'module_type']); !!}
       </div>
 
       <!-- Module ID (Dynamic Select) -->
       <div class="form-group" id="module_id_container" style="display: none;">
         {!! Form::label('module_id', __('lang_v1.module_id') . ':*') !!}
-        {!! Form::select('module_id', [], null, ['class' => 'form-control', 'id' => 'module_id', 'required']); !!}
+        {!! Form::select('module_id', [], null, ['class' => 'form-control', 'id' => 'module_id']); !!}
       </div>
 
 

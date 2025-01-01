@@ -22,7 +22,7 @@ class BusinessLocationService extends BaseService
 
         try {
 
-            $query = BusinessLocation::where('business_id',273)->active();
+            $query = BusinessLocation::where('business_id',1)->active();
 
             $query = $this->withTrashed($query, $request);
 

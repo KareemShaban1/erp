@@ -30,7 +30,7 @@
            <!-- Module Type -->
       <div class="form-group">
         {!! Form::label('module_type', __('lang_v1.module_type') . ':*') !!}
-        {!! Form::select('module_type', [''=>'select type','product' => 'Product', 'category' => 'Category'], $banner->module_type, ['class' => 'form-control', 'id' => 'module_type', 'required']); !!}
+        {!! Form::select('module_type', [''=>'select type','product' => 'Product', 'category' => 'Category'], $banner->module_type, ['class' => 'form-control', 'id' => 'module_type']); !!}
       </div>
 
       <!-- Module ID (Dynamic Select) -->
@@ -40,7 +40,6 @@
         'class' => 'form-control select2',
         'id' => 'module_id',
         'data-selected-id' => $banner->module_id ?? null,
-        'required',
     ]) !!}
 </div>
 

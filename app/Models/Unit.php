@@ -65,7 +65,7 @@ class Unit extends Model
      */
     public function scopeBusinessId($query)
     {
-        return $query->where('business_id', 273);
+        return $query->where('business_id', 1);
     }
 
 }
