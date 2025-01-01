@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Scopes\BusinessIdScope;
 use App\Traits\Filter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Product extends Model
 {
@@ -178,7 +179,14 @@ class Product extends Model
      */
     public function scopeBusinessId($query)
     {
+
         return $query->where('products.business_id', 1);
+    }
+
+    public function scopeAppBusinessId($query)
+    {
+        $client = Client::find(Auth::user()->id);
+        return $query->where('products.business_id', $client->contact->business_id);
     }
 
     /**

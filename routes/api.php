@@ -35,15 +35,11 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('categories', [CategoryController::class, 'index']);
-Route::patch('categories/{id}/restore', [CategoryController::class , 'restore']);
-Route::delete('categories/{id}/force-delete', [CategoryController::class , 'forceDelete']);
+Route::patch('categories/{id}/restore', [CategoryController::class, 'restore']);
+Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete']);
 
 
 Route::get('units', [UnitController::class, 'index']);
-
-Route::get('products/{category_id?}', [ProductController::class, 'index']);
-Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
-Route::get('product_details/{product_id}', [ProductController::class, 'show']);
 
 Route::get('warranties', [WarrantyController::class, 'index']);
 
@@ -51,106 +47,112 @@ Route::get('business_locations', [BusinessLocationController::class, 'index']);
 
 
 Route::middleware('auth:sanctum-client')->group(function () {
-          Route::get('cart_get_items', [CartController::class, 'index']);
-          Route::post('add_to_cart', [CartController::class, 'store']);
-          Route::post('update_cart/{id}', [CartController::class, 'update']);
-          Route::delete('delete_cart/{id}', [CartController::class, 'destroy']);
-          Route::delete('clear_cart', [CartController::class, 'clear']);
 
-          Route::get('brands', [BrandController::class, 'index']);
-
-          Route::get('orders', [OrderController::class, 'index']);
-          Route::post('orders', [OrderController::class, 'store']);
-          Route::post('orders/update/{id}', [OrderController::class, 'update']);
-          Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
-          Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
-  
-          Route::get('clients', [ClientController::class, 'index']);
-          Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
-      
-          Route::get('orders-cancellation', [OrderCancellationController::class, 'index']);
-          Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
-          Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
-  
-          Route::get('orders-refunds', [OrderRefundController::class, 'index']);
-          Route::post('orders-refunds', [OrderRefundController::class, 'store']);
-  
-          Route::get('sendNotification', [ClientNotificationController::class, 'sendNotification']);
-  
-          Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
-  
-          Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
-        
-          Route::get('client/delete-account', [AuthController::class, 'deleteClientAccount']);
-
-          Route::get('client/account-info', [AuthController::class, 'getClientAccount']);
-
-          Route::post('client/update-password', [AuthController::class, 'updateClientPassword']);
+    Route::get('products/{category_id?}', [ProductController::class, 'index']);
+    Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
+    Route::get('product_details/{product_id}', [ProductController::class, 'show']);
 
 
-          Route::get('client/all-notifications', [ClientNotificationController::class, 'getClientNotifications']);
+    Route::get('cart_get_items', [CartController::class, 'index']);
+    Route::post('add_to_cart', [CartController::class, 'store']);
+    Route::post('update_cart/{id}', [CartController::class, 'update']);
+    Route::delete('delete_cart/{id}', [CartController::class, 'destroy']);
+    Route::delete('clear_cart', [CartController::class, 'clear']);
 
-          Route::get('client/get-un-read-notifications', [ClientNotificationController::class, 'getUnreadNotificationsCount']);
+    Route::get('brands', [BrandController::class, 'index']);
 
-          Route::post('client/mark-notification-as-read/{id}', [ClientNotificationController::class, 'markNotificationAsRead']);
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::post('orders', [OrderController::class, 'store']);
+    Route::post('orders/update/{id}', [OrderController::class, 'update']);
+    Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
+    Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
 
-          Route::post('client/mark-all-notifications-as-read', [ClientNotificationController::class, 'markAllNotificationsAsRead']);
-        
+    Route::get('clients', [ClientController::class, 'index']);
+    Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
 
-          Route::get('discounts', [DiscountController::class, 'listDiscounts']);
-          Route::get('flash_sales', [DiscountController::class, 'listFlashSales']);
-      
-         Route::post('suggestionProducts', [SuggestionProductController::class, 'store']);
+    Route::get('orders-cancellation', [OrderCancellationController::class, 'index']);
+    Route::post('orders-cancellation', [OrderCancellationController::class, 'store']);
+    Route::get('getAuthClientOrderCancellations', [OrderCancellationController::class, 'getAuthClientOrderCancellations']);
 
-      
+    Route::get('orders-refunds', [OrderRefundController::class, 'index']);
+    Route::post('orders-refunds', [OrderRefundController::class, 'store']);
 
-          //   getClientNotifications
-      });
-    Route::middleware('auth:sanctum-delivery')->group(function () {
-        Route::get('getNotAssignedOrders/{orderType}', [DeliveryController::class, 'getNotAssignedOrders']);
+    Route::get('sendNotification', [ClientNotificationController::class, 'sendNotification']);
 
-        // getDeliveryOrders
-        Route::get('getDeliveryOrders/{status}', [DeliveryController::class, 'getDeliveryOrders']);
+    Route::put('update-device-token', [FcmController::class, 'updateDeviceToken']);
 
-        Route::get('getAssignedOrders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
-        Route::post('assignDelivery', [DeliveryController::class, 'assignDelivery']);
+    Route::post('send-fcm-notification', [FcmController::class, 'sendFcmNotification']);
 
-        Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
+    Route::get('client/delete-account', [AuthController::class, 'deleteClientAccount']);
 
-        Route::get('delivery/delete-account', [AuthController::class, 'deleteClientAccount']);
+    Route::get('client/account-info', [AuthController::class, 'getClientAccount']);
 
-        Route::get('delivery/account-info', [AuthController::class, 'getDeliveryAccount']);
-
-        Route::get('delivery/getData', [DeliveryController::class, 'getDeliveryData']);
-
-        Route::get('delivery/show', [DeliveryController::class, 'showData']);
-
-
-        Route::post('delivery/changeDeliveryStatus', [DeliveryController::class, 'changeDeliveryStatus']);
-
-        Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
-
-        Route::get('delivery/all-notifications', [DeliveryNotificationController::class, 'getDeliveryNotifications']);
-
-        Route::get('delivery/get-un-read-notifications', [DeliveryNotificationController::class, 'getUnreadNotificationsCount']);
-
-        Route::post('delivery/mark-notification-as-read/{id}', [DeliveryNotificationController::class, 'markNotificationAsRead']);
-
-        Route::post('delivery/mark-all-notifications-as-read', [DeliveryNotificationController::class, 'markAllNotificationsAsRead']);
-
-    });
-
-    Route::get('banners', [BannerController::class, 'index']);
+    Route::post('client/update-password', [AuthController::class, 'updateClientPassword']);
 
 
-    Route::get('orders/{id}', [OrderController::class, 'show']);
+    Route::get('client/all-notifications', [ClientNotificationController::class, 'getClientNotifications']);
 
-    Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
+    Route::get('client/get-un-read-notifications', [ClientNotificationController::class, 'getUnreadNotificationsCount']);
 
-    Route::post('client/register', [AuthController::class, 'clientRegister']);
-    Route::post('client/login', [AuthController::class, 'clientLogin']);
+    Route::post('client/mark-notification-as-read/{id}', [ClientNotificationController::class, 'markNotificationAsRead']);
 
-    Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
-    // sendNotification
+    Route::post('client/mark-all-notifications-as-read', [ClientNotificationController::class, 'markAllNotificationsAsRead']);
 
-    Route::post('user/login', [AuthController::class, 'userLogin']);
+
+    Route::get('discounts', [DiscountController::class, 'listDiscounts']);
+    Route::get('flash_sales', [DiscountController::class, 'listFlashSales']);
+
+    Route::post('suggestionProducts', [SuggestionProductController::class, 'store']);
+
+
+
+    //   getClientNotifications
+});
+Route::middleware('auth:sanctum-delivery')->group(function () {
+    Route::get('getNotAssignedOrders/{orderType}', [DeliveryController::class, 'getNotAssignedOrders']);
+
+    // getDeliveryOrders
+    Route::get('getDeliveryOrders/{status}', [DeliveryController::class, 'getDeliveryOrders']);
+
+    Route::get('getAssignedOrders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
+    Route::post('assignDelivery', [DeliveryController::class, 'assignDelivery']);
+
+    Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
+
+    Route::get('delivery/delete-account', [AuthController::class, 'deleteClientAccount']);
+
+    Route::get('delivery/account-info', [AuthController::class, 'getDeliveryAccount']);
+
+    Route::get('delivery/getData', [DeliveryController::class, 'getDeliveryData']);
+
+    Route::get('delivery/show', [DeliveryController::class, 'showData']);
+
+
+    Route::post('delivery/changeDeliveryStatus', [DeliveryController::class, 'changeDeliveryStatus']);
+
+    Route::post('delivery/update-password', [AuthController::class, 'updateDeliveryPassword']);
+
+    Route::get('delivery/all-notifications', [DeliveryNotificationController::class, 'getDeliveryNotifications']);
+
+    Route::get('delivery/get-un-read-notifications', [DeliveryNotificationController::class, 'getUnreadNotificationsCount']);
+
+    Route::post('delivery/mark-notification-as-read/{id}', [DeliveryNotificationController::class, 'markNotificationAsRead']);
+
+    Route::post('delivery/mark-all-notifications-as-read', [DeliveryNotificationController::class, 'markAllNotificationsAsRead']);
+
+});
+
+Route::get('banners', [BannerController::class, 'index']);
+
+
+Route::get('orders/{id}', [OrderController::class, 'show']);
+
+Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
+
+Route::post('client/register', [AuthController::class, 'clientRegister']);
+Route::post('client/login', [AuthController::class, 'clientLogin']);
+
+Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
+// sendNotification
+
+Route::post('user/login', [AuthController::class, 'userLogin']);
