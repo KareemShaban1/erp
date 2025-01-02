@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\TransactionPayment;
 use App\Services\FirebaseClientService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Activitylog\Models\Activity;
 
@@ -497,12 +498,25 @@ class ContactController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
 
+        
+        $startDate = request()->input('start_date');
+        $endDate = request()->input('end_date');
+
         $is_admin = $this->contactUtil->is_admin(auth()->user());
 
         $query = $this->contactUtil->getContactQuery($business_id, 'client');
 
         if (request()->has('has_sell_due')) {
             $query->havingRaw('(total_invoice - invoice_received) > 0');
+        }
+
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                $query->whereDate('created_at', $startDate);
+            } else {
+                $endDate = Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
         }
 
         if (request()->has('has_sell_return')) {

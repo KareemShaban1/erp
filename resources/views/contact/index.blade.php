@@ -18,9 +18,27 @@
 
 <!-- Main content -->
 <section class="content">
-    @component('components.filters', ['title' => __('report.filters'), 'class' => 'hide'])
+    @component('components.filters', ['title' => __('report.filters')])
     @if($type == 'customer' || $type == 'client' ||  $type == 'delivery')
+    <div class="row mb-3" style="display: flex;align-items: end;">
         <div class="col-md-3">
+            <label for="start_date">{{__('lang_v1.start_date')}}</label>
+            <input type="date" id="start_date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="end_date">{{__('lang_v1.end_date')}}</label>
+            <input type="date" id="end_date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="search">{{__('lang_v1.search')}}</label>
+            <input type="text" id="search" class="form-control" placeholder="Search by client name">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button id="contact_filter" class="btn btn-primary mr-2">{{__('lang_v1.filter')}}</button>
+            <button id="contact_clear_filters" class="btn btn-danger">{{__('lang_v1.clear')}}</button>
+        </div>
+    </div>
+        <!-- <div class="col-md-3">
             <div class="form-group">
                 <label>
                     {!! Form::checkbox('has_sell_due', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_due']); !!} <strong>@lang('lang_v1.sell_due')</strong>
@@ -33,7 +51,7 @@
                     {!! Form::checkbox('has_sell_return', 1, false, ['class' => 'input-icheck', 'id' => 'has_sell_return']); !!} <strong>@lang('lang_v1.sell_return')</strong>
                 </label>
             </div>
-        </div>
+        </div> -->
     @elseif($type == 'supplier')
         <div class="col-md-3">
             <div class="form-group">

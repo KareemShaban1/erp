@@ -8,9 +8,9 @@
 </section>
 
 <section class="content">
-@component('components.filters', ['title' => __('report.filters')])
+    @component('components.filters', ['title' => __('report.filters')])
 
-<div class="row mb-3" style="display: flex;align-items: end;">
+    <div class="row mb-3" style="display: flex;align-items: end;">
         <div class="col-md-3">
             <label for="start_date">{{__('lang_v1.start_date')}}</label>
             <input type="date" id="start_date" class="form-control">
@@ -31,7 +31,7 @@
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
-    
+
     <table class="table table-bordered" id="order_report_table">
         <thead>
             <tr>
@@ -50,48 +50,48 @@
 @section('javascript')
 
 <script>
-$(document).ready(function () {
-    const table = $('#order_report_table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{{ action("ApplicationDashboard\OrderReportsController@index") }}',
-            data: function (d) {
-                d.start_date = $('#start_date').val();
-                d.end_date = $('#end_date').val();
+    $(document).ready(function () {
+        const table = $('#order_report_table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '{{ action("ApplicationDashboard\OrderReportsController@index") }}',
+                data: function (d) {
+                    d.start_date = $('#start_date').val();
+                    d.end_date = $('#end_date').val();
+                },
+                dataSrc: function (json) {
+                    // Update grand totals dynamically
+                    $('#grand_total_amount').text(json.grand_total_amount);
+                    $('#grand_canceled_amount').text(json.grand_canceled_amount);
+                    return json.data;
+                }
             },
-            dataSrc: function (json) {
-                // Update grand totals dynamically
-                $('#grand_total_amount').text(json.grand_total_amount);
-                $('#grand_canceled_amount').text(json.grand_canceled_amount);
-                return json.data;
-            }
-        },
-        columns: [
-            { data: 'client_name', name: 'client_name' },
-            { data: 'client_location', name: 'client_location' },
-            { data: 'total_amount', name: 'total_amount' },
-            { data: 'canceled_amount', name: 'canceled_amount' },
-        ]
-    });
+            columns: [
+                { data: 'client_name', name: 'client_name' },
+                { data: 'client_location', name: 'client_location' },
+                { data: 'total_amount', name: 'total_amount' },
+                { data: 'canceled_amount', name: 'canceled_amount' },
+            ]
+        });
 
-     // Clear button click
-     $('#clear_filters').on('click', function () {
-        $('#start_date').val('');
-        $('#end_date').val('');
-        $('#search').val('');
-        table.search('').columns().search('').draw(); // Clear all filters
-    });
+        // Clear button click
+        $('#clear_filters').on('click', function () {
+            $('#start_date').val('');
+            $('#end_date').val('');
+            $('#search').val('');
+            table.search('').columns().search('').draw(); // Clear all filters
+        });
 
-    // Search on typing in search input
-    $('#search').on('keyup', function () {
-        table.search(this.value).draw();
-    });
+        // Search on typing in search input
+        $('#search').on('keyup', function () {
+            table.search(this.value).draw();
+        });
 
-    $('#filter, #clear_filters').on('click', function () {
-        table.ajax.reload();
+        $('#filter, #clear_filters').on('click', function () {
+            table.ajax.reload();
+        });
     });
-});
 
 </script>
 

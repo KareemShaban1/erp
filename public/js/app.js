@@ -491,6 +491,8 @@ $(document).ready(function() {
             "data": function ( d ) {
                 d.type = $('#contact_type').val();
                 d = __datatable_ajax_callback(d);
+                d.start_date = $('#start_date').val();
+                d.end_date = $('#end_date').val();
 
                 if ($('#has_sell_due').length > 0 && $('#has_sell_due').is(':checked')) {
                     d.has_sell_due = true;
@@ -535,6 +537,10 @@ $(document).ready(function() {
             $('.footer_contact_due').html(__currency_trans_from_en(total_due));
             $('.footer_contact_return_due').html(__currency_trans_from_en(total_return_due));
         }
+    });
+
+    $('#contact_filter, #contact_clear_filters').on('click', function () {
+        contact_table.ajax.reload();
     });
 
     $(document).on('ifChanged', '#has_sell_due, #has_sell_return, \
