@@ -56,7 +56,7 @@ class TransactionUtil extends Util
             'status' => $input['status'],
             'sub_status' => !empty($input['sub_status']) ? $input['sub_status'] : null,
             'contact_id' => $input['contact_id'],
-            'delivery_time'=>$input['time_deliver'] ?? null,
+            'delevery_time'=>$input['time_deliver'] ?? null,
             'customer_group_id' => !empty($input['customer_group_id']) ? $input['customer_group_id'] : null,
             'invoice_no' => $invoice_no,
             'ref_no' => '',
