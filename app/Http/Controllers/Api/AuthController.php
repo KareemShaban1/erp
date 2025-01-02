@@ -11,6 +11,7 @@ use App\Models\Delivery;
 use App\Models\User;
 use App\Notifications\ClientCreatedNotification;
 use App\Utils\ModuleUtil;
+use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,14 +21,18 @@ class AuthController extends Controller
 {
     //
     protected $moduleUtil;
+    protected $transactionUtil;
     /**
      * Constructor
      *
      * @param ProductUtils $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil) {
+    public function __construct(ModuleUtil $moduleUtil,         
+    TransactionUtil $transactionUtil
+    ) {
         $this->moduleUtil = $moduleUtil;
+        $this->transactionUtil = $transactionUtil;
     }
 
     public function userRegister(Request $request)
@@ -137,8 +142,8 @@ class AuthController extends Controller
         $business = Business::where('id', $business_location->business_id)->first();
 
          //Update reference count
-         $ref_count = $this->setAndGetReferenceCount('contacts', $business->id);
-         $contact_id = $this->generateReferenceNumber('contacts', $ref_count, $business->id);
+         $ref_count = $this->transactionUtil->setAndGetReferenceCount('contacts', $business->id);
+         $contact_id = $this->transactionUtil->generateReferenceNumber('contacts', $ref_count, $business->id);
 
 
         // business need to changed
