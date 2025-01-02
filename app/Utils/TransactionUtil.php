@@ -5524,7 +5524,7 @@ class TransactionUtil extends Util
         return $sell_return;     
     }
 
-    public function addSellReturnForRefund($input, $business_id, $user_id, $uf_number = true)
+    public function addSellReturnForRefund($input, $business_id, $user_id, $uf_number = true,$default_location_id)
     { 
 
         \Log::info('sell_return',[$input]);

@@ -136,12 +136,17 @@ class AuthController extends Controller
 
         $business = Business::where('id', $business_location->business_id)->first();
 
+         //Update reference count
+         $ref_count = $this->setAndGetReferenceCount('contacts', $business->id);
+         $contact_id = $this->generateReferenceNumber('contacts', $ref_count, $business->id);
+
 
         // business need to changed
         // Create contact information
         $contactInfo = Contact::create([
             'name' => $request->name,
             'mobile' => $request->mobile,
+            'contact_id'=>$contact_id,
             'created_by' => 1,
             'business_id' => $business->id ?? 1,
             'type' => 'client',

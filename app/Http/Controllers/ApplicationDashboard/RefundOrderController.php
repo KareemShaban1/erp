@@ -350,7 +350,7 @@ class RefundOrderController extends Controller
                     "tax_percent" => "0",
                 ];
 
-                $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1);
+                $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1,true,1 );
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
