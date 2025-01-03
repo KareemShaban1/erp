@@ -5524,7 +5524,7 @@ class TransactionUtil extends Util
         return $sell_return;     
     }
 
-    public function addSellReturnForRefund($input, $business_id, $user_id, $uf_number = true,$default_location_id)
+    public function addSellReturnForRefund($input, $business_id, $user_id, $uf_number = true)
     { 
 
         \Log::info('sell_return',[$input]);
@@ -5623,8 +5623,11 @@ class TransactionUtil extends Util
 
                 // Update quantity in variation location details
                 $productUtil->updateProductQuantity($sell_return->location_id, $sell_line->product_id, $sell_line->variation_id, $quantity, $quantity_before, null, false);
+            
+            
             }
         }
+        
 
         return $sell_return;     
     }

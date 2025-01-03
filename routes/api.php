@@ -34,7 +34,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('categories', [CategoryController::class, 'index']);
+Route::get('categories/{category_id?}', [CategoryController::class, 'index']);
+Route::get('parent_categories', [CategoryController::class, 'parentCategories']);
+
 Route::patch('categories/{id}/restore', [CategoryController::class, 'restore']);
 Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete']);
 

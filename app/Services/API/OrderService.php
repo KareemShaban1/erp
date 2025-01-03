@@ -237,6 +237,8 @@ class OrderService extends BaseService
 
             $business_id = $client->contact->business_id;
 
+            \Log::info('client',[$client]);
+
             $inputData = [
                 'location_id' => $fromLocationId,
                 'order_id' => $order->id,

@@ -24,9 +24,25 @@ class CategoryController extends Controller
     /**
      * Display a listing of the categories.
      */
-    public function index(Request $request)
+    public function index(Request $request, $category_id = null)
     {
-        $categories = $this->service->list($request);
+        $categories = $this->service->list($request, $category_id);
+
+        if ($categories instanceof JsonResponse) {
+            return $categories;
+        }
+
+        return $categories->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' =>  __('message.Categories have been retrieved successfully'),
+        ]);
+    }
+
+
+    public function parentCategories(Request $request)
+    {
+        $categories = $this->service->parentCategories($request);
 
         if ($categories instanceof JsonResponse) {
             return $categories;

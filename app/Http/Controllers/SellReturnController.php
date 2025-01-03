@@ -95,14 +95,15 @@ class SellReturnController extends Controller
                         DB::raw('SUM(TP.amount) as amount_paid')
                     );
 
+
             $permitted_locations = auth()->user()->permitted_locations();
             if ($permitted_locations != 'all') {
                 $sells->whereIn('transactions.location_id', $permitted_locations);
             }
 
-            if (!auth()->user()->can('access_sell_return') && auth()->user()->can('access_own_sell_return')) {
-                $sells->where('transactions.created_by', request()->session()->get('user.id'));
-            }
+            // if (!auth()->user()->can('access_sell_return') && auth()->user()->can('access_own_sell_return')) {
+            //     $sells->where('transactions.created_by', request()->session()->get('user.id'));
+            // }
 
             //Add condition for created_by,used in sales representative sales report
             if (request()->has('created_by')) {
@@ -124,12 +125,12 @@ class SellReturnController extends Controller
                 $customer_id = request()->customer_id;
                 $sells->where('contacts.id', $customer_id);
             }
-            if (!empty(request()->start_date) && !empty(request()->end_date)) {
-                $start = request()->start_date;
-                $end =  request()->end_date;
-                $sells->whereDate('transactions.transaction_date', '>=', $start)
-                        ->whereDate('transactions.transaction_date', '<=', $end);
-            }
+            // if (!empty(request()->start_date) && !empty(request()->end_date)) {
+            //     $start = request()->start_date;
+            //     $end =  request()->end_date;
+            //     $sells->whereDate('transactions.transaction_date', '>=', $start)
+            //             ->whereDate('transactions.transaction_date', '<=', $end);
+            // }
 
             $sells->groupBy('transactions.id');
 

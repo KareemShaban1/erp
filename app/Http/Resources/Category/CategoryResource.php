@@ -24,10 +24,13 @@ class CategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'sub_categories'=>$this->sub_categories,
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'description' => $this->description,
                     'image' => $this->image_url,
+                    'short_code'=>$this->short_code,
+                    'category_type'=>$this->category_type
                 ];
             }),
         ];

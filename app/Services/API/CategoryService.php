@@ -17,7 +17,32 @@ class CategoryService extends BaseService
     /**
      * Get all categories with filters and pagination for DataTables.
      */
-    public function list(Request $request)
+    public function list(Request $request, $category_id = null)
+    {
+
+        try {
+
+            $query = Category::
+            with('sub_categories')->productType()->latest();
+
+            if (!empty($category_id)) {
+                $query->where('id', $category_id);
+            }
+
+            $query = $this->withTrashed($query, $request);
+
+            $categories = $this->withPagination($query, $request);
+
+            return (new CategoryCollection($categories))
+            ->withFullData(!($request->full_data == 'false'));
+
+
+        } catch (\Exception $e) {
+            return $this->handleException($e, __('message.Error happened while listing categories'));
+        }
+    }
+
+    public function parentCategories(Request $request)
     {
 
         try {
