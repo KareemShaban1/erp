@@ -498,7 +498,6 @@ class ContactController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
 
-        
         $startDate = request()->input('start_date');
         $endDate = request()->input('end_date');
 

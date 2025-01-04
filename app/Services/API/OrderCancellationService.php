@@ -130,6 +130,7 @@ class OrderCancellationService extends BaseService
             if (in_array($order->order_status, ['pending'])) {
                 // Set order status to 'cancelled' and save
                 $order->order_status = 'cancelled';
+                $order->payment_status = 'failed';
                 $orderTracking->cancelled_at = now();
 
 

@@ -298,7 +298,7 @@
                             if (data === 'completed' || data === 'cancelled') {
                                 return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                             }
-                            
+
 
                             // Otherwise, display both the badge and the select dropdown
                             return `
@@ -322,7 +322,8 @@
                             }
 
                             return `
-            <select class="form-control change-payment-status" data-order-id="${row.id}">
+            <select class="form-control ${row.order_type === 'order_transfer' ? 'change-payment-status' : 'change-refund-payment-status'}"
+            data-order-id="${row.id}">
                 <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
                 <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
@@ -453,6 +454,32 @@
 
             $.ajax({
                 url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+                type: 'POST',
+                data: {
+                    payment_status: status,
+                    _token: '{{ csrf_token() }}' // CSRF token for security
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    } else {
+                        alert('Failed to update payment status.');
+                    }
+                },
+                error: function (xhr) {
+                    alert('An error occurred: ' + xhr.responseText);
+                }
+            });
+        });
+
+
+        $(document).on('change', '.change-refund-payment-status', function () {
+            var orderId = $(this).data('order-id');
+            var status = $(this).val();
+
+            $.ajax({
+                url: `{{ action("ApplicationDashboard\RefundOrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
                 type: 'POST',
                 data: {
                     payment_status: status,

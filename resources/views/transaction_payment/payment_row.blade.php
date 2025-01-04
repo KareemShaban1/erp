@@ -62,7 +62,7 @@
             {!! Form::hidden('advance_balance', $transaction->contact->balance, ['id' => 'advance_balance', 'data-error-msg' => __('lang_v1.required_advance_balance_not_available')]); !!}
           @endif
         </div>
-      </div>
+      </div> 
       <div class="row payment_row">
         <div class="col-md-4">
           <div class="form-group">

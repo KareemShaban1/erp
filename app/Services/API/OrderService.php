@@ -210,7 +210,6 @@ class OrderService extends BaseService
                             $clientLocationId,
                             $transferQty
                         );
-                        
                         // 2
                         $deficit -= $transferQty;
     
@@ -473,10 +472,6 @@ class OrderService extends BaseService
             $transactionData['transaction_date'] = Carbon::now();
 
             $contact_id = $client->contact_id;
-            $cg = $this->contactUtil->getCustomerGroup($business_id, $contact_id);
-            $customerGroupId = (empty($cg) || empty($cg->id)) ? null : $cg->id;
-
-            \Log::info('transaction_data',[$transactionData]);
 
             $transaction = $this->transactionUtil->createSellTransaction($business_id, $transactionData, $invoice_total, $user_id);
 
@@ -501,7 +496,6 @@ class OrderService extends BaseService
 
             $sellLines = $this->transactionUtil->createOrUpdateSellLines($transaction, $products, $client->business_location_id);
 
-            Log::info($sellLines);
 
             if (!$transaction->is_suspend && !empty($transactionData['payment']) && !$is_direct_sale) {
                 $this->transactionUtil->createOrUpdatePaymentLines($transaction, $transactionData['payment']);
@@ -513,8 +507,6 @@ class OrderService extends BaseService
                     if (!empty($product['base_unit_multiplier'])) {
                         $decrease_qty = $decrease_qty * $product['base_unit_multiplier'];
                     }
-
-
                     // if ($product['enable_stock']) {
                     //     Log::info($products);
                     //     Log::info($decrease_qty);
@@ -538,12 +530,13 @@ class OrderService extends BaseService
                 ];
                 // $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
 
-                // $whatsapp_link = $this->notificationUtil->autoSendNotification($business_id, 'new_sale', $transaction, $transaction->contact);
             }
 
             // Media::uploadMedia($business_id, $transaction, request(), 'documents');
             $this->transactionUtil->activityLog($transaction, 'added',null,
             ['order_number'=>$order->number,'client'=>$client->contact->name]);
+
+          
 
             DB::commit();
 
@@ -559,6 +552,8 @@ class OrderService extends BaseService
             return $this->handleException($e, __('message.Error happened while making sale'));
         }
     }
+
+   
 
     public function storeRefundOrder($order, $items)
     {
