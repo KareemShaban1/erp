@@ -29,10 +29,6 @@
             <label for="end_date">{{__('lang_v1.end_date')}}</label>
             <input type="date" id="end_date" class="form-control">
         </div>
-        <div class="col-md-3">
-            <label for="search">{{__('lang_v1.search')}}</label>
-            <input type="text" id="search" class="form-control" placeholder="Search by client name">
-        </div>
         <div class="col-md-3 d-flex align-items-end">
             <button id="contact_filter" class="btn btn-primary mr-2">{{__('lang_v1.filter')}}</button>
             <button id="contact_clear_filters" class="btn btn-danger">{{__('lang_v1.clear')}}</button>
@@ -68,7 +64,7 @@
             </div>
         </div>
     @endif
-    <div class="col-md-3">
+    <!-- <div class="col-md-3">
         <div class="form-group">
             <label>
                 {!! Form::checkbox('has_advance_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_advance_balance']); !!} <strong>@lang('lang_v1.advance_balance')</strong>
@@ -81,7 +77,7 @@
                 {!! Form::checkbox('has_opening_balance', 1, false, ['class' => 'input-icheck', 'id' => 'has_opening_balance']); !!} <strong>@lang('lang_v1.opening_balance')</strong>
             </label>
         </div>
-    </div>
+    </div> -->
     @endcomponent
     <input type="hidden" value="{{$type}}" id="contact_type">
     @component('components.widget', ['class' => 'box-primary', 'title' => __( 'contact.all_your_contact', ['contacts' => __('lang_v1.'.$type.'s') ])])

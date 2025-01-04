@@ -14,6 +14,17 @@
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
 
+    @slot('tool')
+        <div class="box-tools">
+        </div>
+        @component('components.filters', ['title' => __('report.filters')])
+
+            @include('applicationDashboard.pages.suggestionProducts.filters')
+
+        @endcomponent
+
+        @endslot
+
     <div class="table-responsive">
         <table class="table table-bordered table-striped" id="suggestionProducts_table">
             <thead>
@@ -40,16 +51,33 @@
 <script>
     $(document).ready(function () {
 
+        $('#filter_date').click(function () {
+            suggestionProducts_table.ajax.reload(); // Reload DataTable with the new date filters
+        });
+
+        $('#clear_date').click(function () {
+            $('#start_date').val('');
+            $('#end_date').val('');
+
+            suggestionProducts_table.ajax.reload();
+        });
+
     //suggestionProducts table
     var suggestionProducts_table = $('#suggestionProducts_table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: '{{ action("ApplicationDashboard\SuggestionProductController@index") }}',
+        ajax: {
+                url: '{{ action("ApplicationDashboard\SuggestionProductController@index") }}',
+                data: function (d) {
+                    d.start_date = $('#start_date').val();
+                    d.end_date = $('#end_date').val();
+                }
+            },
         columnDefs: [
             {
                 targets: 2,
-                orderable: false,
-                searchable: false,
+                // orderable: false,
+                // searchable: false,
             },
         ],
         columns: [

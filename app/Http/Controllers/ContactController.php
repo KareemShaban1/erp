@@ -511,10 +511,10 @@ class ContactController extends Controller
 
         if ($startDate && $endDate) {
             if ($startDate === $endDate) {
-                $query->whereDate('created_at', $startDate);
+                $query->whereDate('contacts.created_at', $startDate);
             } else {
                 $endDate = Carbon::parse($endDate)->endOfDay();
-                $query->whereBetween('created_at', [$startDate, $endDate]);
+                $query->whereBetween('contacts.created_at', [$startDate, $endDate]);
             }
         }
 
@@ -735,10 +735,23 @@ class ContactController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
 
+        $startDate = request()->input('start_date');
+        $endDate = request()->input('end_date');
+
         $is_admin = $this->contactUtil->is_admin(auth()->user());
 
         $query = $this->contactUtil->getContactQuery($business_id, 'delivery');
 
+        
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                $query->whereDate('contacts.created_at', $startDate);
+            } else {
+                $endDate = Carbon::parse($endDate)->endOfDay();
+                $query->whereBetween('contacts.created_at', [$startDate, $endDate]);
+            }
+        }
+        
         if (request()->has('has_sell_due')) {
             $query->havingRaw('(total_invoice - invoice_received) > 0');
         }

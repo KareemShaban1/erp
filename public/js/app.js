@@ -539,9 +539,17 @@ $(document).ready(function() {
         }
     });
 
-    $('#contact_filter, #contact_clear_filters').on('click', function () {
+    $('#contact_filter').on('click', function () {
         contact_table.ajax.reload();
     });
+
+    $('#contact_clear_filters').on('click', function () {
+        $('#start_date').val('');
+        $('#end_date').val('');
+        contact_table.ajax.reload();
+    });
+
+    
 
     $(document).on('ifChanged', '#has_sell_due, #has_sell_return, \
     #has_purchase_due, #has_purchase_return, #has_advance_balance, #has_opening_balance', function(){
