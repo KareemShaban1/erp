@@ -17,7 +17,7 @@ class ProductService extends BaseService
     /**
      * Get all products with filters and pagination for DataTables.
      */
-    public function list(Request $request)
+    public function list(Request $request , $category_id = null)
     {
         try {
             
@@ -43,13 +43,11 @@ class ProductService extends BaseService
 
 
             // Check if a category_id is passed and apply the filter
-            if (!empty($request->category_id)) {
-                $query->where('category_id', $request->category_id);
+            if (!empty($category_id)) {
+                $query->where('category_id', $category_id)
+                ->orWhere('sub_category_id',$category_id);
             }
 
-            if (!empty($request->sub_category_id)) {
-                $query->where('sub_category_id', $request->sub_category_id);
-            }
 
             // Add search by product name if provided in the request
             if ($request->filled('search')) {

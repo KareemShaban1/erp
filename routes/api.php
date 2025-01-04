@@ -50,7 +50,7 @@ Route::get('business_locations', [BusinessLocationController::class, 'index']);
 
 Route::middleware('auth:sanctum-client')->group(function () {
 
-    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{category_id?}', [ProductController::class, 'index']);
     Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
     Route::get('product_details/{product_id}', [ProductController::class, 'show']);
 
