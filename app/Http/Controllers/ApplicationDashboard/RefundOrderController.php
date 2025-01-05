@@ -541,6 +541,8 @@ class RefundOrderController extends Controller
             $transaction_id = $salePaymentData['transaction_id'];
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
 
+            $location = BusinessLocation::find($salePaymentData['business_location_id']);
+
             $transaction_before = $transaction->replicate();
 
             if ($transaction->payment_status != 'paid') {
@@ -556,10 +558,9 @@ class RefundOrderController extends Controller
 
                 // $salePaymentData['account_id'] =2;
 
-                if (!empty($location->default_payment_accounts)) {
+                if (!empty( $location->default_payment_accounts)) {
                     $default_payment_accounts = json_decode(
-                        $salePaymentData['business_location_id']->default_payment_accounts,
-                        true
+                        $location->default_payment_accounts, true
                     );
                     // Check for cash account and set account_id
                     if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {

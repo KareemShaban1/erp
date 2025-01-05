@@ -377,10 +377,7 @@ class OrderController extends Controller
 
         $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-        if ($delivery && $delivery->contact) {
-            $delivery->contact->balance += $order->total;
-            $delivery->contact->save();
-        }
+       
 
         $transaction = Transaction::
         where('type','sell')->
@@ -405,6 +402,10 @@ class OrderController extends Controller
                 break;
             case 'paid':
                 $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'paid']);
+                if ($delivery && $delivery->contact) {
+                    $delivery->contact->balance += $order->total;
+                    $delivery->contact->save();
+                }
                 $this->makeSalePayment($salePaymentData);
                 break;
             case 'failed':
@@ -508,6 +509,7 @@ class OrderController extends Controller
             $transaction_id = $salePaymentData['transaction_id'];
             $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
 
+            $location = BusinessLocation::find($salePaymentData['business_location_id']);
             $transaction_before = $transaction->replicate();
 
             if ($transaction->payment_status != 'paid') {
@@ -522,10 +524,9 @@ class OrderController extends Controller
                 $salePaymentData['payment_for'] = $transaction->contact_id;
 
                 // $salePaymentData['account_id'] =2;
-
-                if (!empty($location->default_payment_accounts)) {
+                if (!empty( $location->default_payment_accounts)) {
                     $default_payment_accounts = json_decode(
-                        $salePaymentData['business_location_id']->default_payment_accounts, true
+                        $location->default_payment_accounts, true
                     );
                     // Check for cash account and set account_id
                     if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {
@@ -553,6 +554,8 @@ class OrderController extends Controller
                 // if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
                 //     throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
                 // }
+
+                \Log::info('salePaymentData',[$salePaymentData]);
                 
                 if (!empty($salePaymentData['amount'])) {
                     $tp = TransactionPayment::create($salePaymentData);
@@ -583,6 +586,6 @@ class OrderController extends Controller
         }
 
         return redirect()->back()->with(['status' => $output]);
-    } 
+    }
 
 }
