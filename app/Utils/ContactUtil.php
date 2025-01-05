@@ -236,7 +236,8 @@ class ContactUtil extends Util
             ]);
         } 
         if (in_array($type, ['client', 'both'])) {
-            $query->addSelect([
+            $query->with('client')
+            ->addSelect([
                 DB::raw("SUM(IF(t.type = 'sell' AND t.status = 'final', final_total, 0)) as total_invoice"),
                 DB::raw("SUM(IF(t.type = 'sell' AND t.status = 'final', (SELECT SUM(IF(is_return = 1,-1*amount,amount)) FROM transaction_payments WHERE transaction_payments.transaction_id=t.id), 0)) as invoice_received"),
                 DB::raw("SUM(IF(t.type = 'sell_return', final_total, 0)) as total_sell_return"),
@@ -245,7 +246,9 @@ class ContactUtil extends Util
         } 
 
         if (in_array($type, ['delivery', 'both'])) {
-            $query->addSelect([
+            $query->
+            with('delivery')
+            ->addSelect([
                 DB::raw("SUM(IF(t.type = 'sell' AND t.status = 'final', final_total, 0)) as total_invoice"),
                 DB::raw("SUM(IF(t.type = 'sell' AND t.status = 'final', (SELECT SUM(IF(is_return = 1,-1*amount,amount)) FROM transaction_payments WHERE transaction_payments.transaction_id=t.id), 0)) as invoice_received"),
                 DB::raw("SUM(IF(t.type = 'sell_return', final_total, 0)) as total_sell_return"),

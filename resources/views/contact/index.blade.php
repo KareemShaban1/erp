@@ -114,6 +114,7 @@
                             <!-- <th>@lang('business.business_name')</th> -->
                             <th>@lang('user.name')</th>
                             <th>@lang('business.email')</th>
+                            <th>@lang('lang_v1.business_location')</th>
                             <!-- <th>@lang('contact.tax_no')</th> -->
                             <!-- <th>@lang('lang_v1.credit_limit')</th> -->
                             <!-- <th>@lang('contact.pay_term')</th> -->

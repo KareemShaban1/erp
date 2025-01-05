@@ -24,9 +24,9 @@ class ProductController extends Controller
     /**
      * Display a listing of the categories.
      */
-    public function index(Request $request , $category_id = null)
+    public function index(Request $request)
     {
-        $categories = $this->service->list($request,$category_id);
+        $categories = $this->service->list($request);
 
         if ($categories instanceof JsonResponse) {
             return $categories;

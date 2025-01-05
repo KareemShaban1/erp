@@ -555,6 +555,9 @@ class ContactController extends Controller
         }
 
         $contacts = Datatables::of($query)
+            ->addColumn('business_location', function ($row) {
+                return $row->client->business_location ? $row->client->business_location->name : 'N/A';
+            })
             ->addColumn('address', '{{implode(", ", array_filter([$address_line_1, $address_line_2, $city, $state, $country, $zip_code]))}}')
             ->addColumn(
                 'due',
@@ -717,6 +720,13 @@ class ContactController extends Controller
                         ->orWhere('zip_code', 'like', "%{$keyword}%")
                         ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
                 });
+            })
+            ->filterColumn('business_location',function($query, $keyword){
+                $query->whereHas('client',function ($q) use ($keyword) {
+                    $q->whereHas('business_location',function($q) use($keyword){
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
+                });
             });
         $reward_enabled = (request()->session()->get('business.enable_rp') == 1) ? true : false;
         if (!$reward_enabled) {
@@ -742,7 +752,7 @@ class ContactController extends Controller
 
         $query = $this->contactUtil->getContactQuery($business_id, 'delivery');
 
-        
+
         if ($startDate && $endDate) {
             if ($startDate === $endDate) {
                 $query->whereDate('contacts.created_at', $startDate);
@@ -751,7 +761,7 @@ class ContactController extends Controller
                 $query->whereBetween('contacts.created_at', [$startDate, $endDate]);
             }
         }
-        
+
         if (request()->has('has_sell_due')) {
             $query->havingRaw('(total_invoice - invoice_received) > 0');
         }
@@ -793,6 +803,9 @@ class ContactController extends Controller
         }
 
         $contacts = Datatables::of($query)
+            ->addColumn('business_location', function ($row) {
+                return $row->delivery->business_location ? $row->delivery->business_location->name : 'N/A';
+            })
             ->addColumn('address', '{{implode(", ", array_filter([$address_line_1, $address_line_2, $city, $state, $country, $zip_code]))}}')
             ->addColumn(
                 'due',
@@ -955,6 +968,13 @@ class ContactController extends Controller
                         ->orWhere('zip_code', 'like', "%{$keyword}%")
                         ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
                 });
+            })
+            ->filterColumn('business_location',function($query, $keyword){
+                $query->whereHas('delivery',function ($q) use ($keyword) {
+                    $q->whereHas('business_location',function($q) use($keyword){
+                        $q->where('name', 'like', "%{$keyword}%");
+                    });
+                });
             });
         $reward_enabled = (request()->session()->get('business.enable_rp') == 1) ? true : false;
         if (!$reward_enabled) {
@@ -1026,8 +1046,8 @@ class ContactController extends Controller
 
         $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
 
-        $delivery_users = User::where('business_id',$business_id)
-        ->pluck('username', 'id');
+        $delivery_users = User::where('business_id', $business_id)
+            ->pluck('username', 'id');
 
         return view('contact.create')
             ->with(compact(
@@ -1376,12 +1396,12 @@ class ContactController extends Controller
 
             $account_statuses = ['active', 'deleted'];
 
-            $delivery_users = User::where('business_id',$business_id)
-            ->pluck('username', 'id');
-            
+            $delivery_users = User::where('business_id', $business_id)
+                ->pluck('username', 'id');
+
 
             return view('contact.edit')
-                ->with(compact('contact', 'delivery_users','account_statuses', 'client', 'delivery', 'business_locations', 'types', 'customer_groups', 'opening_balance'));
+                ->with(compact('contact', 'delivery_users', 'account_statuses', 'client', 'delivery', 'business_locations', 'types', 'customer_groups', 'opening_balance'));
         }
     }
 
@@ -1582,7 +1602,7 @@ class ContactController extends Controller
                         'email_address' => $deliveryData['delivery_email_address'],
                         'business_location_id' => $deliveryData['delivery_business_location_id'],
                         'contact_id' => $output['data']->id,
-                        'user_id'=> $deliveryData['delivery_user_id'],
+                        'user_id' => $deliveryData['delivery_user_id'],
                         'location' => $deliveryData['delivery_location'] ?? null,
                         'account_status' => $deliveryData['delivery_account_status'],
                     ];

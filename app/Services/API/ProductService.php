@@ -17,11 +17,11 @@ class ProductService extends BaseService
     /**
      * Get all products with filters and pagination for DataTables.
      */
-    public function list(Request $request , $category_id = null)
+    public function list(Request $request)
     {
         try {
-            
-            // Initialize the query with necessary relationships
+
+                    // Initialize the query with necessary relationships
             $query = Product::with([
                 'media',
                 'unit:id,actual_name,short_name',
@@ -43,9 +43,12 @@ class ProductService extends BaseService
 
 
             // Check if a category_id is passed and apply the filter
-            if (!empty($category_id)) {
-                $query->where('category_id', $category_id)
-                ->orWhere('sub_category_id',$category_id);
+            if (!empty($request->category_id)) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if (!empty($request->sub_category_id)) {
+                $query->Where('sub_category_id', $request->sub_category_id);
             }
 
 
