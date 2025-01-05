@@ -47,8 +47,9 @@ class ProductService extends BaseService
                 $query->where('category_id', $request->category_id);
             }
 
-            if (!empty($request->sub_category_id)) {
-                $query->Where('sub_category_id', $request->sub_category_id);
+            if (!empty($request->category_id) && !empty($request->sub_category_id)) {
+                $query->where('category_id', $request->category_id)->
+                where('sub_category_id', $request->sub_category_id);
             }
 
 
