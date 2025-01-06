@@ -20,6 +20,7 @@ use App\Services\BaseService;
 use App\Traits\CheckQuantityTrait;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
+use App\Utils\BusinessUtil;
 use App\Utils\ContactUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
@@ -40,6 +41,7 @@ class OrderService extends BaseService
     protected $contactUtil;
     protected $cartService;
     protected $orderTrackingService;
+    protected $businessUtil;
     /**
      * Constructor
      *
@@ -52,7 +54,8 @@ class OrderService extends BaseService
         ContactUtil $contactUtil,
         ModuleUtil $moduleUtil,
         OrderTrackingService $orderTrackingService,
-        CartService $cartService
+        CartService $cartService,
+        BusinessUtil $businessUtil
     ) {
         $this->contactUtil = $contactUtil;
         $this->moduleUtil = $moduleUtil;
@@ -60,6 +63,7 @@ class OrderService extends BaseService
         $this->transactionUtil = $transactionUtil;
         $this->cartService = $cartService;
         $this->orderTrackingService = $orderTrackingService;
+        $this->businessUtil = $businessUtil;
     }
     /**
      * Get all Orders with filters and pagination for DataTables.
@@ -72,7 +76,7 @@ class OrderService extends BaseService
 
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
-            ->where('order_type','order')->latest();
+                ->where('order_type', 'order')->latest();
 
             $query = $this->withTrashed($query, $request);
 
@@ -161,7 +165,7 @@ class OrderService extends BaseService
 
             // Notify admins and users about the order
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id,$order);
+            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $order);
 
             \Notification::send($admins, new OrderCreatedNotification($order));
             \Notification::send($users, new OrderCreatedNotification($order));
@@ -179,28 +183,28 @@ class OrderService extends BaseService
     {
         $requiredQuantity = $cart->quantity;
         $clientLocationId = $client->business_location_id;
-    
+
         // Step 1: Check if the required quantity exists in the client's location
         $clientLocationDetail = $cart->variation->variation_location_details
             ->firstWhere('location.id', $clientLocationId);
-    
+
         $availableAtClientLocation = $clientLocationDetail ? $clientLocationDetail->qty_available : 0;
-    
+
         if ($availableAtClientLocation >= $requiredQuantity) {
             // If sufficient stock exists, update stock directly
             $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
         } else {
             // Step 2: Calculate deficit and transfer stock if necessary
             $deficit = $requiredQuantity - $availableAtClientLocation;
-    
+
             foreach ($cart->variation->variation_location_details as $locationDetail) {
                 // if location not same location of client
                 if ($locationDetail->location->id !== $clientLocationId && $deficit > 0) {
                     $availableQty = $locationDetail->qty_available;
-    
+
                     if ($availableQty > 0) {
                         $transferQty = min($deficit, $availableQty);
-    
+
                         // Perform the stock transfer
                         $this->transferQuantity(
                             $order,
@@ -212,18 +216,19 @@ class OrderService extends BaseService
                         );
                         // 2
                         $deficit -= $transferQty;
-    
+
                         // Break if the deficit is covered
-                        if ($deficit <= 0) break;
+                        if ($deficit <= 0)
+                            break;
                     }
                 }
             }
-    
+
             // Step 3: Finalize by updating stock at the client's location
             $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
         }
     }
-    
+
     /**
      * Transfers a specified quantity from one location to another.
      */
@@ -232,11 +237,11 @@ class OrderService extends BaseService
         try {
             DB::beginTransaction();
 
-           
+
 
             $business_id = $client->contact->business_id;
 
-            \Log::info('client',[$client]);
+            \Log::info('client', [$client]);
 
             $inputData = [
                 'location_id' => $fromLocationId,
@@ -250,7 +255,7 @@ class OrderService extends BaseService
                 'payment_status' => 'paid',
                 'status' => 'in_transit',
                 'total_before_tax' => $order->total,
-                'transfer_type'=>'application_transfer'
+                'transfer_type' => 'application_transfer'
             ];
 
             // Generate reference number
@@ -298,13 +303,14 @@ class OrderService extends BaseService
             }
 
 
-            \Log::info("transfer quantity",[
+            \Log::info("transfer quantity", [
                 $order,
                 $orderItem,
                 $quantity,
                 $fromLocationId,
-                $toLocationId]);
-            $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
+                $toLocationId
+            ]);
+            $this->storeTransferOrder($order, $orderItem, $quantity, $fromLocationId, $toLocationId);
 
             DB::commit();
 
@@ -316,7 +322,7 @@ class OrderService extends BaseService
     }
 
 
-     /**
+    /**
      * Transfers a specified quantity from one location to another.
      */
     public function transferQuantityForCancellation($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
@@ -324,12 +330,14 @@ class OrderService extends BaseService
         try {
             DB::beginTransaction();
 
-           
+
 
             $business_id = $client->contact->business_id;
 
-            \Log::info('data',[
-                $fromLocationId , $toLocationId,$quantity
+            \Log::info('data', [
+                $fromLocationId,
+                $toLocationId,
+                $quantity
             ]);
 
             $inputData = [
@@ -344,7 +352,7 @@ class OrderService extends BaseService
                 'payment_status' => 'paid',
                 'status' => 'in_transit',
                 'total_before_tax' => $order->total,
-                'transfer_type'=>'application_transfer'
+                'transfer_type' => 'application_transfer'
             ];
 
             // Generate reference number
@@ -392,7 +400,7 @@ class OrderService extends BaseService
             }
 
 
-            \Log::info("transfer quantity",[$quantity]);
+            \Log::info("transfer quantity", [$quantity]);
             // $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
 
             DB::commit();
@@ -523,20 +531,26 @@ class OrderService extends BaseService
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
                 $transaction->payment_status = $payment_status;
 
+                $business_details = $this->businessUtil->getDetails($business_id);
+                $pos_settings = empty($business_details->pos_settings) ? $this->businessUtil->defaultPosSettings() : json_decode($business_details->pos_settings, true);
+
                 $business = [
                     'id' => $business_id,
-                    'accounting_method' => session()->get('business.accounting_method'),
+                    'accounting_method' => 'fifo',
                     'location_id' => $client->business_location_id,
+                    'pos_settings' => $pos_settings,
                 ];
-                // $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
+                $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
 
             }
 
             // Media::uploadMedia($business_id, $transaction, request(), 'documents');
-            $this->transactionUtil->activityLog($transaction, 'added',null,
-            ['order_number'=>$order->number,'client'=>$client->contact->name]);
-
-          
+            $this->transactionUtil->activityLog(
+                $transaction,
+                'added',
+                null,
+                ['order_number' => $order->number, 'client' => $client->contact->name]
+            );
 
             DB::commit();
 
@@ -553,7 +567,7 @@ class OrderService extends BaseService
         }
     }
 
-   
+
 
     public function storeRefundOrder($order, $items)
     {
@@ -629,9 +643,9 @@ class OrderService extends BaseService
 
             DB::commit();
 
-             // Notify admins and users about the order
+            // Notify admins and users about the order
             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id,$newRefundOrder);
+            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $newRefundOrder);
 
             \Notification::send($admins, new OrderRefundCreatedNotification($newRefundOrder));
             \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
@@ -750,51 +764,51 @@ class OrderService extends BaseService
         }
     }
 
-    public function storeTransferOrder($order, $orderItem, $quantity,$fromLocationId,$toLocationId)
+    public function storeTransferOrder($order, $orderItem, $quantity, $fromLocationId, $toLocationId)
     {
         DB::beginTransaction();
-    
+
         try {
             // Validate order item existence
             $orderItem = OrderItem::find($orderItem->id);
             if (!$orderItem) {
                 throw new \Exception("Order item with ID {$orderItem->id} not found.");
             }
-    
+
             // Validate quantity
             if ($quantity <= 0 || $quantity > $orderItem->quantity) {
                 throw new \Exception("Invalid quantity. It must be greater than zero and not exceed available stock.");
             }
-    
+
             // Calculate subtotal for the transfer
             $subTotal = $quantity * $orderItem->price;
-    
-            \Log::info('sub_total',[$quantity * $orderItem->price]);
+
+            \Log::info('sub_total', [$quantity * $orderItem->price]);
             // Check if a transfer order already exists for the parent order
             $transferOrder = Order::where('parent_order_id', $order->id)
-            ->where('order_type','order_transfer')
-            ->where('from_business_location_id',$fromLocationId)
-            ->where('to_business_location_id',$toLocationId)
-            ->first();
-            
+                ->where('order_type', 'order_transfer')
+                ->where('from_business_location_id', $fromLocationId)
+                ->where('to_business_location_id', $toLocationId)
+                ->first();
+
             if ($transferOrder) {
                 // Update existing transfer order
                 $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
             } else {
                 // Create a new transfer order
-                $transferOrder = $this->createTransferOrder($order, $subTotal,$fromLocationId,$toLocationId);
+                $transferOrder = $this->createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId);
                 $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
             }
-    
+
             DB::commit();
 
-             // Notify admins and users about the order
+            // Notify admins and users about the order
             $admins = $this->moduleUtil->get_admins($transferOrder->client->contact->business_id);
-            $users = $this->moduleUtil->getBusinessUsers($transferOrder->client->contact->business_id,$transferOrder);
+            $users = $this->moduleUtil->getBusinessUsers($transferOrder->client->contact->business_id, $transferOrder);
 
             \Notification::send($admins, new OrderTransferCreatedNotification($transferOrder));
             \Notification::send($users, new OrderTransferCreatedNotification($transferOrder));
-    
+
             return [
                 'success' => true,
                 'message' => 'Transfer order item processed successfully.',
@@ -802,23 +816,23 @@ class OrderService extends BaseService
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-    
+
             \Log::error("Transfer Order Error: {$e->getMessage()}");
-    
+
             return [
                 'success' => false,
                 'message' => 'Failed to process transfer order item. Please try again.',
             ];
         }
     }
-    
-    private function createTransferOrder($order, $subTotal,$fromLocationId,$toLocationId)
+
+    private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
     {
 
         // Fetch client details
         $client = Client::findOrFail($order->client_id);
-    
-        \Log::info('inside sub total',[$subTotal]);
+
+        \Log::info('inside sub total', [$subTotal]);
         // Create a new transfer order
         return Order::create([
             'parent_order_id' => $order->id,
@@ -828,11 +842,11 @@ class OrderService extends BaseService
             'payment_method' => 'Cash on delivery', // Modify as needed
             'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
             'business_location_id' => $client->business_location_id,
-            'from_business_location_id'=> $fromLocationId,
-            'to_business_location_id'=>$toLocationId
+            'from_business_location_id' => $fromLocationId,
+            'to_business_location_id' => $toLocationId
         ]);
     }
-    
+
     private function addTransferItemToOrder($order, $orderItem, $quantity, $subTotal)
     {
         // Add transfer item to the order
@@ -847,8 +861,8 @@ class OrderService extends BaseService
         ]);
 
     }
-    
-    
+
+
 
 
 

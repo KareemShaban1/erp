@@ -4280,6 +4280,8 @@ class TransactionUtil extends Util
             ->join('variations as v', 'SL.variation_id', '=', 'v.id')
             ->where('sale.business_id', $business_id);
 
+        // dd($query->toSql());
+
 
 
         if (!empty($start_date) && !empty($end_date) && $start_date != $end_date) {
@@ -4299,16 +4301,19 @@ class TransactionUtil extends Util
             $query->where('sale.created_by', $user_id);
         }
 
+        //         $first_statement = $query->select(DB::raw('
+//             (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned)  as first_statement'))
+// ->first();
 
-    //     $gross_profit_obj = $query->select(DB::raw('SUM( 
-    //                     (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (SL.unit_price_inc_tax - IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
-    //         ->first();
+        // $second_statemnet = $query->select(DB::raw(' (SL.unit_price_inc_tax - IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) )  as second_statement'))
+// ->first();
+
+        // dd($query->toSql());
 
 
-         $gross_profit_obj = $query->select(DB::raw('SUM( 
-                        (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
-                        ->first();
-    //   dd($query->toSql());
+        $gross_profit_obj = $query->select(DB::raw('SUM( 
+                        (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (SL.unit_price_inc_tax - IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
+            ->first();
 
 
 

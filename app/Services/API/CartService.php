@@ -37,7 +37,8 @@ class CartService extends BaseService
             $multiLocationMessage = false;
     
             foreach ($carts as $cart) {
-                $price = $cart->variation->default_sell_price ?? 0;
+                // $price = $cart->variation->default_sell_price ?? 0;
+                $price = $cart->variation->sell_price_inc_tax ?? 0;
                 $quantity = $cart->quantity;
     
                 // Fetch the latest discount for the variation
