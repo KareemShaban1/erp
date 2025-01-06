@@ -38,7 +38,6 @@ class ModuleUtil extends Util
     
      public static function create_user($details)
     {
-        dd($details);
         $user = User::create([
                     'surname' => $details['surname'],
                     'first_name' => $details['first_name'],
@@ -48,7 +47,6 @@ class ModuleUtil extends Util
                     'password' => Hash::make($details['password']),
                     'language' => !empty($details['language']) ? $details['language'] : 'en'
                 ]);
-                dd($user);
 
         return $user;
     }

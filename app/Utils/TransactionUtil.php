@@ -4280,6 +4280,8 @@ class TransactionUtil extends Util
             ->join('variations as v', 'SL.variation_id', '=', 'v.id')
             ->where('sale.business_id', $business_id);
 
+
+
         if (!empty($start_date) && !empty($end_date) && $start_date != $end_date) {
             $query->whereDate('sale.transaction_date', '>=', $start_date)
                 ->whereDate('sale.transaction_date', '<=', $end_date);
@@ -4297,9 +4299,18 @@ class TransactionUtil extends Util
             $query->where('sale.created_by', $user_id);
         }
 
-        $gross_profit_obj = $query->select(DB::raw('SUM( 
-                        (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (SL.unit_price_inc_tax - IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
-            ->first();
+
+    //     $gross_profit_obj = $query->select(DB::raw('SUM( 
+    //                     (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (SL.unit_price_inc_tax - IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
+    //         ->first();
+
+
+         $gross_profit_obj = $query->select(DB::raw('SUM( 
+                        (transaction_sell_lines_purchase_lines.quantity - transaction_sell_lines_purchase_lines.qty_returned) * (IFNULL(PL.purchase_price_inc_tax, v.default_purchase_price) ) ) as gross_profit'))
+                        ->first();
+    //   dd($query->toSql());
+
+
 
         $gross_profit = !empty($gross_profit_obj->gross_profit) ? $gross_profit_obj->gross_profit : 0;
 
@@ -5051,6 +5062,7 @@ class TransactionUtil extends Util
             $location_id,
             $user_id
         );
+
 
         $data['total_purchase_shipping_charge'] = !empty($purchase_details['total_shipping_charges']) ? $purchase_details['total_shipping_charges'] : 0;
         $data['total_sell_shipping_charge'] = !empty($sell_details['total_shipping_charges']) ? $sell_details['total_shipping_charges'] : 0;

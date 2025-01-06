@@ -149,7 +149,7 @@
                     <span class="display_currency" data-currency_symbol="true">{{$data['total_sell_round_off']}}</span>
                 </td>
             </tr>
-            <tr>
+            <tr></tr> 
                 <td colspan="2">
                 &nbsp;
                 </td>
