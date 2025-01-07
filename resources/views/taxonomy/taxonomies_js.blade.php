@@ -1,6 +1,12 @@
+
+
 <script type="text/javascript">
     $(document).ready( function() {
 
+        $('#subcategories-select').select2({
+            placeholder: "Select subcategories",
+            allowClear: true
+        });
         function getTaxonomiesIndexPage () {
             var data = {category_type : $('#category_type').val()};
             $.ajax({
@@ -26,7 +32,8 @@
                     columns: [
                         { data: 'image', name: 'image' },
                         { data: 'name', name: 'name' },
-                        { data: 'main_category', name: 'main_category' },
+                        { data: 'sub_categories', name: 'sub_categories' },
+                        { data: 'category_type', name: 'category_type' },
                         @if($cat_code_enabled)
                             { data: 'short_code', name: 'short_code' },
                         @endif

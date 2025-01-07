@@ -42,19 +42,23 @@
             <small><p class="help-block">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)]) <br> @lang('lang_v1.aspect_ratio_should_be_1_1')</p></small>
           </div>
 
-      @if(!empty($parent_categories) && $enable_sub_category)
           <div class="form-group">
             <div class="checkbox">
               <label>
-                 {!! Form::checkbox('add_as_sub_cat', 1, !$is_parent,[ 'class' => 'toggler', 'data-toggle_id' => 'parent_cat_div' ]); !!} @lang( 'lang_v1.add_as_sub_txonomy' )
+                 {!! Form::checkbox('is_main_category', 1, !$category->is_sub_category,[ 'class' => 'toggler', 'data-toggle_id' => 'parent_cat_div' ]); !!} 
+                 @lang( 'lang_v1.is_main_category' )
               </label>
             </div>
           </div>
-          <div class="form-group @if($is_parent) {{'hide' }} @endif" id="parent_cat_div">
+          <!-- <div class="form-group @if($is_parent) {{'hide' }} @endif" id="parent_cat_div">
             {!! Form::label('parent_id', __( 'lang_v1.select_parent_taxonomy' ) . ':') !!}
             {!! Form::select('parent_id', $parent_categories, $selected_parent, ['class' => 'form-control']); !!}
-          </div>
-      @endif
+          </div> -->
+          <div class="form-group @if($category->is_sub_category === 1) {{'hide' }} @endif" id="parent_cat_div">
+    {!! Form::label('subcategories', __('category.select_subcategories') . ':') !!}
+    {!! Form::select('subcategories[]', $parent_categories, $selected_subcategories, ['class' => 'form-control', 'multiple' => 'multiple']); !!}
+</div>
+
     </div>
 
     <div class="modal-footer">

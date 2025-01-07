@@ -1538,8 +1538,10 @@ return [
 "suggestion_products"=>"اقترحات المنتجات",
 "suggest_name"=>"اسم الأقتراح",
 ""=>"",
+"sub_categories"=>"التصنيفات الفرعية",
 ""=>"",
-""=>"",
-""=>"",
-""=>"",
+"is_main_category"=>"هل تصنيف رئيسى ؟",
+"category_type"=>"نوع التصنيف",
+"main_category"=>"تصنيف رئيسى",
+"sub_category"=>"تصنيف فرعى",
 ];

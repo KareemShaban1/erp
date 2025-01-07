@@ -40,19 +40,25 @@
             {!! Form::file('image', ['id' => 'upload_image', 'accept' => 'image/*']); !!}
             <small><p class="help-block">@lang('purchase.max_file_size', ['size' => (config('constants.document_size_limit') / 1000000)]) <br> @lang('lang_v1.aspect_ratio_should_be_1_1')</p></small>
           </div>
-      @if(!empty($parent_categories) && $enable_sub_category)
         <div class="form-group">
             <div class="checkbox">
               <label>
-                 {!! Form::checkbox('add_as_sub_cat', 1, false,[ 'class' => 'toggler', 'data-toggle_id' => 'parent_cat_div' ]); !!} @lang( 'lang_v1.add_as_sub_txonomy' )
+                 {!! Form::checkbox('is_main_category', 1, false,[ 'class' => 'toggler', 'data-toggle_id' => 'parent_cat_div' ]); !!} 
+                 @lang( 'lang_v1.is_main_category' )
               </label>
             </div>
         </div>
-        <div class="form-group hide" id="parent_cat_div">
+        <!-- <div class="form-group hide" id="parent_cat_div">
           {!! Form::label('parent_id', __( 'category.select_parent_category' ) . ':') !!}
           {!! Form::select('parent_id', $parent_categories, null, ['class' => 'form-control']); !!}
-        </div>
-      @endif
+        </div> -->
+
+        <div class="form-group hide"  id="parent_cat_div">
+    {!! Form::label('subcategories', __('category.select_subcategories') . ':') !!}
+    {!! Form::select('subcategories[]', $sub_categories, null, ['class' => 'form-control select2', 'multiple' => 'multiple','id' => 'subcategories-select']); !!}
+</div>
+
+
     </div>
 
     <div class="modal-footer">

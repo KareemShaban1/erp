@@ -60,3 +60,14 @@
 
 
    - in sell return transaction_date has problem
+
+
+
+
+
+
+   UPDATE `categories`
+SET `is_sub_category` = CASE 
+    WHEN parent_id <> 0 THEN 1
+    ELSE 0
+END;

@@ -33,7 +33,7 @@ class Category extends Model
      *
      * @var array
      */
-    protected $fillable = ['name','business_id','short_code','parent_id','category_type','description','slug','image','created_by'];
+    protected $fillable = ['name','business_id','is_sub_category','short_code','parent_id','category_type','description','slug','image','created_by'];
 
 
 
@@ -176,5 +176,23 @@ class Category extends Model
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
+
+    public function subcategories()
+    {
+        return $this->belongsToMany(
+            Category::class,
+            'category_subcategory',
+            'category_id',
+            'subcategory_id'
+        );
+    }
+    
+
+
+public function parentCategories()
+{
+    return $this->belongsToMany(Category::class, 'category_subcategory', 'subcategory_id', 'category_id');
+}
+
 
 }

@@ -4,8 +4,8 @@
     $navbar = !empty($module_category_data['navbar']) ? $module_category_data['navbar'] : null;
 @endphp
 @section('title', $heading)
-
 @section('content')
+
 @if(!empty($navbar))
     @include($navbar)
 @endif
@@ -43,7 +43,8 @@
                         <tr>
                             <th>@lang( 'lang_v1.image' )</th>
                             <th>@if(!empty($module_category_data['taxonomy_label'])) {{$module_category_data['taxonomy_label']}} @else @lang( 'category.category' ) @endif</th>
-                            <th>@lang( 'lang_v1.main_category' )</th>
+                            <th>@lang( 'lang_v1.sub_categories' )</th>
+                            <th>@lang( 'lang_v1.category_type' )</th>
                             @if($cat_code_enabled)
                                 <th>{{ $module_category_data['taxonomy_code_label'] ?? __( 'category.code' )}}</th>
                             @endif

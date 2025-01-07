@@ -23,7 +23,8 @@ class CategoryService extends BaseService
         try {
 
             $query = Category::
-            with('sub_categories')->productType()->latest();
+            with('subcategories')
+            ->productType()->latest();
 
             if (!empty($category_id)) {
                 $query->where('id', $category_id);
