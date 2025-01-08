@@ -100,19 +100,20 @@
 
 
 
-                       
-                            // Display only the badge for completed or cancelled statuses
-                            if (data === 'paid') {
-                                 $value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-                            } else if (data === 'failed') {
-                                $value =  `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-                            } else {
-                                $value =  `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-                            }
 
-                          
+                        // Display only the badge for completed or cancelled statuses
+                        if (data === 'paid') {
+                            $value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        } else if (data === 'failed') {
+                            $value = `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        } else {
+                            $value = `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        }
 
-                            if (row.order_status === 'completed') {
+
+
+                        if (row.order_status === 'completed') {
+                            if ($data !== 'paid') {
                                 $select = `
                                 <select class="form-control change-payment-status" data-order-id="${row.id}">
                                     <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
@@ -120,7 +121,9 @@
                                 </select>`;
                             }
 
-                            return  $value + $select ;
+                        }
+
+                        return $value + $select;
 
                         // <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
 
