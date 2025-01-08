@@ -114,10 +114,11 @@
                         // Show select dropdown only if order_status is completed and payment_status is not paid
                         if (row.order_status === 'completed' && data !== 'paid') {
                             select = `
-            <select class="form-control change-payment-status" data-order-id="${row.id}">
-                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-            </select>`;
+                            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                                <option value="" selected disabled>Select Status</option>
+                                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+                            </select>`;
                         }
 
                         return value + select;
