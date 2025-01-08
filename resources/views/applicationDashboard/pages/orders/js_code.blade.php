@@ -112,12 +112,11 @@
 
                         // Show select dropdown when order_status is completed
                         return `
-        <select class="form-control change-payment-status" data-order-id="${row.id}">
-            <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-            <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-        </select>`;
+                            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+                            </select>`;
                     }
-                }
 
                 },
             { data: 'shipping_cost', name: 'shipping_cost' },
