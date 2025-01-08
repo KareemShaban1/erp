@@ -96,41 +96,34 @@
                 },
 
                 {
-                    data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+                    data: 'payment_status',
+                    name: 'payment_status',
+                    render: function (data, type, row) {
+                        let value = '';  // Initialize value for badge
+                        let select = ''; // Initialize select for dropdown
 
-
-
-
-                        // Display only the badge for completed or cancelled statuses
+                        // Display badge based on payment_status
                         if (data === 'paid') {
-                            $value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                            value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         } else if (data === 'failed') {
-                            $value = `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                            value = `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         } else {
-                            $value = `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                            value = `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
-
-
-                        if (row.order_status === 'completed') {
-                            if ($data !== 'paid') {
-                                $select = `
-                                <select class="form-control change-payment-status" data-order-id="${row.id}">
-                                    <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                                    <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-                                </select>`;
-                            }
-
+                        // Show select dropdown only if order_status is completed and payment_status is not paid
+                        if (row.order_status === 'completed' && data !== 'paid') {
+                            select = `
+            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+            </select>`;
                         }
 
-                        return $value + $select;
-
-                        // <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-
-
-
+                        return value + select;
                     }
                 },
+
                 { data: 'shipping_cost', name: 'shipping_cost' },
                 { data: 'sub_total', name: 'sub_total' },
                 { data: 'total', name: 'total' },
