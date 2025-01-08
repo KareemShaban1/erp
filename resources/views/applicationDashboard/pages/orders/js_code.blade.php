@@ -79,7 +79,7 @@
                         }
 
                         // Otherwise, display both the badge and the select dropdown
-                        if (data !== 'completed' || data !== 'cancelled') {
+                        if (data !== 'shipped' ||data !== 'completed' || data !== 'cancelled') {
                             return `
                         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                         <select class="form-control change-order-status" data-order-id="${row.id}">
