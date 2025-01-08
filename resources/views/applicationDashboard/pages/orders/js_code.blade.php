@@ -74,7 +74,7 @@
                         }
 
                         // Display only the badge for completed or cancelled statuses
-                        if (data === 'completed' || data === 'cancelled') {
+                        if (data === 'shipped' ||data === 'completed' || data === 'cancelled') {
                             return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
