@@ -15,6 +15,7 @@ use App\Models\Transaction;
 use App\Models\TransactionPayment;
 use App\Models\TransactionSellLine;
 use App\Services\API\OrderService;
+use App\Services\API\QuantityTransferService;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
@@ -38,15 +39,19 @@ class RefundOrderController extends Controller
 
     protected $orderService;
 
+    protected $quantityTransferService;
+
 
     public function __construct(
         ModuleUtil $moduleUtil,
         TransactionUtil $transactionUtil,
-        OrderService $orderService
+        OrderService $orderService,
+        QuantityTransferService $quantityTransferService
     ) {
         $this->moduleUtil = $moduleUtil;
         $this->transactionUtil = $transactionUtil;
         $this->orderService = $orderService;
+        $this->quantityTransferService = $quantityTransferService;
     }
 
     public function index()
@@ -366,8 +371,7 @@ class RefundOrderController extends Controller
 
                 $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
                 foreach ($order->orderItems as $item) {
-
-                    $this->orderService->transferQuantity($order, $item, $order->client, $order->business_location_id, 1, $item->quantity);
+                    $this->quantityTransferService->transferQuantity($order, $item, $order->client, $order->business_location_id, 1, $item->quantity);
                 }
                 //     public function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
 
@@ -539,7 +543,8 @@ class RefundOrderController extends Controller
         try {
             $business_id = $salePaymentData['business_id'];
             $transaction_id = $salePaymentData['transaction_id'];
-            $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
+            $transaction = Transaction::where('business_id', $business_id)
+            ->with(['contact'])->findOrFail($transaction_id);
 
             $location = BusinessLocation::find($salePaymentData['business_location_id']);
 
