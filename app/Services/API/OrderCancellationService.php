@@ -33,7 +33,7 @@ class OrderCancellationService extends BaseService
         ModuleUtil $moduleUtil,
         ProductUtil $productUtil,
         OrderService $orderService,
-        TransferQuantityService $transferQuantityService,
+        CancellationTransferQuantityService $transferQuantityService,
         TransactionUtil $transactionUtil
 
     ) {
@@ -196,12 +196,9 @@ class OrderCancellationService extends BaseService
                         "tax_percent" => "0",
                     ];
 
-                    \Log::info('input', [$input]);
-
 
                     $this->transactionUtil->addSellReturnForCancellation($input, $business_id, 1);
                 }
-
 
                 $order->save();
                 $orderTracking->save();

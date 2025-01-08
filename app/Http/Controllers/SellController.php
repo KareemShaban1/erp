@@ -548,6 +548,12 @@ class SellController extends Controller
                     return $status;
                 })
                 ->editColumn('so_qty_remaining', '{{@format_quantity($so_qty_remaining)}}')
+                ->addColumn('type',function($row){
+                    if($row->order_id){
+                        return $row->type === 'sell' ? 'Application Order #'. $row->order_id : '';
+                    }
+                    return 'ERP Sell';
+                })
                 ->setRowAttr([
                     'data-href' => function ($row) {
                         if (auth()->user()->can("sell.view") || auth()->user()->can("view_own_sell_only")) {

@@ -132,7 +132,8 @@ class Category extends Model
     public static function forDropdown($business_id, $type)
     {
         $categories = Category::where('business_id', $business_id)
-                            ->where('parent_id', 0)
+                            // ->where('parent_id', 0)
+                            ->where('is_sub_category', 0)
                             ->where('category_type', $type)
                             ->select(DB::raw('IF(short_code IS NOT NULL, CONCAT(name, "-", short_code), name) as name'), 'id')
                             ->orderBy('name', 'asc')
@@ -169,6 +170,12 @@ class Category extends Model
     public function scopeProductType($query)
     {
         return $query->where('category_type', 'product');
+    }
+
+
+    public function scopeIsMainCategory($query)
+    {
+        return $query->where('is_sub_category', 0);
     }
 
 

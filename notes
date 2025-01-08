@@ -71,3 +71,14 @@ SET `is_sub_category` = CASE
     WHEN parent_id <> 0 THEN 1
     ELSE 0
 END;
+
+
+
+-----------------------------------------------------------------------
+- make order process 
+  - get cart data (products)
+  - make order 
+  - make order tracking
+  - add order items
+  - handle quantity transfer between locations if all ordered quantity not exist in client location
+  - make sell 

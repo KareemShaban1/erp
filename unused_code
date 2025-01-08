@@ -1,43 +1,5 @@
-<?php
-
-namespace App\Services\API;
-
-use App\Models\Transaction;
-use App\Services\BaseService;
-use App\Utils\ContactUtil;
-use App\Utils\ModuleUtil;
-use App\Utils\ProductUtil;
-use App\Utils\TransactionUtil;
-use Illuminate\Support\Facades\DB;
-
-class TransferQuantityService extends BaseService {
-
-
-          protected $productUtil;
-          protected $moduleUtil;
-          protected $transactionUtil;
-          protected $contactUtil;
-          protected $cartService;
-          protected $orderTrackingService;
-         
-          public function __construct(
-              ProductUtil $productUtil,
-              TransactionUtil $transactionUtil,
-              ContactUtil $contactUtil,
-              ModuleUtil $moduleUtil,
-              OrderTrackingService $orderTrackingService,
-              CartService $cartService
-          ) {
-              $this->contactUtil = $contactUtil;
-              $this->moduleUtil = $moduleUtil;
-              $this->productUtil = $productUtil;
-              $this->transactionUtil = $transactionUtil;
-              $this->cartService = $cartService;
-              $this->orderTrackingService = $orderTrackingService;
-          }
-
-
-             /**
+    in app\services\api\OrderService.php
+    /**
      * Transfers a specified quantity from one location to another.
      */
     public function transferQuantityForCancellation($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
@@ -45,13 +7,8 @@ class TransferQuantityService extends BaseService {
         try {
             DB::beginTransaction();
 
-           
-
             $business_id = $client->contact->business_id;
 
-            \Log::info('data',[
-                $fromLocationId , $toLocationId,$quantity
-            ]);
 
             $inputData = [
                 'location_id' => $fromLocationId,
@@ -65,7 +22,7 @@ class TransferQuantityService extends BaseService {
                 'payment_status' => 'paid',
                 'status' => 'in_transit',
                 'total_before_tax' => $order->total,
-                'transfer_type'=>'application_transfer'
+                'transfer_type' => 'application_transfer'
             ];
 
             // Generate reference number
@@ -113,7 +70,8 @@ class TransferQuantityService extends BaseService {
             }
 
 
-            \Log::info("transfer quantity",[$quantity]);
+            \Log::info("transfer quantity", [$quantity]);
+            // $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
 
             DB::commit();
 
@@ -123,4 +81,6 @@ class TransferQuantityService extends BaseService {
             throw new \Exception('Stock transfer failed: ' . $e->getMessage());
         }
     }
-}
+
+
+----------------------------------------------------------------------------------------

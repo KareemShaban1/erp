@@ -60,4 +60,5 @@
 "shipping_details"=>"تفاصيل الشحن",
 "shipping_charges"=>"رسوم الشحن",
 'deliver_time'=>'وقت التوصيل',
+"type"=>'النوع'
 ];

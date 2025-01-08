@@ -45,6 +45,7 @@
                         <th>@lang('messages.action')</th>
                         <th>@lang('messages.date')</th>
                         <th>@lang('sale.invoice_no')</th>
+                        <th>@lang('sale.type')</th>
                         <th>@lang('sale.customer_name')</th>
                         <th>@lang('lang_v1.contact_no')</th>
                         <th>@lang('sale.location')</th>
@@ -162,6 +163,7 @@ $(document).ready( function(){
             { data: 'action', name: 'action', orderable: false, "searchable": false},
             { data: 'transaction_date', name: 'transaction_date'  },
             { data: 'invoice_no', name: 'invoice_no'},
+            { data: 'type', name: 'type'},
             { data: 'conatct_name', name: 'conatct_name'},
             { data: 'mobile', name: 'contacts.mobile'},
             { data: 'business_location', name: 'bl.name'},

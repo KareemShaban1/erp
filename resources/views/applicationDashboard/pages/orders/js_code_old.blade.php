@@ -79,19 +79,15 @@
                         }
 
                         // Otherwise, display both the badge and the select dropdown
-                        if (data !== 'completed' || data !== 'cancelled') {
-                            return `
+                        return `
                         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                         <select class="form-control change-order-status" data-order-id="${row.id}">
                             <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>`;
-                        }
-
-
-                        // <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                        //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                        //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                     }
                 },
 
@@ -101,25 +97,14 @@
                         // Display only the badge for completed or cancelled statuses
                         if (data === 'paid') {
                             return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-                        }else if(data === 'failed') {
-                            return `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
-                        }else {
-                            return `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
-                        
-                        // if(row.order_status === 'completed'){
-                        //     return `
-                        //     <select class="form-control change-payment-status" data-order-id="${row.id}">
-                        //         <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                        //         <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-                        //     </select>`;
-                        // }
-
-                        // <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-
-
-
+                        return `
+            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+            </select>`;
                     }
                 },
                 { data: 'shipping_cost', name: 'shipping_cost' },

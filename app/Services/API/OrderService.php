@@ -5,7 +5,6 @@ namespace App\Services\API;
 use App\Http\Resources\Client\ClientResource;
 use App\Http\Resources\Order\OrderCollection;
 use App\Http\Resources\Order\OrderResource;
-use App\Jobs\TransferProductJob;
 use App\Models\ApplicationSettings;
 use App\Models\Cart;
 use App\Models\Client;
@@ -15,7 +14,6 @@ use App\Models\OrderItem;
 use App\Models\Transaction;
 use App\Notifications\OrderCreatedNotification;
 use App\Notifications\OrderRefundCreatedNotification;
-use App\Notifications\OrderTransferCreatedNotification;
 use App\Services\BaseService;
 use App\Traits\CheckQuantityTrait;
 use App\Traits\HelperTrait;
@@ -42,12 +40,9 @@ class OrderService extends BaseService
     protected $cartService;
     protected $orderTrackingService;
     protected $businessUtil;
-    /**
-     * Constructor
-     *
-     * @param ProductUtils $product
-     * @return void
-     */
+
+    protected $quantityTransferService;
+
     public function __construct(
         ProductUtil $productUtil,
         TransactionUtil $transactionUtil,
@@ -55,7 +50,8 @@ class OrderService extends BaseService
         ModuleUtil $moduleUtil,
         OrderTrackingService $orderTrackingService,
         CartService $cartService,
-        BusinessUtil $businessUtil
+        BusinessUtil $businessUtil,
+        QuantityTransferService $quantityTransferService
     ) {
         $this->contactUtil = $contactUtil;
         $this->moduleUtil = $moduleUtil;
@@ -64,6 +60,7 @@ class OrderService extends BaseService
         $this->cartService = $cartService;
         $this->orderTrackingService = $orderTrackingService;
         $this->businessUtil = $businessUtil;
+        $this->quantityTransferService = $quantityTransferService;
     }
     /**
      * Get all Orders with filters and pagination for DataTables.
@@ -72,8 +69,6 @@ class OrderService extends BaseService
     {
 
         try {
-
-
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
                 ->where('order_type', 'order')->latest();
@@ -155,11 +150,11 @@ class OrderService extends BaseService
                 ]);
 
                 // Handle stock transfer and updates
-                $this->handleQuantityTransfer($cart, $client, $order, $orderItem);
+                $this->quantityTransferService->handleQuantityTransfer($cart, $client, $order, $orderItem);
             }
 
             // Create sale record
-            $saleResponse = $this->makeSale($order, $client, $carts);
+            $this->makeSell($order, $client, $carts);
 
             DB::commit();
 
@@ -179,254 +174,7 @@ class OrderService extends BaseService
         }
     }
 
-    protected function handleQuantityTransfer($cart, $client, $order, $orderItem)
-    {
-        $requiredQuantity = $cart->quantity;
-        $clientLocationId = $client->business_location_id;
-
-        // Step 1: Check if the required quantity exists in the client's location
-        $clientLocationDetail = $cart->variation->variation_location_details
-            ->firstWhere('location.id', $clientLocationId);
-
-        $availableAtClientLocation = $clientLocationDetail ? $clientLocationDetail->qty_available : 0;
-
-        if ($availableAtClientLocation >= $requiredQuantity) {
-            // If sufficient stock exists, update stock directly
-            $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
-        } else {
-            // Step 2: Calculate deficit and transfer stock if necessary
-            $deficit = $requiredQuantity - $availableAtClientLocation;
-
-            foreach ($cart->variation->variation_location_details as $locationDetail) {
-                // if location not same location of client
-                if ($locationDetail->location->id !== $clientLocationId && $deficit > 0) {
-                    $availableQty = $locationDetail->qty_available;
-
-                    if ($availableQty > 0) {
-                        $transferQty = min($deficit, $availableQty);
-
-                        // Perform the stock transfer
-                        $this->transferQuantity(
-                            $order,
-                            $orderItem,
-                            $client,
-                            $locationDetail->location->id,
-                            $clientLocationId,
-                            $transferQty
-                        );
-                        // 2
-                        $deficit -= $transferQty;
-
-                        // Break if the deficit is covered
-                        if ($deficit <= 0)
-                            break;
-                    }
-                }
-            }
-
-            // Step 3: Finalize by updating stock at the client's location
-            $this->updateStock($orderItem, $clientLocationId, $requiredQuantity);
-        }
-    }
-
-    /**
-     * Transfers a specified quantity from one location to another.
-     */
-    public function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    {
-        try {
-            DB::beginTransaction();
-
-
-
-            $business_id = $client->contact->business_id;
-
-            \Log::info('client', [$client]);
-
-            $inputData = [
-                'location_id' => $fromLocationId,
-                'order_id' => $order->id,
-                'transaction_date' => now(),
-                'final_total' => $order->total,
-                'type' => 'sell_transfer',
-                'business_id' => $business_id,
-                'created_by' => 1,
-                'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
-                'payment_status' => 'paid',
-                'status' => 'in_transit',
-                'total_before_tax' => $order->total,
-                'transfer_type' => 'application_transfer'
-            ];
-
-            // Generate reference number
-            $refCount = $this->productUtil->setAndGetReferenceCount('stock_transfer', $business_id);
-            $inputData['ref_no'] = $this->productUtil->generateReferenceNumber('stock_transfer', $refCount, $business_id);
-
-            $sellTransfer = Transaction::create($inputData);
-            $inputData['type'] = 'purchase_transfer';
-            $inputData['location_id'] = $toLocationId;
-            $inputData['transfer_parent_id'] = $sellTransfer->id;
-            $inputData['status'] = 'in_transit';
-
-            $purchaseTransfer = Transaction::create($inputData);
-
-            $products = [
-                [
-                    'product_id' => $orderItem->product_id,
-                    'variation_id' => $orderItem->variation_id,
-                    'quantity' => $quantity,
-                    'unit_price' => $orderItem->price,
-                    'unit_price_inc_tax' => $orderItem->price,
-                    'enable_stock' => $orderItem->product->enable_stock,
-                    'item_tax' => 0,
-                    'tax_id' => null,
-                ]
-            ];
-
-            $this->transactionUtil->createOrUpdateSellLines($sellTransfer, $products, $fromLocationId);
-            $purchaseTransfer->purchase_lines()->createMany($products);
-
-            foreach ($products as $product) {
-                $this->productUtil->decreaseProductQuantity(
-                    $product['product_id'],
-                    $product['variation_id'],
-                    $sellTransfer->location_id,
-                    $product['quantity']
-                );
-
-                $this->productUtil->updateProductQuantity(
-                    $purchaseTransfer->location_id,
-                    $product['product_id'],
-                    $product['variation_id'],
-                    $product['quantity']
-                );
-            }
-
-
-            \Log::info("transfer quantity", [
-                $order,
-                $orderItem,
-                $quantity,
-                $fromLocationId,
-                $toLocationId
-            ]);
-            $this->storeTransferOrder($order, $orderItem, $quantity, $fromLocationId, $toLocationId);
-
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
-            throw new \Exception('Stock transfer failed: ' . $e->getMessage());
-        }
-    }
-
-
-    /**
-     * Transfers a specified quantity from one location to another.
-     */
-    public function transferQuantityForCancellation($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-    {
-        try {
-            DB::beginTransaction();
-
-
-
-            $business_id = $client->contact->business_id;
-
-            \Log::info('data', [
-                $fromLocationId,
-                $toLocationId,
-                $quantity
-            ]);
-
-            $inputData = [
-                'location_id' => $fromLocationId,
-                'order_id' => $order->parent_order_id,
-                'transaction_date' => now(),
-                'final_total' => $order->total,
-                'type' => 'sell_transfer',
-                'business_id' => $business_id,
-                'created_by' => 1,
-                'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
-                'payment_status' => 'paid',
-                'status' => 'in_transit',
-                'total_before_tax' => $order->total,
-                'transfer_type' => 'application_transfer'
-            ];
-
-            // Generate reference number
-            $refCount = $this->productUtil->setAndGetReferenceCount('stock_transfer', $business_id);
-            $inputData['ref_no'] = $this->productUtil->generateReferenceNumber('stock_transfer', $refCount, $business_id);
-
-            $sellTransfer = Transaction::create($inputData);
-            $inputData['type'] = 'purchase_transfer';
-            $inputData['location_id'] = $toLocationId;
-            $inputData['transfer_parent_id'] = $sellTransfer->id;
-            $inputData['status'] = 'in_transit';
-
-            $purchaseTransfer = Transaction::create($inputData);
-
-            $products = [
-                [
-                    'product_id' => $orderItem->product_id,
-                    'variation_id' => $orderItem->variation_id,
-                    'quantity' => $quantity,
-                    'unit_price' => $orderItem->price,
-                    'unit_price_inc_tax' => $orderItem->price,
-                    'enable_stock' => $orderItem->product->enable_stock,
-                    'item_tax' => 0,
-                    'tax_id' => null,
-                ]
-            ];
-
-            $this->transactionUtil->createOrUpdateSellLines($sellTransfer, $products, $fromLocationId);
-            $purchaseTransfer->purchase_lines()->createMany($products);
-
-            foreach ($products as $product) {
-                $this->productUtil->decreaseProductQuantity(
-                    $product['product_id'],
-                    $product['variation_id'],
-                    $sellTransfer->location_id,
-                    $product['quantity']
-                );
-
-                $this->productUtil->updateProductQuantity(
-                    $purchaseTransfer->location_id,
-                    $product['product_id'],
-                    $product['variation_id'],
-                    $product['quantity']
-                );
-            }
-
-
-            \Log::info("transfer quantity", [$quantity]);
-            // $this->storeTransferOrder($order,$orderItem,$quantity,$fromLocationId,$toLocationId);
-
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
-            throw new \Exception('Stock transfer failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Update stock directly without a transfer (e.g., from the client's location).
-     */
-    protected function updateStock($orderItem, $locationId, $quantity)
-    {
-        \Log::info("update stock");
-        $this->productUtil->decreaseProductQuantity(
-            $orderItem->product_id,
-            $orderItem->variation_id,
-            $locationId,
-            $quantity
-        );
-    }
-
-    protected function makeSale($order, $client, $carts)
+    protected function makeSell($order, $client, $carts)
     {
         $is_direct_sale = true;
 
@@ -763,108 +511,6 @@ class OrderService extends BaseService
             ];
         }
     }
-
-    public function storeTransferOrder($order, $orderItem, $quantity, $fromLocationId, $toLocationId)
-    {
-        DB::beginTransaction();
-
-        try {
-            // Validate order item existence
-            $orderItem = OrderItem::find($orderItem->id);
-            if (!$orderItem) {
-                throw new \Exception("Order item with ID {$orderItem->id} not found.");
-            }
-
-            // Validate quantity
-            if ($quantity <= 0 || $quantity > $orderItem->quantity) {
-                throw new \Exception("Invalid quantity. It must be greater than zero and not exceed available stock.");
-            }
-
-            // Calculate subtotal for the transfer
-            $subTotal = $quantity * $orderItem->price;
-
-            \Log::info('sub_total', [$quantity * $orderItem->price]);
-            // Check if a transfer order already exists for the parent order
-            $transferOrder = Order::where('parent_order_id', $order->id)
-                ->where('order_type', 'order_transfer')
-                ->where('from_business_location_id', $fromLocationId)
-                ->where('to_business_location_id', $toLocationId)
-                ->first();
-
-            if ($transferOrder) {
-                // Update existing transfer order
-                $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
-            } else {
-                // Create a new transfer order
-                $transferOrder = $this->createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId);
-                $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
-            }
-
-            DB::commit();
-
-            // Notify admins and users about the order
-            $admins = $this->moduleUtil->get_admins($transferOrder->client->contact->business_id);
-            $users = $this->moduleUtil->getBusinessUsers($transferOrder->client->contact->business_id, $transferOrder);
-
-            \Notification::send($admins, new OrderTransferCreatedNotification($transferOrder));
-            \Notification::send($users, new OrderTransferCreatedNotification($transferOrder));
-
-            return [
-                'success' => true,
-                'message' => 'Transfer order item processed successfully.',
-                'transfer_order' => $transferOrder,
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            \Log::error("Transfer Order Error: {$e->getMessage()}");
-
-            return [
-                'success' => false,
-                'message' => 'Failed to process transfer order item. Please try again.',
-            ];
-        }
-    }
-
-    private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
-    {
-
-        // Fetch client details
-        $client = Client::findOrFail($order->client_id);
-
-        \Log::info('inside sub total', [$subTotal]);
-        // Create a new transfer order
-        return Order::create([
-            'parent_order_id' => $order->id,
-            'client_id' => $order->client_id,
-            'sub_total' => $subTotal,
-            'total' => $subTotal, // Adjustments for taxes or other calculations can be added here
-            'payment_method' => 'Cash on delivery', // Modify as needed
-            'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
-            'business_location_id' => $client->business_location_id,
-            'from_business_location_id' => $fromLocationId,
-            'to_business_location_id' => $toLocationId
-        ]);
-    }
-
-    private function addTransferItemToOrder($order, $orderItem, $quantity, $subTotal)
-    {
-        // Add transfer item to the order
-        OrderItem::create([
-            'order_id' => $order->id,
-            'product_id' => $orderItem->product_id,
-            'variation_id' => $orderItem->variation_id,
-            'quantity' => $quantity,
-            'price' => $orderItem->price,
-            'discount' => $orderItem->discount ?? 0,
-            'sub_total' => $subTotal,
-        ]);
-
-    }
-
-
-
-
 
     /**
      * Update the specified Order.

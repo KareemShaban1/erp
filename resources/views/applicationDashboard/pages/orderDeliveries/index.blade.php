@@ -110,11 +110,12 @@ var orderDeliveries_table = $('#orderDeliveries_table').DataTable({
                 // Display the badge and dropdown when order_status is 'completed'
                 return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    <select class="form-control change-payment-status" data-order-id="${row.id}">
-                        <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                        <option value="not_paid" ${data === 'not_paid' ? 'selected' : ''}>Not Paid</option>
-                    </select>
+                    
                 `;
+                // <select class="form-control change-payment-status" data-order-id="${row.id}">
+                //         <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                //         <option value="not_paid" ${data === 'failed' ? 'selected' : ''}>Not Paid</option>
+                //     </select>
             }
             },
 

@@ -31,7 +31,7 @@ class OrderController extends Controller
     protected $moduleUtil;
     protected $transactionUtil;
 
-    public function __construct(ModuleUtil $moduleUtil , TransactionUtil $transactionUtil)
+    public function __construct(ModuleUtil $moduleUtil, TransactionUtil $transactionUtil)
     {
         $this->moduleUtil = $moduleUtil;
         $this->transactionUtil = $transactionUtil;
@@ -62,16 +62,16 @@ class OrderController extends Controller
             }
 
             // Fetch filtered data
-            return $this->fetchOrders($status,$order_status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
+            return $this->fetchOrders($status, $order_status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
         }
 
         $business_locations = BusinessLocation::BusinessId()->active()->select('id', 'name')->get();
 
-        return view('applicationDashboard.pages.orders.index', compact('order_status','business_locations'));
+        return view('applicationDashboard.pages.orders.index', compact('order_status', 'business_locations'));
     }
 
 
-    private function fetchOrders($status,$order_status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
+    private function fetchOrders($status, $order_status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
     {
         $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
@@ -157,11 +157,11 @@ class OrderController extends Controller
     private function formatDatatableResponse($query)
     {
         return Datatables::of($query)
-        ->addColumn('invoice_no', function ($order) {
-            if ($order->transaction) {
-                return $order->transaction->invoice_no ?? 'N/A';
-            }
-        })
+            ->addColumn('invoice_no', function ($order) {
+                if ($order->transaction) {
+                    return $order->transaction->invoice_no ?? 'N/A';
+                }
+            })
             ->addColumn('business_location_name', function ($order) {
                 if ($order->businessLocation) {
                     return $order->businessLocation->name ?? 'N/A';
@@ -373,43 +373,47 @@ class OrderController extends Controller
         $order = Order::findOrFail($orderId);
         $order->payment_status = $status;
         $order->save();
-        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
 
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
         $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-       
-
         $transaction = Transaction::
-        where('type','sell')->
-        where('location_id',$order->business_location_id)->
-        where('order_id',$order->id)
-        ->first();
+            where('type', 'sell')->
+            where('location_id', $order->business_location_id)->
+            where('order_id', $order->id)
+            ->first();
 
         // $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
 
         $salePaymentData = [
             'transaction_id' => $transaction->id,
-            'business_id'=> $order->client->contact->business_id,
-            'amount'=>$order->total,
-            'business_location_id'=>$order->business_location_id,
-            'method'=>'cash',
-            'note'=>''
+            'business_id' => $order->client->contact->business_id,
+            'amount' => $order->total,
+            'business_location_id' => $order->business_location_id,
+            'method' => 'cash',
+            'note' => ''
         ];
-
         switch ($status) {
             case 'pending':
                 $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'pending']);
                 break;
             case 'paid':
                 $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'paid']);
-                if ($delivery && $delivery->contact) {
-                    $delivery->contact->balance += $order->total;
-                    $delivery->contact->save();
+                if ($deliveryOrder) {
+                    $deliveryOrder->payment_status = 'paid';
+                    $deliveryOrder->save();
+
+                    if ($delivery && $delivery->contact) {
+                        $delivery->contact->balance += $order->total;
+                        $delivery->contact->save();
+                    }
                 }
                 $this->makeSalePayment($salePaymentData);
                 break;
             case 'failed':
                 $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'failed']);
+                $deliveryOrder->payment_status = 'not_paid';
+                $deliveryOrder->save();
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -524,16 +528,17 @@ class OrderController extends Controller
                 $salePaymentData['payment_for'] = $transaction->contact_id;
 
                 // $salePaymentData['account_id'] =2;
-                if (!empty( $location->default_payment_accounts)) {
+                if (!empty($location->default_payment_accounts)) {
                     $default_payment_accounts = json_decode(
-                        $location->default_payment_accounts, true
+                        $location->default_payment_accounts,
+                        true
                     );
                     // Check for cash account and set account_id
                     if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {
                         $salePaymentData['account_id'] = $default_payment_accounts['cash']['account'] ?? 1;
                     }
                 }
-                
+
 
                 $prefix_type = 'purchase_payment';
                 if (in_array($transaction->type, ['sell', 'sell_return'])) {
@@ -555,8 +560,8 @@ class OrderController extends Controller
                 //     throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
                 // }
 
-                \Log::info('salePaymentData',[$salePaymentData]);
-                
+                \Log::info('salePaymentData', [$salePaymentData]);
+
                 if (!empty($salePaymentData['amount'])) {
                     $tp = TransactionPayment::create($salePaymentData);
                     $salePaymentData['transaction_type'] = $transaction->type;
@@ -568,21 +573,23 @@ class OrderController extends Controller
                 $transaction->payment_status = $payment_status;
 
                 $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
-                
+
                 DB::commit();
             }
 
-            $output = ['success' => true,
-                            'msg' => __('purchase.payment_added_success')
-                        ];
+            $output = [
+                'success' => true,
+                'msg' => __('purchase.payment_added_success')
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
             $msg = __('messages.something_went_wrong');
 
 
-            $output = ['success' => false,
-                          'msg' => $msg
-                      ];
+            $output = [
+                'success' => false,
+                'msg' => $msg
+            ];
         }
 
         return redirect()->back()->with(['status' => $output]);

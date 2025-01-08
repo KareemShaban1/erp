@@ -24,6 +24,7 @@ class CategoryService extends BaseService
 
             $query = Category::
             with('subcategories')
+            ->isMainCategory()
             ->productType()->latest();
 
             if (!empty($category_id)) {

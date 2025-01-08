@@ -53,7 +53,7 @@ class TaxonomyController extends Controller
                 ->select(
                     ['name', 'short_code', 'description', 'id', 'is_sub_category', 'parent_id', 'image']
                 )
-                ->orderBy('is_sub_category', 'asc') // Main categories (parent_id = 0) first
+                ->orderBy('is_sub_category', 'asc') 
                 ->orderBy('name', 'asc');     // Sort alphabetically within main and sub-categories
 
             return Datatables::of($category)
