@@ -24,7 +24,7 @@ class CategoryService extends BaseService
 
             $query = Category::
             with('subcategories')
-            ->isMainCategory()
+            // ->isMainCategory()
             ->productType()->latest();
 
             if (!empty($category_id)) {
@@ -49,7 +49,9 @@ class CategoryService extends BaseService
 
         try {
 
-            $query = Category::onlyParent()->with('sub_categories')->productType()->latest();
+            $query = Category::onlyParent()->with('sub_categories')
+            ->isMainCategory()
+            ->productType()->latest();
 
             $query = $this->withTrashed($query, $request);
 
