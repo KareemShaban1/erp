@@ -100,7 +100,7 @@
 
 
 
-                        if (row.order_status === 'completed') {
+                       
                             // Display only the badge for completed or cancelled statuses
                             if (data === 'paid') {
                                  $value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
@@ -110,12 +110,17 @@
                                 $value =  `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                             }
 
-                            return  $value + `
-                            <select class="form-control change-payment-status" data-order-id="${row.id}">
-                                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-                            </select>`;
-                        }
+                          
+
+                            if (row.order_status === 'completed') {
+                                $select = `
+                                <select class="form-control change-payment-status" data-order-id="${row.id}">
+                                    <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                                    <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+                                </select>`;
+                            }
+
+                            return  $value + $select ;
 
                         // <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
 
