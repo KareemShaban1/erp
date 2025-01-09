@@ -57,7 +57,6 @@
                 }, // Ensure this matches the added column name
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
-                // { data: 'payment_method', name: 'payment_method' },
 
                 {
                     data: 'order_status',

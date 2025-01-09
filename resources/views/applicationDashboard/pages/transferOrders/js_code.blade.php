@@ -46,7 +46,56 @@
                 { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
-                {
+            //     {
+            //         data: 'order_status',
+            //         name: 'order_status',
+            //         render: function (data, type, row) {
+            //             let badgeClass;
+            //             switch (data) {
+            //                 case 'pending': badgeClass = 'badge btn-warning'; break;
+            //                 case 'processing': badgeClass = 'badge btn-info'; break;
+            //                 case 'shipped': badgeClass = 'badge btn-primary'; break;
+            //                 case 'completed': badgeClass = 'badge btn-success'; break;
+            //                 case 'cancelled': badgeClass = 'badge btn-danger'; break;
+            //                 default: badgeClass = 'badge badge-secondary'; // For any other statuses
+            //             }
+
+            //             // Display only the badge for completed or cancelled statuses
+            //             if (data === 'completed' || data === 'cancelled') {
+            //                 return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+            //             }
+
+            //             // Otherwise, display both the badge and the select dropdown
+            //             return `
+            // <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+            // <select class="form-control change-order-status" data-order-id="${row.id}">
+            //     <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+            //     <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+            //     <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+            //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+            //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            // </select>`;
+            //         }
+            //     },
+
+            //     {
+            //         data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
+            //             // Display only the badge for completed or cancelled statuses
+            //             if (data === 'paid') {
+            //                 return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+            //             }
+
+            //             return `
+            // <select class="form-control change-payment-status" data-order-id="${row.id}">
+            //     <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+            //     <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+            //     <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+            // </select>`;
+            //         }
+            //     },
+                
+            
+            {
                     data: 'order_status',
                     name: 'order_status',
                     render: function (data, type, row) {
@@ -61,38 +110,59 @@
                         }
 
                         // Display only the badge for completed or cancelled statuses
-                        if (data === 'completed' || data === 'cancelled') {
+                        if (data === 'shipped' ||data === 'completed' || data === 'cancelled') {
                             return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
                         // Otherwise, display both the badge and the select dropdown
-                        return `
-            <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-            <select class="form-control change-order-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-            </select>`;
+                        if (data !== 'shipped' ||data !== 'completed' || data !== 'cancelled') {
+                            return `
+                        <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                        <select class="form-control change-order-status" data-order-id="${row.id}">
+                            <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                        </select>`;
+                        }
+
+
+                        // <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
+                        //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
+                        //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                     }
                 },
 
                 {
-                    data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
-                        // Display only the badge for completed or cancelled statuses
+                    data: 'payment_status',
+                    name: 'payment_status',
+                    render: function (data, type, row) {
+                        let value = '';  // Initialize value for badge
+                        let select = ''; // Initialize select for dropdown
+
+                        // Display badge based on payment_status
                         if (data === 'paid') {
-                            return `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                            value = `<span class="badge btn-success">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        } else if (data === 'failed') {
+                            value = `<span class="badge btn-danger">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
+                        } else {
+                            value = `<span class="badge btn-info">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
-                        return `
-            <select class="form-control change-payment-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-            </select>`;
+                        // Show select dropdown only if order_status is completed and payment_status is not paid
+                        if (row.order_status === 'completed' && data !== 'paid') {
+                            select = `
+                            <select class="form-control change-payment-status" data-order-id="${row.id}">
+                                <option value="" selected disabled>Select Status</option>
+                                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+                            </select>`;
+                        }
+
+                        return value + select;
                     }
                 },
+
+                
+                
                 { data: 'shipping_cost', name: 'shipping_cost' },
                 { data: 'sub_total', name: 'sub_total' },
                 { data: 'total', name: 'total' },

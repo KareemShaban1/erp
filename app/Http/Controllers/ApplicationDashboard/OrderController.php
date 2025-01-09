@@ -409,6 +409,8 @@ class OrderController extends Controller
                     }
                 }
                 $this->makeSalePayment($salePaymentData);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
+                ['order_number' => $order->number, 'status'=>'paid','order_type',$order->order_type]);
                 break;
             case 'failed':
                 $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'failed']);

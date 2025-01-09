@@ -49,7 +49,7 @@ class TransferOrderController extends Controller
             $status = request()->get('status', 'all'); // Default to 'all' if not provided
             $startDate = request()->get('start_date');
             $endDate = request()->get('end_date');
-            $search =  request()->get('search')['value'];
+            $search = request()->get('search')['value'];
             $businessLocation = request()->get('business_location');
             $deliveryName = request()->get('delivery_name');
             $paymentStatus = request()->get('payment_status', 'all');
@@ -64,9 +64,9 @@ class TransferOrderController extends Controller
             return $this->fetchOrders($status, $startDate, $endDate, $search, $businessLocation, $deliveryName, $paymentStatus);
         }
 
-        $business_locations = BusinessLocation::BusinessId()->active()->select('id','name')->get();
+        $business_locations = BusinessLocation::BusinessId()->active()->select('id', 'name')->get();
 
-        return view('applicationDashboard.pages.transferOrders.index',compact('business_locations'));
+        return view('applicationDashboard.pages.transferOrders.index', compact('business_locations'));
     }
 
     /**
@@ -109,7 +109,7 @@ class TransferOrderController extends Controller
         }
 
         if ($user_locations !== "all") {
-            $query->where(function($query) use ($user_locations) {
+            $query->where(function ($query) use ($user_locations) {
                 $query->whereIn('orders.business_location_id', $user_locations)
                     ->orWhereIn('orders.from_business_location_id', $user_locations)
                     ->orWhereIn('orders.to_business_location_id', $user_locations);
@@ -117,7 +117,7 @@ class TransferOrderController extends Controller
         }
 
         if ($deliveryName) {
-            $query->whereHas('deliveries.contact', function($query) use ($deliveryName) {
+            $query->whereHas('deliveries.contact', function ($query) use ($deliveryName) {
                 $query->where('contacts.name', 'like', "%{$deliveryName}%");
             });
         }
@@ -137,9 +137,9 @@ class TransferOrderController extends Controller
             $query->where(function ($query) use ($search) {
                 $query->where('orders.id', 'like', "%{$search}%")
                     ->orWhere('orders.number', 'like', "%{$search}%")
-                    ->orWhereHas('client.contact', function($query) use ($search) {
+                    ->orWhereHas('client.contact', function ($query) use ($search) {
                         $query->where('contacts.name', 'like', "%{$search}%")
-                        ->orWhere('contacts.mobile', 'like', "%{$search}%");
+                            ->orWhere('contacts.mobile', 'like', "%{$search}%");
                     });
             });
         }
@@ -177,16 +177,16 @@ class TransferOrderController extends Controller
                     return 'Error';
                 }
             })
-            ->filterColumn('client_contact_name', function($query, $keyword) {
-                $query->whereHas('client', function($query) use ($keyword) {
-                    $query->whereHas('contact', function($query) use ($keyword) {
+            ->filterColumn('client_contact_name', function ($query, $keyword) {
+                $query->whereHas('client', function ($query) use ($keyword) {
+                    $query->whereHas('contact', function ($query) use ($keyword) {
                         $query->where('contacts.name', 'like', "%{$keyword}%");
                     });
                 });
             })
-            ->filterColumn('client_contact_mobile', function($query, $keyword) {
-                $query->whereHas('client', function($query) use ($keyword) {
-                    $query->whereHas('contact', function($query) use ($keyword) {
+            ->filterColumn('client_contact_mobile', function ($query, $keyword) {
+                $query->whereHas('client', function ($query) use ($keyword) {
+                    $query->whereHas('contact', function ($query) use ($keyword) {
                         $query->where('contacts.mobile', 'like', "%{$keyword}%");
                     });
                 });
@@ -195,7 +195,7 @@ class TransferOrderController extends Controller
                 return $order->has_delivery; // Add the delivery status here
             })
             ->addColumn('delivery_name', function ($order) {
-                     if ($order->has_delivery) {
+                if ($order->has_delivery) {
                     // Assuming `deliveries` is a relationship on the Order model
                     return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
                 }
@@ -228,8 +228,12 @@ class TransferOrderController extends Controller
         switch ($status) {
             case 'pending':
                 $orderTracking->pending_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'pending', 'order_type', $order->order_type]
+                );
                 break;
             case 'processing':
                 $orderTracking->processing_at = now();
@@ -239,31 +243,47 @@ class TransferOrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been processed successfully.',
-                    ['order_id' => $order->id,
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->order, 'status'=>'processing','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->order, 'status' => 'processing', 'order_type', $order->order_type]
+                );
                 break;
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
-                 // Send and store push notification
+                // Send and store push notification
                 app(FirebaseClientService::class)->sendAndStoreNotification(
                     $order->client->id,
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been shipped successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
                 $orderTracking->shipped_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'shipped','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'shipped', 'order_type', $order->order_type]
+                );
                 break;
             case 'cancelled':
                 $orderTracking->cancelled_at = now();
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'cancelled','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'cancelled', 'order_type', $order->order_type]
+                );
                 break;
             case 'completed':
                 $orderTracking->completed_at = now();
@@ -273,11 +293,17 @@ class TransferOrderController extends Controller
                     $order->client->fcm_token,
                     'Order Status Changed',
                     'Your order has been completed successfully.',
-                    ['order_id' => $order->id, 
-                    'status'=>$order->status]
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
                 );
-                $this->moduleUtil->activityLog($order, 'change_status', null, 
-                ['order_number' => $order->number, 'status'=>'completed','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'completed', 'order_type', $order->order_type]
+                );
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -301,37 +327,57 @@ class TransferOrderController extends Controller
         $order->payment_status = $status;
         $order->save();
         $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
-
         $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-        if ($delivery && $delivery->contact) {
-            $delivery->contact->balance += $order->total;
-            $delivery->contact->save();
-        }
+
 
         switch ($status) {
             case 'pending':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'pending','order_type',$order->order_type]);
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'pending', 'order_type', $order->order_type]
+                );
                 break;
             case 'paid':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'paid','order_type',$order->order_type]);
+                if ($deliveryOrder) {
+                    $deliveryOrder->payment_status = 'paid';
+                    $deliveryOrder->save();
+
+                    if ($delivery && $delivery->contact) {
+                        $delivery->contact->balance += $order->total;
+                        $delivery->contact->save();
+                    }
+                }
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'paid', 'order_type', $order->order_type]
+                );
                 break;
             case 'failed':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, 
-                ['order_number' => $order->number, 'status'=>'failed','order_type',$order->order_type]);
+                $deliveryOrder->payment_status = 'not_paid';
+                $deliveryOrder->save();
+                $this->moduleUtil->activityLog(
+                    $order,
+                    'change_payment_status',
+                    null,
+                    ['order_number' => $order->number, 'status' => 'failed', 'order_type', $order->order_type]
+                );
                 break;
             default:
-                throw new \InvalidArgumentException("Invalid status: $status");    
-            }
+                throw new \InvalidArgumentException("Invalid status: $status");
+        }
 
         return response()->json(['success' => true, 'message' => 'Order Payment status updated successfully.']);
     }
 
 
-    public function getOrderTransferDetails($orderId){
-        
+    public function getOrderTransferDetails($orderId)
+    {
+
         // Fetch activity logs related to the order
         $activityLogs = Activity::with(['subject'])
             ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
@@ -393,7 +439,7 @@ class TransferOrderController extends Controller
         ]);
     }
 
-     /**
+    /**
      * Update the delivery contact balance based on the order total.
      *
      * @param Order $order
