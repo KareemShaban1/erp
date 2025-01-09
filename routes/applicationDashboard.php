@@ -44,7 +44,7 @@ Route::get('/products/get_variation_value_row', 'ProductController@getVariationV
 Route::post('/products/check_product_sku', 'ProductController@checkProductSku');
 Route::get('/products/quick_add_product', 'ProductController@quickAdd');
 Route::post('/products/save_quick_product', 'ProductController@saveQuickProduct');
-Route::get('/products/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
+Route::get('/get-combo-product-entry-row', 'ProductController@getComboProductEntryRow');
 Route::post('/products/toggle-woocommerce-sync', 'ProductController@toggleWooCommerceSync');
 // ----------------------------------------------
 

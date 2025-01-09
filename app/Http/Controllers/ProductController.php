@@ -1485,6 +1485,7 @@ class ProductController extends Controller
      */
     public function getComboProductEntryRow(Request $request)
     {
+
         if (request()->ajax()) {
             $product_id = $request->input('product_id');
             $variation_id = $request->input('variation_id');

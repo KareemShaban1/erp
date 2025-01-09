@@ -117,7 +117,7 @@
 	    	if (product_id) {
 	    		$.ajax({
 	    			method : 'GET',
-	    			url: '/products/get-combo-product-entry-row',
+				 url: '{{ action("ProductController@getComboProductEntryRow") }}',
 	    			dataType : "html",
 	    			data: { 'product_id' : product_id, 'variation_id' : variation_id},
 	    			success :function(result){
