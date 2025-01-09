@@ -117,17 +117,34 @@ class DeliveryController extends Controller
                 ->addColumn('delivery_name', function ($row) {
                     return $row->contact->name ?? '';
                 })
+                ->addColumn('update_delivery_balance', function ($row) {
+                    $url = route('deliveries.updateBalance', ['delivery_id' => $row->id]);
+                    return '<a href="' . $url . '" class="btn btn-danger">' . __('lang_v1.update_delivery_balance') . '</a>';
+                })
                 ->addColumn('action', function ($row) {
                     $url = route('order.deliveries', ['delivery_id' => $row->id]);
                     return '<a href="' . $url . '" class="btn btn-primary">' . __('lang_v1.view_orders') . '</a>';
                 })
-                ->rawColumns(['action'])
+                ->rawColumns(['update_delivery_balance','action'])
                 ->make(true);
         }
     
         return view('applicationDashboard.pages.deliveries.index');
     }
     
+
+    public function UpdateDeliveryBalance($delivery_id){
+        
+        $delivery = Delivery::find($delivery_id);
+        if($delivery){
+            $delivery->contact->balance = 0;
+            $delivery->contact->save();
+            $delivery->save();
+        }
+        return view('applicationDashboard.pages.deliveries.index');
+
+    }
+
 
 
     public function orderDeliveries(Request $request)

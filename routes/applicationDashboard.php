@@ -124,6 +124,7 @@ Route::post('applicationDashboard/transferOrders/{orderId}/change-payment-status
 
 // deliveries
 Route::get('/order-deliveries', 'ApplicationDashboard\DeliveryController@orderDeliveries')->name('order.deliveries');
+Route::get('/UpdateDeliveryBalance/{delivery_id}', 'ApplicationDashboard\DeliveryController@UpdateDeliveryBalance')->name('deliveries.updateBalance');
 Route::get('applicationDashboard/allDeliveries', 'ApplicationDashboard\DeliveryController@allDeliveries');
 Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
 Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');

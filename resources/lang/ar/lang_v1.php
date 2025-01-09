@@ -1544,4 +1544,5 @@ return [
 "category_type"=>"نوع التصنيف",
 "main_category"=>"تصنيف رئيسى",
 "sub_category"=>"تصنيف فرعى",
+"update_delivery_balance"=>"تصفير حساب الدليفرى"
 ];

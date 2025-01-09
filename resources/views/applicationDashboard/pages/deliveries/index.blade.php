@@ -23,6 +23,7 @@
                         <th>@lang('lang_v1.email_address')</th>
                         <th>@lang('lang_v1.location')</th>
                         <th>@lang('lang_v1.balance')</th>
+                        <th>@lang('lang_v1.update_delivery_balance')</th>
                         <th>@lang('lang_v1.actions')</th>
 
 
@@ -63,6 +64,7 @@ $(document).ready(function(){
             { data: 'email_address', name: 'email_address' },
             { data: 'location', name: 'location' },
             { data: 'contact.balance', name: 'contact.balance' },
+            { data: 'update_delivery_balance', name: 'update_delivery_balance' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
 
 
