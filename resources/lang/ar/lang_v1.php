@@ -1544,5 +1544,9 @@ return [
 "category_type"=>"نوع التصنيف",
 "main_category"=>"تصنيف رئيسى",
 "sub_category"=>"تصنيف فرعى",
-"update_delivery_balance"=>"تصفير حساب الدليفرى"
+"update_delivery_balance"=>"تصفير حساب الدليفرى",
+"tags"=>'العلامات',
+"add_tag"=>'أضافة علامة',
+"edit_tag"=>'تعديل علامة',
+"tag_name"=>'أسم العلامة'
 ];

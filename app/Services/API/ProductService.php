@@ -55,8 +55,19 @@ class ProductService extends BaseService
 
             // Add search by product name if provided in the request
             if ($request->filled('search')) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $searchTerm = $request->search;
+            
+                $query->where(function ($q) use ($searchTerm) {
+                    // Search in product name
+                    $q->where('name', 'like', '%' . $searchTerm . '%');
+            
+                    // Search in tags using whereHas
+                    $q->orWhereHas('tags', function ($tagQuery) use ($searchTerm) {
+                        $tagQuery->where('name', 'like', '%' . $searchTerm . '%');
+                    });
+                });
             }
+            
 
             // Apply withTrashed logic if needed
             $query = $this->withTrashed($query, $request);

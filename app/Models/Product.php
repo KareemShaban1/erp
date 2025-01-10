@@ -240,6 +240,12 @@ class Product extends Model
         return $this->belongsToMany(\App\Models\BusinessLocation::class, 'product_locations', 'product_id', 'location_id');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(\App\Models\Tag::class, 'products_tags', 'product_id', 'tag_id');
+    }
+    
+
     /**
      * Scope a query to only include products available for a location.
      *

@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\PurchaseLine;
 use App\Models\SellingPriceGroup;
+use App\Models\Tag;
 use App\Models\TaxRate;
 use App\Models\Unit;
 use App\Utils\ModuleUtil;
@@ -731,8 +732,10 @@ class ProductController extends Controller
         //product screen view from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
 
+        $tags = Tag::active()->pluck('name', 'id');
+
         return view('product.create')
-            ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
+            ->with(compact('tags', 'categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
     }
 
     private function product_types()
@@ -815,6 +818,11 @@ class ProductController extends Controller
             $product_locations = $request->input('product_locations');
             if (!empty($product_locations)) {
                 $product->product_locations()->sync($product_locations);
+            }
+
+            $product_tags = $request->input('tags');
+            if (!empty($product_tags)) {
+                $product->tags()->sync($product_tags);
             }
 
             if ($product->type == 'single') {
@@ -967,8 +975,9 @@ class ProductController extends Controller
         //product screen view from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
 
+        $tags = Tag::active()->pluck('name','id');
         return view('product.edit')
-            ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
+            ->with(compact('tags','categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
     }
 
     /**
@@ -1075,6 +1084,10 @@ class ProductController extends Controller
             $product_locations = !empty($request->input('product_locations')) ?
                 $request->input('product_locations') : [];
             $product->product_locations()->sync($product_locations);
+
+            $product_tags = !empty($request->input('tags')) ?
+                $request->input('tags') : [];
+            $product->tags()->sync($product_tags);
 
             if ($product->type == 'single') {
                 $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);

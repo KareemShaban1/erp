@@ -141,6 +141,22 @@ class ApplicationSidebarMenu
                 )->order(21);
             }
 
+            if (auth()->user()->can('tags.view')) {
+                $menu->dropdown(
+                    __('lang_v1.tags'),
+                    function ($sub) {
+
+
+
+                        $sub->url(
+                            action('ApplicationDashboard\TagController@index'),
+                            __('lang_v1.tags'),
+                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
+                        );
+                    },
+                    ['icon' => 'fa fa-flag']
+                )->order(21);
+            }
             if (auth()->user()->can('orders.view') || auth()->user()->can('orders_refund.view') || auth()->user()->can('orders_transfer.view')) {
 
                 $menu->dropdown(
@@ -249,11 +265,14 @@ class ApplicationSidebarMenu
 
             // <i class="fa-solid fa-magnifying-glass"></i>
 
-                $menu->url(action('ApplicationDashboard\SuggestionProductController@index'),
-                 __('lang_v1.suggestion_products'), [
+            $menu->url(
+                action('ApplicationDashboard\SuggestionProductController@index'),
+                __('lang_v1.suggestion_products'),
+                [
                     'icon' => 'fa fa-search',
                     'active' => request()->segment(1)
-                ])->order(80);
+                ]
+            )->order(80);
 
 
             if (auth()->user()->can('applicationSettings.view')) {

@@ -299,6 +299,10 @@ class PermissionsTableSeeder extends Seeder
             ['name' => 'applicationSettings.view'],
             ['name' => 'applicationSettings.dashboard'],
 
+            ['name' => 'tags.view'],
+            ['name' => 'tags.create'],
+            ['name' => 'tags.update'],
+            ['name' => 'tags.delete'],
 
         ];
 

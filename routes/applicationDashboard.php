@@ -163,6 +163,12 @@ Route::resource('suggestionProducts', 'ApplicationDashboard\SuggestionProductCon
 
 // ----------------------------------------------
 
+// tags
+Route::resource('tags', 'ApplicationDashboard\TagController');
+
+// ----------------------------------------------
+
+
 // settings
 Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
     ->name('application_settings.index');

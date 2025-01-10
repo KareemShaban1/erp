@@ -166,6 +166,15 @@
             </small>
           </div>
         </div>
+
+       
+
+        <div class="col-sm-4">
+          <div class="form-group">
+            {!! Form::label('tags', __('business.tags') . ':') !!} @show_tooltip(__('lang_v1.product_location_help'))
+              {!! Form::select('tags[]', $tags, null, ['class' => 'form-control select2', 'multiple', 'id' => 'tags']); !!}
+          </div>
+        </div>
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
