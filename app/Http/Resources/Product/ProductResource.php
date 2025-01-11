@@ -71,7 +71,6 @@ class ProductResource extends JsonResource
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'active_in_app'=>$this->active_in_app,
-                'combo_variations'=>$this->variations->combo_variations,
                 'type' => $this->type,
                 'business_id' => $this->business_id,
                 'brand' => (new BrandResource($this->brand))->withFullData(false),

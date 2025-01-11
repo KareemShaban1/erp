@@ -41,6 +41,7 @@ class VariationResource extends JsonResource
                 return [
                     'discounts'=> (new DiscountCollection($this->discounts))->withFullData(true),
                     'total_qty_available' => intval($this->total_qty_available),
+                    'combo_variations'=>$this->combo_variations,
                     'default_sell_price' => $this->default_sell_price,
                     'sell_price_inc_tax' => $this->sell_price_inc_tax,
                     'variation_template' => (new ProductVariationResource($this->product_variation))->withFullData(false),
