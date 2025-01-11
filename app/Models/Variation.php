@@ -27,10 +27,21 @@ class Variation extends Model
      *
      * @var array
      */
-    protected $fillable = ['name','product_id','sub_sku','product_variation_id','woocommerce_variation_id',
-    'variation_value_id','default_purchase_price','dpp_inc_tax','profit_percent','default_sell_price',
-    'sell_price_inc_tax','combo_variations'];
-    
+    protected $fillable = [
+        'name',
+        'product_id',
+        'sub_sku',
+        'product_variation_id',
+        'woocommerce_variation_id',
+        'variation_value_id',
+        'default_purchase_price',
+        'dpp_inc_tax',
+        'profit_percent',
+        'default_sell_price',
+        'sell_price_inc_tax',
+        'combo_variations'
+    ];
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -40,9 +51,9 @@ class Variation extends Model
         'combo_variations' => 'array',
     ];
 
-    protected $appends = ['code','total_qty_available'];
+    protected $appends = ['code', 'total_qty_available'];
 
-    
+
     public function product_variation()
     {
         return $this->belongsTo(\App\Models\ProductVariation::class);
@@ -55,7 +66,7 @@ class Variation extends Model
 
     public function variation_value()
     {
-        return $this->belongsTo(\App\Models\VariationValueTemplate::class,'variation_value_id');
+        return $this->belongsTo(\App\Models\VariationValueTemplate::class, 'variation_value_id');
     }
 
     /**
@@ -96,7 +107,7 @@ class Variation extends Model
     {
         return $this->belongsToMany(\App\Models\Discount::class, 'discount_variations', 'variation_id', 'discount_id');
     }
-    
+
 
 
     public function getFullNameAttribute()
@@ -111,7 +122,7 @@ class Variation extends Model
     }
 
 
-     /**
+    /**
      * Accessor for the code attribute.
      *
      * @return string|null
@@ -127,8 +138,27 @@ class Variation extends Model
     }
 
     public function getTotalQtyAvailableAttribute()
-{
-    // Sum the qty_available of all related VariationLocationDetails records
-    return $this->variation_location_details()->sum('qty_available');
-}
+    {
+        // Check if the variation has combo variations
+        if (!empty($this->combo_variations) && is_array($this->combo_variations)) {
+            $total_qty = 0;
+    
+            // Iterate through each combo variation
+            foreach ($this->combo_variations as $combo_variation) {
+                // Find the corresponding variation by its ID
+                $variation = self::find($combo_variation['variation_id']);
+    
+                if ($variation) {
+                    // Multiply the quantity available by the required quantity
+                    $total_qty += $variation->variation_location_details()->sum('qty_available') * $combo_variation['quantity'];
+                }
+            }
+    
+            return $total_qty;
+        }
+    
+        // If no combo variations, return the normal sum of qty_available
+        return $this->variation_location_details()->sum('qty_available');
+    }
+    
 }
