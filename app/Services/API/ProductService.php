@@ -21,7 +21,7 @@ class ProductService extends BaseService
     {
         try {
 
-                    // Initialize the query with necessary relationships
+            // Initialize the query with necessary relationships
             $query = Product::with([
                 'media',
                 'unit:id,actual_name,short_name',
@@ -49,25 +49,29 @@ class ProductService extends BaseService
 
             if (!empty($request->category_id) && !empty($request->sub_category_id)) {
                 $query->where('category_id', $request->category_id)->
-                where('sub_category_id', $request->sub_category_id);
+                    where('sub_category_id', $request->sub_category_id);
             }
 
 
             // Add search by product name if provided in the request
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-            
+
                 $query->where(function ($q) use ($searchTerm) {
                     // Search in product name
                     $q->where('name', 'like', '%' . $searchTerm . '%');
-            
+
                     // Search in tags using whereHas
                     $q->orWhereHas('tags', function ($tagQuery) use ($searchTerm) {
                         $tagQuery->where('name', 'like', '%' . $searchTerm . '%');
                     });
                 });
             }
-            
+
+            // if ($product->product_type == 'combo') {
+            //     if ($check_qty) {
+            //         $product->qty_available = $this->calculateComboQuantity($location_id, $product->combo_variations);
+            //     }
 
             // Apply withTrashed logic if needed
             $query = $this->withTrashed($query, $request);
