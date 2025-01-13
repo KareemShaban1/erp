@@ -815,4 +815,18 @@
         });
 
     });
+
+    function printOrderDetails() {
+    var modalContent = document.querySelector('#viewOrderInfoModal .modal-content').innerHTML;
+    var originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = modalContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+
+    // Reinitialize scripts after restoring the content (if needed)
+    location.reload(); // Refresh to restore event listeners and modal functionality
+}
+
+
 </script>

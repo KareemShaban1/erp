@@ -953,3 +953,15 @@ table.table-text-center td, table.table-text-center th{
         margin-bottom: 40px;
     }
 }
+
+@media print {
+  .order-data {
+    display: flex;
+  }
+  .modal-footer {
+    display: none;
+}
+.activity-container {
+  display: none;
+}
+}

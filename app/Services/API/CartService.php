@@ -132,7 +132,7 @@ class CartService extends BaseService
                 'product_id' => $productId,
                 'variation_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $variation->default_sell_price,
+                'price' => $variation->sell_price_inc_tax,
             ]);
         }
     

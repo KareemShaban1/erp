@@ -48,15 +48,16 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
         ];
-
-        // if ($product->product_type == 'combo') {
-        //     if ($check_qty) {
-        //         $product->qty_available = $this->productUtil->calculateComboQuantity($location_id, $product->combo_variations);
-        //     }
     
         // Conditionally merge the full data if the flag is set to true
         if ($this->withFullData) {
-            $variations = $this->variations;
+            // Filter variations to exclude inactive locations
+            $variations = $this->variations->map(function ($variation) {
+                $variation->variation_location_details = $variation->variation_location_details->filter(function ($details) {
+                    return $details->location->is_active == 1;
+                });
+                return $variation;
+            });
     
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
@@ -70,7 +71,7 @@ class ProductResource extends JsonResource
             // Otherwise, return full data
             $data = array_merge($data, [
                 'description' => $this->product_description,
-                'active_in_app'=>$this->active_in_app,
+                'active_in_app' => $this->active_in_app,
                 'type' => $this->type,
                 'business_id' => $this->business_id,
                 'brand' => (new BrandResource($this->brand))->withFullData(false),
@@ -78,11 +79,12 @@ class ProductResource extends JsonResource
                 'current_stock' => $current_stock,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
-                'variations' => (new VariationCollection($this->variations))->withFullData(true),
+                'variations' => (new VariationCollection($variations))->withFullData(true),
             ]);
         }
     
         return $data;
     }
+    
     
 }

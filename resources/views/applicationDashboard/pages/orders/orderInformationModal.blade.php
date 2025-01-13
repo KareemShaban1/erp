@@ -8,7 +8,7 @@
                 <form id="viewOrderInfoForm">
                     <input type="hidden" name="order_id" id="view_order_id">
 
-                    <div class="box box-primary">
+                    <div class="box box-primary order-data">
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-3">
@@ -143,7 +143,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row activity-container">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>@lang('lang_v1.activity_logs'):</label>
@@ -169,6 +169,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('lang_v1.close')</button>
+                <button type="button" class="btn btn-primary" onclick="printOrderDetails()">@lang('lang_v1.print')</button>
             </div>
         </div>
     </div>
