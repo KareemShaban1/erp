@@ -85,7 +85,7 @@ class Variation extends Model
         // return $this->hasMany(\App\Models\VariationLocationDetails::class);
         return $this->hasMany(\App\Models\VariationLocationDetails::class)
                 ->whereHas('location', function ($query) {
-                    $query->where('is_active', 1);
+                    $query->where('active_in_app', 1);
                 });
     }
 

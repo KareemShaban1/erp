@@ -24,7 +24,7 @@ class BusinessLocation extends Model
      *
      * @var array
      */
-    protected $fillable = ['business_id','location_id','name','landmark','country','state',
+    protected $fillable = ['business_id','active_in_app','location_id','name','landmark','country','state',
     'city','zip_code','invoice_scheme_id','invoice_layout_id','sale_invoice_layout_id',
     'selling_price_group_id','print_receipt_on_invoice','receipt_printer_type','printer_id',
     'mobile','alternate_number','email','website','featured_products','is_active',

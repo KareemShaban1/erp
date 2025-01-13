@@ -82,6 +82,14 @@
             {!! Form::text('website', $location->website, ['class' => 'form-control', 'placeholder' => __( 'lang_v1.website')]); !!}
           </div>
         </div>
+        <div class="col-sm-12">
+          <div class="form-group">
+            <br>
+            <label>
+              {!! Form::checkbox('active_in_app', 1, $location->active_in_app, ['class' => 'input-icheck']); !!} <strong>@lang('lang_v1.enable_active_in_app')</strong>
+            </label> @show_tooltip(__('lang_v1.tooltip_sr_no'))
+          </div>
+        </div>
         <div class="clearfix"></div>
         <div class="col-sm-6">
           <div class="form-group">
