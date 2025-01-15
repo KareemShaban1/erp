@@ -98,11 +98,12 @@ class QuantityTransferService extends BaseService
                               DB::beginTransaction();
 
                               $variation = Variation::
-                              where('id', $orderItem->variation_id)
-                              ->where('product_id', $orderItem->product_id);
+                                        where('id', $orderItem->variation_id)
+                                        ->where('product_id', $orderItem->product_id)
+                                        ->first();
                               $total = $quantity * $variation->default_purchase_price;
                               $business_id = $client->contact->business_id;
-                           
+
                               $inputData = [
                                         'location_id' => $fromLocationId,
                                         'order_id' => $order->id,
@@ -138,7 +139,7 @@ class QuantityTransferService extends BaseService
                                                   'quantity' => $quantity,
                                                   'unit_price' => $variation->default_purchase_price,
                                                   'unit_price_inc_tax' => $variation->default_purchase_price,
-                                                  'unite_price_before_discount'=>$variation->default_purchase_price,
+                                                  'unite_price_before_discount' => $variation->default_purchase_price,
                                                   'enable_stock' => $orderItem->product->enable_stock,
                                                   'item_tax' => 0,
                                                   'tax_id' => null,
@@ -173,6 +174,7 @@ class QuantityTransferService extends BaseService
                               DB::commit();
 
                     } catch (\Exception $e) {
+                              \Log::info($e);
                               DB::rollBack();
                               Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
                               throw new \Exception('Stock transfer failed: ' . $e->getMessage());
