@@ -421,6 +421,8 @@ class RefundOrderController extends Controller
             'note' => ''
         ];
 
+        \Log::info('saleReturnPaymentData',[$saleReturnPaymentData]);
+
         switch ($status) {
             case 'pending':
                 $this->moduleUtil->activityLog(
