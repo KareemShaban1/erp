@@ -307,32 +307,32 @@ $(document).ready(function(){
         ]
     });
 
-    $(document).on('change', '.change-order-status', function () {
-        var orderRefundId = $(this).data('order-refund-id');
-        var status = $(this).val();
+    // $(document).on('change', '.change-order-status', function () {
+    //     var orderRefundId = $(this).data('order-refund-id');
+    //     var status = $(this).val();
 
-        $.ajax({
-            // url: `/order-refunds/${orderRefundId}/change-status`, // Update this URL to match your route
-            url: `{{ action("ApplicationDashboard\RefundOrderController@changeOrderStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
-            type: 'POST',
-            data: {
-                status: status,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    // alert(response.message);
-                    order_refunds_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                } else {
-                    alert('Failed to update order status.');
-                }
-            },
-            error: function (xhr) {
-                alert('An error occurred: ' + xhr.responseText);
-            }
-        });
-    });
+    //     $.ajax({
+    //         // url: `/order-refunds/${orderRefundId}/change-status`, // Update this URL to match your route
+    //         url: `{{ action("ApplicationDashboard\RefundOrderController@changeOrderStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
+    //         type: 'POST',
+    //         data: {
+    //             status: status,
+    //             _token: '{{ csrf_token() }}' // CSRF token for security
+    //         },
+    //         success: function (response) {
+    //             if (response.success) {
+    //                 toastr.success(response.message);
+    //                 // alert(response.message);
+    //                 order_refunds_table.ajax.reload(); // Reload DataTable to reflect the updated status
+    //             } else {
+    //                 alert('Failed to update order status.');
+    //             }
+    //         },
+    //         error: function (xhr) {
+    //             alert('An error occurred: ' + xhr.responseText);
+    //         }
+    //     });
+    // });
 
 
     $(document).on('change', '.change-refund-status', function () {
