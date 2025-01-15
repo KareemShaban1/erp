@@ -95,20 +95,21 @@ class QuantityTransferService extends BaseService
                     try {
                               DB::beginTransaction();
 
+                              $total = $quantity * $orderItem->price;
                               $business_id = $client->contact->business_id;
 
                               $inputData = [
                                         'location_id' => $fromLocationId,
                                         'order_id' => $order->id,
                                         'transaction_date' => now(),
-                                        'final_total' => $order->total,
+                                        'final_total' => $total,
                                         'type' => 'sell_transfer',
                                         'business_id' => $business_id,
                                         'created_by' => 1,
                                         'shipping_charges' => $this->productUtil->num_uf($order->shipping_cost),
                                         'payment_status' => 'paid',
                                         'status' => 'in_transit',
-                                        'total_before_tax' => $order->total,
+                                        'total_before_tax' => $total,
                                         'transfer_type' => 'application_transfer'
                               ];
 
@@ -197,6 +198,7 @@ class QuantityTransferService extends BaseService
                               if ($transferOrder) {
                                         // Update existing transfer order
                                         $this->addTransferItemToOrder($transferOrder, $orderItem, $quantity, $subTotal);
+                                        $this->updateTransferOrderTotal($transferOrder, $orderItem, $quantity);
                               } else {
                                         // Create a new transfer order
                                         $transferOrder = $this->createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId);
@@ -263,6 +265,13 @@ class QuantityTransferService extends BaseService
                               'sub_total' => $subTotal,
                     ]);
 
+          }
+
+          private function updateTransferOrderTotal($transferOrder, $orderItem, $quantity)
+          {
+                    $transferOrder->sub_total += ($quantity * $orderItem->price);
+                    $transferOrder->total += ($quantity * $orderItem->price);
+                    $transferOrder->save();
           }
 
 
