@@ -312,7 +312,7 @@ $(document).ready(function(){
 
         $.ajax({
             // url: `/order-refunds/${orderRefundId}/change-status`, // Update this URL to match your route
-            url: `{{ action("ApplicationDashboard\OrderRefundController@changeOrderRefundStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
+            url: `{{ action("ApplicationDashboard\OrderRefundController@changeOrderStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
                 status: status,

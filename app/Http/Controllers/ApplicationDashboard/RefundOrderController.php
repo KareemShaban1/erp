@@ -407,7 +407,7 @@ class RefundOrderController extends Controller
         }
 
         $transaction = Transaction::
-            where('type', 'sell')->
+            where('type', 'sell_return')->
             where('location_id', $order->business_location_id)->
             where('order_id', $order->id)
             ->first();
