@@ -201,12 +201,13 @@ $(document).ready(function(){
                     return `
                     <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                     
-            <select class="form-control change-order-status" data-order-refund-id="${row.id}">
-                <option value="requested" ${data === 'requested' ? 'selected' : ''}>Requested</option>
-                 <option value="processed" ${data === 'processed' ? 'selected' : ''}>Processed</option>
-                <option value="approved" ${data === 'approved' ? 'selected' : ''}>Approved</option>
-                <option value="rejected" ${data === 'rejected' ? 'selected' : ''}>Rejected</option>
-            </select>`;
+           `;
+        //    <select class="form-control change-order-status" data-order-refund-id="${row.id}">
+        //         <option value="requested" ${data === 'requested' ? 'selected' : ''}>Requested</option>
+        //          <option value="processed" ${data === 'processed' ? 'selected' : ''}>Processed</option>
+        //         <option value="approved" ${data === 'approved' ? 'selected' : ''}>Approved</option>
+        //         <option value="rejected" ${data === 'rejected' ? 'selected' : ''}>Rejected</option>
+        //     </select>
                 }
             },
         //     {
@@ -312,7 +313,7 @@ $(document).ready(function(){
 
         $.ajax({
             // url: `/order-refunds/${orderRefundId}/change-status`, // Update this URL to match your route
-            url: `{{ action("ApplicationDashboard\OrderRefundController@changeOrderStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
+            url: `{{ action("ApplicationDashboard\RefundOrderController@changeOrderStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
                 status: status,
