@@ -421,7 +421,7 @@ class RefundOrderController extends Controller
             'note' => ''
         ];
 
-        \Log::info('saleReturnPaymentData',[$saleReturnPaymentData]);
+        \Log::info('saleReturnPaymentData', [$saleReturnPaymentData]);
 
         switch ($status) {
             case 'pending':
@@ -465,8 +465,14 @@ class RefundOrderController extends Controller
         // Fetch activity logs related to the order
         $activityLogs = Activity::with(['subject'])
             ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
-            ->leftJoin('clients as c', 'c.id', '=', 'activity_log.causer_id')
-            ->leftJoin('deliveries as d', 'd.id', '=', 'activity_log.causer_id')
+            ->leftJoin('deliveries as d', function ($join) {
+                $join->on('d.id', '=', 'activity_log.causer_id')
+                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
+            })
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
             ->leftJoin('contacts as contact', function ($join) {
                 $join->on('contact.id', '=', 'c.contact_id')
                     ->orOn('contact.id', '=', 'd.contact_id');
@@ -546,7 +552,7 @@ class RefundOrderController extends Controller
             $business_id = $salePaymentData['business_id'];
             $transaction_id = $salePaymentData['transaction_id'];
             $transaction = Transaction::where('business_id', $business_id)
-            ->with(['contact'])->findOrFail($transaction_id);
+                ->with(['contact'])->findOrFail($transaction_id);
 
             $location = BusinessLocation::find($salePaymentData['business_location_id']);
 
@@ -565,9 +571,10 @@ class RefundOrderController extends Controller
 
                 // $salePaymentData['account_id'] =2;
 
-                if (!empty( $location->default_payment_accounts)) {
+                if (!empty($location->default_payment_accounts)) {
                     $default_payment_accounts = json_decode(
-                        $location->default_payment_accounts, true
+                        $location->default_payment_accounts,
+                        true
                     );
                     // Check for cash account and set account_id
                     if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {
@@ -619,7 +626,7 @@ class RefundOrderController extends Controller
             DB::rollBack();
             $msg = __('messages.something_went_wrong');
 
-            \Log::info('error',[$e]);
+            \Log::info('error', [$e]);
 
             $output = [
                 'success' => false,
