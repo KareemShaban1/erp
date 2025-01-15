@@ -368,6 +368,7 @@ class RefundOrderController extends Controller
                     "tax_percent" => "0",
                 ];
 
+                \Log::info('sale_refund_date',[$input]);
 
                 $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
                 foreach ($order->orderItems as $item) {
