@@ -193,23 +193,23 @@ class ApplicationSidebarMenu
                 )->order(22);
             }
 
-            if (auth()->user()->can('orders_cancellation.view')) {
+            // if (auth()->user()->can('orders_cancellation.view')) {
 
-                $menu->dropdown(
-                    __('lang_v1.order_cancellations'),
-                    function ($sub) {
+            //     $menu->dropdown(
+            //         __('lang_v1.order_cancellations'),
+            //         function ($sub) {
 
-                        $sub->url(
-                            action('ApplicationDashboard\OrderCancellationController@index'),
-                            __('lang_v1.all_order_cancellations'),
-                            ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
-                        );
+            //             $sub->url(
+            //                 action('ApplicationDashboard\OrderCancellationController@index'),
+            //                 __('lang_v1.all_order_cancellations'),
+            //                 ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_cancellations' && !request()->segment(2)]
+            //             );
 
 
-                    },
-                    ['icon' => 'fa fa-cart-arrow-down']
-                )->order(23);
-            }
+            //         },
+            //         ['icon' => 'fa fa-cart-arrow-down']
+            //     )->order(23);
+            // }
 
             if (auth()->user()->can('orders_refund.view')) {
 
