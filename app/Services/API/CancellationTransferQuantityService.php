@@ -3,6 +3,7 @@
 namespace App\Services\API;
 
 use App\Models\Transaction;
+use App\Models\Variation;
 use App\Services\BaseService;
 use App\Utils\ContactUtil;
 use App\Utils\ModuleUtil;
@@ -80,6 +81,11 @@ class CancellationTransferQuantityService extends BaseService {
 
             $purchaseTransfer = Transaction::create($inputData);
 
+            $variation = Variation::
+            where('id', $orderItem->variation_id)
+            ->where('product_id', $orderItem->product_id);
+
+
             $products = [
                 [
                     'product_id' => $orderItem->product_id,
@@ -90,6 +96,9 @@ class CancellationTransferQuantityService extends BaseService {
                     'enable_stock' => $orderItem->product->enable_stock,
                     'item_tax' => 0,
                     'tax_id' => null,
+                    'pp_without_discount'=>$variation->default_purchase_price,
+                    'purchase_price'=>$variation->default_purchase_price,
+                    'purchase_price_inc_tax'=>$variation->default_purchase_price,
                 ]
             ];
 

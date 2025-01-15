@@ -5,7 +5,9 @@ namespace App\Services\API;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Variation;
 use App\Notifications\OrderTransferCreatedNotification;
 use App\Services\BaseService;
 use App\Utils\ContactUtil;
@@ -125,6 +127,10 @@ class QuantityTransferService extends BaseService
 
                               $purchaseTransfer = Transaction::create($inputData);
 
+                              $variation = Variation::
+                                        where('id', $orderItem->variation_id)
+                                        ->where('product_id', $orderItem->product_id);
+
                               $products = [
                                         [
                                                   'product_id' => $orderItem->product_id,
@@ -135,6 +141,10 @@ class QuantityTransferService extends BaseService
                                                   'enable_stock' => $orderItem->product->enable_stock,
                                                   'item_tax' => 0,
                                                   'tax_id' => null,
+                                                  'pp_without_discount'=>$variation->default_purchase_price,
+                                                  'purchase_price'=>$variation->default_purchase_price,
+                                                  'purchase_price_inc_tax'=>$variation->default_purchase_price,
+
                                         ]
                               ];
 
