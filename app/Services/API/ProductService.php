@@ -55,23 +55,22 @@ class ProductService extends BaseService
 
             if ($request->filled('search')) {
                 $searchTerm = $request->search;
-
+            
                 // Split the search term into tokens (words)
                 $tokens = explode(' ', strtolower($searchTerm));
-
+            
                 $query->where(function ($q) use ($tokens) {
                     foreach ($tokens as $token) {
-                        $q->orWhere('name', 'like', '%' . $token . '%')
-                            ->orWhere('sku', 'like', '%' . $token . '%')
-                            //   ->orWhere('description', 'like', '%' . $token . '%')
-                            ->orWhereHas('tags', function ($tagQuery) use ($token) {
-                                $tagQuery->where('name', 'like', '%' . $token . '%');
-                            });
+                        $q->where(function ($innerQuery) use ($token) {
+                            $innerQuery->where('name', 'like', '%' . $token . '%')
+                                       ->orWhere('sku', 'like', '%' . $token . '%')
+                                    //    ->orWhere('description', 'like', '%' . $token . '%')
+                                       ->orWhereHas('tags', function ($tagQuery) use ($token) {
+                                           $tagQuery->where('name', 'like', '%' . $token . '%');
+                                       });
+                        });
                     }
                 });
-
-                // Optional: Prioritize exact matches
-                $query->orderByRaw("CASE WHEN name = ? THEN 1 ELSE 2 END", [$searchTerm]);
             }
 
             // if ($product->product_type == 'combo') {
