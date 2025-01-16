@@ -53,20 +53,19 @@ class ProductService extends BaseService
             }
 
 
-            // Add search by product name if provided in the request
-            if ($request->filled('search')) {
-                $searchTerm = $request->search;
+             // Full-text search
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
 
-                $query->where(function ($q) use ($searchTerm) {
-                    // Search in product name
-                    $q->where('name', 'like', '%' . $searchTerm . '%');
-
-                    // Search in tags using whereHas
-                    $q->orWhereHas('tags', function ($tagQuery) use ($searchTerm) {
-                        $tagQuery->where('name', 'like', '%' . $searchTerm . '%');
-                    });
-                });
-            }
+            $query->where(function ($q) use ($searchTerm) {
+                $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', [$searchTerm])
+                  ->orWhere('sku', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('description', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('tags', function ($tagQuery) use ($searchTerm) {
+                      $tagQuery->where('name', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
 
             // if ($product->product_type == 'combo') {
             //     if ($check_qty) {
