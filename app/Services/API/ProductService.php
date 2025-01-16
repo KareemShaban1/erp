@@ -60,7 +60,6 @@ class ProductService extends BaseService
             $query->where(function ($q) use ($searchTerm) {
                 $q->whereRaw('MATCH(name) AGAINST(? IN BOOLEAN MODE)', [$searchTerm])
                   ->orWhere('sku', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('description', 'like', '%' . $searchTerm . '%')
                   ->orWhereHas('tags', function ($tagQuery) use ($searchTerm) {
                       $tagQuery->where('name', 'like', '%' . $searchTerm . '%');
                   });
