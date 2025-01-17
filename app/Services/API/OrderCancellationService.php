@@ -110,7 +110,7 @@ class OrderCancellationService extends BaseService
     public function store($data)
     {
         $data['client_id'] = Auth::id();
-        $data['status'] = 'requested';
+        $data['status'] = 'approved';
         $data['requested_at'] = now();
 
         try {
@@ -134,8 +134,8 @@ class OrderCancellationService extends BaseService
                 $orderTracking->cancelled_at = now();
 
 
+                // decrease quantity of order items from location
                 foreach ($order->orderItems as $item) {
-
                     $this->productUtil->updateProductQuantity(
                         $order->business_location_id,
                         $item->product_id,
@@ -144,24 +144,27 @@ class OrderCancellationService extends BaseService
                     );
                 }
 
-                foreach ($order_transfer as $transfer) {
-                    foreach ($transfer->orderItems as $item) {
-                        $this->transferQuantityService->transferQuantityForCancellation(
-                            $transfer,
-                            $item,
-                            $transfer->client,
-                            $transfer->to_business_location_id,
-                            $transfer->from_business_location_id,
-                            $item->quantity
-                        );
+                // if there is transfer from location to location based on
+                // this order re transfer it again
+                if ($order_transfer) {
+                    foreach ($order_transfer as $transfer) {
+                        foreach ($transfer->orderItems as $item) {
+                            $this->transferQuantityService->transferQuantityForCancellation(
+                                $transfer,
+                                $item,
+                                $transfer->client,
+                                $transfer->to_business_location_id,
+                                $transfer->from_business_location_id,
+                                $item->quantity
+                            );
+                        }
+                        $transfer->order_status = 'cancelled';
+                        $transfer->save();
                     }
-                    $transfer->order_status = 'cancelled';
-                    $transfer->save();
                 }
 
                 $business_id = $order->client->contact->business->id;
 
-                // dd($order->id);
                 $parent_sell_transaction = Transaction::
                     where('order_id', $order->id)
                     ->where('type', 'sell')
@@ -181,12 +184,12 @@ class OrderCancellationService extends BaseService
                         'unit_price_inc_tax' => $item->price, // Include price if applicable
                     ];
 
-                    $transferOrder = Order::where('id',$item->order_id)
-                    ->first();
+                    $transferOrder = Order::where('id', $item->order_id)
+                        ->first();
                     $input = [
                         'transaction_id' => $parent_sell_transaction->id,
                         'order_id' => $transferOrder->id,
-                        'invoice_no' => null,
+                        // 'invoice_no' => null,
                         // 'transaction_date' => Carbon::now(),
                         'products' => $products,
                         "discount_type" => null,
@@ -197,6 +200,7 @@ class OrderCancellationService extends BaseService
                     ];
 
 
+                    // add sell return for this cancelled order
                     $this->transactionUtil->addSellReturnForCancellation($input, $business_id, 1);
                 }
 

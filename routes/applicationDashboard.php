@@ -148,10 +148,10 @@ Route::post(
     'applicationDashboard/order-refunds/{orderRefundId}/change-status',
     'ApplicationDashboard\OrderRefundController@changeOrderRefundStatus'
 );
-Route::post(
-    'applicationDashboard/order-refunds/{orderRefundId}/change-refund-status',
-    'ApplicationDashboard\OrderRefundController@changeRefundStatus'
-);
+// Route::post(
+//     'applicationDashboard/order-refunds/{orderRefundId}/change-refund-status',
+//     'ApplicationDashboard\OrderRefundController@changeRefundStatus'
+// );
 Route::get('applicationDashboard/order-refunds/{orderRefundId}/details', 'ApplicationDashboard\OrderRefundController@getRefundDetails');
 // ----------------------------------------------
 

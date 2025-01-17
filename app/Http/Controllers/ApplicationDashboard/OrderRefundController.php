@@ -133,85 +133,120 @@ class OrderRefundController extends Controller
             ->make(true);
     }
 
+    // public function changeOrderRefundStatus($orderRefundId)
+    // {
+    //     if (!auth()->user()->can('orders_refund.changeStatus')) {
+    //         abort(403, 'Unauthorized action.');
+    //     }
+    //     $status = request()->input('status'); // Retrieve status from the request
+
+    //     $orderRefund = OrderRefund::findOrFail($orderRefundId);
+    //     $orderRefund->status = $status;
+
+    //     $parentOrder = Order::where('id', $orderRefund->order_id)->first();
+
+    //     // Set the tracking status timestamp based on the status provided
+    //     switch ($status) {
+    //         case 'requested':
+    //             $orderRefund->requested_at = now();
+    //             $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'requested']);
+    //             break;
+    //         case 'processed':
+    //             $orderRefund->processed_at = now();
+    //             $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'processed']);
+    //             break;
+    //         case 'approved':
+    //             $orderRefund->processed_at = now();
+    //             $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'approved']);
+    //             $this->orderService->storeRefundOrderItem($parentOrder, $orderRefund);
+    //             break;
+    //         case 'rejected':
+    //             $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
+    //             break;
+    //         default:
+    //             throw new \InvalidArgumentException("Invalid status: $status");
+    //     }
+
+    //     $orderRefund->save();
+
+    //     return response()->json(['success' => true, 'message' => 'Order Refund status updated successfully.']);
+    // }
+
     public function changeOrderRefundStatus($orderRefundId)
     {
         if (!auth()->user()->can('orders_refund.changeStatus')) {
             abort(403, 'Unauthorized action.');
         }
+
         $status = request()->input('status'); // Retrieve status from the request
 
-        $orderRefund = OrderRefund::findOrFail($orderRefundId);
-        $orderRefund->status = $status;
+        // Begin a database transaction
+        DB::beginTransaction();
 
-        $order = Order::where('id', $orderRefund->order_id)->first();
+        try {
+            $orderRefund = OrderRefund::findOrFail($orderRefundId);
+            $orderRefund->status = $status;
 
-        // Set the tracking status timestamp based on the status provided
-        switch ($status) {
-            case 'requested':
-                $orderRefund->requested_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'requested']);
-                break;
-            case 'processed':
-                $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'processed']);
-                break;
-            case 'approved':
-                $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'approved']);
-                $this->orderService->storeRefundOrderItem($order, $orderRefund);
-                break;
-            case 'rejected':
-                $this->moduleUtil->activityLog($orderRefund, 'change_status', null, ['order_number' => $order->number, 'status' => 'rejected']);
-                break;
-            default:
-                throw new \InvalidArgumentException("Invalid status: $status");
+            $parentOrder = Order::find($orderRefund->order_id);
+
+            if (!$parentOrder) {
+                throw new \Exception("Parent order not found for the refund.");
+            }
+
+            // Set the tracking status timestamp based on the status provided
+            switch ($status) {
+                case 'requested':
+                    $orderRefund->requested_at = now();
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, [
+                        'order_number' => $parentOrder->number,
+                        'status' => 'requested'
+                    ]);
+                    break;
+
+                case 'processed':
+                    $orderRefund->processed_at = now();
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, [
+                        'order_number' => $parentOrder->number,
+                        'status' => 'processed'
+                    ]);
+                    break;
+
+                case 'approved':
+                    $orderRefund->processed_at = now();
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, [
+                        'order_number' => $parentOrder->number,
+                        'status' => 'approved'
+                    ]);
+                    // Process refund
+                    $this->orderService->storeRefundOrderItem($parentOrder, $orderRefund);
+                    break;
+
+                case 'rejected':
+                    $this->moduleUtil->activityLog($orderRefund, 'change_status', null, [
+                        'order_number' => $parentOrder->number,
+                        'status' => 'rejected'
+                    ]);
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException("Invalid status: $status");
+            }
+
+            // Save the refund status
+            $orderRefund->save();
+
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Order Refund status updated successfully.']);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+
+            \Log::info('change order refund status',[$e]);
+
+            return response()->json(['success' => false, 'message' => 'Failed to update order refund status.', 'error' => $e->getMessage()], 500);
         }
-
-        $orderRefund->save();
-
-        return response()->json(['success' => true, 'message' => 'Order Refund status updated successfully.']);
-    }
-
-
-    public function changeRefundStatus($orderRefundId)
-    {
-        if (!auth()->user()->can('orders_refund.changeStatus')) {
-            abort(403, 'Unauthorized action.');
-        }
-        $status = request()->input('refund_status');
-
-        $orderRefund = OrderRefund::findOrFail($orderRefundId);
-        $orderRefund->refund_status = $status;
-
-        $order = Order::where('id', $orderRefund->order_id)->first();
-
-        // Set the tracking status timestamp based on the status provided
-        switch ($status) {
-            case 'pending':
-                // $orderRefund->requested_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'pending']);
-                break;
-            case 'processed':
-                // $orderRefund->processed_at = now();
-               
-                $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'processed']);
-                break;
-            case 'delivering':
-                // $orderRefund->processed_at = now();
-                $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'delivering']);
-               
-                break;
-            case 'completed':
-                
-                $this->moduleUtil->activityLog($orderRefund, 'change_refund_status', null, ['order_number' => $order->number, 'status' => 'completed']);
-                break;
-            default:
-                throw new \InvalidArgumentException("Invalid status: $status");
-        }
-
-        $orderRefund->save();
-
-        return response()->json(['success' => true, 'message' => 'Order Refund status updated successfully.']);
     }
 
 
@@ -229,61 +264,83 @@ class OrderRefundController extends Controller
             'items' => 'required|array',
             'items.*.id' => 'required|exists:order_items,id',
             'items.*.refund_reason' => 'required|string',
-            'items.*.refund_amount' => 'required|numeric|min:0',
+            'items.*.refund_amount' => 'required|numeric|min:1',
             'items.*.refund_status' => 'required|in:requested,processed,approved,rejected',
             'items.*.refund_admin_response' => 'nullable|string',
         ]);
 
-        $order = Order::findOrFail($data['order_id']);
+        $parentOrder = Order::findOrFail($data['order_id']);
 
-        foreach ($data['items'] as $item) {
-            // Create refund entry
-            $orderRefund = $this->createRefund($order, $item);
+        // Use a transaction to ensure atomicity
+        DB::beginTransaction();
 
-            // Handle status-specific logic
-            $this->handleRefundStatus($orderRefund, $order, $data['items']);
+        try {
+            // Create refund entries
+            $orderRefunds = $this->createRefunds($parentOrder, $data['items']);
+
+            // Handle status-specific logic for each refund
+            foreach ($orderRefunds as $orderRefund) {
+                $this->handleRefundStatus($orderRefund, $parentOrder, $data['items']);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Refund processed successfully.'),
+            ]);
+        } catch (\Exception $e) {
+            // Rollback the transaction on any error
+            DB::rollBack();
+
+            \Log::info('store refund order', [$e]);
+            return response()->json([
+                'success' => false,
+                'message' => __('An error occurred while processing the refund: ') . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function createRefunds($order, $items)
+    {
+        $refunds = [];
+
+        foreach ($items as $item) {
+            $refunds[] = OrderRefund::create([
+                'reason' => $item['refund_reason'] ?? null,
+                'admin_response' => $item['refund_admin_response'] ?? null,
+                'amount' => $item['refund_amount'] ?? 0,
+                'status' => $item['refund_status'],
+                'order_item_id' => $item['id'],
+                'order_id' => $order->id,
+                'client_id' => $order->client->id,
+            ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Refund processed successfully.'),
-        ]);
+        return $refunds;
     }
 
-    private function createRefund($order, $item)
-    {
-        return OrderRefund::create([
-            'reason' => $item['refund_reason'] ?? null,
-            'admin_response' => $item['refund_admin_response'] ?? null,
-            'amount' => $item['refund_amount'] ?? 0,
-            'status' => $item['refund_status'],
-            'order_item_id' => $item['id'],
-            'order_id' => $order->id,
-            'client_id' => $order->client->id,
-        ]);
-    }
-
-    private function handleRefundStatus($orderRefund, $order, $items)
+    private function handleRefundStatus($orderRefund, $parentOrder, $items)
     {
         switch ($orderRefund->status) {
             case 'requested':
                 $orderRefund->update(['requested_at' => now()]);
-                $this->logAndNotify($orderRefund, $order, 'requested');
+                $this->logAndNotify($orderRefund, $parentOrder, 'requested');
                 break;
 
             case 'processed':
                 $orderRefund->update(['processed_at' => now()]);
-                $this->logAndNotify($orderRefund, $order, 'processed');
+                $this->logAndNotify($orderRefund, $parentOrder, 'processed');
                 break;
 
             case 'approved':
                 $orderRefund->update(['processed_at' => now()]);
-                $this->logAndNotify($orderRefund, $order, 'approved');
-                $this->orderService->storeRefundOrder($order, $items);
+                $this->logAndNotify($orderRefund, $parentOrder, 'approved');
+                $this->orderService->storeRefundOrder($parentOrder, $items);
                 break;
 
             case 'rejected':
-                $this->logAndNotify($orderRefund, $order, 'rejected');
+                $this->logAndNotify($orderRefund, $parentOrder, 'rejected');
                 break;
 
             default:

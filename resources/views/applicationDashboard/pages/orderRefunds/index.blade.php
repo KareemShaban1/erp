@@ -97,7 +97,7 @@
                         <!-- Add your form fields here, pre-filled with order refund data -->
                         <div class="form-group">
                             <label>@lang('lang_v1.status')</label>
-                            <select name="status" id="orderRefundStatus" class="form-control">
+                            <select name="status" id="orderRefundStatus" class="form-control" readonly>
                                 <option value="requested">@lang('lang_v1.requested')</option>
                                 <option value="processed">@lang('lang_v1.processed')</option>
                                 <option value="approved">@lang('lang_v1.approved')</option>
@@ -167,44 +167,68 @@ $(document).ready(function(){
             { data: 'order_number', name: 'order.number' },
             { data: 'amount', name: 'amount' },
             {
-    data: 'order_item', name: 'order_item',
-    render: function (data) {
-        try {
-            // Parse the order_item JSON string
-            let orderItem = JSON.parse(data);
-            
-            // Check if the parsed data and product properties exist
-            if (orderItem && orderItem.product && orderItem.product.name && orderItem.quantity) {
-                return `${orderItem.product.name} (${orderItem.quantity})`;
-            }
-        } catch (e) {
-            console.error('Error parsing order_item:', e);
-        }
-        
-        return 'N/A'; // If parsing fails or the required data is missing, return 'N/A'
-    }
-},
+                data: 'order_item', name: 'order_item',
+                render: function (data) {
+                    try {
+                        // Parse the order_item JSON string
+                        let orderItem = JSON.parse(data);
+                        
+                        // Check if the parsed data and product properties exist
+                        if (orderItem && orderItem.product && orderItem.product.name && orderItem.quantity) {
+                            return `${orderItem.product.name} (${orderItem.quantity})`;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing order_item:', e);
+                    }
+                    
+                    return 'N/A'; // If parsing fails or the required data is missing, return 'N/A'
+                }
+            },
 
 
             { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
             {
-                data: 'status', name: 'status', render: function (data, type, row) {
-                    let badgeClass;
-        switch(data) {
-            case 'requested': badgeClass = 'badge btn-warning'; break;
-            case 'requested': badgeClass = 'badge btn-info'; break;
-            case 'approved': badgeClass = 'badge btn-primary'; break;
-            case 'rejected': badgeClass = 'badge btn-danger'; break;
-            default: badgeClass = 'badge badge-secondary'; // For any other statuses
+    data: 'status', 
+    name: 'status', 
+    render: function (data, type, row) {
+        let badgeClass;
+        switch (data) {
+            case 'requested': 
+                badgeClass = 'badge btn-warning'; 
+                break;
+            case 'approved': 
+                badgeClass = 'badge btn-primary'; 
+                break;
+            case 'rejected': 
+                badgeClass = 'badge btn-danger'; 
+                break;
+            default: 
+                badgeClass = 'badge badge-secondary'; // For any other statuses
         }
-                    
-                    return `
-                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    
-           `;
-       
-                }
-            },
+
+        // Badge for the status
+        let output = `
+            <span class="${badgeClass}">
+                ${data.charAt(0).toUpperCase() + data.slice(1)}
+            </span>
+        `;
+
+        // Add select dropdown if status is not "approved"
+        if (data !== 'approved') {
+            output += `
+                <select class="form-control change-refund-status" 
+                        data-order-refund-id="${row.id}">
+                    <option value="requested" ${data === 'requested' ? 'selected' : ''}>Requested</option>
+                    <option value="approved" ${data === 'approved' ? 'selected' : ''}>Approved</option>
+                    <option value="rejected" ${data === 'rejected' ? 'selected' : ''}>Rejected</option>
+                </select>
+            `;
+        }
+
+        return output;
+    }
+}
+
         //     {
         //         data: 'refund_status', name: 'refund_status', render: function (data, type, row) {
         //             let badgeClass;
@@ -303,15 +327,18 @@ $(document).ready(function(){
     });
 
 
+ 
+
+
     $(document).on('change', '.change-refund-status', function () {
         var orderRefundId = $(this).data('order-refund-id');
-        var refund_status = $(this).val();
+        var status = $(this).val();
 
         $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderRefundController@changeRefundStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
+            url: `{{ action("ApplicationDashboard\OrderRefundController@changeOrderRefundStatus", ['orderRefundId' => ':orderRefundId']) }}`.replace(':orderRefundId', orderRefundId), // Replacing the placeholder with the actual orderId
             type: 'POST',
             data: {
-                refund_status: refund_status,
+                status: status,
                 _token: '{{ csrf_token() }}' // CSRF token for security
             },
             success: function (response) {

@@ -73,12 +73,12 @@
                         }
 
                         // Display only the badge for completed or cancelled statuses
-                        if (data === 'shipped' ||data === 'completed' || data === 'cancelled') {
+                        if (data === 'shipped' || data === 'completed' || data === 'cancelled') {
                             return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
                         // Otherwise, display both the badge and the select dropdown
-                        if (data !== 'shipped' ||data !== 'completed' || data !== 'cancelled') {
+                        if (data !== 'shipped' || data !== 'completed' || data !== 'cancelled') {
                             return `
                         <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
                         <select class="form-control change-order-status" data-order-id="${row.id}">
@@ -609,7 +609,7 @@
                             const row = `
                         <tr>
                             <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
-                            <td>${item.product.name}</td>
+                            <td>${item.product.name}  - [${item.variation.name} ]</td>
                             <td>${item.quantity}</td>
                             <td>${item.price}</td>
                             <td>${item.sub_total}</td>
@@ -817,16 +817,16 @@
     });
 
     function printOrderDetails() {
-    var modalContent = document.querySelector('#viewOrderInfoModal .modal-content').innerHTML;
-    var originalContent = document.body.innerHTML;
+        var modalContent = document.querySelector('#viewOrderInfoModal .modal-content').innerHTML;
+        var originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = modalContent;
-    window.print();
-    document.body.innerHTML = originalContent;
+        document.body.innerHTML = modalContent;
+        window.print();
+        document.body.innerHTML = originalContent;
 
-    // Reinitialize scripts after restoring the content (if needed)
-    location.reload(); // Refresh to restore event listeners and modal functionality
-}
+        // Reinitialize scripts after restoring the content (if needed)
+        location.reload(); // Refresh to restore event listeners and modal functionality
+    }
 
 
 </script>

@@ -317,139 +317,377 @@ class OrderService extends BaseService
 
 
 
-    public function storeRefundOrder($order, $items)
+    // public function storeRefundOrder($parentOrder, $items)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Ensure $items is a collection to use pluck
+    //         if (is_array($items)) {
+    //             $items = collect($items); // Convert array to collection
+    //         }
+
+    //         // Fetch the order items using the provided item IDs
+    //         $orderItems = OrderItem::whereIn('id', $items->pluck('id'))->get();
+
+    //         // Check if order items exist
+    //         if ($orderItems->isEmpty()) {
+    //             throw new \Exception('No valid order items found for refund.');
+    //         }
+
+    //         $client = Client::findOrFail($parentOrder->client_id);
+    //         $subTotal = 0;
+
+    //         // Map refund amounts to order items
+    //         $itemsWithRefund = $items->keyBy('id');
+
+    //         // Calculate the subtotal for the refund order
+    //         foreach ($orderItems as $orderItem) {
+    //             if (!isset($itemsWithRefund[$orderItem->id]['refund_amount'])) {
+    //                 throw new \Exception("Refund amount is missing for item ID {$orderItem->id}");
+    //             }
+
+    //             $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
+
+    //             // Validate refund amount
+    //             if ($refundAmount > $orderItem->quantity) {
+    //                 throw new \Exception("Refund amount exceeds available quantity for item ID {$orderItem->id}");
+    //             }
+
+    //             // Add to subtotal
+    //             $subTotal += $refundAmount * $orderItem->price;
+    //         }
+
+    //         $orderTotal = $subTotal; // Adjustments for taxes or other calculations can be added here
+
+    //         $existRefundOrder = Order::
+    //             where('parent_order_id', $parentOrder->id)
+    //             ->where('client_id', $parentOrder->client_id)
+    //             ->where('order_type', 'order_refund')
+    //             ->whereNotIn('order_status', ['shipped', 'completed', 'cancelled'])
+    //             ->first();
+    //         if ($existRefundOrder) {
+
+    //             // Add refund item to the existing parent order
+    //             OrderItem::create([
+    //                 'order_id' => $existRefundOrder->id,
+    //                 'parent_order_id' => $existRefundOrder->parent_order_id,
+    //                 'product_id' => $orderItem->product_id,
+    //                 'variation_id' => $orderItem->variation_id,
+    //                 'quantity' => $refundAmount,
+    //                 'price' => $orderItem->price,
+    //                 'discount' => $orderItem->discount ?? 0,
+    //                 'sub_total' => $subTotal,
+    //             ]);
+
+    //             // Update the parent order's totals
+    //             $existRefundOrder->sub_total += $subTotal;
+    //             $existRefundOrder->total += $subTotal;
+    //             $existRefundOrder->save();
+    //         } else {
+    //             // Create the refund order
+    //             $newRefundOrder = Order::create([
+    //                 'parent_order_id' => $parentOrder->id,
+    //                 'client_id' => $parentOrder->client_id,
+    //                 'sub_total' => $subTotal,
+    //                 'total' => $orderTotal,
+    //                 'payment_method' => 'Cash on delivery',
+    //                 'order_type' => 'order_refund',
+    //                 'business_location_id' => $client->business_location_id,
+    //             ]);
+
+    //             // Track the refund order status
+    //             $this->orderTrackingService->store($newRefundOrder, 'pending');
+
+    //             // Create refund order items
+    //             foreach ($orderItems as $orderItem) {
+    //                 $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
+
+    //                 OrderItem::create([
+    //                     'order_id' => $newRefundOrder->id,
+    //                     'product_id' => $orderItem->product_id,
+    //                     'variation_id' => $orderItem->variation_id,
+    //                     'quantity' => $refundAmount, // Use refund amount here
+    //                     'price' => $orderItem->price,
+    //                     'discount' => $orderItem->discount ?? 0,
+    //                     'sub_total' => $refundAmount * $orderItem->price, // Calculate based on refund amount
+    //                 ]);
+    //             }
+
+    //             // Notify admins and users about the order
+    //             $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+    //             $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $newRefundOrder);
+
+    //             \Notification::send($admins, new OrderRefundCreatedNotification($newRefundOrder));
+    //             \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
+
+    //         }
+
+    //         DB::commit();
+
+
+    //         return [
+    //             'success' => true,
+    //             'message' => 'Refund order created successfully.',
+    //             'refund_order' => $newRefundOrder,
+    //         ];
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         \Log::error("Refund Order Error: {$e->getMessage()}");
+
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to create refund order. Please try again.',
+    //         ];
+    //     }
+    // }
+
+
+    private function createRefundOrderItems($orderId, $orderItems, $itemsWithRefund)
+    {
+        foreach ($orderItems as $orderItem) {
+            $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
+            OrderItem::create([
+                'order_id' => $orderId,
+                'product_id' => $orderItem->product_id,
+                'variation_id' => $orderItem->variation_id,
+                'quantity' => $refundAmount,
+                'price' => $orderItem->price,
+                'discount' => $orderItem->discount ?? 0,
+                'sub_total' => $refundAmount * $orderItem->price,
+            ]);
+        }
+    }
+
+    public function storeRefundOrder($parentOrder, $items)
     {
         try {
             DB::beginTransaction();
 
-            // Ensure $items is a collection to use pluck
-            if (is_array($items)) {
-                $items = collect($items); // Convert array to collection
-            }
+            // Convert $items to a collection if needed
+            $items = collect($items);
 
-            // Fetch the order items using the provided item IDs
             $orderItems = OrderItem::whereIn('id', $items->pluck('id'))->get();
-
-            // Check if order items exist
             if ($orderItems->isEmpty()) {
                 throw new \Exception('No valid order items found for refund.');
             }
 
-            $client = Client::findOrFail($order->client_id);
+            $client = Client::findOrFail($parentOrder->client_id);
+            $itemsWithRefund = $items->keyBy('id');
             $subTotal = 0;
 
-            // Map refund amounts to order items
-            $itemsWithRefund = $items->keyBy('id');
-
-            // Calculate the subtotal for the refund order
             foreach ($orderItems as $orderItem) {
-                if (!isset($itemsWithRefund[$orderItem->id]['refund_amount'])) {
-                    throw new \Exception("Refund amount is missing for item ID {$orderItem->id}");
-                }
-
                 $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
-
-                // Validate refund amount
                 if ($refundAmount > $orderItem->quantity) {
                     throw new \Exception("Refund amount exceeds available quantity for item ID {$orderItem->id}");
                 }
-
-                // Add to subtotal
                 $subTotal += $refundAmount * $orderItem->price;
             }
 
-            $orderTotal = $subTotal; // Adjustments for taxes or other calculations can be added here
+            $existRefundOrder = Order::where('parent_order_id', $parentOrder->id)
+                ->where('client_id', $parentOrder->client_id)
+                ->where('order_type', 'order_refund')
+                ->whereNotIn('order_status', ['shipped', 'completed', 'cancelled'])
+                ->first();
 
-            // Create the refund order
-            $newRefundOrder = Order::create([
-                'parent_order_id' => $order->id,
-                'client_id' => $order->client_id,
-                'sub_total' => $subTotal,
-                'total' => $orderTotal,
-                'payment_method' => 'Cash on delivery',
-                'order_type' => 'order_refund',
-                'business_location_id' => $client->business_location_id,
-            ]);
+            if ($existRefundOrder) {
+                $this->createRefundOrderItems($existRefundOrder->id, $orderItems, $itemsWithRefund);
 
-            // Track the refund order status
-            $this->orderTrackingService->store($newRefundOrder, 'pending');
-
-            // Create refund order items
-            foreach ($orderItems as $orderItem) {
-                $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
-
-                OrderItem::create([
-                    'order_id' => $newRefundOrder->id,
-                    'product_id' => $orderItem->product_id,
-                    'variation_id' => $orderItem->variation_id,
-                    'quantity' => $refundAmount, // Use refund amount here
-                    'price' => $orderItem->price,
-                    'discount' => $orderItem->discount ?? 0,
-                    'sub_total' => $refundAmount * $orderItem->price, // Calculate based on refund amount
+                $existRefundOrder->sub_total += $subTotal;
+                $existRefundOrder->total += $subTotal;
+                $existRefundOrder->save();
+            } else {
+                $newRefundOrder = Order::create([
+                    'parent_order_id' => $parentOrder->id,
+                    'client_id' => $parentOrder->client_id,
+                    'sub_total' => $subTotal,
+                    'total' => $subTotal,
+                    'payment_method' => 'Cash on delivery',
+                    'order_type' => 'order_refund',
+                    'business_location_id' => $client->business_location_id,
                 ]);
+
+                $this->orderTrackingService->store($newRefundOrder, 'pending');
+                $this->createRefundOrderItems($newRefundOrder->id, $orderItems, $itemsWithRefund);
+
+                $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+                $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $newRefundOrder);
+
+                \Notification::send($admins, new OrderRefundCreatedNotification($newRefundOrder));
+                \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
             }
 
             DB::commit();
 
-            // Notify admins and users about the order
-            $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-            $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $newRefundOrder);
-
-            \Notification::send($admins, new OrderRefundCreatedNotification($newRefundOrder));
-            \Notification::send($users, new OrderRefundCreatedNotification($newRefundOrder));
-
-            return [
-                'success' => true,
-                'message' => 'Refund order created successfully.',
-                'refund_order' => $newRefundOrder,
-            ];
+            return ['success' => true, 'message' => 'Refund order created successfully.'];
         } catch (\Exception $e) {
             DB::rollBack();
-
             \Log::error("Refund Order Error: {$e->getMessage()}");
-
-            return [
-                'success' => false,
-                'message' => 'Failed to create refund order. Please try again.',
-            ];
+            return ['success' => false, 'message' => 'Failed to create refund order. Please try again.'];
         }
     }
 
 
-    public function storeRefundOrderItem($order, $orderRefund)
+
+
+
+
+
+
+    // public function storeRefundOrderItem($parentOrder, $orderRefund)
+    // {
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Check for an existing parent refund order
+    //         $existRefundOrder = Order::
+    //             where('parent_order_id', $parentOrder->id)
+    //             ->where('client_id', $parentOrder->client_id)
+    //             ->where('order_type', 'order_refund')
+    //             ->whereNotIn('order_status', ['shipped', 'completed', 'cancelled'])
+    //             ->first();
+
+    //         // Fetch the specific order item using the provided item ID
+    //         $orderItem = OrderItem::find($orderRefund->order_item_id);
+
+
+    //         // Check if the order item exists
+    //         if (!$orderItem) {
+    //             throw new \Exception("Order item with ID  not found for refund.");
+    //         }
+
+    //         // Validate refund amount
+    //         $refundAmount = $orderRefund->amount ?? null;
+    //         if (is_null($refundAmount)) {
+    //             throw new \Exception("Refund amount is missing for item ID {$orderItem->id}.");
+    //         }
+
+    //         if ($refundAmount > $orderItem->quantity) {
+    //             throw new \Exception("Refund amount exceeds available quantity for item ID {$orderItem->id}.");
+    //         }
+
+    //         // Calculate subtotal for the refund order
+    //         $subTotal = $refundAmount * $orderItem->price;
+
+    //         \Log::info('refund_data', [$existRefundOrder, $orderItem, $subTotal]);
+
+
+    //         if ($existRefundOrder) {
+    //             // Add refund item to the existing parent order
+    //             OrderItem::create([
+    //                 'order_id' => $existRefundOrder->id,
+    //                 'parent_order_id' => $existRefundOrder->parent_order_id,
+    //                 'product_id' => $orderItem->product_id,
+    //                 'variation_id' => $orderItem->variation_id,
+    //                 'quantity' => $refundAmount,
+    //                 'price' => $orderItem->price,
+    //                 'discount' => $orderItem->discount ?? 0,
+    //                 'sub_total' => $subTotal,
+    //             ]);
+
+    //             // Update the parent order's totals
+    //             $existRefundOrder->sub_total += $subTotal;
+    //             $existRefundOrder->total += $subTotal;
+    //             $existRefundOrder->save();
+
+    //         } else {
+    //             // Fetch client details
+    //             $client = Client::findOrFail($parentOrder->client_id);
+
+    //             // Create a new refund order
+    //             $newRefundOrder = Order::create([
+    //                 'parent_order_id' => $parentOrder->id,
+    //                 'client_id' => $parentOrder->client_id,
+    //                 'sub_total' => $subTotal,
+    //                 'total' => $subTotal,
+    //                 'payment_method' => 'Cash on delivery',
+    //                 'order_type' => 'order_refund',
+    //                 'business_location_id' => $client->business_location_id,
+    //             ]);
+
+    //             // Track the refund order status
+    //             $this->orderTrackingService->store($newRefundOrder, 'pending');
+
+    //             // Add the refund item to the newly created order
+    //             OrderItem::create([
+    //                 'order_id' => $newRefundOrder->id,
+    //                 'product_id' => $orderItem->product_id,
+    //                 'variation_id' => $orderItem->variation_id,
+    //                 'quantity' => $refundAmount,
+    //                 'price' => $orderItem->price,
+    //                 'discount' => $orderItem->discount ?? 0,
+    //                 'sub_total' => $subTotal,
+    //             ]);
+
+    //             \Log::info('new_refund', [$newRefundOrder]);
+
+    //         }
+
+
+
+    //         DB::commit();
+
+    //         return [
+    //             'success' => true,
+    //             'message' => 'Refund order item processed successfully.',
+    //             'refund_order' => $parentOrder,
+    //         ];
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         \Log::info('refund_error', [$e]);
+    //         \Log::error("Refund Order Error: {$e->getMessage()}");
+
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Failed to process refund order item. Please try again.',
+    //         ];
+    //     }
+    // }
+
+
+    public function storeRefundOrderItem($parentOrder, $orderRefund)
     {
         try {
             DB::beginTransaction();
 
-            // Check for an existing parent refund order
-            $existOrder = Order::where('parent_order_id', $order->id)->first();
-
-            // Fetch the specific order item using the provided item ID
-            $orderItem = OrderItem::find($orderRefund->order_item_id);
-
-            // Check if the order item exists
-            if (!$orderItem) {
-                throw new \Exception("Order item with ID  not found for refund.");
+            // Validate refund data
+            if (is_null($orderRefund->order_item_id)) {
+                throw new \Exception("Order item ID is missing in the refund data.");
             }
 
-            // Validate refund amount
+            $orderItem = OrderItem::find($orderRefund->order_item_id);
+
+            \Log::info('orderRefund',[$orderRefund]);
+
+            if (!$orderItem) {
+                throw new \Exception("Order item with ID {$orderRefund->order_item_id} not found for refund.");
+            }
+
             $refundAmount = $orderRefund->amount ?? null;
-            if (is_null($refundAmount)) {
-                throw new \Exception("Refund amount is missing for item ID {$orderItem->id}.");
+            if (is_null($refundAmount) || $refundAmount <= 0) {
+                throw new \Exception("Refund amount must be greater than zero for item ID {$orderItem->id}.");
             }
 
             if ($refundAmount > $orderItem->quantity) {
                 throw new \Exception("Refund amount exceeds available quantity for item ID {$orderItem->id}.");
             }
 
-            // Calculate subtotal for the refund order
             $subTotal = $refundAmount * $orderItem->price;
 
-            if ($existOrder) {
-                // Add refund item to the existing parent order
+            $existRefundOrder = Order::where('parent_order_id', $parentOrder->id)
+                ->where('client_id', $parentOrder->client_id)
+                ->where('order_type', 'order_refund')
+                ->whereNotIn('order_status', ['shipped', 'completed', 'cancelled'])
+                ->first();
+
+
+            if ($existRefundOrder) {
+                // Add refund item to existing order
                 OrderItem::create([
-                    'order_id' => $existOrder->id,
-                    'parent_order_id' => $existOrder->parent_order_id,
+                    'order_id' => $existRefundOrder->id,
+                    'parent_order_id' => $existRefundOrder->parent_order_id,
                     'product_id' => $orderItem->product_id,
                     'variation_id' => $orderItem->variation_id,
                     'quantity' => $refundAmount,
@@ -458,32 +696,32 @@ class OrderService extends BaseService
                     'sub_total' => $subTotal,
                 ]);
 
-                // Update the parent order's totals
-                $existOrder->sub_total += $subTotal;
-                $existOrder->total += $subTotal; // Adjustments for taxes or other calculations can be added here
-                $existOrder->save();
+                // Update existing order totals
+                $existRefundOrder->sub_total += $subTotal;
+                $existRefundOrder->total += $subTotal;
+                $existRefundOrder->save();
+
+                \Log::info('existRefundOrder',[$existRefundOrder]);
 
             } else {
-                // Fetch client details
-                $client = Client::findOrFail($order->client_id);
+                // Create new refund order
+                $client = Client::findOrFail($parentOrder->client_id);
 
-                // Create a new refund order
-                $parentOrder = Order::create([
-                    'parent_order_id' => $order->id,
-                    'client_id' => $order->client_id,
+                $newRefundOrder = Order::create([
+                    'parent_order_id' => $parentOrder->id,
+                    'client_id' => $parentOrder->client_id,
                     'sub_total' => $subTotal,
-                    'total' => $subTotal, // Adjustments for taxes or other calculations can be added here
+                    'total' => $subTotal,
                     'payment_method' => 'Cash on delivery',
                     'order_type' => 'order_refund',
                     'business_location_id' => $client->business_location_id,
                 ]);
 
-                // Track the refund order status
-                $this->orderTrackingService->store($parentOrder, 'pending');
+                $this->orderTrackingService->store($newRefundOrder, 'pending');
 
-                // Add the refund item to the newly created order
+                // Add refund item to the new order
                 OrderItem::create([
-                    'order_id' => $parentOrder->id,
+                    'order_id' => $newRefundOrder->id,
                     'product_id' => $orderItem->product_id,
                     'variation_id' => $orderItem->variation_id,
                     'quantity' => $refundAmount,
@@ -491,6 +729,9 @@ class OrderService extends BaseService
                     'discount' => $orderItem->discount ?? 0,
                     'sub_total' => $subTotal,
                 ]);
+
+                \Log::info('newRefundOrder',[$newRefundOrder]);
+
             }
 
             DB::commit();
@@ -498,11 +739,10 @@ class OrderService extends BaseService
             return [
                 'success' => true,
                 'message' => 'Refund order item processed successfully.',
-                'refund_order' => $parentOrder,
+                'refund_order' => $existRefundOrder ?? $newRefundOrder,
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-
             \Log::error("Refund Order Error: {$e->getMessage()}");
 
             return [
