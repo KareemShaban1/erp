@@ -77,7 +77,7 @@ class DeliveryController extends Controller
             'assigned_at' => now(), // Timestamp of assignment
         ]);
 
-        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number,'status'=>'delivery_assigned', 'delivery_name'=> $delivery->contact->name]);
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'status' => 'delivery_assigned', 'delivery_name' => $delivery->contact->name]);
 
         // Send and store push notification
         app(FirebaseDeliveryService::class)->sendAndStoreNotification(
@@ -103,13 +103,13 @@ class DeliveryController extends Controller
         }
         if (request()->ajax()) {
             $business_id = request()->session()->get('user.business_id');
-    
+
             // Load orders and related deliveries with their data
             $deliveries = Delivery::with(['contact'])
                 ->whereHas('contact', function ($query) use ($business_id) {
                     $query->where('business_id', $business_id);
                 });
-    
+
             return Datatables::of($deliveries)
                 ->addColumn('id', function ($row) {
                     return $row->id;
@@ -125,18 +125,19 @@ class DeliveryController extends Controller
                     $url = route('order.deliveries', ['delivery_id' => $row->id]);
                     return '<a href="' . $url . '" class="btn btn-primary">' . __('lang_v1.view_orders') . '</a>';
                 })
-                ->rawColumns(['update_delivery_balance','action'])
+                ->rawColumns(['update_delivery_balance', 'action'])
                 ->make(true);
         }
-    
+
         return view('applicationDashboard.pages.deliveries.index');
     }
-    
 
-    public function UpdateDeliveryBalance($delivery_id){
-        
+
+    public function UpdateDeliveryBalance($delivery_id)
+    {
+
         $delivery = Delivery::find($delivery_id);
-        if($delivery){
+        if ($delivery) {
             $delivery->contact->balance = 0;
             $delivery->contact->save();
             $delivery->save();
@@ -152,23 +153,23 @@ class DeliveryController extends Controller
         if (!auth()->user()->can('deliveries.orders')) {
             abort(403, 'Unauthorized action.');
         }
-    
+
         $business_id = $request->session()->get('user.business_id');
         $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
         $search = $request->get('search')['value'] ?? null;
-    
+
         if ($request->ajax()) {
             // Load orders and related deliveries with their data
-            $query = DeliveryOrder::with(['order','order.client.contact', 'delivery.contact'])
+            $query = DeliveryOrder::with(['order', 'order.client.contact', 'delivery.contact'])
                 ->whereHas('delivery.contact', function ($query) use ($business_id) {
                     $query->where('business_id', $business_id);
                 });
-    
+
             // Filter by delivery_id if provided
             if (!empty($delivery_id)) {
                 $query->where('delivery_id', $delivery_id);
             }
-    
+
             // Apply search filter if applicable
             if ($search) {
                 $query->where(function ($query) use ($search) {
@@ -182,7 +183,7 @@ class DeliveryController extends Controller
                         });
                 });
             }
-    
+
             return Datatables::of($query)
                 ->addColumn('id', function ($row) {
                     return $row->id;
@@ -196,11 +197,130 @@ class DeliveryController extends Controller
                 ->rawColumns(['id', 'delivery_name', 'client_name']) // Use raw columns if needed for HTML
                 ->make(true);
         }
-    
+
         // Pass delivery_id and other data to the view for non-AJAX requests
         return view('applicationDashboard.pages.orderDeliveries.index', compact('delivery_id'));
     }
-    
+
+
+    public function getDeliveryStatistics(Request $request)
+    {
+        if (!auth()->user()->can('deliveries.orders')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = $request->session()->get('user.business_id');
+        $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
+        $start_date = $request->query('start_date'); // Get start_date from query parameters
+        $end_date = $request->query('end_date'); // Get end_date from query parameters
+
+        // Base query for delivery orders
+        $baseQuery = DeliveryOrder::with(['order', 'order.client.contact', 'delivery.contact'])
+            ->whereHas('delivery.contact', function ($query) use ($business_id) {
+                $query->where('business_id', $business_id);
+            });
+
+        // Filter by delivery_id if provided
+        if (!empty($delivery_id)) {
+            $baseQuery->where('delivery_id', $delivery_id);
+        }
+
+        // Apply date filters if provided
+        if ($start_date && $end_date) {
+            $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
+                $q->whereBetween('created_at', [$start_date, $end_date]);
+            });
+        }
+
+        // Get total orders count and total amount
+        $totalOrdersCount = $baseQuery->count();
+        $totalOrdersAmount = $baseQuery->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        // Get orders with type 'order_refund'
+        $refundOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order_refund');
+        })->count();
+        $refundOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order_refund');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        // Get orders with type 'order_transfer'
+        $transferOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order_transfer');
+        })->count();
+        $transferOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order_transfer');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        // Get orders with cancellation status
+        $cancelledOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_status', 'cancelled');
+        })->count();
+        $cancelledOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_status', 'cancelled');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        // Get paid and not paid orders
+        $paidOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'paid');
+        })->count();
+        $paidOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'paid');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        $failedPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'failed');
+        })->count();
+        $failedPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'failed');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+        $pendingPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'pending');
+        })->count();
+        $pendingPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('payment_status', 'pending');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
+            return $deliveryOrder->order->total ?? 0;
+        });
+
+
+        // Calculate net total after removing refunded, cancelled, failed, and pending payment orders
+        $netTotalAmount = $totalOrdersAmount - $refundOrdersAmount - $cancelledOrdersAmount - $failedPayOrdersAmount - $pendingPayOrdersAmount;
+        // Return the statistics as JSON
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_orders_count' => $totalOrdersCount,
+                'total_orders_amount' => $totalOrdersAmount,
+                'refund_orders_count' => $refundOrdersCount,
+                'refund_orders_amount' => $refundOrdersAmount,
+                'transfer_orders_count' => $transferOrdersCount,
+                'transfer_orders_amount' => $transferOrdersAmount,
+                'cancelled_orders_count' => $cancelledOrdersCount,
+                'cancelled_orders_amount' => $cancelledOrdersAmount,
+                'paid_orders_count' => $paidOrdersCount,
+                'paid_orders_amount' => $paidOrdersAmount,
+                'failed_paid_orders_count' => $failedPayOrdersCount,
+                'failed_paid_orders_amount' => $failedPayOrdersAmount,
+                'pending_paid_orders_count' => $pendingPayOrdersCount,
+                'pending_paid_orders_amount' => $pendingPayOrdersAmount,
+                'net_total_amount' => $netTotalAmount,
+            ],
+        ]);
+    }
 
 
 
@@ -225,11 +345,11 @@ class DeliveryController extends Controller
 
                 $deliveryOrder->paid_at = now();
 
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'paid']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'paid']);
 
                 break;
             case 'not_paid':
-                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status'=>'not_paid']);
+                $this->moduleUtil->activityLog($order, 'change_payment_status', null, ['order_number' => $order->number, 'status' => 'not_paid']);
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");

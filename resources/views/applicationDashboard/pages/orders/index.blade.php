@@ -12,6 +12,7 @@
     <h1>@lang('lang_v1.orders')
         <small>@lang('lang_v1.manage_your_orders')</small>
     </h1>
+   
 </section>
 
 <!-- Main content -->
@@ -20,9 +21,10 @@
     @can('orders.create')
         @slot('tool')
         <div class="box-tools">
+            
         </div>
         @component('components.filters', ['title' => __('report.filters')])
-
+        
             @include('applicationDashboard.pages.orders.filters')
 
         @endcomponent
@@ -71,6 +73,7 @@
 
     @include('applicationDashboard.pages.orders.refundOrderModal')
 
+    @include('applicationDashboard.pages.orders.statisticsModal')
 
 </section>
 <!-- /.content -->

@@ -415,6 +415,7 @@
                 ]
             });
         });
+        
         $(document).on('change', '.change-refund-order-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();
@@ -438,7 +439,7 @@
                 }
             });
         });
-
+        
         $(document).on('change', '.change-order-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();
@@ -463,7 +464,6 @@
                 }
             });
         });
-
 
         $(document).on('change', '.change-payment-status', function () {
             var orderId = $(this).data('order-id');
@@ -829,4 +829,63 @@
     }
 
 
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
+        // Set the default value for start_date and end_date
+        document.getElementById('statistics_start_date').value = today;
+        document.getElementById('statistics_end_date').value = today;
+    });
+
+    $('#orderStatisticsModal').on('show.bs.modal', function () {
+            fetchStatistics();
+        });
+
+        // Fetch statistics on filter button click
+        $('#filter_statistics').click(function () {
+            fetchStatistics();
+        });
+
+        function fetchStatistics() {
+            const startDate = $('#statistics_start_date').val();
+            const endDate = $('#statistics_end_date').val();
+
+            $.ajax({
+                url: '{{ route("orders.statistics") }}',
+                type: 'GET',
+                data: {
+                    start_date: startDate,
+                    end_date: endDate,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        const data = response.data;
+
+                        // Ensure values are numbers before calling toFixed
+                        const totalOrdersAmount = parseFloat(data.total_orders_amount) || 0;
+                        const refundOrdersAmount = parseFloat(data.refund_orders_amount) || 0;
+                        const transferOrdersAmount = parseFloat(data.transfer_orders_amount) || 0;
+                        const cancelledOrdersAmount = parseFloat(data.cancelled_orders_amount) || 0;
+                        const netTotalAmount = parseFloat(data.net_total_amount) || 0;
+
+                        // Update the UI with the fetched statistics
+                        $('#total_orders_count').text(data.total_orders_count || 0);
+                        $('#total_orders_amount').text('$' + totalOrdersAmount.toFixed(2));
+                        $('#refund_orders_count').text(data.refund_orders_count || 0);
+                        $('#refund_orders_amount').text('$' + refundOrdersAmount.toFixed(2));
+                        $('#transfer_orders_count').text(data.transfer_orders_count || 0);
+                        $('#transfer_orders_amount').text('$' + transferOrdersAmount.toFixed(2));
+                        $('#cancelled_orders_count').text(data.cancelled_orders_count || 0);
+                        $('#cancelled_orders_amount').text('$' + cancelledOrdersAmount.toFixed(2));
+                        $('#net_total_amount').text('$' + netTotalAmount.toFixed(2));
+                    } else {
+                        alert('Failed to fetch statistics.');
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while fetching statistics.');
+                }
+            });
+        }
 </script>

@@ -213,16 +213,10 @@ class ApplicationSidebarMenu
 
             if (auth()->user()->can('orders_refund.view')) {
 
-                $menu->dropdown(
-                    __('lang_v1.order_refunds'),
-                    function ($sub) {
-                        $sub->url(
-                            route('order-refunds.index'),
-                            __('lang_v1.all_order_refunds'),
-                            ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order_refunds' && !request()->segment(2)]
-                        );
-                    },
-                    ['icon' => 'fa fa-cart-arrow-down']
+                $menu->url(
+                    route('order-refunds.index'),
+                    __('lang_v1.refund_reasons'),
+                    ['icon' => 'fa fas fa-list', 'active' => request()->segment(1) == 'order-refunds' && !request()->segment(2)]
                 )->order(24);
             }
 

@@ -101,6 +101,8 @@ Route::get('applicationDashboard/orders/{orderId}/related',  'ApplicationDashboa
 Route::get('applicationDashboard/orders/{orderId}/details', 'ApplicationDashboard\OrderController@getOrderDetails')->name('orders.details');
 Route::post('applicationDashboard/orders/{orderId}/change-order-status', 'ApplicationDashboard\OrderController@changeOrderStatus');
 Route::post('applicationDashboard/orders/{orderId}/change-payment-status', 'ApplicationDashboard\OrderController@changePaymentStatus');
+Route::get('applicationDashboard/getStatistics',  'ApplicationDashboard\OrderController@getOrderStatistics')
+->name('orders.statistics');
 // ----------------------------------------------
 
 // refund orders
@@ -129,6 +131,7 @@ Route::get('applicationDashboard/allDeliveries', 'ApplicationDashboard\DeliveryC
 Route::get('applicationDashboard/deliveries/{orderId}/list', 'ApplicationDashboard\DeliveryController@getAvailableDeliveries');
 Route::post('applicationDashboard/deliveries/assign-delivery', 'ApplicationDashboard\DeliveryController@assignDelivery');
 Route::post('applicationDashboard/deliveries/{orderId}/change-payment-status', 'ApplicationDashboard\DeliveryController@changePaymentStatus');
+Route::get('/deliveries/statistics', 'ApplicationDashboard\DeliveryController@getDeliveryStatistics')->name('deliveries.statistics');
 // ----------------------------------------------
 
 // order cancellations

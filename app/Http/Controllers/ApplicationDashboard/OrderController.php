@@ -491,7 +491,7 @@ class OrderController extends Controller
             // Rollback the transaction if anything fails
             DB::rollBack();
 
-            \Log::info('change order status',[$e]);
+            \Log::info('change order status', [$e]);
             return response()->json(['success' => false, 'message' => 'Failed to update order status.', 'error' => $e->getMessage()], 500);
         }
     }
@@ -739,6 +739,67 @@ class OrderController extends Controller
         }
 
         return redirect()->back()->with(['status' => $output]);
+    }
+
+
+    public function getOrderStatistics(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+    
+        // Get filters from the request
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+    
+        // Base query for orders
+        $baseQuery = Order::query();
+    
+        // Apply date filters if provided
+        if ($startDate && $endDate) {
+            $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
+    
+        // Get total orders count and total amount (completed orders)
+        $totalOrdersCount = (clone $baseQuery)->where('order_status', 'completed')->count();
+        $totalOrdersAmount = (clone $baseQuery)->where('order_status', 'completed')->sum('total');
+    
+        // Get orders with type 'order_refund' (completed orders)
+        $refundOrdersCount = (clone $baseQuery)->where('order_type', 'order_refund')
+            ->where('order_status', 'completed')->count();
+        $refundOrdersAmount = (clone $baseQuery)->where('order_type', 'order_refund')
+            ->where('order_status', 'completed')->sum('total');
+    
+        // Get orders with type 'order_transfer' (completed orders)
+        $transferOrdersCount = (clone $baseQuery)->where('order_type', 'order_transfer')
+            ->where('order_status', 'completed')->count();
+        $transferOrdersAmount = (clone $baseQuery)->where('order_type', 'order_transfer')
+            ->where('order_status', 'completed')->sum('total');
+    
+        // Get orders with cancellation status
+        $cancelledOrdersCount = (clone $baseQuery)->where('order_status', 'cancelled')->count();
+        $cancelledOrdersAmount = (clone $baseQuery)->where('order_status', 'cancelled')->sum('total');
+    
+         // Calculate net total after decreasing refund and cancellation orders
+    $netTotalAmount = $totalOrdersAmount - $refundOrdersAmount - $cancelledOrdersAmount;
+        // Return the statistics as JSON
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_orders_count' => $totalOrdersCount,
+                'total_orders_amount' => $totalOrdersAmount,
+                'refund_orders_count' => $refundOrdersCount,
+                'refund_orders_amount' => $refundOrdersAmount,
+                'transfer_orders_count' => $transferOrdersCount,
+                'transfer_orders_amount' => $transferOrdersAmount,
+                'cancelled_orders_count' => $cancelledOrdersCount,
+                'cancelled_orders_amount' => $cancelledOrdersAmount,
+                'net_total_amount' => $netTotalAmount, // Add net total amount
+
+            ],
+        ]);
     }
 
 }
