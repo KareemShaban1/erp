@@ -40,7 +40,7 @@ class OrderResource extends JsonResource
                     'payment_method' => $this->payment_method,
                     'order_status' => ucfirst($this->order_status),
                     // 'order_type' => ucfirst($this->order_type),
-                    'order_type' =>$this->order_type
+                    'order_type' =>$this->order_type,
                     'payment_status' => ucfirst($this->payment_status),
                     'shipping_cost' => $this->shipping_cost,
                     'sub_total' => $this->sub_total,
