@@ -10,6 +10,7 @@ use App\Utils\ModuleUtil;
 use Datatables;
 use Illuminate\Http\Request;
 use App\Services\FirebaseDeliveryService;
+use Carbon\Carbon;
 
 class DeliveryController extends Controller
 {
@@ -226,11 +227,26 @@ class DeliveryController extends Controller
         }
 
         // Apply date filters if provided
+        // if ($start_date && $end_date) {
+        //     $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
+        //         $q->whereBetween('created_at', [$start_date, $end_date]);
+        //     });
+        // }
+
         if ($start_date && $end_date) {
+            $end_date = $start_date === $end_date 
+                ? Carbon::parse($end_date)->endOfDay() // Ensure end_date is properly parsed even when dates are the same
+                : Carbon::parse($end_date)->endOfDay();
+        
             $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
-                $q->whereBetween('created_at', [$start_date, $end_date]);
+                if ($start_date === $end_date) {
+                    $q->whereDate('created_at', $start_date);
+                } else {
+                    $q->whereBetween('created_at', [$start_date, $end_date]);
+                }
             });
         }
+        
 
         // Get total orders count and total amount
         $totalOrdersCount = $baseQuery->count();
