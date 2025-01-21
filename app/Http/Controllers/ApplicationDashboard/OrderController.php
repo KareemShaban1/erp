@@ -758,8 +758,17 @@ class OrderController extends Controller
         $baseQuery = Order::query();
     
         // Apply date filters if provided
+        // if ($startDate && $endDate) {
+        //     $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+        // }
+
         if ($startDate && $endDate) {
-            $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+            if ($startDate === $endDate) {
+                $baseQuery->whereDate('created_at', $startDate);
+            } else {
+                $endDate = Carbon::parse($endDate)->endOfDay();
+                $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
         }
     
         // Get total orders count and total amount (completed orders)
