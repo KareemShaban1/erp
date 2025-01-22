@@ -774,10 +774,11 @@ class OrderController extends Controller
         // Get total orders count and total amount (completed orders)
         $totalOrdersCount = (clone $baseQuery)
             ->where('order_type', '<>', 'order_transfer')
-            ->where('order_status', 'completed')->count();
+            // ->where('order_status', 'completed')
+            ->count();
         $totalOrdersAmount = (clone $baseQuery)
             ->where('order_type', '<>', 'order_transfer')
-            ->where('order_status', 'completed')
+            // ->where('order_status', 'completed')
             ->sum('total');
 
         // Get total orders count and total amount (completed orders)
