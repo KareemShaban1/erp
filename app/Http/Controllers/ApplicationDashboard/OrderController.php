@@ -773,29 +773,34 @@ class OrderController extends Controller
 
         // Get total orders count and total amount (completed orders)
         $totalOrdersCount = (clone $baseQuery)
+            ->where('order_type', '<>', 'order_transfer')
             ->where('order_status', 'completed')->count();
         $totalOrdersAmount = (clone $baseQuery)
-            ->where('order_status', 'completed')->sum('total');
+            ->where('order_type', '<>', 'order_transfer')
+            ->where('order_status', 'completed')
+            ->sum('total');
 
         // Get total orders count and total amount (completed orders)
         $totalCompletedPaidOrdersCount = (clone $baseQuery)->
             where('order_status', 'completed')
+            ->where('order_type', '<>', 'order_transfer')
             ->where('payment_status', 'paid')
             ->count();
         $totalCompletedPaidOrdersAmount = (clone $baseQuery)->
             where('order_status', 'completed')
+            ->where('order_type', '<>', 'order_transfer')
             ->where('payment_status', 'paid')
             ->sum('total');
 
         $totalCompletedNotPaidOrdersCount = (clone $baseQuery)
-            ->where('order_status','<>', 'cancelled')
-            ->where('payment_status','<>', 'paid')
-            ->where('order_type','<>', 'order_refund')
+            ->where('order_status', '<>', 'cancelled')
+            ->where('payment_status', '<>', 'paid')
+            ->where('order_type', '<>', 'order_refund')
             ->count();
         $totalCompletedNotPaidOrdersAmount = (clone $baseQuery)
-            ->where('order_status','<>', 'cancelled')
-            ->where('payment_status','<>', 'paid')
-            ->where('order_type','<>', 'order_refund')
+            ->where('order_status', '<>', 'cancelled')
+            ->where('payment_status', '<>', 'paid')
+            ->where('order_type', '<>', 'order_refund')
             ->sum('total');
 
         // Get orders with type 'order_refund' (completed orders)
