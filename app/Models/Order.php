@@ -24,7 +24,20 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
-        'order_uuid', 'number', 'client_id', 'parent_order_id', 'business_location_id', 'payment_method', 'order_type', 'order_status', 'payment_status', 'shipping_cost', 'sub_total', 'total', 'from_business_location_id', 'to_business_location_id'
+        'order_uuid',
+        'number',
+        'client_id',
+        'parent_order_id',
+        'business_location_id',
+        'payment_method',
+        'order_type',
+        'order_status',
+        'payment_status',
+        'shipping_cost',
+        'sub_total',
+        'total',
+        'from_business_location_id',
+        'to_business_location_id'
     ];
 
     protected static function boot()
@@ -41,15 +54,19 @@ class Order extends Model
     }
 
     public function relatedOrders()
-{
-    return $this->hasMany(Order::class, 'parent_order_id');
-}
+    {
+        return $this->hasMany(Order::class, 'parent_order_id');
+    }
+
+    public function parentOrder(){
+        return $this->belongsTo(Order::class, 'parent_order_id');
+    }
 
 
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id')
-        ->with(['business_location','contact']);
+            ->with(['business_location', 'contact']);
         // return $this->belongsTo(Client::class, 'client_id')
         //     ->select(['id', 'contact_id','fcm_token','business_location_id'])
         //     ->with(['business_location','contact' => function ($query) {

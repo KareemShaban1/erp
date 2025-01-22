@@ -93,6 +93,7 @@ class RefundOrderController extends Controller
 
         $query = Order::with([
             'client.contact',
+            'parentOrder',
             'businessLocation',
             'transaction' => function ($query) {
                 $query->where('type', 'sell_return'); // Filter transactions with type 'sell'
@@ -104,6 +105,7 @@ class RefundOrderController extends Controller
                 'orders.order_type',
                 'orders.client_id',
                 'orders.business_location_id',
+                'orders.parent_order_id',
                 'orders.payment_method',
                 'orders.order_status',
                 'orders.payment_status',
@@ -227,6 +229,10 @@ class RefundOrderController extends Controller
                     // Assuming `deliveries` is a relationship on the Order model
                     return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
                 }
+            })
+            ->addColumn('parent_order_number',function ($order) {
+                // dd($order);
+                return $order->parentOrder->number ?? 'N/A';
             })
             ->make(true);
     }

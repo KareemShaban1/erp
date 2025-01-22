@@ -35,11 +35,11 @@
                     <tr>
                         <th>@lang('lang_v1.id')</th>
                         <th>@lang('lang_v1.business_location')</th>
+                        <th>@lang('lang_v1.parent_order_number')</th>
                         <th>@lang('lang_v1.number')</th>
                         <th>@lang('lang_v1.invoice_no')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.client_number')</th>
-                        <!-- <th>@lang('lang_v1.payment_method')</th> -->
                         <th>@lang('lang_v1.order_status')</th>
                         <th>@lang('lang_v1.payment_status')</th>
                         <th>@lang('lang_v1.shipping_cost')</th>

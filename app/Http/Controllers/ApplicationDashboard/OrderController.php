@@ -749,14 +749,14 @@ class OrderController extends Controller
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
-    
+
         // Get filters from the request
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-    
+
         // Base query for orders
         $baseQuery = Order::query();
-    
+
         // Apply date filters if provided
         // if ($startDate && $endDate) {
         //     $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
@@ -770,35 +770,68 @@ class OrderController extends Controller
                 $baseQuery->whereBetween('created_at', [$startDate, $endDate]);
             }
         }
-    
+
         // Get total orders count and total amount (completed orders)
-        $totalOrdersCount = (clone $baseQuery)->where('order_status', 'completed')->count();
-        $totalOrdersAmount = (clone $baseQuery)->where('order_status', 'completed')->sum('total');
-    
-        // Get orders with type 'order_refund' (completed orders)
-        $refundOrdersCount = (clone $baseQuery)->where('order_type', 'order_refund')
+        $totalOrdersCount = (clone $baseQuery)
             ->where('order_status', 'completed')->count();
-        $refundOrdersAmount = (clone $baseQuery)->where('order_type', 'order_refund')
+        $totalOrdersAmount = (clone $baseQuery)
             ->where('order_status', 'completed')->sum('total');
-    
+
+        // Get total orders count and total amount (completed orders)
+        $totalCompletedPaidOrdersCount = (clone $baseQuery)->
+            where('order_status', 'completed')
+            ->where('payment_status', 'paid')
+            ->count();
+        $totalCompletedPaidOrdersAmount = (clone $baseQuery)->
+            where('order_status', 'completed')
+            ->where('payment_status', 'paid')
+            ->sum('total');
+
+        $totalCompletedNotPaidOrdersCount = (clone $baseQuery)
+            ->where('order_status','<>', 'cancelled')
+            ->where('payment_status','<>', 'paid')
+            ->where('order_type','<>', 'order_refund')
+            ->count();
+        $totalCompletedNotPaidOrdersAmount = (clone $baseQuery)
+            ->where('order_status','<>', 'cancelled')
+            ->where('payment_status','<>', 'paid')
+            ->where('order_type','<>', 'order_refund')
+            ->sum('total');
+
+        // Get orders with type 'order_refund' (completed orders)
+        $refundOrdersCount = (clone $baseQuery)
+            ->where('order_type', 'order_refund')
+            ->where('order_status', 'completed')
+            ->where('payment_status', 'paid')
+            ->count();
+        $refundOrdersAmount = (clone $baseQuery)
+            ->where('order_type', 'order_refund')
+            ->where('payment_status', 'paid')
+            ->where('order_status', 'completed')
+            ->sum('total');
+
         // Get orders with type 'order_transfer' (completed orders)
         $transferOrdersCount = (clone $baseQuery)->where('order_type', 'order_transfer')
             ->where('order_status', 'completed')->count();
         $transferOrdersAmount = (clone $baseQuery)->where('order_type', 'order_transfer')
             ->where('order_status', 'completed')->sum('total');
-    
+
         // Get orders with cancellation status
         $cancelledOrdersCount = (clone $baseQuery)->where('order_status', 'cancelled')->count();
         $cancelledOrdersAmount = (clone $baseQuery)->where('order_status', 'cancelled')->sum('total');
-    
-         // Calculate net total after decreasing refund and cancellation orders
-    $netTotalAmount = $totalOrdersAmount - $refundOrdersAmount - $cancelledOrdersAmount;
+
+        // Calculate net total after decreasing refund and cancellation orders
+        $netTotalAmount = $totalCompletedPaidOrdersAmount - $refundOrdersAmount;
         // Return the statistics as JSON
         return response()->json([
             'success' => true,
             'data' => [
                 'total_orders_count' => $totalOrdersCount,
                 'total_orders_amount' => $totalOrdersAmount,
+                'total_completed_paid_orders_count' => $totalCompletedPaidOrdersCount,
+                'total_completed_paid_orders_amount' => $totalCompletedPaidOrdersAmount,
+                'total_completed_not_paid_orders_count' => $totalCompletedNotPaidOrdersCount,
+                'total_completed_not_paid_orders_amount' => $totalCompletedNotPaidOrdersAmount,
                 'refund_orders_count' => $refundOrdersCount,
                 'refund_orders_amount' => $refundOrdersAmount,
                 'transfer_orders_count' => $transferOrdersCount,

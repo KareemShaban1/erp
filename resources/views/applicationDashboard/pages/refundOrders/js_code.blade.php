@@ -45,8 +45,9 @@
                     data: 'business_location_name',
                     name: 'business_location_name'
                 },
+                { data: 'parent_order_number', name: 'parent_order_number' },
                 { data: 'number', name: 'number' },
-                {data:'invoice_no',name:'invoice_no'},
+                { data: 'invoice_no', name: 'invoice_no' },
                 { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
                 {
@@ -315,7 +316,7 @@
                             const row = `
                         <tr>
                             <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
-                            <td>${item.product.name}</td>
+                            <td>${item.product.name}  - [${item.variation.name} ]</td>
                             <td>${item.quantity}</td>
                             <td>${item.price}</td>
                             <td>${item.sub_total}</td>

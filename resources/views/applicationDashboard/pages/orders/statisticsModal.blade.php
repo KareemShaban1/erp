@@ -39,13 +39,33 @@
 
                 <!-- Statistics Display -->
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="info-box">
                             <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-cart"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">@lang('lang_v1.total_orders')</span>
                                 <span class="info-box-number" id="total_orders_count">0</span>
                                 <span class="info-box-number" id="total_orders_amount">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-cart"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">@lang('lang_v1.total_completed_paid_orders')</span>
+                                <span class="info-box-number" id="total_completed_paid_orders_count">0</span>
+                                <span class="info-box-number" id="total_completed_paid_orders_amount">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-cart"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">@lang('lang_v1.total_completed_not_paid_orders')</span>
+                                <span class="info-box-number" id="total_completed_not_paid_orders_count">0</span>
+                                <span class="info-box-number" id="total_completed_not_paid_orders_amount">$0.00</span>
                             </div>
                         </div>
                     </div>
