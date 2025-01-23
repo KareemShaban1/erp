@@ -18,7 +18,7 @@
 </button>
 
 
-    @can('lang_v1.view')
+    @can('deliveries.orders')
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orderDeliveries_table">
                 <thead>

@@ -13,7 +13,7 @@
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
 
-    @can('lang_v1.view')
+    @can('deliveries.view')
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="deliveries_table">
                 <thead>
