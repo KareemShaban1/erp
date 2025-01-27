@@ -574,7 +574,7 @@ class OrderController extends Controller
             })
             ->leftJoin('deliveries as d', function ($join) {
                 $join->on('d.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
+                    ->where('activity_log.causer_type', '=', 'App\\Models\\Delivery');
             })
             ->leftJoin('contacts as contact', function ($join) {
                 $join->on('contact.id', '=', 'c.contact_id')
