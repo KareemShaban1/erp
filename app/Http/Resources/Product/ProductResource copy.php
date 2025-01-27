@@ -24,10 +24,10 @@ class ProductResource extends JsonResource
      * @param bool $withFullData
      * @return self
      */
-    public function withFullData(
-        bool $withFullData
-        // , bool $isVariation
-    ): self {
+    public function withFullData(bool $withFullData 
+    // , bool $isVariation
+    ): self
+    {
         $this->withFullData = $withFullData;
 
         // $this->isVariation = $isVariation;
@@ -48,7 +48,7 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
         ];
-
+    
         // Conditionally merge the full data if the flag is set to true
         if ($this->withFullData) {
             // Filter variations to exclude inactive locations
@@ -58,21 +58,16 @@ class ProductResource extends JsonResource
                 });
                 return $variation;
             });
-
-            // Sort variations by total stock in descending order
-            $variations = $variations->sortByDesc(function ($variation) {
-                return $variation->variation_location_details->sum('qty_available');
-            });
-
+    
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
-
+    
             // If current_stock < 0, return an empty array
             if ($current_stock < 0) {
                 return [];
             }
-
+    
             // Otherwise, return full data
             $data = array_merge($data, [
                 'description' => $this->product_description,
@@ -84,12 +79,12 @@ class ProductResource extends JsonResource
                 'current_stock' => $current_stock,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
-                'variations' => (new VariationCollection($variations->values()))->withFullData(true),
+                'variations' => (new VariationCollection($variations))->withFullData(true),
             ]);
         }
-
+    
         return $data;
     }
-
-
+    
+    
 }
