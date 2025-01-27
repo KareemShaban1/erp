@@ -567,14 +567,18 @@ class OrderController extends Controller
     {
         // Fetch activity logs related to the order
         $activityLogs = Activity::with(['subject'])
-            ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            // ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('users as u', function ($join) {
+                $join->on('u.id', '=', 'activity_log.causer_id')
+                    ->where('activity_log.causer_type', '=', 'App\Models\User');
+            })
             ->leftJoin('clients as c', function ($join) {
                 $join->on('c.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', 'App\Models\Client');
+                    ->where('activity_log.causer_type', '=', 'App\Models\Client');
             })
             ->leftJoin('deliveries as d', function ($join) {
                 $join->on('d.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', 'App\Models\Delivery');
+                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
             })
             ->leftJoin('contacts as contact', function ($join) {
                 $join->on('contact.id', '=', 'c.contact_id')
