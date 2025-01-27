@@ -693,7 +693,7 @@
                         <td>
                             <img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;">
                         </td>
-                        <td>Name: ${item.product.name} / quantity: ${item.quantity}</td>
+                        <td>Name: ${item.product.name} - ${item.variation.name} / quantity: ${item.quantity}</td>
                         <td>
                             <textarea name="refund_reason_${item.id}" class="form-control refund-reason" rows="2" data-item-id="${item.id}"></textarea>
                         </td>
