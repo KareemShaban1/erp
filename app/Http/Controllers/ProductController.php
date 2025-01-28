@@ -947,12 +947,31 @@ class ProductController extends Controller
             ->firstOrFail();
 
         //Sub-category
-        $sub_categories = [];
-        $sub_categories = Category::where('business_id', $business_id)
-            ->where('parent_id', $product->category_id)
-            ->pluck('name', 'id')
-            ->toArray();
+        // $sub_categories = [];
+        // $sub_categories = Category::where('business_id', $business_id)
+        //     ->where('parent_id', $product->category_id)
+        //     ->pluck('name', 'id')
+        //     ->toArray();
         // $sub_categories = ["" => "None"] + $sub_categories;
+
+        $sub_categories = [];
+        if (!empty(request()->input('d'))) {
+            $duplicate_product = Product::where('business_id', $business_id)->find(request()->input('d'));
+            $duplicate_product->name .= ' (copy)';
+
+            if (!empty($duplicate_product->category_id)) {
+                $sub_categories = Category::where('business_id', $business_id)
+                    ->where('parent_id', $duplicate_product->category_id)
+                    ->pluck('name', 'id')
+                    ->toArray();
+            }
+
+            //Rack details
+            if (!empty($duplicate_product->id)) {
+                $rack_details = $this->productUtil->getRackDetails($business_id, $duplicate_product->id);
+            }
+        }
+
 
         $default_profit_percent = request()->session()->get('business.default_profit_percent');
 

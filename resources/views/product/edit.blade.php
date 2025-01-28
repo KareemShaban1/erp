@@ -84,7 +84,6 @@
               </div>
             </div>
 
-            
 
             <div class="clearfix"></div>
             <div class="col-sm-4 @if(!session('business.enable_category')) hide @endif">
