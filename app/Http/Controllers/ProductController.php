@@ -952,7 +952,7 @@ class ProductController extends Controller
             ->where('parent_id', $product->category_id)
             ->pluck('name', 'id')
             ->toArray();
-        $sub_categories = ["" => "None"] + $sub_categories;
+        // $sub_categories = ["" => "None"] + $sub_categories;
 
         $default_profit_percent = request()->session()->get('business.default_profit_percent');
 
