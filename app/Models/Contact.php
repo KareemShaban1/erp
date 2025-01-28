@@ -238,6 +238,36 @@ class Contact extends Authenticatable
         return $customers;
     }
 
+    public static function customersClientsDropdown($business_id, $prepend_none = true, $append_id = true)
+    {
+        $all_contacts = Contact::where('business_id', $business_id)
+                        ->whereIn('type', ['customer','client', 'both'])
+                        ->active();
+
+        if ($append_id) {
+            $all_contacts->select(
+                DB::raw("IF(contact_id IS NULL OR contact_id='', CONCAT( COALESCE(supplier_business_name, ''), ' - ', name), CONCAT(COALESCE(supplier_business_name, ''), ' - ', name, ' (', contact_id, ')')) AS customer"),
+                'id'
+                );
+        } else {
+            $all_contacts->select('id', DB::raw("name as customer"));
+        }
+
+        if (auth()->check() && !auth()->user()->can('customer.view') && auth()->user()->can('customer.view_own')) {
+            $all_contacts->where('contacts.created_by', auth()->user()->id);
+        }
+
+        $customers = $all_contacts->pluck('customer', 'id');
+
+        //Prepend none
+        if ($prepend_none) {
+            $customers = $customers->prepend(__('lang_v1.none'), '');
+        }
+
+        return $customers;
+    }
+
+
     /**
      * Return list of contact type.
      *
