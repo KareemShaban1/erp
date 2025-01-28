@@ -571,7 +571,7 @@ class SellController extends Controller
         }
 
         $business_locations = BusinessLocation::forDropdown($business_id, false);
-        $customers = Contact::customersDropdown($business_id, false);
+        $customers = Contact::customersClientsDropdown($business_id, false);
         $sales_representative = User::forDropdown($business_id, false, false, true);
 
         //Commission agent filter
