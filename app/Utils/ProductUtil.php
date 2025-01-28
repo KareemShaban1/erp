@@ -521,7 +521,6 @@ class ProductUtil extends Util
             });
         }
 
-        try {
         $product = $query->select(
             DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, 
                     ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
@@ -551,13 +550,9 @@ class ProductUtil extends Util
             DB::raw("(SELECT purchase_price_inc_tax FROM purchase_lines WHERE 
                         variation_id=variations.id ORDER BY id DESC LIMIT 1) as last_purchased_price")
         )
-            ->firstOrFail();
+            ->find();
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            \Log::error("Product not found for variation ID: $variation_id, Business ID: $business_id, Location ID: $location_id", [
-                'check_qty' => $check_qty,
-            ]);
-        }
+       
 
         if ($product->product_type == 'combo') {
             if ($check_qty) {
