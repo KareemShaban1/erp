@@ -505,6 +505,7 @@ class ProductUtil extends Util
                 ->where('p.business_id', $business_id)
                 ->where('variations.id', $variation_id);
 
+                \Log::info('product details',[$query->get()]);
         //Add condition for check of quantity. (if stock is not enabled or qty_available > 0)
         if ($check_qty) {
             $query->where(function ($query) use ($location_id) {

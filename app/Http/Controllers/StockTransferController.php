@@ -102,10 +102,10 @@ class StockTransferController extends Controller
             $duplicate_order_numbers = [];
             foreach ($grouped_by_order as $order_number => $group) {
                 if ($group->count() > 1) {
-                    if($order_number != ''){
+                    if ($order_number != '') {
                         $duplicate_order_numbers[] = $order_number;
                     }
-                    
+
                 }
             }
 
@@ -164,12 +164,12 @@ class StockTransferController extends Controller
                         return action('StockTransferController@show', [$row->id]);
                     },
                     'style' => function ($row) use ($random_colors, $duplicate_order_numbers) {
-                       if($duplicate_order_numbers != ''){
-                         // Only apply color if duplicate_order_numbers is not empty
-                         return !empty($duplicate_order_numbers) && in_array(optional($row->order)->number, $duplicate_order_numbers)
-                         ? 'background-color: ' . $random_colors[optional($row->order)->number] .';' . 'color:white;'
-                         : '';
-                       }
+                        if ($duplicate_order_numbers != '') {
+                            // Only apply color if duplicate_order_numbers is not empty
+                            return !empty($duplicate_order_numbers) && in_array(optional($row->order)->number, $duplicate_order_numbers)
+                                ? 'background-color: ' . $random_colors[optional($row->order)->number] . ';' . 'color:white;'
+                                : '';
+                        }
                     },
                 ])
                 ->make(true);
