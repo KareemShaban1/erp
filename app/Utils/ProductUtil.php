@@ -560,7 +560,7 @@ class ProductUtil extends Util
             $product->combo_products = $this->calculateComboDetails($location_id, $product->combo_variations);
         }
         
-        \Log::info('product details',[$product]);
+        \Log::info('product',[$product]);
 
         return $product;
     }
