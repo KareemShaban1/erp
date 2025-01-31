@@ -235,7 +235,7 @@ class DeliveryController extends Controller
 
         if ($start_date && $end_date) {
             $end_date = $start_date === $end_date
-                ? Carbon::parse($end_date)->endOfDay() // Ensure end_date is properly parsed even when dates are the same
+                ? Carbon::parse($end_date)->endOfDay()
                 : Carbon::parse($end_date)->endOfDay();
 
             $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
