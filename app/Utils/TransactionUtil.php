@@ -2863,7 +2863,6 @@ class TransactionUtil extends Util
      */
     public function mapPurchaseSell($business, $transaction_lines, $mapping_type = 'purchase', $check_expiry = true, $purchase_line_id = null)
     {
-        // Log::info($transaction_lines);
         if (empty($transaction_lines)) {
             return false;
         }
@@ -3014,7 +3013,6 @@ class TransactionUtil extends Util
                             ->update(['mfg_quantity_used' => $row->mfg_quantity_used + $qty_allocated]);
                     }
                 }
-
                 if ($qty_selling == 0) {
                     break;
                 }
@@ -5777,7 +5775,7 @@ class TransactionUtil extends Util
             $sell_return_data['invoice_no'] = $this->generateReferenceNumber('sell_return', $ref_count, $business_id);
         }
 
-        if (empty($sell_return)) {
+        // if (empty($sell_return)) {
             $sell_return_data['transaction_date'] = \Carbon::now();
             $sell_return_data['business_id'] = $business_id;
             $sell_return_data['location_id'] = $sell->location_id;
@@ -5791,14 +5789,14 @@ class TransactionUtil extends Util
             $sell_return = Transaction::create($sell_return_data);
 
             $this->activityLog($sell_return, 'added');
-        } else {
-            $sell_return_data['invoice_no'] = $sell_return_data['invoice_no'] ?? $sell_return->invoice_no;
-            $sell_return_before = $sell_return->replicate();
+        // } else {
+        //     $sell_return_data['invoice_no'] = $sell_return_data['invoice_no'] ?? $sell_return->invoice_no;
+        //     $sell_return_before = $sell_return->replicate();
 
-            $sell_return->update($sell_return_data);
+        //     $sell_return->update($sell_return_data);
 
-            $this->activityLog($sell_return, 'edited', $sell_return_before);
-        }
+        //     $this->activityLog($sell_return, 'edited', $sell_return_before);
+        // }
 
         if ($business->enable_rp == 1 && !empty($sell->rp_earned)) {
             $is_reward_expired = $this->isRewardExpired($sell->transaction_date, $business_id);
