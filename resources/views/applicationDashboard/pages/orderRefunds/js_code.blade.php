@@ -44,7 +44,7 @@ $(document).ready(function(){
                         
                         // Check if the parsed data and product properties exist
                         if (orderItem && orderItem.product && orderItem.product.name && orderItem.quantity) {
-                            return `${orderItem.product.name} (${orderItem.quantity})`;
+                            return `${orderItem.product.name} (${orderItem.variation.name}) (${orderItem.quantity})`;
                         }
                     } catch (e) {
                         console.error('Error parsing order_item:', e);
