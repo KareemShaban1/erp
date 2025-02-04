@@ -230,7 +230,7 @@ class RefundOrderController extends Controller
                     return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
                 }
             })
-            ->addColumn('parent_order_number',function ($order) {
+            ->addColumn('parent_order_number', function ($order) {
                 // dd($order);
                 return $order->parentOrder->number ?? 'N/A';
             })
@@ -374,7 +374,7 @@ class RefundOrderController extends Controller
                     "tax_percent" => "0",
                 ];
 
-                \Log::info('sale_refund_date',[$input]);
+                \Log::info('sale_refund_date', [$input]);
 
                 $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
                 foreach ($order->orderItems as $item) {
@@ -404,20 +404,24 @@ class RefundOrderController extends Controller
         $order = Order::findOrFail($orderId);
         $order->payment_status = $status;
         $order->save();
-        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
 
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
         $delivery = Delivery::find($deliveryOrder->delivery_id);
 
-        if ($delivery && $delivery->contact) {
-            $delivery->contact->balance += $order->total;
-            $delivery->contact->save();
-        }
 
         $transaction = Transaction::
             where('type', 'sell_return')->
             where('location_id', $order->business_location_id)->
             where('order_id', $order->id)
             ->first();
+
+        // If transaction is null, do not change status
+        if (!$transaction) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction not found. Payment status was not updated.'
+            ], 400);
+        }
 
         $saleReturnPaymentData = [
             'transaction_id' => $transaction->id,
@@ -446,6 +450,15 @@ class RefundOrderController extends Controller
                     null,
                     ['order_number' => $order->number, 'status' => 'paid', 'order_type', $order->order_type]
                 );
+                if ($deliveryOrder) {
+                    $deliveryOrder->payment_status = 'paid';
+                    $deliveryOrder->save();
+
+                    if ($delivery && $delivery->contact) {
+                        $delivery->contact->balance += $order->total;
+                        $delivery->contact->save();
+                    }
+                }
                 $this->makeSaleReturnPayment($saleReturnPaymentData);
 
                 break;
@@ -476,13 +489,13 @@ class RefundOrderController extends Controller
                 $join->on('u.id', '=', 'activity_log.causer_id')
                     ->where('activity_log.causer_type', '=', 'App\Models\User');
             })
-            ->leftJoin('clients as c', function($join) {
+            ->leftJoin('clients as c', function ($join) {
                 $join->on('c.id', '=', 'activity_log.causer_id')
-                     ->where('activity_log.causer_type', '=', 'App\Models\Client');
+                    ->where('activity_log.causer_type', '=', 'App\Models\Client');
             })
-            ->leftJoin('deliveries as d', function($join) {
+            ->leftJoin('deliveries as d', function ($join) {
                 $join->on('d.id', '=', 'activity_log.causer_id')
-                     ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
+                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
             })
             ->leftJoin('contacts as contact', function ($join) {
                 $join->on('contact.id', '=', 'c.contact_id')
