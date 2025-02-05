@@ -257,7 +257,12 @@ class PayrollController extends Controller
                     ->where('expense_for', $employee->id)
                     ->where('type', 'expense')
                     ->whereBetween('transaction_date', [$start_date, $end_date->format('Y-m-d')])
-                    ->get();
+                    ->select(
+                        'transactions.id',
+                        'transactions.final_total',
+                        'transactions.transaction_date',
+                        'ec.name as category');
+                    // ->get();
 
                 dd($expense_transactions);
                 foreach ($expense_transactions as $expense) {
