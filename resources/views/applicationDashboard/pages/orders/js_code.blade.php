@@ -339,12 +339,12 @@
                             }
 
                             return `
-            <select class="form-control ${row.order_type === 'order_transfer' ? 'change-payment-status' : 'change-refund-payment-status'}"
-            data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-            </select>`;
+                                <select class="form-control ${row.order_type === 'order_transfer' ? 'change-payment-status' : 'change-refund-payment-status'}"
+                                data-order-id="${row.id}">
+                                    <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
+                                    <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
+                                </select>`;
                         }
                     },
                     { data: 'shipping_cost', name: 'shipping_cost' },

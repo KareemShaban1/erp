@@ -374,7 +374,7 @@ class RefundOrderController extends Controller
                     "tax_percent" => "0",
                 ];
 
-                \Log::info('sale_refund_date', [$input]);
+                \Log::info('sale_refund_data', [$input]);
 
                 $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
                 foreach ($order->orderItems as $item) {
@@ -402,8 +402,6 @@ class RefundOrderController extends Controller
         $status = request()->input('payment_status'); // Retrieve status from the request
 
         $order = Order::findOrFail($orderId);
-        $order->payment_status = $status;
-        $order->save();
 
         $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
         $delivery = Delivery::find($deliveryOrder->delivery_id);
@@ -417,11 +415,15 @@ class RefundOrderController extends Controller
 
         // If transaction is null, do not change status
         if (!$transaction) {
+            \Log::info('transaction_error',[$transaction]);
             return response()->json([
                 'success' => false,
                 'message' => 'Transaction not found. Payment status was not updated.'
             ], 400);
         }
+
+        $order->payment_status = $status;
+        $order->save();
 
         $saleReturnPaymentData = [
             'transaction_id' => $transaction->id,
