@@ -261,10 +261,9 @@ class PayrollController extends Controller
                         'transactions.id',
                         'transactions.final_total',
                         'transactions.transaction_date',
-                        'ec.name as category');
-                    // ->get();
+                        'ec.name as category')
+                    ->get();
 
-                dd($expense_transactions);
                 foreach ($expense_transactions as $expense) {
                     $payrolls[$employee->id]['deductions']['deduction_names'][] = __('essentials::lang.expense');
                     $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $expense->final_total;
