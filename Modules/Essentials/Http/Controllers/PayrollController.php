@@ -252,11 +252,13 @@ class PayrollController extends Controller
 
                 // Get transactions of type 'expense' for employee and add to deductions
                 $expense_transactions = Transaction::where('business_id', $business_id)
+                    ->leftJoin('expense_categories AS ec', 'transactions.expense_category_id', '=', 'ec.id')
                     ->where('expense_for', $employee->id)
                     ->where('type', 'expense')
                     ->whereBetween('transaction_date', [$start_date, $end_date->format('Y-m-d')])
                     ->get();
 
+                    dd($expense_transactions);
                 foreach ($expense_transactions as $expense) {
                     $payrolls[$employee->id]['deductions']['deduction_names'][] = __('essentials::lang.expense');
                     $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $expense->final_total;
