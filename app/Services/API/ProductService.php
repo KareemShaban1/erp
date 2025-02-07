@@ -96,7 +96,7 @@ class ProductService extends BaseService
     }
 
 
-    public function show($id , $variationId = null)
+    public function show(Request $request , $id)
     {
         try {
             // Fetch product with relationships and filters
@@ -125,7 +125,7 @@ class ProductService extends BaseService
 
             // return new ProductResource($product);
 
-            return (new ProductResource($product))->setVariationId($variationId);
+            return (new ProductResource($product))->setVariationId($request->variationId);
 
 
             // // Return the product
