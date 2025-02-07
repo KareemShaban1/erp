@@ -57,10 +57,10 @@ class ProductController extends Controller
     /**
      * Display the specified Product.
      */
-    public function show($id, $variationId = null)
+    public function show(Request $request, $id)
     {
 
-        $product = $this->service->show($id,$variationId);
+        $product = $this->service->show( $request,$id);
 
         if ($product instanceof JsonResponse) {
             return $product;
