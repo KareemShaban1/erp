@@ -15,43 +15,37 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class ProductResource extends JsonResource
 {
     protected bool $withFullData = true;
-
-    // protected bool $isVariation = true;
+    protected ?int $variationId = null;
 
     /**
      * Set whether to return full data or not.
-     * 
-     * @param bool $withFullData
-     * @return self
      */
-    public function withFullData(
-        bool $withFullData
-        // , bool $isVariation
-    ): self {
+    public function withFullData(bool $withFullData): self
+    {
         $this->withFullData = $withFullData;
+        return $this;
+    }
 
-        // $this->isVariation = $isVariation;
-
+    /**
+     * Set variation ID to filter variations.
+     */
+    public function setVariationId(?int $variationId): self
+    {
+        $this->variationId = $variationId;
         return $this;
     }
 
     /**
      * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array
      */
     public function toArray($request): array
     {
-        // Basic data to always return
         $data = [
             'id' => $this->id,
             'name' => $this->name,
         ];
 
-        // Conditionally merge the full data if the flag is set to true
         if ($this->withFullData) {
-            // Filter variations to exclude inactive locations
             $variations = $this->variations->map(function ($variation) {
                 $variation->variation_location_details = $variation->variation_location_details->filter(function ($details) {
                     return $details->location->is_active == 1;
@@ -59,21 +53,19 @@ class ProductResource extends JsonResource
                 return $variation;
             });
 
-            // Sort variations by total stock in descending order
-            $variations = $variations->sortByDesc(function ($variation) {
-                return $variation->variation_location_details->sum('qty_available');
-            });
+            // Filter only the requested variation if `$variationId` is provided
+            if ($this->variationId) {
+                $variations = $variations->where('id', $this->variationId)->values();
+            }
 
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
 
-            // If current_stock < 0, return an empty array
             if ($current_stock < 0) {
                 return [];
             }
 
-            // Otherwise, return full data
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'active_in_app' => $this->active_in_app,
@@ -84,12 +76,10 @@ class ProductResource extends JsonResource
                 'current_stock' => $current_stock,
                 'image_url' => $this->image_url,
                 'media' => (new MediaCollection($this->media))->withFullData(false),
-                'variations' => (new VariationCollection($variations->values()))->withFullData(true),
+                'variations' => (new VariationCollection($variations))->withFullData(true),
             ]);
         }
 
         return $data;
     }
-
-
 }

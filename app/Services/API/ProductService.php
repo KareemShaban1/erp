@@ -5,6 +5,7 @@ namespace App\Services\API;
 use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Product\ProductResource;
 use App\Models\Product;
+use App\Models\Variation;
 use App\Services\BaseService;
 use App\Traits\HelperTrait;
 use App\Traits\UploadFileTrait;
@@ -95,9 +96,10 @@ class ProductService extends BaseService
     }
 
 
-    public function show($id)
+    public function show($id , $variationId = null)
     {
         try {
+            $variation = Variation::findOrFail($variationId);
             // Fetch product with relationships and filters
             $product = Product::with([
                 'media',
@@ -105,7 +107,8 @@ class ProductService extends BaseService
                 'brand:id,name',
                 'category:id,name',
                 'sub_category:id,name',
-                'warranty:id,name,duration,duration_type'
+                'warranty:id,name,duration,duration_type',
+                'variations.variation_location_details.location' // Load variations and their stock locations
             ])
                 ->where('type', '!=', 'modifier') // Simplified column reference
                 ->appBusinessId() // Assuming this is a global scope or local query scope
@@ -121,7 +124,10 @@ class ProductService extends BaseService
                 ], 404);
             }
 
-            return new ProductResource($product);
+            // return new ProductResource($product);
+
+            return (new ProductResource($product))->setVariationId($variationId);
+
 
             // // Return the product
             // return response()->json([
