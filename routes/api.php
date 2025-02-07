@@ -52,7 +52,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
     Route::get('products', [ProductController::class, 'index']);
     Route::get('category_products/{id}', [ProductController::class, 'categoryProducts']);
-    Route::get('product_details/{product_id}', [ProductController::class, 'show']);
+    Route::get('product_details/{product_id}/{variation_id?}', [ProductController::class, 'show']);
 
 
     Route::get('cart_get_items', [CartController::class, 'index']);
