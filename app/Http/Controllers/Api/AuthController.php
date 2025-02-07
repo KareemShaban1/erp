@@ -186,128 +186,247 @@ class AuthController extends Controller
 
 
 
+    // public function clientLogin(Request $request)
+    // {
+    //     // Custom validation messages
+    // $messages = [
+    //     'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
+    //     'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+    //     'password.required' => 'كلمة المرور مطلوبة.',
+    //     'fcm_token.required' => 'رمز FCM مطلوب.',
+    // ];
+
+    // // Validation
+    // $validator = Validator::make($request->all(), [
+    //     'email_address' => 'required|string|email',
+    //     'password' => 'required|string',
+    //     'fcm_token' => 'required|string',
+    // ], $messages);
+
+    //     if ($validator->fails()) {
+    //         // Get the first error message
+    //         $firstError = $validator->errors()->first();
+    //         return response()->json(['message' => $firstError], 422);
+    //     }
+
+    //     // Find the client by email
+    //     $client = Client::where('email_address', $request->email_address)->first();
+
+    //     $client_status = $client->contact->contact_status;
+
+    //     // Check if client exists
+    //     if (!$client) {
+    //         return response()->json(['message' => 'Client not found'], 404);
+    //     }
+
+    //     // Check if the delivery account is deleted
+    //     if ($client->account_status == 'deleted') {
+    //         return response()->json(['message' => 'client account is deleted'], 403); // Forbidden for inactive deliverys
+    //     }
+
+
+    //     // Check if the client is active
+    //     if ($client_status == 'inactive') {
+    //         return response()->json(['message' => 'Client is not active'], 403); // Forbidden for inactive clients
+    //     }
+
+    //     // Check if the password is correct
+    //     if (!Hash::check($request->password, $client->password)) {
+    //         return response()->json(['message' => 'Invalid credentials'], 401);
+    //     }
+
+    //     // Generate Sanctum Token
+    //     $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+    //     $client->fcm_token = $request->fcm_token;
+    //     $client->save();
+
+    //     // Respond with Client Data and Token
+    //     return response()->json([
+    //         'client' => $client,
+    //         'token' => $token,
+    //     ], 200);
+    // }
+
     public function clientLogin(Request $request)
-    {
-        // Custom validation messages
+{
+    // Custom validation messages
     $messages = [
-        'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
-        'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+        'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
         'password.required' => 'كلمة المرور مطلوبة.',
         'fcm_token.required' => 'رمز FCM مطلوب.',
     ];
 
     // Validation
     $validator = Validator::make($request->all(), [
-        'email_address' => 'required|string|email',
+        'email_or_phone' => 'required|string', // Allow either email or phone
         'password' => 'required|string',
         'fcm_token' => 'required|string',
     ], $messages);
 
-        if ($validator->fails()) {
-            // Get the first error message
-            $firstError = $validator->errors()->first();
-            return response()->json(['message' => $firstError], 422);
-        }
-
-        // Find the client by email
-        $client = Client::where('email_address', $request->email_address)->first();
-
-        $client_status = $client->contact->contact_status;
-
-        // Check if client exists
-        if (!$client) {
-            return response()->json(['message' => 'Client not found'], 404);
-        }
-
-        // Check if the delivery account is deleted
-        if ($client->account_status == 'deleted') {
-            return response()->json(['message' => 'client account is deleted'], 403); // Forbidden for inactive deliverys
-        }
-
-
-        // Check if the client is active
-        if ($client_status == 'inactive') {
-            return response()->json(['message' => 'Client is not active'], 403); // Forbidden for inactive clients
-        }
-
-        // Check if the password is correct
-        if (!Hash::check($request->password, $client->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        // Generate Sanctum Token
-        $token = $client->createToken('Personal Access Token')->plainTextToken;
-
-        $client->fcm_token = $request->fcm_token;
-        $client->save();
-
-        // Respond with Client Data and Token
-        return response()->json([
-            'client' => $client,
-            'token' => $token,
-        ], 200);
+    if ($validator->fails()) {
+        return response()->json(['message' => $validator->errors()->first()], 422);
     }
 
+    // Find the client by email or phone
+    $client = Client::where('email_address', $request->email_or_phone)
+                    ->orWhere('phone', $request->email_or_phone)
+                    ->first();
+
+    // Check if client exists
+    if (!$client) {
+        return response()->json(['message' => 'Client not found'], 404);
+    }
+
+    // Check if the delivery account is deleted
+    if ($client->account_status == 'deleted') {
+        return response()->json(['message' => 'Client account is deleted'], 403);
+    }
+
+    // Check if the client is active
+    if ($client->contact->contact_status == 'inactive') {
+        return response()->json(['message' => 'Client is not active'], 403);
+    }
+
+    // Check if the password is correct
+    if (!Hash::check($request->password, $client->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    // Generate Sanctum Token
+    $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+    // Update FCM token
+    $client->fcm_token = $request->fcm_token;
+    $client->save();
+
+    // Respond with Client Data and Token
+    return response()->json([
+        'client' => $client,
+        'token' => $token,
+    ], 200);
+}
+
+
+
+    // public function deliveryLogin(Request $request)
+    // {
+    //     $messages = [
+    //         'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
+    //         'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+    //         'password.required' => 'كلمة المرور مطلوبة.',
+    //         'fcm_token.required' => 'رمز FCM مطلوب.',
+    //     ];
+    //     // Validation
+    //     $validator = Validator::make($request->all(), [
+    //         'email_address' => 'required|string|email',
+    //         'password' => 'required|string',
+    //         'fcm_token' => 'required|string',
+    //     ],$messages);
+
+    //     if ($validator->fails()) {
+    //         // Get the first error message
+    //         $firstError = $validator->errors()->first();
+    //         return response()->json(['message' => $firstError], 422);
+    //     }
+
+    //     // Find the delivery by email
+    //     $delivery = Delivery::where('email_address', $request->email_address)->first();
+
+    //     $delivery_status = $delivery->contact->contact_status;
+
+    //     // Check if delivery exists
+    //     if (!$delivery) {
+    //         return response()->json(['message' => 'delivery not found'], 404);
+    //     }
+
+    //     // Check if the delivery account is deleted
+    //     if ($delivery->account_status == 'deleted') {
+    //         return response()->json(['message' => 'delivery account is deleted'], 403); // Forbidden for inactive deliverys
+    //     }
+
+    //     // Check if the delivery is active
+    //     if ($delivery_status == 'inactive') {
+    //         return response()->json(['message' => 'delivery is not active'], 403); // Forbidden for inactive deliverys
+    //     }
+
+    //     // Check if the password is correct
+    //     if (!Hash::check($request->password, $delivery->password)) {
+    //         return response()->json(['message' => 'Invalid credentials'], 401);
+    //     }
+
+    //     // Generate Sanctum Token
+    //     $token = $delivery->createToken('Personal Access Token')->plainTextToken;
+
+
+    //     $delivery->fcm_token = $request->fcm_token;
+    //     $delivery->save();
+        
+    //     // Respond with delivery Data and Token
+    //     return response()->json([
+    //         'delivery' => $delivery,
+    //         'token' => $token,
+    //     ], 200);
+    // }
 
     public function deliveryLogin(Request $request)
-    {
-        $messages = [
-            'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
-            'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
-            'password.required' => 'كلمة المرور مطلوبة.',
-            'fcm_token.required' => 'رمز FCM مطلوب.',
-        ];
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'email_address' => 'required|string|email',
-            'password' => 'required|string',
-            'fcm_token' => 'required|string',
-        ],$messages);
+{
+    $messages = [
+        'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
+        'password.required' => 'كلمة المرور مطلوبة.',
+        'fcm_token.required' => 'رمز FCM مطلوب.',
+    ];
 
-        if ($validator->fails()) {
-            // Get the first error message
-            $firstError = $validator->errors()->first();
-            return response()->json(['message' => $firstError], 422);
-        }
+    // Validation
+    $validator = Validator::make($request->all(), [
+        'email_or_phone' => 'required|string', // Allow either email or phone
+        'password' => 'required|string',
+        'fcm_token' => 'required|string',
+    ], $messages);
 
-        // Find the delivery by email
-        $delivery = Delivery::where('email_address', $request->email_address)->first();
-
-        $delivery_status = $delivery->contact->contact_status;
-
-        // Check if delivery exists
-        if (!$delivery) {
-            return response()->json(['message' => 'delivery not found'], 404);
-        }
-
-        // Check if the delivery account is deleted
-        if ($delivery->account_status == 'deleted') {
-            return response()->json(['message' => 'delivery account is deleted'], 403); // Forbidden for inactive deliverys
-        }
-
-        // Check if the delivery is active
-        if ($delivery_status == 'inactive') {
-            return response()->json(['message' => 'delivery is not active'], 403); // Forbidden for inactive deliverys
-        }
-
-        // Check if the password is correct
-        if (!Hash::check($request->password, $delivery->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        // Generate Sanctum Token
-        $token = $delivery->createToken('Personal Access Token')->plainTextToken;
-
-
-        $delivery->fcm_token = $request->fcm_token;
-        $delivery->save();
-        
-        // Respond with delivery Data and Token
-        return response()->json([
-            'delivery' => $delivery,
-            'token' => $token,
-        ], 200);
+    if ($validator->fails()) {
+        return response()->json(['message' => $validator->errors()->first()], 422);
     }
+
+    // Find the delivery by email or phone
+    $delivery = Delivery::where('email_address', $request->email_or_phone)
+                        ->orWhere('phone', $request->email_or_phone)
+                        ->first();
+
+    // Check if delivery exists
+    if (!$delivery) {
+        return response()->json(['message' => 'Delivery not found'], 404);
+    }
+
+    // Check if the delivery account is deleted
+    if ($delivery->account_status == 'deleted') {
+        return response()->json(['message' => 'Delivery account is deleted'], 403);
+    }
+
+    // Check if the delivery is active
+    if ($delivery->contact->contact_status == 'inactive') {
+        return response()->json(['message' => 'Delivery is not active'], 403);
+    }
+
+    // Check if the password is correct
+    if (!Hash::check($request->password, $delivery->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    // Generate Sanctum Token
+    $token = $delivery->createToken('Personal Access Token')->plainTextToken;
+
+    // Update FCM token
+    $delivery->fcm_token = $request->fcm_token;
+    $delivery->save();
+
+    // Respond with Delivery Data and Token
+    return response()->json([
+        'delivery' => $delivery,
+        'token' => $token,
+    ], 200);
+}
+
 
     public function deleteClientAccount()
     {
