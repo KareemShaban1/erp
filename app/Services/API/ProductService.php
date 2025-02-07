@@ -99,7 +99,6 @@ class ProductService extends BaseService
     public function show($id , $variationId = null)
     {
         try {
-            $variation = Variation::findOrFail($variationId);
             // Fetch product with relationships and filters
             $product = Product::with([
                 'media',
