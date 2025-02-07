@@ -38,7 +38,7 @@ class DiscountResource extends JsonResource
                 'variation_id' => $variation->id,
                 'original_price' => $basePrice,
                 'discount_amount' => $this->discount_amount,
-                'price_after_discount' => max($discountedPrice, 0),
+                'price_after_discount' => (string) max($discountedPrice, 0),
             ];
         })->toArray();
     }
