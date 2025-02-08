@@ -28,7 +28,7 @@ class DeliveryNotificationController extends Controller
       $notifications = Notification::where('notifiable_type', 'App\Models\Delivery')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at') // Only unread notifications
-         ->latest();
+         ->latest()->get();
 
       $response = new NotificationCollection($notifications);
 
