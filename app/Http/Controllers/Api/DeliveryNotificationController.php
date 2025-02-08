@@ -16,7 +16,7 @@ class DeliveryNotificationController extends Controller
    {
       $notifications = Notification::
          where('notifiable_type', 'App\Models\Delivery')->
-         where('notifiable_id', Auth::id())->latest();
+         where('notifiable_id', Auth::id())->latest()->get();
       // return $notifications;
       $response = new NotificationCollection($notifications);
       return $this->returnJSON($response, __('message.Notifications has been retrieved  successfully'));
