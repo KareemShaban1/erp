@@ -68,7 +68,7 @@ class DeliveryController extends Controller
         }
 
         // Execute the query
-        $orders = $query->latest();
+        $orders = $query->latest()->get();
 
         if ($orders->isEmpty()) {
             return $this->returnJSON([], 'No unassigned orders found for your location');
@@ -98,7 +98,7 @@ class DeliveryController extends Controller
         }
 
         // Execute the query
-        $assignedOrders = $query->latest();
+        $assignedOrders = $query->latest()->get();
 
         if ($assignedOrders->isEmpty()) {
             return $this->returnJSON([], 'No assigned orders found for you');
@@ -132,7 +132,7 @@ class DeliveryController extends Controller
             $assignedOrders->where('order_status', $status);
         }
 
-        $assignedOrders = $assignedOrders->latest();
+        $assignedOrders = $assignedOrders->latest()->get();
 
         if ($assignedOrders->isEmpty()) {
             return $this->returnJSON([], 'No assigned orders found for you');
