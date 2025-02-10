@@ -46,4 +46,8 @@ class CustomerGroup extends Model
         
         return $all_cg;
     }
+
+    public function selling_price_group(){
+        return $this->belongsTo(SellingPriceGroup::class);
+    }
 }

@@ -374,4 +374,9 @@ class Contact extends Authenticatable
     public function delivery(){
         return $this->hasOne(Delivery::class);
     }
+
+    public function customer_group(){
+
+        return $this->belongsTo(CustomerGroup::class);
+    }
 }
