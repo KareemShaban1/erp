@@ -128,5 +128,16 @@ class OrderController extends Controller
             return $response;
 
     }
+
+    public function removeOrderRefundItem(Request $request){
+        $order = $this->service->removeOrderRefundItem($request);
+
+        if ($order instanceof JsonResponse) {
+            return $order;
+        }
+
+        return $this->returnJSON($order, __('message.Order has been force deleted successfully'));
+
+    }
     
 }

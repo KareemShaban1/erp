@@ -885,5 +885,47 @@ class OrderService extends BaseService
         return false; // All items have sufficient quantities
     }
 
+    public function removeOrderRefundItem($request)
+    {
+        // Find the refund order
+        $orderRefund = Order::where('id', $request->order_id)
+            ->where('order_type', 'order_refund')
+            ->first();
+    
+        if (!$orderRefund) {
+            return $this->returnJSON(null, __('message.Order not found'), false, 400);
+        }
+    
+        // Find the order item
+        $orderItem = OrderItem::where('id', $request->order_item_id)
+            ->where('order_id', $request->order_id)
+            ->first();
+    
+        if (!$orderItem) {
+            return $this->returnJSON(null, __('message.Order item not found'), false, 400);
+        }
+    
+        // Delete the order item
+        $orderItem->delete();
+    
+        // Retrieve remaining order items
+        $remainingOrderItems = OrderItem::where('order_id', $orderRefund->id)->get();
+    
+        // Calculate the new total
+        $itemPrice = 0; // Initialize before using
+    
+        foreach ($remainingOrderItems as $item) {
+            $itemPrice += $item->price;
+        }
+    
+        // Update refund order totals
+        $orderRefund->sub_total = $itemPrice;
+        $orderRefund->total = $itemPrice;
+        $orderRefund->save();
+    
+        return $this->returnJSON($orderRefund, __('message.Order refund Updated Successfully'));
+    }
+    
+
 
 }

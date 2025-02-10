@@ -196,6 +196,58 @@
         });
 
 
+        // handle change orders status
+        $(document).on('change', '.change-order-status', function () {
+            var orderId = $(this).data('order-id');
+            var status = $(this).val();
+
+            $.ajax({
+                url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+                type: 'POST',
+                data: {
+                    order_status: status,
+                    _token: '{{ csrf_token() }}' // CSRF token for security
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    } else {
+                        alert('Failed to update order status.');
+                    }
+                },
+                error: function (xhr) {
+                    alert('An error occurred: ' + xhr.responseText);
+                }
+            });
+        });
+
+        // handle change order payment status
+        $(document).on('change', '.change-payment-status', function () {
+            var orderId = $(this).data('order-id');
+            var status = $(this).val();
+
+            $.ajax({
+                url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
+                type: 'POST',
+                data: {
+                    payment_status: status,
+                    _token: '{{ csrf_token() }}' // CSRF token for security
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
+                    } else {
+                        alert('Failed to update payment status.');
+                    }
+                },
+                error: function (xhr) {
+                    alert('An error occurred: ' + xhr.responseText);
+                }
+            });
+        });
+
 
         // Handle related orders button click
         $(document).on('click', '.show-related-orders-btn', function () {
@@ -416,6 +468,8 @@
             });
         });
 
+
+        // handle change order refund status button
         $(document).on('change', '.change-refund-order-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();
@@ -440,57 +494,7 @@
             });
         });
 
-        $(document).on('change', '.change-order-status', function () {
-            var orderId = $(this).data('order-id');
-            var status = $(this).val();
-
-            $.ajax({
-                url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-                type: 'POST',
-                data: {
-                    order_status: status,
-                    _token: '{{ csrf_token() }}' // CSRF token for security
-                },
-                success: function (response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                    } else {
-                        alert('Failed to update order status.');
-                    }
-                },
-                error: function (xhr) {
-                    alert('An error occurred: ' + xhr.responseText);
-                }
-            });
-        });
-
-        $(document).on('change', '.change-payment-status', function () {
-            var orderId = $(this).data('order-id');
-            var status = $(this).val();
-
-            $.ajax({
-                url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-                type: 'POST',
-                data: {
-                    payment_status: status,
-                    _token: '{{ csrf_token() }}' // CSRF token for security
-                },
-                success: function (response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                    } else {
-                        alert('Failed to update payment status.');
-                    }
-                },
-                error: function (xhr) {
-                    alert('An error occurred: ' + xhr.responseText);
-                }
-            });
-        });
-
-
+        // handle change order payment status
         $(document).on('change', '.change-refund-payment-status', function () {
             var orderId = $(this).data('order-id');
             var status = $(this).val();
@@ -517,6 +521,7 @@
         });
 
 
+        // handle assign delivery button (show modal)
         $(document).on('click', '.assign-delivery-btn', function () {
             var orderId = $(this).data('order-id');
             var contactName = $(this).data('contact-name'); // Get the contact name
@@ -547,8 +552,7 @@
             });
         });
 
-
-        // Event listener for saving the delivery assignment
+        // handle save delivery assign button
         $('#saveDeliveryAssignment').click(function () {
             var formData = $('#assignDeliveryForm').serialize();
 
@@ -571,7 +575,9 @@
             });
         });
 
-        // Event listener for the 'View Order Info' button
+
+        
+        // handle 'View Order Info' button
         $(document).on('click', '.view-order-info-btn', function () {
             var orderId = $(this).data('order-id'); // Get the order ID
 
@@ -671,7 +677,8 @@
         });
 
 
-        // Show refund modal
+
+        // handle Show refund modal
         $(document).on('click', '.refund-order-btn', function () {
             var orderId = $(this).data('order-id');
 

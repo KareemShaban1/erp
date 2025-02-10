@@ -68,7 +68,9 @@ Route::middleware('auth:sanctum-client')->group(function () {
     Route::post('orders/update/{id}', [OrderController::class, 'update']);
     Route::delete('orders/delete/{id}', [OrderController::class, 'destroy']);
     Route::get('checkQuantityAndLocation', [OrderController::class, 'checkQuantityAndLocation']);
+    Route::post('orders/removeOrderRefundItem', [OrderController::class, 'removeOrderRefundItem']);
 
+    // removeOrderRefundItem
     Route::get('clients', [ClientController::class, 'index']);
     Route::get('clients/getAuthClient', [ClientController::class, 'getAuthClient']);
 
