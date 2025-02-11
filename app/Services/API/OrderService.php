@@ -923,7 +923,9 @@ class OrderService extends BaseService
         $orderRefund->total = $itemPrice;
         $orderRefund->save();
     
-        return $this->returnJSON($orderRefund, __('message.Order refund Updated Successfully'));
+        return new OrderResource($orderRefund);
+
+        // return $this->returnJSON($orderRefund, __('message.Order refund Updated Successfully'));
     }
     
 
