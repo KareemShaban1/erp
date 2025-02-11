@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Variation extends Model
 {
@@ -51,7 +53,7 @@ class Variation extends Model
         'combo_variations' => 'array',
     ];
 
-    protected $appends = ['code', 'total_qty_available'];
+    protected $appends = ['code', 'total_qty_available','client_selling_group', 'client_selling_price'];
 
 
     public function product_variation()
@@ -163,6 +165,31 @@ class Variation extends Model
     
         // If no combo variations, return the normal sum of qty_available
         return $this->variation_location_details()->sum('qty_available');
+    }
+
+
+    public function getClientSellingGroupAttribute()
+    {
+        $client = Auth::user();
+        return $client && isset($client->contact->customer_group->selling_price_group)
+            ? $client->contact->customer_group->selling_price_group->name
+            : null;
+    }
+
+    public function getClientSellingPriceAttribute()
+    {
+        $client = Auth::user();
+
+        if (!$client || !isset($client->contact->customer_group->selling_price_group)) {
+            return null;
+        }
+
+        $selling_group_id = $client->contact->customer_group->selling_price_group->id;
+
+        return DB::table('variation_group_prices')
+            ->where('price_group_id', $selling_group_id)
+            ->where('variation_id', $this->id)
+            ->value('price_inc_tax'); // Use `value()` to get only the price field
     }
     
 }

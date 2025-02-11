@@ -25,75 +25,143 @@ class CartService extends BaseService
             $carts = Cart::where('client_id', Auth::id())
                 ->with(['product', 'variation.variation_location_details', 'client'])
                 ->get();
-    
+
             // Check if the cart is empty
             if ($carts->isEmpty()) {
                 return $this->returnJSON([], __('message.Cart is empty'));
             }
-    
+
             $totalPrice = 0;
             $totalDiscount = 0;
             $totalAfterDiscount = 0;
             $multiLocationMessage = false;
-    
+
             foreach ($carts as $cart) {
                 // $price = $cart->variation->default_sell_price ?? 0;
                 $price = $cart->variation->sell_price_inc_tax ?? 0;
                 $quantity = $cart->quantity;
-    
+
                 // Fetch the latest discount for the variation
                 $latestDiscount = $cart->variation->discounts()->latest('id')->first();
                 $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
-    
+
                 // Calculate total discount for this cart item
                 $itemDiscount = $discountAmount * $quantity;
-    
+
                 // Check if sufficient quantity is available at the client's business location
                 $sufficientQuantity = $this->checkSufficientQuantity($cart->variation->variation_location_details, $client->business_location_id, $quantity);
-    
+
                 // If the required quantity is not available, set multi-location message
                 if (!$sufficientQuantity) {
                     $multiLocationMessage = true;
                 }
-    
+
                 $totalPrice += ($price * $quantity);
                 $totalDiscount += $itemDiscount;
                 $totalAfterDiscount += (($price * $quantity) - $itemDiscount);
             }
-    
+
             // Create response with CartCollection and additional data
             $cartCollection = (new CartCollection($carts))
                 ->withFullData(true)
                 ->setTotals($totalPrice, $totalDiscount, $totalAfterDiscount);
-    
-            
+
+
 
             // Add multi-location message if applicable
             if ($multiLocationMessage) {
                 $cartCollection->setLocationMessage(__('message.Order will be shipped tomorrow due to multiple locations'));
             }
-    
+
             return $cartCollection;
-    
+
         } catch (\Exception $e) {
             return $this->handleException($e, __('message.Error happened while listing cart items'));
         }
     }
-    
+
+
+    // public function addToCart($productId, $variantId, $quantity)
+    // {
+
+    //     // Fetch the product and variation
+    //     $product = Product::findOrFail($productId);
+    //     $variation = Variation::findOrFail($variantId);
+
+    //     // Fetch the latest discount for the variation
+    //     $latestDiscount = $variation->discounts()->latest('id')->first();
+
+    //     // Calculate the current stock available
+    //     $current_stock = $variation->variation_location_details->sum('qty_available');
+
+    //     // Check if the requested quantity exceeds available stock
+    //     if ($quantity > $current_stock) {
+    //         return response()->json([
+    //             'code' => 400,
+    //             'status' => 'failed',
+    //             'message' => __('message.Quantity exceeds available stock'),
+    //             'data' => null
+    //         ], 400);
+    //     }
+
+    //     // Check if the item already exists in the cart
+    //     $cartItem = Cart::where('client_id', Auth::id())
+    //         ->where('product_id', $productId)
+    //         ->where('variation_id', $variantId)
+    //         ->first();
+
+    //     if ($cartItem) {
+    //         // Set the new total quantity (prevent exceeding available stock)
+    //         $newQuantity = $cartItem->quantity + $quantity;
+
+    //         if ($newQuantity > $current_stock) {
+    //             return response()->json([
+    //                 'code' => 400,
+    //                 'status' => 'failed',
+    //                 'message' => __('message.Quantity exceeds available stock'),
+    //                 'data' => null
+    //             ], 400);
+    //         }
+
+    //         // Update the quantity and recalculate totals
+    //         $cartItem->quantity = $newQuantity;
+    //     } else {
+    //         // Create a new cart item
+    //         $cartItem = Cart::create([
+    //             'client_id' => Auth::id(),
+    //             'product_id' => $productId,
+    //             'variation_id' => $variantId,
+    //             'quantity' => $quantity,
+    //             'price' => $variation->client_selling_price ? $variation->client_selling_price : $variation->sell_price_inc_tax,
+    //         ]);
+    //     }
+
+    //     // Apply discount if available
+    //     $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
+
+    //     // Calculate total price (quantity * price) - discount
+    //     $cartItem->discount = $discountAmount;
+    //     $cartItem->discount_type = $latestDiscount->discount_type;
+    //     $cartItem->total = ($cartItem->quantity * $cartItem->price) - $discountAmount;
+
+    //     // Save the cart item with the updated total
+    //     $cartItem->save();
+
+    //     return $cartItem;
+    // }
 
     public function addToCart($productId, $variantId, $quantity)
     {
-        
         // Fetch the product and variation
         $product = Product::findOrFail($productId);
         $variation = Variation::findOrFail($variantId);
-    
+
         // Fetch the latest discount for the variation
         $latestDiscount = $variation->discounts()->latest('id')->first();
-    
+
         // Calculate the current stock available
         $current_stock = $variation->variation_location_details->sum('qty_available');
-    
+
         // Check if the requested quantity exceeds available stock
         if ($quantity > $current_stock) {
             return response()->json([
@@ -103,17 +171,24 @@ class CartService extends BaseService
                 'data' => null
             ], 400);
         }
-    
+
+        // Determine the price to be used (always using sell_price_inc_tax for discount calculations)
+        $basePrice = $variation->sell_price_inc_tax;
+
+        // Apply discount only on sell_price_inc_tax
+        $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
+        $finalPrice = max(0, $basePrice - $discountAmount); // Ensure price does not go negative
+
         // Check if the item already exists in the cart
         $cartItem = Cart::where('client_id', Auth::id())
             ->where('product_id', $productId)
             ->where('variation_id', $variantId)
             ->first();
-    
+
         if ($cartItem) {
             // Set the new total quantity (prevent exceeding available stock)
             $newQuantity = $cartItem->quantity + $quantity;
-    
+
             if ($newQuantity > $current_stock) {
                 return response()->json([
                     'code' => 400,
@@ -122,8 +197,8 @@ class CartService extends BaseService
                     'data' => null
                 ], 400);
             }
-    
-            // Update the quantity and recalculate totals
+
+            // Update the quantity
             $cartItem->quantity = $newQuantity;
         } else {
             // Create a new cart item
@@ -132,24 +207,22 @@ class CartService extends BaseService
                 'product_id' => $productId,
                 'variation_id' => $variantId,
                 'quantity' => $quantity,
-                'price' => $variation->sell_price_inc_tax,
+                'price' => $basePrice, // Original price (sell_price_inc_tax)
+                'client_price' => $variation->client_selling_price, // Store client_selling_price separately
             ]);
         }
-    
-        // Apply discount if available
-        $discountAmount = $latestDiscount ? $latestDiscount->discount_amount : 0;
-    
-        // Calculate total price (quantity * price) - discount
+
+        // Update discount details
         $cartItem->discount = $discountAmount;
         $cartItem->discount_type = $latestDiscount->discount_type;
-        $cartItem->total = ($cartItem->quantity * $cartItem->price) - $discountAmount;
-    
-        // Save the cart item with the updated total
+        $cartItem->total = $cartItem->quantity * $finalPrice; // Apply discount only on sell_price_inc_tax
+
+        // Save the cart item with updated details
         $cartItem->save();
-    
+
         return $cartItem;
     }
-    
+
 
 
     /**
