@@ -170,7 +170,8 @@ class Variation extends Model
 
     public function getClientSellingGroupAttribute()
     {
-        $client = Auth::user();
+        $client_id = Auth::user()->id;
+        $client = Client::findOrFail($client_id);        
         return $client && isset($client->contact->customer_group->selling_price_group)
             ? $client->contact->customer_group->selling_price_group->name
             : null;
@@ -178,7 +179,8 @@ class Variation extends Model
 
     public function getClientSellingPriceAttribute()
     {
-        $client = Auth::user();
+        $client_id = Auth::user()->id;
+        $client = Client::findOrFail($client_id);
 
         if (!$client || !isset($client->contact->customer_group->selling_price_group)) {
             return null;
