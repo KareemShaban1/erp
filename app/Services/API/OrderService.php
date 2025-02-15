@@ -70,6 +70,7 @@ class OrderService extends BaseService
 
         try {
             $client = Client::find(Auth::id());
+            dd($client);
             $query = Order::where('client_id', $client->id)
                 ->where('order_type', 'order')->latest();
 
