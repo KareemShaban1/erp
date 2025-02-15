@@ -92,7 +92,7 @@ class OrderService extends BaseService
         
         try {
             $order = Order::findOrFail($id);
-            dd($id);
+            dd($order);
 
             if (!$order) {
                 return null;
