@@ -28,8 +28,9 @@ class AuthController extends Controller
      * @param ProductUtils $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil,         
-    TransactionUtil $transactionUtil
+    public function __construct(
+        ModuleUtil $moduleUtil,
+        TransactionUtil $transactionUtil
     ) {
         $this->moduleUtil = $moduleUtil;
         $this->transactionUtil = $transactionUtil;
@@ -94,8 +95,8 @@ class AuthController extends Controller
 
     public function clientRegister(Request $request)
     {
-         // Custom validation messages
-         $messages = [
+        // Custom validation messages
+        $messages = [
             'name.required' => 'الاسم مطلوب.',
             'email_address.required' => 'عنوان البريد الإلكتروني مطلوب.',
             'email_address.email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
@@ -109,7 +110,7 @@ class AuthController extends Controller
             'business_location_id.required' => 'معرف موقع العمل مطلوب.',
             'business_location_id.exists' => 'معرف موقع العمل المحدد غير صالح.',
         ];
-        
+
 
         // Validation
         $validator = Validator::make($request->all(), [
@@ -141,9 +142,9 @@ class AuthController extends Controller
 
         $business = Business::where('id', $business_location->business_id)->first();
 
-         //Update reference count
-         $ref_count = $this->transactionUtil->setAndGetReferenceCount('contacts', $business->id);
-         $contact_id = $this->transactionUtil->generateReferenceNumber('contacts', $ref_count, $business->id);
+        //Update reference count
+        $ref_count = $this->transactionUtil->setAndGetReferenceCount('contacts', $business->id);
+        $contact_id = $this->transactionUtil->generateReferenceNumber('contacts', $ref_count, $business->id);
 
 
         // business need to changed
@@ -151,7 +152,7 @@ class AuthController extends Controller
         $contactInfo = Contact::create([
             'name' => $request->name,
             'mobile' => $request->mobile,
-            'contact_id'=>$contact_id,
+            'contact_id' => $contact_id,
             'created_by' => 1,
             'business_id' => $business->id ?? 1,
             'type' => 'client',
@@ -172,9 +173,9 @@ class AuthController extends Controller
         // Generate Sanctum Token
         $token = $client->createToken('Personal Access Token')->plainTextToken;
 
-           // Notify admins about the order
-           $admins = $this->moduleUtil->get_admins($client->contact->business_id);
-           \Notification::send($admins, new ClientCreatedNotification($client));
+        // Notify admins about the order
+        $admins = $this->moduleUtil->get_admins($client->contact->business_id);
+        \Notification::send($admins, new ClientCreatedNotification($client));
 
         // Respond with Client Data and Token
         return response()->json([
@@ -249,66 +250,66 @@ class AuthController extends Controller
     // }
 
     public function clientLogin(Request $request)
-{
-    // Custom validation messages
-    $messages = [
-        'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
-        'password.required' => 'كلمة المرور مطلوبة.',
-        'fcm_token.required' => 'رمز FCM مطلوب.',
-    ];
+    {
+        // Custom validation messages
+        $messages = [
+            'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'fcm_token.required' => 'رمز FCM مطلوب.',
+        ];
 
-    // Validation
-    $validator = Validator::make($request->all(), [
-        'email_or_phone' => 'required|string', // Allow either email or phone
-        'password' => 'required|string',
-        'fcm_token' => 'required|string',
-    ], $messages);
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'email_or_phone' => 'required|string', // Allow either email or phone
+            'password' => 'required|string',
+            'fcm_token' => 'required|string',
+        ], $messages);
 
-    if ($validator->fails()) {
-        return response()->json(['message' => $validator->errors()->first()], 422);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        // Find the client by email or phone
+        $client = Client::where('email_address', $request->email_or_phone)
+            ->orWhereHas('contact', function ($query) use ($request) {
+                $query->where('mobile', $request->email_or_phone);
+            })
+            ->first();
+
+
+        // Check if client exists
+        if (!$client) {
+            return response()->json(['message' => 'Client not found'], 404);
+        }
+
+        // Check if the delivery account is deleted
+        if ($client->account_status == 'deleted') {
+            return response()->json(['message' => 'Client account is deleted'], 403);
+        }
+
+        // Check if the client is active
+        if ($client->contact->contact_status == 'inactive') {
+            return response()->json(['message' => 'Client is not active'], 403);
+        }
+
+        // Check if the password is correct
+        if (!Hash::check($request->password, $client->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Generate Sanctum Token
+        $token = $client->createToken('Personal Access Token')->plainTextToken;
+
+        // Update FCM token
+        $client->fcm_token = $request->fcm_token;
+        $client->save();
+
+        // Respond with Client Data and Token
+        return response()->json([
+            'client' => $client,
+            'token' => $token,
+        ], 200);
     }
-
-    // Find the client by email or phone
-    $client = Client::where('email_address', $request->email_or_phone)
-    ->orWhereHas('contact', function ($query) use ($request) {
-        $query->where('mobile', $request->email_or_phone);
-    })
-    ->first();
-
-
-    // Check if client exists
-    if (!$client) {
-        return response()->json(['message' => 'Client not found'], 404);
-    }
-
-    // Check if the delivery account is deleted
-    if ($client->account_status == 'deleted') {
-        return response()->json(['message' => 'Client account is deleted'], 403);
-    }
-
-    // Check if the client is active
-    if ($client->contact->contact_status == 'inactive') {
-        return response()->json(['message' => 'Client is not active'], 403);
-    }
-
-    // Check if the password is correct
-    if (!Hash::check($request->password, $client->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    // Generate Sanctum Token
-    $token = $client->createToken('Personal Access Token')->plainTextToken;
-
-    // Update FCM token
-    $client->fcm_token = $request->fcm_token;
-    $client->save();
-
-    // Respond with Client Data and Token
-    return response()->json([
-        'client' => $client,
-        'token' => $token,
-    ], 200);
-}
 
 
 
@@ -364,7 +365,7 @@ class AuthController extends Controller
 
     //     $delivery->fcm_token = $request->fcm_token;
     //     $delivery->save();
-        
+
     //     // Respond with delivery Data and Token
     //     return response()->json([
     //         'delivery' => $delivery,
@@ -373,62 +374,64 @@ class AuthController extends Controller
     // }
 
     public function deliveryLogin(Request $request)
-{
-    $messages = [
-        'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
-        'password.required' => 'كلمة المرور مطلوبة.',
-        'fcm_token.required' => 'رمز FCM مطلوب.',
-    ];
+    {
+        $messages = [
+            'email_or_phone.required' => 'البريد الإلكتروني أو رقم الهاتف مطلوب.',
+            'password.required' => 'كلمة المرور مطلوبة.',
+            'fcm_token.required' => 'رمز FCM مطلوب.',
+        ];
 
-    // Validation
-    $validator = Validator::make($request->all(), [
-        'email_or_phone' => 'required|string', // Allow either email or phone
-        'password' => 'required|string',
-        'fcm_token' => 'required|string',
-    ], $messages);
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'email_or_phone' => 'required|string', // Allow either email or phone
+            'password' => 'required|string',
+            'fcm_token' => 'required|string',
+        ], $messages);
 
-    if ($validator->fails()) {
-        return response()->json(['message' => $validator->errors()->first()], 422);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
+        // Find the delivery by email or phone
+        $delivery = Delivery::where('email_address', $request->email_or_phone)
+            ->orWhereHas('contact', function ($query) use ($request) {
+                $query->where('mobile', $request->email_or_phone);
+            })
+            ->first();
+
+        // Check if delivery exists
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery not found'], 404);
+        }
+
+        // Check if the delivery account is deleted
+        if ($delivery->account_status == 'deleted') {
+            return response()->json(['message' => 'Delivery account is deleted'], 403);
+        }
+
+        // Check if the delivery is active
+        if ($delivery->contact->contact_status == 'inactive') {
+            return response()->json(['message' => 'Delivery is not active'], 403);
+        }
+
+        // Check if the password is correct
+        if (!Hash::check($request->password, $delivery->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Generate Sanctum Token
+        $token = $delivery->createToken('Personal Access Token')->plainTextToken;
+
+        // Update FCM token
+        $delivery->fcm_token = $request->fcm_token;
+        $delivery->save();
+
+        // Respond with Delivery Data and Token
+        return response()->json([
+            'delivery' => $delivery,
+            'token' => $token,
+        ], 200);
     }
-
-    // Find the delivery by email or phone
-    $delivery = Delivery::where('email_address', $request->email_or_phone)
-                        ->orWhere('phone', $request->email_or_phone)
-                        ->first();
-
-    // Check if delivery exists
-    if (!$delivery) {
-        return response()->json(['message' => 'Delivery not found'], 404);
-    }
-
-    // Check if the delivery account is deleted
-    if ($delivery->account_status == 'deleted') {
-        return response()->json(['message' => 'Delivery account is deleted'], 403);
-    }
-
-    // Check if the delivery is active
-    if ($delivery->contact->contact_status == 'inactive') {
-        return response()->json(['message' => 'Delivery is not active'], 403);
-    }
-
-    // Check if the password is correct
-    if (!Hash::check($request->password, $delivery->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    // Generate Sanctum Token
-    $token = $delivery->createToken('Personal Access Token')->plainTextToken;
-
-    // Update FCM token
-    $delivery->fcm_token = $request->fcm_token;
-    $delivery->save();
-
-    // Respond with Delivery Data and Token
-    return response()->json([
-        'delivery' => $delivery,
-        'token' => $token,
-    ], 200);
-}
 
 
     public function deleteClientAccount()
@@ -480,9 +483,9 @@ class AuthController extends Controller
             'current_password' => 'required',
             'new_password' => 'required|min:8',
         ]);
-    
+
         $client = Auth::user();
-    
+
         // Verify the current password
         if (!Hash::check($request->current_password, $client->password)) {
             return response()->json([
@@ -490,17 +493,17 @@ class AuthController extends Controller
                 'message' => __('message.Current password is incorrect'),
             ], 400);
         }
-    
+
         // Update the password with hashing
         $client->password = Hash::make($request->new_password);
         $client->save();
-    
+
         return response()->json([
             'success' => true,
             'message' => __('message.Password updated successfully'),
         ]);
     }
-    
+
 
     public function updateDeliveryPassword(Request $request)
     {
@@ -509,9 +512,9 @@ class AuthController extends Controller
             'current_password' => 'required',
             'new_password' => 'required|min:8',
         ]);
-    
+
         $delivery = Auth::user();
-    
+
         // Verify the current password
         if (!Hash::check($request->current_password, $delivery->password)) {
             return response()->json([
@@ -519,11 +522,11 @@ class AuthController extends Controller
                 'message' => __('message.Current password is incorrect'),
             ], 400);
         }
-    
+
         // Update the password with hashing
         $delivery->password = Hash::make($request->new_password);
         $delivery->save();
-    
+
         return response()->json([
             'success' => true,
             'message' => __('message.Password updated successfully'),
@@ -532,48 +535,48 @@ class AuthController extends Controller
 
 
     public function updatePassword(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'type' => 'required|in:client,delivery',
-        'current_password' => 'required',
-        'new_password' => 'required|min:8',
-    ]);
+    {
+        // Validate the request
+        $request->validate([
+            'type' => 'required|in:client,delivery',
+            'current_password' => 'required',
+            'new_password' => 'required|min:8',
+        ]);
 
-    // Get the authenticated user
-    $user = Auth::user();
+        // Get the authenticated user
+        $user = Auth::user();
 
-    // Check the user type and apply specific logic
-    if ($request->type === 'client' && $user->role !== 'client') {
+        // Check the user type and apply specific logic
+        if ($request->type === 'client' && $user->role !== 'client') {
+            return response()->json([
+                'success' => false,
+                'message' => __('message.Unauthorized user for client type'),
+            ], 403);
+        }
+
+        if ($request->type === 'delivery' && $user->role !== 'delivery') {
+            return response()->json([
+                'success' => false,
+                'message' => __('message.Unauthorized user for delivery type'),
+            ], 403);
+        }
+
+        // Verify the current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('message.Current password is incorrect'),
+            ], 400);
+        }
+
+        // Update the password with hashing
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
         return response()->json([
-            'success' => false,
-            'message' => __('message.Unauthorized user for client type'),
-        ], 403);
+            'success' => true,
+            'message' => __('message.Password updated successfully'),
+        ]);
     }
-
-    if ($request->type === 'delivery' && $user->role !== 'delivery') {
-        return response()->json([
-            'success' => false,
-            'message' => __('message.Unauthorized user for delivery type'),
-        ], 403);
-    }
-
-    // Verify the current password
-    if (!Hash::check($request->current_password, $user->password)) {
-        return response()->json([
-            'success' => false,
-            'message' => __('message.Current password is incorrect'),
-        ], 400);
-    }
-
-    // Update the password with hashing
-    $user->password = Hash::make($request->new_password);
-    $user->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => __('message.Password updated successfully'),
-    ]);
-}
 
 }

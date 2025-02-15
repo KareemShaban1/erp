@@ -149,7 +149,7 @@ Route::middleware('auth:sanctum-delivery')->group(function () {
 Route::get('banners', [BannerController::class, 'index']);
 
 
-Route::get('orders/{id}', [OrderController::class, 'show']);
+Route::get('orders-show/{id}', [OrderController::class, 'show']);
 
 Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
 
