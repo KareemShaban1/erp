@@ -270,7 +270,7 @@ class AuthController extends Controller
 
     // Find the client by email or phone
     $client = Client::where('email_address', $request->email_or_phone)
-                    ->whereHas('contact',function($request) {
+                    ->whereHas('contact',function() use ($request) {
                         $this->where('mobile',$request->email_or_phone);
                     })
                     // ->orWhere('phone', $request->email_or_phone)
