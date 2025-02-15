@@ -91,12 +91,12 @@ class OrderService extends BaseService
 
         
         try {
-            $client = Client::find(Auth::id());
+            $client = Client::find(Auth::user()->id);
             $order = Order::where('id',$id)
             ->where('client_id', $client->id)
             ->first();
 
-            dd($client , $order);
+            dd(Auth::user()->id ,$client , $order);
             if (!$order) {
                 return null;
             }
