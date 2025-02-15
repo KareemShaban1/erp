@@ -91,7 +91,9 @@ class OrderService extends BaseService
 
         
         try {
-            $order = Order::findOrFail($id);
+            $client = Client::find(Auth::id());
+            $order = Order::where('id',$id)
+            ->where('client_id', $client->id)->first();
 
             if (!$order) {
                 return null;
