@@ -96,7 +96,6 @@ class OrderService extends BaseService
             ->where('client_id', $client->id)
             ->first();
 
-            dd($client , $order);
             if (!$order) {
                 return null;
             }
