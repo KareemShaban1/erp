@@ -89,8 +89,10 @@ class OrderService extends BaseService
     public function show($id)
     {
 
+        
         try {
             $order = Order::findOrFail($id);
+            dd($id);
 
             if (!$order) {
                 return null;
