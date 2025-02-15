@@ -2,6 +2,7 @@
 
 namespace App\Services\API;
 
+use App\Models\ApplicationSettings;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -201,6 +202,8 @@ class QuantityTransferService extends BaseService
                               // Calculate subtotal for the transfer
                               $subTotal = $quantity * $orderItem->price;
 
+
+
                               // Check if a transfer order already exists for the parent order
                               $transferOrder = Order::where('parent_order_id', $order->id)
                                         ->where('order_type', 'order_transfer')
@@ -248,6 +251,12 @@ class QuantityTransferService extends BaseService
           private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
           {
 
+                    $transferOrderShippingCost =
+                              ApplicationSettings::where('key', 'transfer_order_shipping_cost')
+                                        ->value('value');
+                    if ($transferOrderShippingCost) {
+                              $subTotal += $transferOrderShippingCost;
+                    }
                     // Fetch client details
                     $client = Client::findOrFail($order->client_id);
 
@@ -259,6 +268,7 @@ class QuantityTransferService extends BaseService
                               'total' => $subTotal, // Adjustments for taxes or other calculations can be added here
                               'payment_method' => 'Cash on delivery', // Modify as needed
                               'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
+                              'shipping_cost' => $transferOrderShippingCost ?? 0,
                               'business_location_id' => $client->business_location_id,
                               'from_business_location_id' => $fromLocationId,
                               'to_business_location_id' => $toLocationId
