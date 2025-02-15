@@ -93,11 +93,14 @@ class OrderService extends BaseService
         try {
             $client = Client::find(Auth::id());
             $order = Order::where('id',$id)
-            ->where('client_id', $client->id)->first();
+            ->where('client_id', $client->id)
+            ->first();
 
+            dd($client , $order);
             if (!$order) {
                 return null;
             }
+
             $orderDelivery = DeliveryOrder::where('order_id', $order->id)->first();
 
             return new OrderResource($order);
