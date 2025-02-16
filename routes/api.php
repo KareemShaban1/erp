@@ -145,6 +145,8 @@ Route::middleware('auth:sanctum-delivery')->group(function () {
 
     Route::post('orders/removeOrderRefundItem', [OrderController::class, 'removeOrderRefundItem']);
 
+    Route::get('delivery/orders/{id}', [OrderController::class, 'show']);
+
     // removeOrderRefundItem
 });
 
