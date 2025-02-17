@@ -325,7 +325,7 @@
                 const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'
                 ,'order_message_today','order_message_tomorrow',
                 'order_shipping_cost','refund_order_shipping_cost',
-                'transfer_order_shipping_cost'];
+                'transfer_order_shipping_cost','customer_service_phone','customer_service_whatsapp'];
                 if (readonlyKeys.includes(setting.key)) {
                     $('#editKey').prop('readonly', true);
                     $('#editType').prop('disabled', true);
