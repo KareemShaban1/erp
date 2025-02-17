@@ -28,6 +28,11 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {
+        $customer_service_phone =  ApplicationSettings::where('key', 'customer_service_phone')
+        ->value('value');
+
+        $customer_service_whatsapp =  ApplicationSettings::where('key', 'customer_service_whatsapp')
+        ->value('value');
         return [
             'id' => $this->id,
             'order_uuid' => $this->order_uuid,
@@ -50,6 +55,9 @@ class OrderResource extends JsonResource
                     'order_refunds'=>(new OrderRefundCollection( $this->orderRefunds))->withFullData(true),
                     'assigned_delivery' => DeliveryOrder::where('order_id', $this->id)->exists(),
                     'created_at' => $this->created_at,
+                    'customer_service_phone'=>$customer_service_phone ?? '',
+                    'customer_service_whatsapp'=>$customer_service_whatsapp ?? '',
+                    
                 ];
             }),
         ];
