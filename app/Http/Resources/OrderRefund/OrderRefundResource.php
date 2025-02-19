@@ -33,7 +33,7 @@ class OrderRefundResource extends JsonResource
             'reason'=>$this->reason,
             'admin_response' => $this->admin_response,
             'status' => $this->status,
-            'amount' => $this->amount,
+'amount' => (strpos($this->amount, '.') !== false) ? rtrim(rtrim($this->amount, '0'), '.') : $this->amount,
             'product_id'=>$this->order_item->product->id,
             'product_name'=>$this->order_item->product->name,
             'variation_id'=>$this->order_item->variation->id,
