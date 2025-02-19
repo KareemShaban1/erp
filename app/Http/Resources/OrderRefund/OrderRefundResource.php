@@ -30,16 +30,20 @@ class OrderRefundResource extends JsonResource
         // 'order_id','client_id','product_id','variation_id','amount','status','reason','admin_response','requested_at','processed_at'
         return [
             'id' => $this->id,
+            'reason'=>$this->reason,
+            'admin_response' => $this->admin_response,
+            'status' => $this->status,
+            'amount' => $this->amount,
+            'product_id'=>$this->order_item->product->id,
+            'product_name'=>$this->order_item->product->name,
+            'variation_id'=>$this->order_item->variation->id,
+            'variation_name'=>$this->order_item->variation->name,
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'order_id' => $this->order_id,
                     'client_name' => $this->client->contact->name,
                     'order_number' => $this->order->number,
                     'order_item'=> new OrderItemResource($this->order_item),
-                    'status' => $this->status,
-                    'amount' => $this->amount,
-                    'reason'=>$this->reason,
-                    'admin_response' => $this->admin_response,
                     'requested_at' => $this->requested_at,
                     'processed_at' => $this->processed_at,
                     'created_at' => $this->created_at,
