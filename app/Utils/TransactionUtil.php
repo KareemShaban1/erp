@@ -2910,6 +2910,8 @@ class TransactionUtil extends Util
 
             Log::info('transaction data',[$business['id'],
             $business['location_id'],$qty_sum_query,$line->product_id,$line->variation_id]);
+
+            Log::info('transaction',[$query->get()]);
             //If product expiry is enabled then check for on expiry conditions
             if ($stop_selling_expired && empty($purchase_line_id)) {
                 $stop_before = request()->session()->get('business')['stop_selling_before'];
