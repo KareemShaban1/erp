@@ -2904,7 +2904,7 @@ class TransactionUtil extends Util
                     'production_purchase'
                 ])
                 ->where('transactions.status', 'received')
-                ->whereRaw("( $qty_sum_query ) < PL.quantity")
+                // ->whereRaw("( $qty_sum_query ) < PL.quantity")
                 ->where('PL.product_id', $line->product_id)
                 ->where('PL.variation_id', $line->variation_id);
 
