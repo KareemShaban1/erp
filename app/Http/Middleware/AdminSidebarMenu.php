@@ -109,6 +109,7 @@ class AdminSidebarMenu
                             );
                         }
 
+                        dd(env('GOOGLE_MAP_API_KEY'));
                         if(!empty(env('GOOGLE_MAP_API_KEY'))) {
                             $sub->url(
                                 action('ContactController@contactMap'),
