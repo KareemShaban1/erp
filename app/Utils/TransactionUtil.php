@@ -2946,6 +2946,10 @@ class TransactionUtil extends Util
                 'transactions.invoice_no'
             )->get();
 
+            Log::info('rows',[$rows]);
+            Log::info('line',[$line]);
+
+
 
             $purchase_sell_map = [];
 
@@ -2954,8 +2958,6 @@ class TransactionUtil extends Util
             foreach ($rows as $k => $row) {
                 $qty_allocated = 0;
 
-                Log::info($qty_selling);
-                Log::info($line->quantity);
                 //Check if qty_available is more or equal
                 if ($qty_selling <= $row->quantity_available) {
                     $qty_allocated = $qty_selling;
@@ -2964,8 +2966,6 @@ class TransactionUtil extends Util
                     $qty_selling = $qty_selling - $row->quantity_available;
                     $qty_allocated = $row->quantity_available;
                 }
-                Log::info('qty_selling',[$qty_selling]);
-                Log::info('qty_allocated',[$qty_allocated]);
 
 
                 //Check for sell mapping or stock adjsutment mapping
