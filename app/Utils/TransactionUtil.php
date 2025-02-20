@@ -3029,54 +3029,54 @@ class TransactionUtil extends Util
                 }
             }
 
-            // if (!($qty_selling == 0 || is_null($qty_selling))) {
-            //     //If overselling not allowed through exception else create mapping with blank purchase_line_id
-            //     if (!$allow_overselling) {
-            //         $variation = Variation::find($line->variation_id);
-            //         $mismatch_name = $product->name;
-            //         if (!empty($variation->sub_sku)) {
-            //             $mismatch_name .= ' ' . 'SKU: ' . $variation->sub_sku;
-            //         }
-            //         if (!empty($qty_selling)) {
-            //             $mismatch_name .= ' ' . 'Quantity: ' . abs($qty_selling);
-            //         }
+            if (!($qty_selling == 0 || is_null($qty_selling))) {
+                //If overselling not allowed through exception else create mapping with blank purchase_line_id
+                if (!$allow_overselling) {
+                    $variation = Variation::find($line->variation_id);
+                    $mismatch_name = $product->name;
+                    if (!empty($variation->sub_sku)) {
+                        $mismatch_name .= ' ' . 'SKU: ' . $variation->sub_sku;
+                    }
+                    if (!empty($qty_selling)) {
+                        $mismatch_name .= ' ' . 'Quantity: ' . abs($qty_selling);
+                    }
 
-            //         if ($mapping_type == 'purchase') {
-            //             $mismatch_error = trans(
-            //                 "messages.purchase_sell_mismatch_exception",
-            //                 ['product' => $mismatch_name]
-            //             );
+                    if ($mapping_type == 'purchase') {
+                        $mismatch_error = trans(
+                            "messages.purchase_sell_mismatch_exception",
+                            ['product' => $mismatch_name]
+                        );
 
-            //             if ($stop_selling_expired) {
-            //                 $mismatch_error .= __('lang_v1.available_stock_expired');
-            //             }
-            //         } elseif ($mapping_type == 'stock_adjustment') {
-            //             $mismatch_error = trans(
-            //                 "messages.purchase_stock_adjustment_mismatch_exception",
-            //                 ['product' => $mismatch_name]
-            //             );
-            //         } else {
-            //             $mismatch_error = trans(
-            //                 "lang_v1.quantity_mismatch_exception",
-            //                 ['product' => $mismatch_name]
-            //             );
-            //         }
+                        if ($stop_selling_expired) {
+                            $mismatch_error .= __('lang_v1.available_stock_expired');
+                        }
+                    } elseif ($mapping_type == 'stock_adjustment') {
+                        $mismatch_error = trans(
+                            "messages.purchase_stock_adjustment_mismatch_exception",
+                            ['product' => $mismatch_name]
+                        );
+                    } else {
+                        $mismatch_error = trans(
+                            "lang_v1.quantity_mismatch_exception",
+                            ['product' => $mismatch_name]
+                        );
+                    }
 
-            //         $business_name = optional(Business::find($business['id']))->name;
-            //         $location_name = optional(BusinessLocation::find($business['location_id']))->name;
-            //         \Log::emergency($mismatch_error . ' Business: ' . $business_name . ' Location: ' . $location_name);
-            //         throw new PurchaseSellMismatch($mismatch_error);
-            //     } else {
-            //         //Mapping with no purchase line
-            //         $purchase_sell_map[] = [
-            //             'sell_line_id' => $line->id,
-            //             'purchase_line_id' => 0,
-            //             'quantity' => $qty_selling,
-            //             'created_at' => \Carbon::now(),
-            //             'updated_at' => \Carbon::now()
-            //         ];
-            //     }
-            // }
+                    $business_name = optional(Business::find($business['id']))->name;
+                    $location_name = optional(BusinessLocation::find($business['location_id']))->name;
+                    \Log::emergency($mismatch_error . ' Business: ' . $business_name . ' Location: ' . $location_name);
+                    throw new PurchaseSellMismatch($mismatch_error);
+                } else {
+                    //Mapping with no purchase line
+                    $purchase_sell_map[] = [
+                        'sell_line_id' => $line->id,
+                        'purchase_line_id' => 0,
+                        'quantity' => $qty_selling,
+                        'created_at' => \Carbon::now(),
+                        'updated_at' => \Carbon::now()
+                    ];
+                }
+            }
 
             //Insert the mapping
             if (!empty($purchase_adjustment_map)) {
