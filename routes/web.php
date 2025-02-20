@@ -5,6 +5,7 @@ use App\Http\Controllers\ApplicationDashboard\BannerController;
 use App\Http\Controllers\ApplicationDashboard\HomeController;
 use App\Http\Controllers\ApplicationDashboard\OrderController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -463,3 +464,12 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone'])
     Route::get('/sells/invoice-url/{id}', 'SellPosController@showInvoiceUrl');
     Route::get('/show-notification/{id}', 'HomeController@showNotification');
 });
+
+
+Route::get('forget-password', [ForgotPasswordController::class, 'showForgetPasswordFormForClient'])->name('forget.password.get');
+
+Route::post('forget-password', [ForgotPasswordController::class, 'submitForgetPasswordFormForClient'])->name('forget.password.post'); 
+
+Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetPasswordFormForClient'])->name('reset.password.get');
+
+Route::post('reset-password', [ForgotPasswordController::class, 'submitResetPasswordFormForClient'])->name('reset.password.post');
