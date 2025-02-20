@@ -2964,6 +2964,9 @@ class TransactionUtil extends Util
                     $qty_selling = $qty_selling - $row->quantity_available;
                     $qty_allocated = $row->quantity_available;
                 }
+                Log::info('qty_selling',[$qty_selling]);
+                Log::info('qty_allocated',[$qty_allocated]);
+
 
                 //Check for sell mapping or stock adjsutment mapping
                 if ($mapping_type == 'stock_adjustment') {
