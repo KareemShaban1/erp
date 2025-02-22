@@ -50,6 +50,21 @@ class PushNotification extends Notification
             'title' => $this->title,
             'body' => $this->body,
             'data' => $this->data,
+            'android' => [
+                'notification' => [
+                    'sound' => 'custom_sound',
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK', // Required for tapping to trigger response
+                    'channel_id' => 'high_importance_channel'
+                ],
+            ],
+            'apns' => [
+                'payload' => [
+                    'aps' => [
+                        'sound' => 'custom_sound.caf',
+                        'content-available' => 1,
+                    ],
+                ],
+            ],
         ];
     }
 }
