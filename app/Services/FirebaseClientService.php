@@ -9,7 +9,8 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Exception\Messaging\MessagingException;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Exception\MessagingException as ExceptionMessagingException;
-
+use Kreait\Firebase\Messaging\AndroidConfig;
+use Kreait\Firebase\Messaging\ApnsConfig;
 class FirebaseClientService
 {
     protected $messaging;
@@ -41,29 +42,26 @@ class FirebaseClientService
         $notification = [
             'title' => $title,
             'body' => $body,
-            'android' => [
-                'notification' => [
-                    'sound' => 'custom_sound',
-                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK', // Required for tapping to trigger response
-                    'channel_id' => 'high_importance_channel'
-                ],
-            ],
-            'apns' => [
-                'payload' => [
-                    'aps' => [
-                        'sound' => 'custom_sound.caf',
-                        'content-available' => 1,
-                    ],
-                ],
-            ],
-
+            
 
         ];
 
         $cloudMessage = CloudMessage::new()
             ->withNotification($notification)
             ->withData($data)
-            ->withChangedTarget('token', $token);
+            ->withChangedTarget('token', $token)
+            ->withAndroidConfig(AndroidConfig::fromArray([
+                'notification' => [
+                    'sound' => 'custom_sound',
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+                    'channel_id' => 'high_importance_channel'
+                ]
+            ]))
+            ->withApnsConfig(ApnsConfig::fromArray([
+                'payload' => [
+                    'aps' => ['sound' => 'custom_sound.caf', 'content-available' => 1]
+                ]
+            ]));;
 
         try {
             // Send notification via Firebase
