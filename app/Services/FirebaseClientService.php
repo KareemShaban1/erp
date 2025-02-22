@@ -41,6 +41,23 @@ class FirebaseClientService
         $notification = [
             'title' => $title,
             'body' => $body,
+            'android' => [
+                'notification' => [
+                    'sound' => 'custom_sound',
+                    'click_action' => 'FLUTTER_NOTIFICATION_CLICK', // Required for tapping to trigger response
+                    'channel_id' => 'high_importance_channel'
+                ],
+            ],
+            'apns' => [
+                'payload' => [
+                    'aps' => [
+                        'sound' => 'custom_sound.caf',
+                        'content-available' => 1,
+                    ],
+                ],
+            ],
+
+
         ];
 
         $cloudMessage = CloudMessage::new()
@@ -51,7 +68,7 @@ class FirebaseClientService
         try {
             // Send notification via Firebase
             $response = $this->messaging->send($cloudMessage);
-            
+
             // Log the success response (can be used to track the response from Firebase)
             Log::info("Notification sent successfully", [
                 'client_id' => $clientId,
