@@ -250,13 +250,13 @@ class QuantityTransferService extends BaseService
 
           private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
           {
+                    // Fetch transfer order shipping cost from settings
+                    $transferOrderShippingCost = ApplicationSettings::where('key', 'transfer_order_shipping_cost')
+                              ->value('value');
 
-                    $transferOrderShippingCost =
-                              ApplicationSettings::where('key', 'transfer_order_shipping_cost')
-                                        ->value('value');
-                    if ($transferOrderShippingCost) {
-                              $subTotal += $transferOrderShippingCost;
-                    }
+                    // Ensure shipping cost is only added to total, not sub_total
+                    $total = $subTotal + ($transferOrderShippingCost ?? 0);
+
                     // Fetch client details
                     $client = Client::findOrFail($order->client_id);
 
@@ -264,8 +264,8 @@ class QuantityTransferService extends BaseService
                     return Order::create([
                               'parent_order_id' => $order->id,
                               'client_id' => $order->client_id,
-                              'sub_total' => $subTotal,
-                              'total' => $subTotal, // Adjustments for taxes or other calculations can be added here
+                              'sub_total' => $subTotal, // Only item prices
+                              'total' => $total, // Includes shipping cost
                               'payment_method' => 'Cash on delivery', // Modify as needed
                               'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
                               'shipping_cost' => $transferOrderShippingCost ?? 0,
@@ -274,6 +274,7 @@ class QuantityTransferService extends BaseService
                               'to_business_location_id' => $toLocationId
                     ]);
           }
+
 
           private function addTransferItemToOrder($order, $orderItem, $quantity, $subTotal)
           {
@@ -292,10 +293,18 @@ class QuantityTransferService extends BaseService
 
           private function updateTransferOrderTotal($transferOrder, $orderItem, $quantity)
           {
-                    $transferOrder->sub_total += ($quantity * $orderItem->price);
-                    $transferOrder->total += ($quantity * $orderItem->price);
+                    // Calculate the additional amount for the new item(s)
+                    $additionalAmount = $quantity * $orderItem->price;
+
+                    // Update sub_total (only item prices)
+                    $transferOrder->sub_total += $additionalAmount;
+
+                    // Ensure total includes shipping cost
+                    $transferOrder->total = $transferOrder->sub_total + ($transferOrder->shipping_cost ?? 0);
+
                     $transferOrder->save();
           }
+
 
 
           /**

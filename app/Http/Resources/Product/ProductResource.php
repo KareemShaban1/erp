@@ -58,6 +58,11 @@ class ProductResource extends JsonResource
                 $variations = $variations->where('id', $this->variationId)->values();
             }
 
+             // Sort variations by total stock in descending order
+             $variations = $variations->sortByDesc(function ($variation) {
+                return $variation->variation_location_details->sum('qty_available');
+            });
+
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
