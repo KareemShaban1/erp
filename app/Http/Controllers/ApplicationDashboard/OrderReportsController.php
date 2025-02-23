@@ -34,12 +34,13 @@ class OrderReportsController extends Controller
     
             // Apply search filter for client name
             if (!empty($request->search['value'])) {
-                $query->whereHas('client.contact', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search['value'] . '%');
-                })->havingRaw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"])
-                ->orHavingRaw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"])
-                ->orHavingRaw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"]);
+                $searchValue = $request->search['value'];
+            
+                $query->whereHas('client.contact', function ($q) use ($searchValue) {
+                    $q->where('name', 'like', '%' . $searchValue . '%');
+                });
             }
+            
     
             // Calculate grand totals separately
             $grandTotals = Order::select(
