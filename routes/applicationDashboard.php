@@ -95,6 +95,7 @@ Route::get('applicationDashboard/client-orders-report', 'ApplicationDashboard\Or
 Route::get('applicationDashboard/client-orders/{id}', 'ApplicationDashboard\OrderReportsController@clientOrders')->name('client.orders');
 // ----------------------------------------------
 
+
 // orders 
 Route::resource('applicationDashboard/orders', 'ApplicationDashboard\OrderController');
 Route::get('applicationDashboard/orders/{orderId}/related',  'ApplicationDashboard\OrderController@getRelatedOrders');
@@ -163,6 +164,8 @@ Route::get('get_products', 'ApplicationDashboard\BannerController@getProducts');
 Route::get('get_categories', 'ApplicationDashboard\BannerController@getCategories');
 Route::resource('banners', 'ApplicationDashboard\BannerController');
 Route::resource('suggestionProducts', 'ApplicationDashboard\SuggestionProductController');
+Route::resource('application_notifications', 'ApplicationDashboard\ApplicationNotificationsController');
+Route::get('get_clients', 'ApplicationDashboard\ApplicationNotificationsController@getClients');
 
 // ----------------------------------------------
 

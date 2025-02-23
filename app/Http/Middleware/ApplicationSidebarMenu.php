@@ -141,6 +141,23 @@ class ApplicationSidebarMenu
                 )->order(21);
             }
 
+            if (auth()->user()->can('notifications.view')) {
+                $menu->dropdown(
+                    __('lang_v1.notifications'),
+                    function ($sub) {
+
+
+
+                        $sub->url(
+                            action('ApplicationDashboard\ApplicationNotificationsController@index'),
+                            __('lang_v1.notifications'),
+                            ['icon' => 'fa fas fa-shield-alt', 'active' => request()->segment(1) == 'banners']
+                        );
+                    },
+                    ['icon' => 'fa fa-flag']
+                )->order(21);
+            }
+
             if (auth()->user()->can('tags.view')) {
                 $menu->dropdown(
                     __('lang_v1.tags'),

@@ -42,7 +42,7 @@ class FirebaseClientService
         $notification = [
             'title' => $title,
             'body' => $body,
-            
+
 
         ];
 
@@ -61,7 +61,8 @@ class FirebaseClientService
                 'payload' => [
                     'aps' => ['sound' => 'custom_sound.caf', 'content-available' => 1]
                 ]
-            ]));;
+            ]));
+        ;
 
         try {
             // Send notification via Firebase

@@ -38,6 +38,7 @@
                 <th>{{__('lang_v1.Client_Name')}}</th>
                 <th>{{__('lang_v1.Client_Location')}}</th>
                 <th>{{__('lang_v1.Total_Order_Amount')}}</th>
+                <th>{{__('lang_v1.Total_Refund_Orders_Amount')}}</th>
                 <th>{{__('lang_v1.Total_Cancelled_Amount')}}</th>
             </tr>
         </thead>
@@ -63,6 +64,7 @@
                 dataSrc: function (json) {
                     // Update grand totals dynamically
                     $('#grand_total_amount').text(json.grand_total_amount);
+                    $('#grand_refund_amount').text(json.grand_refund_amount);
                     $('#grand_canceled_amount').text(json.grand_canceled_amount);
                     return json.data;
                 }
@@ -71,6 +73,7 @@
                 { data: 'client_name', name: 'client_name' },
                 { data: 'client_location', name: 'client_location' },
                 { data: 'total_amount', name: 'total_amount' },
+                { data: 'refund_amount', name: 'refund_amount' },
                 { data: 'canceled_amount', name: 'canceled_amount' },
             ]
         });

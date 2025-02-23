@@ -139,5 +139,16 @@ class OrderController extends Controller
         return $this->returnJSON($order, __('message.Order has been force deleted successfully'));
 
     }
+
+    public function searchByProduct(Request $request){
+        $orders = $this->service->searchByProduct($request);
+
+        if ($orders instanceof JsonResponse) {
+            return $orders;
+        }
+
+        return $this->returnJSON($orders, __('message.Order has been force deleted successfully'));
+
+    }
     
 }

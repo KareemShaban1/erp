@@ -963,5 +963,19 @@ class OrderService extends BaseService
     }
 
 
+    public function searchByProduct(Request $request)
+    {
+        $orders = Order::whereHas('orderItems', function ($query) use ($request) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            })
+                ->orWhereHas('variation', function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
+        })->get(); // or use paginate(x) if needed
+
+        return $orders; // Return the results
+    }
+
 
 }

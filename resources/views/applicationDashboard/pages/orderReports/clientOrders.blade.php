@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Order')
+@section('title', __('lang_v1.orders'))
 
 @section('content')
 
@@ -13,36 +13,57 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('lang_v1.create')
+    @can('create', App\Models\Order::class)
         @slot('tool')
-        <div class="box-tools">
-        </div>
+        <div class="box-tools"></div>
         @component('components.filters', ['title' => __('report.filters')])
         <div class="row">
             <div class="col-md-3">
-                <input type="date" id="start_date" class="form-control" placeholder="Start Date">
+                <input type="date" id="start_date" class="form-control" placeholder="@lang('lang_v1.start_date')">
             </div>
             <div class="col-md-3">
-                <input type="date" id="end_date" class="form-control" placeholder="End Date">
+                <input type="date" id="end_date" class="form-control" placeholder="@lang('lang_v1.end_date')">
             </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary" id="filter_date">Filter</button>
+
+            <div class="col-md-2">
+                <label class="form-label">@lang('lang_v1.order_type')</label>
+                <select id="order_type" class="form-control">
+                    <option value="">@lang('lang_v1.all')</option>
+                    <option value="order">@lang('lang_v1.order')</option>
+                    <option value="order_refund">@lang('lang_v1.order_refund')</option>
+                </select>
             </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary" id="clear_date">Clear</button>
+            <div class="col-md-2">
+                <label class="form-label">@lang('lang_v1.order_status')</label>
+                <select id="order_status" class="form-control">
+                    <option value="">@lang('lang_v1.all')</option>
+                    <option value="pending">@lang('lang_v1.pending')</option>
+                    <option value="processing">@lang('lang_v1.processed')</option>
+                    <option value="shipped">@lang('lang_v1.shipped')</option>
+                    <option value="completed">@lang('lang_v1.completed')</option>
+                    <option value="cancelled">@lang('lang_v1.cancelled')</option>
+                </select>
             </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary" id="filter_date">@lang('lang_v1.filter')</button>
+                <button class="btn btn-danger" id="clear_date">@lang('lang_v1.clear')</button>
+            </div>
+
         </div>
         @endcomponent
-
         @endslot
     @endcan
-    @can('lang_v1.view')
+
+    @can('view', App\Models\Order::class)
+        <input type="hidden" name="client_id" id="client_id" value="{{ $clientId }}">
+
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="orders_table">
                 <thead>
                     <tr>
                         <th>@lang('lang_v1.id')</th>
                         <th>@lang('lang_v1.number')</th>
+                        <th>@lang('lang_v1.order_type')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.payment_method')</th>
                         <th>@lang('lang_v1.order_status')</th>
@@ -53,328 +74,152 @@
                         <th>@lang('lang_v1.order_date_time')</th>
                         <th>@lang('lang_v1.assign_delivery')</th>
                         <th>@lang('lang_v1.actions')</th>
-
                     </tr>
                 </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="8" class="text-right">Total:</th>
+                        <th id="total_sum">0.00</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     @endcan
     @endcomponent
 
-    <div class="modal fade orders_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
-    </div>
+    <!-- Modals -->
+    <div class="modal fade orders_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
 
-    <!-- Delivery Assignment Modal -->
     @include('applicationDashboard.pages.orders.assignDeliveryModal')
-
-    <!-- Order Information Modal -->
     @include('applicationDashboard.pages.orders.orderInformationModal')
 
-
 </section>
-<!-- /.content -->
-
 @stop
+
 @section('javascript')
-<script>
-    $('#filter_date').click(function () {
-        orders_table.ajax.reload(); // Reload DataTable with the new date filters
-    });
+    <script>
+        $(document).ready(function () {
+            var clientId = $('#client_id').val();
+            var orders_table = $('#orders_table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '{{ action("ApplicationDashboard\OrderReportsController@clientOrders", ["id" => ":client_id"]) }}'.replace(':client_id', clientId),
+                    data: function (d) {
+                        d.start_date = $('#start_date').val();
+                        d.end_date = $('#end_date').val();
+                        d.order_type = $('#order_type').val();
+                        d.order_status = $('#order_status').val();
 
-    $('#clear_date').click(function () {
-        $('#start_date').val('');
-        $('#end_date').val('');
-        orders_table.ajax.reload();
-    });
-
-
-    //Orders table
-    var orders_table = $('#orders_table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: '{{ action("ApplicationDashboard\OrderController@index") }}',
-            data: function (d) {
-                d.start_date = $('#start_date').val();
-                d.end_date = $('#end_date').val();
-            }
-        },
-        columnDefs: [
-            {
-                targets: 2,
-                orderable: false,
-                searchable: false,
-            },
-        ],
-        columns: [
-            { data: 'id', name: 'id' },
-            { data: 'number', name: 'number' },
-            { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
-            { data: 'payment_method', name: 'payment_method' },
-            {
-                data: 'order_status', name: 'order_status', render: function (data, type, row) {
-                    let badgeClass;
-                    switch (data) {
-                        case 'pending': badgeClass = 'badge btn-warning'; break;
-                        case 'processing': badgeClass = 'badge btn-info'; break;
-                        case 'shipped': badgeClass = 'badge btn-primary'; break;
-                        case 'completed': badgeClass = 'badge btn-success'; break;
-                        case 'cancelled': badgeClass = 'badge btn-danger'; break;
-                        default: badgeClass = 'badge badge-secondary'; // For any other statuses
                     }
-
-                    return `
-                    <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                    
-            <select class="form-control change-order-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Canceled</option>
-            </select>`;
-                }
-            },
-            {
-                data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
-                    return `
-            <select class="form-control change-payment-status" data-order-id="${row.id}">
-                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                <option value="paid" ${data === 'paid' ? 'selected' : ''}>Paid</option>
-                <option value="failed" ${data === 'failed' ? 'selected' : ''}>Failed</option>
-            </select>`;
-                }
-            },
-            { data: 'shipping_cost', name: 'shipping_cost' },
-            { data: 'sub_total', name: 'sub_total' },
-            { data: 'total', name: 'total' },
-            {
-                data: 'created_at',
-                name: 'created_at',
-                render: function (data) {
-                    // Format the date using JavaScript
-                    if (data) {
-                        const date = new Date(data);
-                        return date.toLocaleString(); // Adjust format as needed
-                    }
-                    return '';
-                }
-            },
-            {
-                data: 'order_status',
-                name: 'order_status',
-                render: function (data, type, row) {
-                    console.log(row)
-                    // Case 1: If the order status is 'processing' and has no delivery assigned
-                    if (data === 'processing' && row.has_delivery === false) {
-                        return `<button class="btn btn-primary assign-delivery-btn" 
-                    data-order-id="${row.id}" 
-                    data-contact-name="${row.client_contact_name
-                            } ">
-                    @lang('lang_v1.assign_delivery')
-                </button > `;
-                    }
-                    if (row.has_delivery === true) {
-                        return `<span class="badge badge-success">
-                        @lang('lang_v1.delivery_assigned')
-                    </span>`;
-                    }
-
-                    return '';
                 },
-                orderable: false,
-                searchable: false
-            },
-            {
-                data: 'id',
-                name: 'id',
-                render: function (data, type, row) {
+                columns: [
+                    { data: 'id', name: 'id' },
+                    { data: 'number', name: 'number' },
+                    { data: 'order_type', name: 'order_type' },
+                    { data: 'client_contact_name', name: 'client_contact_name' },
+                    { data: 'payment_method', name: 'payment_method' },
+                    { data: 'order_status', name: 'order_status', render: formatOrderStatus },
+                    { data: 'payment_status', name: 'payment_status', render: formatPaymentStatus },
+                    { data: 'shipping_cost', name: 'shipping_cost' },
+                    { data: 'sub_total', name: 'sub_total' },
+                    { data: 'total', name: 'total' },
+                    { data: 'created_at', name: 'created_at', render: formatDate },
+                    { data: 'order_status', name: 'order_status', render: renderAssignDeliveryButton },
+                    { data: 'id', name: 'id', render: renderViewOrderButton }
+                ],
+                footerCallback: function (row, data, start, end, display) {
+                    var api = this.api();
 
-                    return `<button class="btn btn-info view-order-info-btn" data-order-id="${row.id}">@lang('lang_v1.view_order_info')</button>`;
-                },
-                orderable: false,
-                searchable: false
-            },
-
-
-        ],
-
-        fnDrawCallback: function (oSettings) {
-            __currency_convert_recursively($('#orders_table'));
-        },
-    });
-
-    $('#purchase_list_filter_date_range').daterangepicker(
-        dateRangeSettings,
-        function (start, end) {
-            $('#purchase_list_filter_date_range').val(start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format));
-            orders_table.ajax.reload();
-        }
-    );
-    $('#purchase_list_filter_date_range').on('cancel.daterangepicker', function (ev, picker) {
-        $('#purchase_list_filter_date_range').val('');
-        orders_table.ajax.reload();
-    });
-
-
-    $(document).on('change', '.change-order-status', function () {
-        var orderId = $(this).data('order-id');
-        var status = $(this).val();
-
-        $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@changeOrderStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-            type: 'POST',
-            data: {
-                order_status: status,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                } else {
-                    alert('Failed to update order status.');
-                }
-            },
-            error: function (xhr) {
-                alert('An error occurred: ' + xhr.responseText);
-            }
-        });
-    });
-
-    $(document).on('change', '.change-payment-status', function () {
-        var orderId = $(this).data('order-id');
-        var status = $(this).val();
-
-        $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@changePaymentStatus", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId), // Replacing the placeholder with the actual orderId
-            type: 'POST',
-            data: {
-                payment_status: status,
-                _token: '{{ csrf_token() }}' // CSRF token for security
-            },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    orders_table.ajax.reload(); // Reload DataTable to reflect the updated status
-                } else {
-                    alert('Failed to update payment status.');
-                }
-            },
-            error: function (xhr) {
-                alert('An error occurred: ' + xhr.responseText);
-            }
-        });
-    });
-
-
-    $(document).on('click', '.assign-delivery-btn', function () {
-        var orderId = $(this).data('order-id');
-        var contactName = $(this).data('contact-name'); // Get the contact name
-
-        $('#order_id').val(orderId);
-
-        // Set the contact name in the modal
-        $('#contact_name_display').text(contactName); // Assume #contact_name_display is the placeholder for contact name
-
-        // Fetch available deliveries
-        $.ajax({
-            url: `{{ action("ApplicationDashboard\DeliveryController@getAvailableDeliveries" , ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
-            type: 'GET',
-            success: function (response) {
-                console.log(response)
-                if (response.success) {
-                    var deliveryOptions = response.deliveries.map(delivery => {
-                        return `<option value="${delivery.id}">${delivery.name}</option>`;
-                    }).join('');
-                    $('#delivery_id').html(deliveryOptions);
-                    $('#assignDeliveryModal').modal('show');
-                } else {
-                    alert('Failed to fetch deliveries.');
-                }
-            },
-            error: function () {
-                alert('An error occurred while fetching deliveries.');
-            }
-        });
-    });
-
-
-    // Event listener for saving the delivery assignment
-    $('#saveDeliveryAssignment').click(function () {
-        var formData = $('#assignDeliveryForm').serialize();
-
-        $.ajax({
-            url: '{{ action("ApplicationDashboard\DeliveryController@assignDelivery") }}',
-            type: 'POST',
-            data: formData + '&_token={{ csrf_token() }}',
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    orders_table.ajax.reload();
-                    $('#assignDeliveryModal').modal('hide');
-                } else {
-                    alert('Failed to assign delivery.');
-                }
-            },
-            error: function () {
-                alert('An error occurred while assigning delivery.');
-            }
-        });
-    });
-
-    // Event listener for the 'View Order Info' button
-    // Event listener for the 'View Order Info' button
-    $(document).on('click', '.view-order-info-btn', function () {
-        var orderId = $(this).data('order-id'); // Get the order ID
-
-        // Fetch the order details
-        $.ajax({
-            url: `{{ action("ApplicationDashboard\OrderController@getOrderDetails", ['orderId' => ':orderId']) }}`.replace(':orderId', orderId),
-            type: 'GET',
-            success: function (response) {
-                console.log(response);
-                if (response.success) {
-                    // Populate the modal with the order details
-                    $('#view_order_id').val(response.order.id);
-                    $('#order_number').text(response.order.number);
-                    $('#business_location').text(response.order.business_location.name);
-                    $('#client_name').text(response.order.client.contact.name);
-                    $('#payment_method').text(response.order.payment_method);
-                    $('#shipping_cost').text(response.order.shipping_cost);
-                    $('#sub_total').text(response.order.sub_total);
-                    $('#total').text(response.order.total);
-                    $('#order_status').text(response.order.order_status);
-                    $('#payment_status').text(response.order.payment_status);
-
-                    // Populate the order items
-                    const itemsTable = $('#order_items_table tbody');
-                    itemsTable.empty(); // Clear existing rows
-
-                    response.order.order_items.forEach(item => {
-                        const row = `
-                        <tr>
-                            <td><img src="${item.product.image_url}" alt="${item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
-                            <td>${item.product.name}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>${item.sub_total}</td>
-                        </tr>
-                    `;
-                        itemsTable.append(row);
+                    // Get total sum from the server response
+                    $.ajax({
+                        url: "{{ route('client.orders', ['id' => ':client_id']) }}".replace(':client_id', clientId),
+                        data: {
+                            start_date: $('#start_date').val(),
+                            end_date: $('#end_date').val(),
+                            order_type: $('#order_type').val(),
+                            order_status: $('#order_status').val()
+                        },
+                        success: function (response) {
+                            console.log(response.totalSum)
+                            $(api.column(8).footer()).html(
+                                 response.totalSum
+                            );
+                        }
                     });
-
-                    // Show the modal
-                    $('#viewOrderInfoModal').modal('show');
-                } else {
-                    alert('Failed to fetch order details.');
+                },
+                fnDrawCallback: function () {
+                    __currency_convert_recursively($('#orders_table'));
                 }
-            },
-            error: function () {
-                alert('An error occurred while fetching the order details.');
+            });
+
+            // Date Filter Button Click
+            $('#filter_date').click(function () {
+                orders_table.ajax.reload();
+            });
+
+            $('#clear_date').click(function () {
+                $('#start_date, #end_date').val('');
+                orders_table.ajax.reload();
+            });
+
+            // Functions for rendering status fields
+            function formatOrderStatus(data, type, row) {
+                let badgeClass = {
+                    'pending': 'badge btn-warning',
+                    'processing': 'badge btn-info',
+                    'shipped': 'badge btn-primary',
+                    'completed': 'badge btn-success',
+                    'cancelled': 'badge btn-danger'
+                }[data] || 'badge badge-secondary';
+
+                return `<span class="${badgeClass}">${capitalize(data)}</span>
+                    <select class="form-control change-order-status" data-order-id="${row.id}">
+                        ${generateOptions(['pending', 'processing', 'shipped', 'completed', 'cancelled'], data)}
+                    </select>`;
+            }
+
+            function formatPaymentStatus(data, type, row) {
+                return `<select class="form-control change-payment-status" data-order-id="${row.id}">
+                    ${generateOptions(['pending', 'paid', 'failed'], data)}
+                </select>`;
+            }
+
+            function formatDate(data) {
+                return data ? new Date(data).toLocaleString() : '';
+            }
+
+            function renderAssignDeliveryButton(data, type, row) {
+                if (data === 'processing' && !row.has_delivery) {
+                    return `<button class="btn btn-primary assign-delivery-btn" 
+                        data-order-id="${row.id}" 
+                        data-contact-name="${row.client_contact_name}">
+                        @lang('lang_v1.assign_delivery')
+                    </button>`;
+                }
+                if (row.has_delivery) {
+                    return `<span class="badge badge-success">@lang('lang_v1.delivery_assigned')</span>`;
+                }
+                return '';
+            }
+
+            function renderViewOrderButton(data) {
+                return `<button class="btn btn-info view-order-info-btn" data-order-id="${data}">
+                    @lang('lang_v1.view_order_info')
+                </button>`;
+            }
+
+            function generateOptions(options, selected) {
+                return options.map(option =>
+                    `<option value="${option}" ${option === selected ? 'selected' : ''}>${capitalize(option)}</option>`
+                ).join('');
+            }
+
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
             }
         });
-    });
-
-</script>
+    </script>
 @endsection
