@@ -80,7 +80,7 @@ class TransferOrderController extends Controller
         $query = Order::with(['client.contact', 'businessLocation','parentOrder'])
             ->select([
                 'orders.id',
-                'order.parent_order_id',
+                'orders.parent_order_id',
                 'orders.number',
                 'orders.order_type',
                 'orders.client_id',
