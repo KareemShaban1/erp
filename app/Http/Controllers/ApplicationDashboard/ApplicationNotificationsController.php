@@ -26,7 +26,7 @@ class ApplicationNotificationsController extends Controller
                 select(['id', 'title', 'body', 'type', 'client_id']);
 
             return Datatables::of($applicationNotifications)
-                ->addColumn('client',function($item){
+                ->addColumn('client', function ($item) {
                     return $item->client->contact->name ?? '';
 
                 })
@@ -66,58 +66,64 @@ class ApplicationNotificationsController extends Controller
     public function store(Request $request)
     {
         try {
-        //
-        $request->validate([
-            'title' => 'required',
-            'body' => 'required',
-            'type' => 'required',
-            'client_id' => 'nullable|exists:clients,id'
-        ]);
-        $notification = ApplicationNotifications::create([
-            'title' => $request->title,
-            'body' => $request->body,
-            'type' => $request->type,
-            'client_id' => $request->client_id ?? null,
-        ]);
+            //
+            $request->validate([
+                'title' => 'required',
+                'body' => 'required',
+                'type' => 'required',
+                'client_id' => 'nullable|exists:clients,id'
+            ]);
+            $notification = ApplicationNotifications::create([
+                'title' => $request->title,
+                'body' => $request->body,
+                'type' => $request->type,
+                'client_id' => $request->client_id ?? null,
+            ]);
 
-        $client = Client::find($request->client_id);
-        if ($client) {
-            app(FirebaseClientService::class)->sendAndStoreNotification(
-                $client->id,
-                $client->fcm_token,
-                $request->title,
-                $request->body,
-                []
-            );
-        } else {
-            $clients = Client::all();
-            foreach ($clients as $client) {
+            $client = Client::find($request->client_id);
+            if ($client) {
                 app(FirebaseClientService::class)->sendAndStoreNotification(
                     $client->id,
                     $client->fcm_token,
                     $request->title,
                     $request->body,
-                    []
+                    [
+                        'title' => $request->title,
+                        'body' => $request->body,
+                    ]
                 );
+            } else {
+                $clients = Client::all();
+                foreach ($clients as $client) {
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
+                        $client->id,
+                        $client->fcm_token,
+                        $request->title,
+                        $request->body,
+                        [
+                            'title' => $request->title,
+                            'body' => $request->body,
+                        ]
+                    );
+                }
             }
+
+            $output = [
+                'success' => true,
+                'data' => $notification,
+                'msg' => __("lang_v1.added_success")
+            ];
+
+        } catch (\Exception $e) {
+            \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __("messages.something_went_wrong")
+            ];
         }
 
-        $output = [
-            'success' => true,
-            'data' => $notification,
-            'msg' => __("lang_v1.added_success")
-        ];
-
-    } catch (\Exception $e) {
-        \Log::emergency("File:" . $e->getFile() . "Line:" . $e->getLine() . "Message:" . $e->getMessage());
-
-        $output = [
-            'success' => false,
-            'msg' => __("messages.something_went_wrong")
-        ];
-    }
-
-    return response()->json($output);
+        return response()->json($output);
 
     }
 
@@ -173,7 +179,10 @@ class ApplicationNotificationsController extends Controller
 
     public function getClients()
     {
-        $clients = Client::with('contact')->get();
+        $clients = Client::with('contact')
+        ->whereHas('contact',function($query){
+            return $query->where('status',1);
+        })->get();
         return response()->json($clients);
     }
 }
