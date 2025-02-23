@@ -254,6 +254,9 @@ class DeliveryController extends Controller
             return $deliveryOrder->order->total ?? 0;
         });
 
+        dd($totalOrdersCount , $totalOrdersAmount);
+
+
         // Get orders with type 'order_refund'
         $refundOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('order_type', 'order_refund');
