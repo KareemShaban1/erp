@@ -19,16 +19,15 @@
             <label for="end_date">{{__('lang_v1.end_date')}}</label>
             <input type="date" id="end_date" class="form-control">
         </div>
-        <!-- <div class="col-md-3">
-            <label for="search">{{__('lang_v1.search')}}</label>
-            <input type="text" id="search" class="form-control" placeholder="Search by client name">
-        </div> -->
-        <select id="clientFilter" class="form-control">
+        <div class="col-md-3">
+                  <select id="clientFilter" class="form-control">
             <option value="">All Clients</option>
             @foreach($clients as $client)
                 <option value="{{ $client->id }}">{{ $client->contact->name ?? 'Unknown' }}</option>
             @endforeach
         </select>
+        </div>
+
 
         <div class="col-md-3 d-flex align-items-end">
             <button id="filter" class="btn btn-primary mr-2">{{__('lang_v1.filter')}}</button>

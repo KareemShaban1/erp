@@ -52,6 +52,12 @@ class Client  extends Authenticatable
     
         return $query;
     }
+
+    public function scopeActive($query){
+        $query->whereHas('contact', function ($query) {
+            $query->where('contact_status', "active");
+        });
+    }
     
 
 }

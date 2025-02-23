@@ -82,7 +82,7 @@ class OrderReportsController extends Controller
             ->make(true);
     }
 
-    $clients = Client::with('contact')->get();
+    $clients = Client::active()->with('contact')->get();
 
     return view('applicationDashboard.pages.orderReports.index',compact('clients'));
 }
