@@ -965,7 +965,9 @@ class OrderService extends BaseService
 
     public function searchByProduct(Request $request)
     {
-        $orders = Order::whereHas('orderItems', function ($query) use ($request) {
+        $client = Client::find(Auth::id());
+        $orders = Order::where('client_id',$client->id)
+        ->whereHas('orderItems', function ($query) use ($request) {
             $query->whereHas('product', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
             })
