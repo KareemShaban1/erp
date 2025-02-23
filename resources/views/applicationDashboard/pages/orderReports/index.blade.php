@@ -19,10 +19,17 @@
             <label for="end_date">{{__('lang_v1.end_date')}}</label>
             <input type="date" id="end_date" class="form-control">
         </div>
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
             <label for="search">{{__('lang_v1.search')}}</label>
             <input type="text" id="search" class="form-control" placeholder="Search by client name">
-        </div>
+        </div> -->
+        <select id="clientFilter" class="form-control">
+            <option value="">All Clients</option>
+            @foreach($clients as $client)
+                <option value="{{ $client->id }}">{{ $client->contact->name ?? 'Unknown' }}</option>
+            @endforeach
+        </select>
+
         <div class="col-md-3 d-flex align-items-end">
             <button id="filter" class="btn btn-primary mr-2">{{__('lang_v1.filter')}}</button>
             <button id="clear_filters" class="btn btn-danger">{{__('lang_v1.clear')}}</button>
@@ -50,52 +57,56 @@
 @stop
 @section('javascript')
 
-<script>
-    $(document).ready(function () {
-        const table = $('#order_report_table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '{{ action("ApplicationDashboard\OrderReportsController@index") }}',
-                data: function (d) {
-                    d.start_date = $('#start_date').val();
-                    d.end_date = $('#end_date').val();
+    <script>
+        $(document).ready(function () {
+            const table = $('#order_report_table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '{{ action("ApplicationDashboard\OrderReportsController@index") }}',
+                    data: function (d) {
+                        d.client_id = $('#clientFilter').val(); // Pass selected client_id
+
+                        d.start_date = $('#start_date').val();
+                        d.end_date = $('#end_date').val();
+                    },
+                    dataSrc: function (json) {
+                        // Update grand totals dynamically
+                        $('#grand_total_amount').text(json.grand_total_amount);
+                        $('#grand_refund_amount').text(json.grand_refund_amount);
+                        $('#grand_canceled_amount').text(json.grand_canceled_amount);
+                        return json.data;
+                    }
                 },
-                dataSrc: function (json) {
-                    // Update grand totals dynamically
-                    $('#grand_total_amount').text(json.grand_total_amount);
-                    $('#grand_refund_amount').text(json.grand_refund_amount);
-                    $('#grand_canceled_amount').text(json.grand_canceled_amount);
-                    return json.data;
-                }
-            },
-            columns: [
-                { data: 'client_name', name: 'client_name' },
-                { data: 'client_location', name: 'client_location' },
-                { data: 'total_amount', name: 'total_amount' },
-                { data: 'refund_amount', name: 'refund_amount' },
-                { data: 'canceled_amount', name: 'canceled_amount' },
-            ]
+                columns: [
+                    { data: 'client_name', name: 'client_name' },
+                    { data: 'client_location', name: 'client_location' },
+                    { data: 'total_amount', name: 'total_amount' },
+                    { data: 'refund_amount', name: 'refund_amount' },
+                    { data: 'canceled_amount', name: 'canceled_amount' },
+                ]
+            });
+
+            // Clear button click
+            $('#clear_filters').on('click', function () {
+                $('#start_date').val('');
+                $('#end_date').val('');
+                $('#search').val('');
+                table.search('').columns().search('').draw(); // Clear all filters
+            });
+
+            // Search on typing in search input
+            $('#search').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            $('#filter, #clear_filters').on('click', function () {
+                table.ajax.reload();
+            });
+
+
         });
 
-        // Clear button click
-        $('#clear_filters').on('click', function () {
-            $('#start_date').val('');
-            $('#end_date').val('');
-            $('#search').val('');
-            table.search('').columns().search('').draw(); // Clear all filters
-        });
-
-        // Search on typing in search input
-        $('#search').on('keyup', function () {
-            table.search(this.value).draw();
-        });
-
-        $('#filter, #clear_filters').on('click', function () {
-            table.ajax.reload();
-        });
-    });
-
-</script>
+    </script>
 
 @endsection
