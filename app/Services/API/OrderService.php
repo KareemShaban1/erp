@@ -966,19 +966,22 @@ class OrderService extends BaseService
     public function searchByProduct(Request $request)
     {
         $client = Client::find(Auth::id());
-        $orders = Order::where('client_id',$client->id)
-        ->whereHas('orderItems', function ($query) use ($request) {
-            $query->whereHas('product', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            })
-                ->orWhereHas('variation', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%');
+    
+        $orders = Order::where('client_id', $client->id)
+            ->whereHas('orderItems', function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('product', function ($subQuery) use ($request) {
+                        $subQuery->where('name', 'like', '%' . $request->search . '%');
+                    })->orWhereHas('variation', function ($subQuery) use ($request) {
+                        $subQuery->where('name', 'like', '%' . $request->search . '%');
+                    });
                 });
-        })->get(); // or use paginate(x) if needed
-
+            })->get();
+    
         return (new OrderCollection($orders))
-        ->withFullData(!($request->full_data == 'false'));
+            ->withFullData(!($request->full_data == 'false'));
     }
+    
 
 
 }
