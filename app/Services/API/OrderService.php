@@ -968,7 +968,7 @@ class OrderService extends BaseService
 
 
         try {
-            dd($request->search);
+            dd($request->all());
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
                 ->whereHas('orderItems', function ($query) use ($request) {
