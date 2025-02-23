@@ -12,83 +12,77 @@ class OrderReportsController extends Controller
 {
 
     public function index(Request $request)
-    {
-        if (!auth()->user()->can('orders.reports')) {
-            abort(403, 'Unauthorized action.');
-        }
-    
-        if (request()->ajax()) {
-            $query = Order::select(
-                'client_id',
-                DB::raw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) as total_amount'),
-                DB::raw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) as refund_amount'),
-                DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount')
-            )
-                ->with(['client.contact', 'client.business_location'])
-                ->groupBy('client_id');
-    
-            // Apply date filters
-            if ($request->start_date && $request->end_date) {
-                $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
-            }
-    
-            // Apply search filter for client name
-            if (!empty($request->search['value'])) {
-                $searchValue = '%' . $request->search['value'] . '%';
-    
-                $query->whereHas('client.contact', function ($q) use ($searchValue) {
-                    $q->where('name', 'like', $searchValue);
-                });
-    
-                // Use HAVING for calculated columns
-                $query->havingRaw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) LIKE ?', [$searchValue])
-                      ->orHavingRaw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) LIKE ?', [$searchValue])
-                      ->orHavingRaw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) LIKE ?', [$searchValue]);
-            }
-    
-            // Calculate grand totals separately
-            $grandTotals = Order::select(
-                DB::raw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) as total_amount'),
-                DB::raw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) as refund_amount'),
-                DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount')
-            );
-    
-            if ($request->start_date && $request->end_date) {
-                $grandTotals->whereBetween('created_at', [$request->start_date, $request->end_date]);
-            }
-    
-            $grandTotals = $grandTotals->first();
-    
-            return DataTables::of($query)
-                ->addColumn('client_name', function ($row) {
-                    return '<a href="' . route('client.orders', $row->client_id) . '">' .
-                        optional($row->client->contact)->name ?? 'Unknown Client' .
-                        '</a>';
-                })
-                ->addColumn('client_location', function ($row) {
-                    return optional($row->client->business_location)->name ?? 'Unknown Location';
-                })
-                ->editColumn('total_amount', function ($row) {
-                    return number_format($row->total_amount, 2);
-                })
-                ->editColumn('canceled_amount', function ($row) {
-                    return number_format($row->canceled_amount, 2);
-                })
-                ->editColumn('refund_amount', function ($row) {
-                    return number_format($row->refund_amount, 2);
-                })
-                ->with([
-                    'grand_total_amount' => number_format($grandTotals->total_amount ?? 0, 2),
-                    'grand_canceled_amount' => number_format($grandTotals->canceled_amount ?? 0, 2),
-                    'grand_refund_amount' => number_format($grandTotals->refund_amount ?? 0, 2),
-                ])
-                ->rawColumns(['client_name'])
-                ->make(true);
-        }
-    
-        return view('applicationDashboard.pages.orderReports.index');
+{
+    if (!auth()->user()->can('orders.reports')) {
+        abort(403, 'Unauthorized action.');
     }
-    
+
+    if (request()->ajax()) {
+        $query = Order::select(
+            'client_id',
+            DB::raw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) as total_amount'),
+            DB::raw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) as refund_amount'),
+            DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount')
+        )
+            ->with(['client.contact', 'client.business_location']) // Ensure relationships are eager loaded
+            ->groupBy('client_id');
+
+        // Apply date filters
+        if ($request->start_date && $request->end_date) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+
+        // Apply search filter for client name
+        if (!empty($request->search['value'])) {
+            $query->whereHas('client.contact', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search['value'] . '%');
+            });
+        }
+
+        // Calculate grand totals separately
+        $grandTotals = Order::select(
+            DB::raw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) as total_amount'),
+            DB::raw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) as refund_amount'),
+            DB::raw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) as canceled_amount')
+        );
+
+        if ($request->start_date && $request->end_date) {
+            $grandTotals->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+
+        $grandTotals = $grandTotals->first();
+
+        return DataTables::of($query)
+            ->addColumn('client_name', function ($row) {
+                return '<a href="' . route('client.orders', $row->client_id) . '">' .
+                    optional($row->client->contact)->name ?? 'Unknown Client' .
+                    '</a>';
+            })
+            ->addColumn('client_location', function ($row) {
+                return optional($row->client->business_location)->name ?? 'Unknown Location';
+            })
+            ->editColumn('total_amount', function ($row) {
+                return number_format($row->total_amount, 2);
+            })
+            ->editColumn('canceled_amount', function ($row) {
+                return number_format($row->canceled_amount, 2);
+            })
+            ->editColumn('refund_amount', function ($row) {
+                return number_format($row->refund_amount, 2);
+            })
+            ->with([
+                'grand_total_amount' => number_format($grandTotals->total_amount ?? 0, 2),
+                'grand_canceled_amount' => number_format($grandTotals->canceled_amount ?? 0, 2),
+                'grand_refund_amount' => number_format($grandTotals->refund_amount ?? 0, 2),
+            ])
+            ->rawColumns(['client_name'])
+            ->make(true);
+    }
+
+    return view('applicationDashboard.pages.orderReports.index');
+}
+
+
 
 
 
