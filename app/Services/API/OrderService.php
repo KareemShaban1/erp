@@ -967,15 +967,10 @@ class OrderService extends BaseService
     {
         $client = Client::find(Auth::id());
     
-        dd($client);
         $orders = Order::where('client_id', $client->id)
             ->whereHas('orderItems', function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->whereHas('product', function ($subQuery) use ($request) {
-                        $subQuery->where('name', 'like', '%' . $request->search . '%');
-                    })->orWhereHas('variation', function ($subQuery) use ($request) {
-                        $subQuery->where('name', 'like', '%' . $request->search . '%');
-                    });
+                $query->whereHas('product', function ($subQuery) use ($request) {
+                    $subQuery->where('name', 'like', '%' . $request->search . '%');
                 });
             })->get();
     
