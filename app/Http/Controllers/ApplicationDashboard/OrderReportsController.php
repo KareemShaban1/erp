@@ -36,7 +36,9 @@ class OrderReportsController extends Controller
             if (!empty($request->search['value'])) {
                 $query->whereHas('client.contact', function ($q) use ($request) {
                     $q->where('name', 'like', '%' . $request->search['value'] . '%');
-                });
+                })->havingRaw('SUM(CASE WHEN order_type = "order" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"])
+                ->orHavingRaw('SUM(CASE WHEN order_type = "order_refund" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"])
+                ->orHavingRaw('SUM(CASE WHEN order_status = "cancelled" THEN total ELSE 0 END) LIKE ?', ["%{$request->search['value']}%"]);
             }
     
             // Calculate grand totals separately
