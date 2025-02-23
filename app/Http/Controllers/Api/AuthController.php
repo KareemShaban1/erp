@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -496,6 +497,13 @@ class AuthController extends Controller
 
         // Update the password with hashing
         $client->password = Hash::make($request->new_password);
+
+        // Remove FCM token
+        $client->fcm_token = null;
+
+        // 🔥 Revoke all Sanctum tokens for this client
+        PersonalAccessToken::where('tokenable_id', $client->id)->delete();
+
         $client->save();
 
         return response()->json([
