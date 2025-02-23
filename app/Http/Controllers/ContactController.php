@@ -25,6 +25,7 @@ use App\Models\TransactionPayment;
 use App\Services\FirebaseClientService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Activitylog\Models\Activity;
 
 class ContactController extends Controller
@@ -721,9 +722,9 @@ class ContactController extends Controller
                         ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
                 });
             })
-            ->filterColumn('business_location',function($query, $keyword){
-                $query->whereHas('client',function ($q) use ($keyword) {
-                    $q->whereHas('business_location',function($q) use($keyword){
+            ->filterColumn('business_location', function ($query, $keyword) {
+                $query->whereHas('client', function ($q) use ($keyword) {
+                    $q->whereHas('business_location', function ($q) use ($keyword) {
                         $q->where('name', 'like', "%{$keyword}%");
                     });
                 });
@@ -969,9 +970,9 @@ class ContactController extends Controller
                         ->orWhereRaw("CONCAT(COALESCE(address_line_1, ''), ', ', COALESCE(address_line_2, ''), ', ', COALESCE(city, ''), ', ', COALESCE(state, ''), ', ', COALESCE(country, '') ) like ?", ["%{$keyword}%"]);
                 });
             })
-            ->filterColumn('business_location',function($query, $keyword){
-                $query->whereHas('delivery',function ($q) use ($keyword) {
-                    $q->whereHas('business_location',function($q) use($keyword){
+            ->filterColumn('business_location', function ($query, $keyword) {
+                $query->whereHas('delivery', function ($q) use ($keyword) {
+                    $q->whereHas('business_location', function ($q) use ($keyword) {
                         $q->where('name', 'like', "%{$keyword}%");
                     });
                 });
@@ -2342,8 +2343,6 @@ class ContactController extends Controller
                         'Your Account is active now.',
                         $data
                     );
-                    // $this->moduleUtil->activityLog($contact, 'change_status', null, 
-                    // ['order_number' => $order->number, 'status'=>'approved']);
                     $this->contactUtil->activityLog(
                         $contact,
                         'change_status',
@@ -2352,6 +2351,12 @@ class ContactController extends Controller
                     );
 
                 } else {
+                    // Remove FCM token
+                    $client->fcm_token = null;
+                    $client->save();
+
+                    // 🔥 Revoke all Sanctum tokens for this client
+                    PersonalAccessToken::where('tokenable_id', $client->id)->delete();
                     app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
                         $client->fcm_token,
