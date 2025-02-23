@@ -93,7 +93,9 @@ class ApplicationNotificationsController extends Controller
                     ]
                 );
             } else {
-                $clients = Client::all();
+                $clients = Client::whereHas('contact', function ($query) {
+                    return $query->where('contact_status', "active");
+                })->get();
                 foreach ($clients as $client) {
                     app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
@@ -180,9 +182,9 @@ class ApplicationNotificationsController extends Controller
     public function getClients()
     {
         $clients = Client::with('contact')
-        ->whereHas('contact',function($query){
-            return $query->where('contact_status',"active");
-        })->get();
+            ->whereHas('contact', function ($query) {
+                return $query->where('contact_status', "active");
+            })->get();
         return response()->json($clients);
     }
 }
