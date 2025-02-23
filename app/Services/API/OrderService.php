@@ -963,14 +963,14 @@ class OrderService extends BaseService
     }
 
 
-    public function searchByProduct(Request $request)
+    public function searchByProduct($request)
     {
 
 
         try {
-            dd($request->all());
             $client = Client::find(Auth::id());
             $query = Order::where('client_id', $client->id)
+                ->where('order_type', 'order')
                 ->whereHas('orderItems', function ($query) use ($request) {
                     $query->whereHas('product', function ($subQuery) use ($request) {
                         $subQuery->where('name', 'like', '%' . $request->search . '%');
