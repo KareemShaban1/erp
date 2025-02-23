@@ -77,9 +77,10 @@ class TransferOrderController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = Order::with(['client.contact', 'businessLocation'])
+        $query = Order::with(['client.contact', 'businessLocation','parentOrder'])
             ->select([
                 'orders.id',
+                'order.parent_order_id',
                 'orders.number',
                 'orders.order_type',
                 'orders.client_id',
