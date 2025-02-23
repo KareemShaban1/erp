@@ -974,7 +974,8 @@ class OrderService extends BaseService
                 });
         })->get(); // or use paginate(x) if needed
 
-        return $orders; // Return the results
+        return (new OrderCollection($orders))
+        ->withFullData(!($request->full_data == 'false'));
     }
 
 
