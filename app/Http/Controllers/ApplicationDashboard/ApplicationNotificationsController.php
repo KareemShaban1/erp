@@ -181,7 +181,7 @@ class ApplicationNotificationsController extends Controller
     {
         $clients = Client::with('contact')
         ->whereHas('contact',function($query){
-            return $query->where('status',1);
+            return $query->where('contact_status',"active");
         })->get();
         return response()->json($clients);
     }
