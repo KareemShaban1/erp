@@ -42,6 +42,7 @@
             columns: [
                 { data: 'id', name: 'id' },
                 // { data: 'business_location.name', name: 'business_location.name' },
+                { data: 'parent_order_number', name: 'parent_order_number' },
                 { data: 'number', name: 'number' },
                 { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name

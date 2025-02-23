@@ -172,11 +172,28 @@ class ApplicationNotificationsController extends Controller
      * @param  \App\Models\ApplicationNotifications  $applicationNotifications
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ApplicationNotifications $applicationNotifications)
+    public function destroy($id)
     {
         //
-        $applicationNotifications->delete();
-        return redirect()->route('applicationDashboard.notifications.index')->with('success', 'Notification deleted successfully');
+        try {
+            $applicationNotifications = ApplicationNotifications::find($id);
+            $applicationNotifications->delete();
+            $output = [
+                'success' => true,
+                'msg' => __("lang_v1.deleted_success")
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency("File:" . $e->getFile() . " Line:" . $e->getLine() . " Message:" . $e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __("messages.something_went_wrong")
+            ];
+        }
+
+        return response()->json($output);
+
+
     }
 
     public function getClients()

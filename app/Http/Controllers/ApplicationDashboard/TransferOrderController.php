@@ -200,6 +200,10 @@ class TransferOrderController extends Controller
                     return $order->deliveries->pluck('contact.name')->implode(', ') ?: __('lang_v1.delivery_assigned');
                 }
             })
+            ->addColumn('parent_order_number', function ($order) {
+                // dd($order);
+                return $order->parentOrder->number ?? 'N/A';
+            })
             ->make(true);
     }
 

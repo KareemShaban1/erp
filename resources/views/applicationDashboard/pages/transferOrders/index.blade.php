@@ -35,6 +35,7 @@
                     <tr>
                         <th>@lang('lang_v1.id')</th>
                         <!-- <th>@lang('lang_v1.business_location')</th> -->
+                        <th>@lang('lang_v1.parent_order_number')</th>
                         <th>@lang('lang_v1.number')</th>
                         <th>@lang('lang_v1.client')</th>
                         <th>@lang('lang_v1.client_number')</th>
