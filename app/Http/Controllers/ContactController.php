@@ -2361,7 +2361,7 @@ class ContactController extends Controller
                     );
 
                     // Remove FCM token
-                    $client->fcm_token = null;
+                    // $client->fcm_token = null;
 
                     // 🔥 Revoke all Sanctum tokens for this client
                     PersonalAccessToken::where('tokenable_id', $client->id)->delete();
