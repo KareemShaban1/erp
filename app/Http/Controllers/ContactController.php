@@ -2351,12 +2351,7 @@ class ContactController extends Controller
                     );
 
                 } else {
-                    // Remove FCM token
-                    $client->fcm_token = null;
 
-                    // 🔥 Revoke all Sanctum tokens for this client
-                    PersonalAccessToken::where('tokenable_id', $client->id)->delete();
-                    
                     app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
                         $client->fcm_token,
@@ -2364,6 +2359,12 @@ class ContactController extends Controller
                         'Your Account is not active now.',
                         $data
                     );
+
+                    // Remove FCM token
+                    $client->fcm_token = null;
+
+                    // 🔥 Revoke all Sanctum tokens for this client
+                    PersonalAccessToken::where('tokenable_id', $client->id)->delete();
 
                     $this->contactUtil->activityLog(
                         $contact,
