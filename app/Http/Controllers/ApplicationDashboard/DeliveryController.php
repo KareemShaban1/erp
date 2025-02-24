@@ -226,7 +226,6 @@ class DeliveryController extends Controller
             $baseQuery->where('delivery_id', $delivery_id);
         }
 
-        dd($baseQuery->get());
         // Apply date filters if provided
         // if ($start_date && $end_date) {
         //     $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
