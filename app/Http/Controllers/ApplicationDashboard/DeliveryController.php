@@ -156,34 +156,45 @@ class DeliveryController extends Controller
         }
 
         $business_id = $request->session()->get('user.business_id');
-        $delivery_id = $request->query('delivery_id'); // Get delivery_id from query parameters
+        $delivery_id = $request->query('delivery_id');
         $search = $request->get('search')['value'] ?? null;
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
 
         if ($request->ajax()) {
-            // Load orders and related deliveries with their data
             $query = DeliveryOrder::with(['order', 'order.client.contact', 'delivery.contact'])
                 ->whereHas('delivery.contact', function ($query) use ($business_id) {
                     $query->where('business_id', $business_id);
                 });
 
-            // Filter by delivery_id if provided
             if (!empty($delivery_id)) {
                 $query->where('delivery_id', $delivery_id);
             }
 
-            // Apply search filter if applicable
+            if (!empty($start_date) && !empty($end_date)) {
+                $query->whereHas('order', function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+                });
+            }
+
             if ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('id', 'like', "%{$search}%") // Searching DeliveryOrder ID
+                    $query->where('id', 'like', "%{$search}%")
                         ->orWhereHas('order', function ($query) use ($search) {
-                            $query->where('number', 'like', "%{$search}%"); // Searching Order Number
+                            $query->where('number', 'like', "%{$search}%");
                         })
                         ->orWhereHas('order.client.contact', function ($query) use ($search) {
-                            $query->where('name', 'like', "%{$search}%")  // Searching Client Name
-                                ->orWhere('mobile', 'like', "%{$search}%"); // Searching Client Mobile
+                            $query->where('name', 'like', "%{$search}%")
+                                ->orWhere('mobile', 'like', "%{$search}%");
                         });
                 });
             }
+
+            // Calculate total order sum
+            $total_order_sum = (clone $query)->get()->sum(function ($order) {
+                return $order->order->total ?? 0;
+            });
+            
 
             return Datatables::of($query)
                 ->addColumn('id', function ($row) {
@@ -195,13 +206,17 @@ class DeliveryController extends Controller
                 ->addColumn('client_name', function ($row) {
                     return $row->order->client->contact->name ?? 'N/A';
                 })
-                ->rawColumns(['id', 'delivery_name', 'client_name']) // Use raw columns if needed for HTML
+                ->addColumn('order_total', function ($row) {
+                    return number_format($row->order->total ?? 0, 2);
+                })
+                ->with('total_order_sum', number_format($total_order_sum, 2)) // Pass total order sum to frontend
+                ->rawColumns(['id', 'delivery_name', 'client_name'])
                 ->make(true);
         }
 
-        // Pass delivery_id and other data to the view for non-AJAX requests
         return view('applicationDashboard.pages.orderDeliveries.index', compact('delivery_id'));
     }
+
 
 
     public function getDeliveryStatistics(Request $request)
@@ -288,33 +303,33 @@ class DeliveryController extends Controller
         // Get paid and not paid orders
         $paidOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'paid')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->count();
         $paidOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'paid')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
 
         $failedPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'failed')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->count();
         $failedPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'failed')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
 
         $pendingPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'pending')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->count();
         $pendingPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
             $q->where('payment_status', 'pending')
-            ->where('order_type', 'order');
+                ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
