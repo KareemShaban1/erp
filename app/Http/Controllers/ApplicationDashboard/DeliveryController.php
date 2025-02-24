@@ -309,10 +309,12 @@ class DeliveryController extends Controller
         });
 
         $pendingPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'pending');
+            $q->where('payment_status', 'pending')
+            ->where('order_type', 'order');
         })->count();
         $pendingPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'pending');
+            $q->where('payment_status', 'pending')
+            ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
