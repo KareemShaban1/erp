@@ -287,19 +287,23 @@ class DeliveryController extends Controller
 
         // Get paid and not paid orders
         $paidOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'paid');
+            $q->where('payment_status', 'paid')
+            ->where('order_type', 'order');
         })->count();
         $paidOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'paid');
+            $q->where('payment_status', 'paid')
+            ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
 
         $failedPayOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'failed');
+            $q->where('payment_status', 'failed')
+            ->where('order_type', 'order');
         })->count();
         $failedPayOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('payment_status', 'failed');
+            $q->where('payment_status', 'failed')
+            ->where('order_type', 'order');
         })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
