@@ -16,7 +16,9 @@ class ClientNotificationController extends Controller
    {
       $notifications = Notification::
          where('notifiable_type', 'App\Models\Client')->
-         where('notifiable_id', Auth::id())->get();
+         where('notifiable_id', Auth::id())
+         ->latest()
+         ->get();
       // return $notifications;
       $response = new NotificationCollection($notifications);
       return $this->returnJSON($response, __('message.Notifications has been retrieved  successfully'));
@@ -28,6 +30,7 @@ class ClientNotificationController extends Controller
       $notifications =  Notification::where('notifiable_type', 'App\Models\Client')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at') // Only unread notifications
+         ->latest()
          ->get();
 
          $response = new NotificationCollection($notifications);
