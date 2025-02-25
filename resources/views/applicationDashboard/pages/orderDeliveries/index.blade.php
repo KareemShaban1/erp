@@ -180,8 +180,8 @@
 
             // Set default dates to today
             const today = new Date().toISOString().split('T')[0];
-            $('#start_date').val(today);
-            $('#end_date').val(today);
+            $('#statistics_start_date').val(today);
+            $('#statistics_end_date').val(today);
 
             // Fetch statistics when the modal is shown
             $('#deliveryStatisticsModal').on('show.bs.modal', function () {
@@ -195,8 +195,8 @@
 
             function fetchDeliveryStatistics() {
                 const delivery_id = {{ $delivery_id ?? 'null' }}; // Ensure this value is passed from the backend
-                const start_date = $('#start_date').val();
-                const end_date = $('#end_date').val();
+                const start_date = $('#statistics_start_date').val();
+                const end_date = $('#statistics_end_date').val();
 
                 $.ajax({
                     url: '{{ route("deliveries.statistics") }}',

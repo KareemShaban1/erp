@@ -240,14 +240,6 @@ class DeliveryController extends Controller
         if (!empty($delivery_id)) {
             $baseQuery->where('delivery_id', $delivery_id);
         }
-
-        // Apply date filters if provided
-        // if ($start_date && $end_date) {
-        //     $baseQuery->whereHas('order', function ($q) use ($start_date, $end_date) {
-        //         $q->whereBetween('created_at', [$start_date, $end_date]);
-        //     });
-        // }
-
         if ($start_date && $end_date) {
             $end_date = $start_date === $end_date
                 ? Carbon::parse($end_date)->endOfDay()
@@ -264,8 +256,12 @@ class DeliveryController extends Controller
 
 
         // Get total orders count and total amount
-        $totalOrdersCount = $baseQuery->count();
-        $totalOrdersAmount = $baseQuery->with('order')->get()->sum(function ($deliveryOrder) {
+        $totalOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order');
+        })->count();
+        $totalOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
+            $q->where('order_type', 'order');
+        })->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
 

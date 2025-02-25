@@ -19,14 +19,14 @@
                                                             <div class="form-group">
                                                                       <label for="start_date">@lang('lang_v1.start_date')</label>
                                                                       <input type="date" class="form-control"
-                                                                                id="start_date" name="start_date">
+                                                                                id="statistics_start_date" name="start_date">
                                                             </div>
                                                   </div>
                                                   <div class="col-md-4">
                                                             <div class="form-group">
                                                                       <label for="end_date">@lang('lang_v1.end_date')</label>
                                                                       <input type="date" class="form-control"
-                                                                                id="end_date" name="end_date">
+                                                                                id="statistics_end_date" name="end_date">
                                                             </div>
                                                   </div>
                                                   <div class="col-md-4">
