@@ -264,12 +264,8 @@ class DeliveryController extends Controller
 
 
         // Get total orders count and total amount
-        $totalOrdersCount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('order_type', 'order');
-        })->count();
-        $totalOrdersAmount = (clone $baseQuery)->whereHas('order', function ($q) {
-            $q->where('order_type', 'order');
-        })->with('order')->get()->sum(function ($deliveryOrder) {
+        $totalOrdersCount = $baseQuery->count();
+        $totalOrdersAmount = $baseQuery->with('order')->get()->sum(function ($deliveryOrder) {
             return $deliveryOrder->order->total ?? 0;
         });
 
