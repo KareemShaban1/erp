@@ -45,7 +45,7 @@
                                                                       <span class="info-box-icon bg-aqua"><i
                                                                                           class="fa fa-shopping-cart"></i></span>
                                                                       <div class="info-box-content">
-                                                                                <span class="info-box-text">@lang('lang_v1.total_orders')</span>
+                                                                                <span class="info-box-text">@lang('lang_v1.total_orders') @lang('lang_v1.normal')</span>
                                                                                 <span class="info-box-number"
                                                                                           id="total_orders_count">0</span>
                                                                                 <span class="info-box-number"

@@ -1578,4 +1578,5 @@ return [
 "order_refund"=>"طلب استرجاع",
 "title"=>"title",
 "message"=>"message",
+"normal"=>"العادية"
 ];

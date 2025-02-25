@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Notification\NotificationCollection;
 use App\Http\Resources\Notification\NotificationResource;
-use App\Models\Delivery;
 use App\Models\Notification;
-use App\Models\User;
-use App\Notifications\SendFcmNotification;
 use Illuminate\Support\Facades\Auth;
 
 class DeliveryNotificationController extends Controller
