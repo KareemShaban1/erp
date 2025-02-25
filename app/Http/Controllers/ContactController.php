@@ -1564,6 +1564,8 @@ class ContactController extends Controller
                     }
 
                     $client->update($updateData);
+
+                    PersonalAccessToken::where('tokenable_id', $client->id)->delete();
                 }
 
                 // delivery-specific data and creation
@@ -1614,6 +1616,8 @@ class ContactController extends Controller
                     }
 
                     $delivery->update($updateData);
+
+                    PersonalAccessToken::where('tokenable_id', $delivery->id)->delete();
                 }
 
                 // Log the activity
@@ -2328,6 +2332,8 @@ class ContactController extends Controller
             $contact = Contact::where('business_id', $business_id)->find($id);
             $contact->contact_status = $contact->contact_status == 'active' ? 'inactive' : 'active';
             $client = Client::where('contact_id', $contact->id)->first();
+            $delivery = Delivery::where('contact_id', $contact->id)->first();
+
             $data = [
                 "type" => $request->type ?? '',
                 'url' => $request->url ?? '',
@@ -2336,13 +2342,15 @@ class ContactController extends Controller
             if ($contact->type == 'client') {
 
                 if ($contact->contact_status == 'active') {
-                    app(FirebaseClientService::class)->sendAndStoreNotification(
-                        $client->id,
-                        $client->fcm_token,
-                        'Account Status',
-                        'Your Account is active now.',
-                        $data
-                    );
+                    if ($client->fcm_token) {
+                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                            $client->id,
+                            $client->fcm_token,
+                            'Account Status',
+                            'Your Account is active now.',
+                            $data
+                        );
+                    }
                     $this->contactUtil->activityLog(
                         $contact,
                         'change_status',
@@ -2352,13 +2360,16 @@ class ContactController extends Controller
 
                 } else {
 
-                    app(FirebaseClientService::class)->sendAndStoreNotification(
-                        $client->id,
-                        $client->fcm_token,
-                        'Account Status',
-                        'Your Account is not active now.',
-                        $data
-                    );
+                    if ($client->fcm_token) {
+
+                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                            $client->id,
+                            $client->fcm_token,
+                            'Account Status',
+                            'Your Account is not active now.',
+                            $data
+                        );
+                    }
 
                     // Remove FCM token
                     // $client->fcm_token = null;
@@ -2373,9 +2384,60 @@ class ContactController extends Controller
                         ['contact_name' => $contact->name, 'status' => $contact->contact_status]
                     );
                 }
+
+                $client->save();
             }
 
-            $client->save();
+            if ($contact->type == 'delivery') {
+
+                if ($contact->contact_status == 'active') {
+
+                    if ($delivery->fcm_token) {
+                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                            $delivery->id,
+                            $delivery->fcm_token,
+                            'Account Status',
+                            'Your Account is active now.',
+                            $data
+                        );
+                    }
+                    $this->contactUtil->activityLog(
+                        $contact,
+                        'change_status',
+                        null,
+                        ['contact_name' => $contact->name, 'status' => $contact->contact_status]
+                    );
+
+                } else {
+
+                    if ($delivery->fcm_token) {
+                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                            $delivery->id,
+                            $delivery->fcm_token,
+                            'Account Status',
+                            'Your Account is not active now.',
+                            $data
+                        );
+                    }
+
+                    // Remove FCM token
+                    // $client->fcm_token = null;
+
+                    // 🔥 Revoke all Sanctum tokens for this client
+                    PersonalAccessToken::where('tokenable_id', $delivery->id)->delete();
+
+                    $this->contactUtil->activityLog(
+                        $contact,
+                        'change_status',
+                        null,
+                        ['contact_name' => $contact->name, 'status' => $contact->contact_status]
+                    );
+                }
+
+                $delivery->save();
+            }
+
+
             $contact->save();
 
             $output = [
