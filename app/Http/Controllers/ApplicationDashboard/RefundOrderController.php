@@ -112,7 +112,7 @@ class RefundOrderController extends Controller
                 'orders.shipping_cost',
                 'orders.sub_total',
                 'orders.total',
-                'orders.users',
+                'orders.user_id',
                 'orders.created_at'
             ])
             ->where('orders.order_type', 'order_refund');
