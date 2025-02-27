@@ -104,10 +104,21 @@ class OrderController extends Controller
                 'orders.shipping_cost',
                 'orders.sub_total',
                 'orders.total',
+                'orders.user_id',
                 'orders.created_at'
             ])
-            ->where('orders.order_type', 'order')
-            ->latest();
+            ->where('orders.order_type', 'order');
+
+        // Check if user_id is not null before filtering by Auth user
+        if (Auth::check()) {
+            $query->where(function ($subQuery) {
+                $subQuery->whereNull('orders.user_id') // Allow orders where user_id is null
+                    ->orWhere('orders.user_id', Auth::user()->id); // Also include orders assigned to the user
+            });
+        }
+
+        $query = $query->latest();
+
 
         // Apply filters as before
         if ($status !== 'all') {
@@ -384,7 +395,6 @@ class OrderController extends Controller
 
         try {
             $order = Order::findOrFail($orderId);
-            $order->order_status = $status;
 
             // Check if an OrderTracking already exists for the order
             $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
@@ -403,6 +413,7 @@ class OrderController extends Controller
                     break;
 
                 case 'processing':
+                    $order->user_id = Auth::user()->id;
                     $orderTracking->processing_at = now();
                     // Send and store push notification
                     app(FirebaseClientService::class)->sendAndStoreNotification(
@@ -422,6 +433,7 @@ class OrderController extends Controller
                     break;
 
                 case 'shipped':
+                    $order->user_id = Auth::user()->id;
                     if ($delivery) {
                         $this->updateDeliveryBalance($order, $delivery);
                     }
@@ -453,7 +465,9 @@ class OrderController extends Controller
                         'order_id' => $order->id,
                         'reason' => 'erp cancellation'
                     ];
+                    if($order->order_status === 'pending' || $order->order_status === 'processing'){
                     $this->orderCancellationService->makeOrderCancellation($cancellationData);
+                    }
                     break;
 
                 case 'completed':
@@ -480,6 +494,7 @@ class OrderController extends Controller
             }
 
             // Save the order and tracking record (it will either update or create)
+            $order->order_status = $status;
             $order->save();
             $orderTracking->save();
 
@@ -781,14 +796,14 @@ class OrderController extends Controller
             // ->where('order_status', 'completed')
             ->count();
         $totalOrdersAmount = (clone $baseQuery)
-            ->where('order_type','order')
+            ->where('order_type', 'order')
             // ->where('order_status', 'completed')
             ->sum('total');
 
         // Get total orders count and total amount (completed orders)
         $totalCompletedPaidOrdersCount = (clone $baseQuery)->
             where('order_status', 'completed')
-            ->where('order_type',  'order')
+            ->where('order_type', 'order')
             ->where('payment_status', 'paid')
             ->count();
         $totalCompletedPaidOrdersAmount = (clone $baseQuery)->

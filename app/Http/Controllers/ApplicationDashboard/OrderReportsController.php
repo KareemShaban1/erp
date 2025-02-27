@@ -126,7 +126,13 @@ class OrderReportsController extends Controller
     
         // Apply filters
         if ($startDate && $endDate) {
-            $ordersQuery->whereBetween('created_at', [$startDate, $endDate]);
+            if ($startDate === $endDate) {
+                // Filter for a single day
+                $ordersQuery->whereDate('created_at', $startDate);
+            } else {
+                // Filter for a range of dates
+                $ordersQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
         }
         if ($orderType && $orderType !== 'all') {
             $ordersQuery->where('order_type', $orderType);

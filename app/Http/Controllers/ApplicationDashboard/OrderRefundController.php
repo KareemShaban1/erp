@@ -68,7 +68,13 @@ class OrderRefundController extends Controller
     {
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = OrderRefund::with(['client.contact:id,name', 'order:id,number,order_status', 'order_item.product:id,name','order_item.variation:id,name', 'order_item'])  // Added product relationship
+        $query = OrderRefund::with([
+            'client.contact:id,name',
+            'order:id,number,order_status',
+            'order_item.product:id,name',
+            'order_item.variation:id,name',
+            'order_item'
+        ])
             ->select(['id', 'order_id', 'client_id', 'order_item_id', 'status', 'refund_status', 'amount', 'created_at'])
             ->latest();
 
@@ -87,10 +93,8 @@ class OrderRefundController extends Controller
         // Apply date filter
         if ($startDate && $endDate) {
             if ($startDate === $endDate) {
-                // Filter for a single day
                 $query->whereDate('created_at', $startDate);
             } else {
-                // Filter for a range of dates
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
         }
@@ -100,11 +104,10 @@ class OrderRefundController extends Controller
             $query->where(function ($query) use ($search) {
                 $query->where('id', 'like', "%$search%")
                     ->orWhere('status', 'like', "%$search%")
-                    ->orWhereHas('order', function ($query) use ($search) {
-                        $query->where('number', 'like', "%$search%");
-                    })
-                    ->orWhereHas('client.contact', function ($query) use ($search) {
-                        $query->where('name', 'like', "%$search%");
+                    ->orWhereHas('order_item.product', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })->orWhereHas('client.contact', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
                     });
             });
         }
@@ -112,26 +115,49 @@ class OrderRefundController extends Controller
         return $this->formatDatatableResponse($query);
     }
 
+
     /**
      * Format the response for DataTables.
      */
     private function formatDatatableResponse($query)
-    {
-        return Datatables::of($query)
-            ->addColumn('client_contact_name', function ($orderRefund) {
-                return optional($orderRefund->client->contact)->name ?? 'N/A';
-            })
-            ->addColumn('order_number', function ($orderRefund) {
-                return optional($orderRefund->order)->number ?? 'N/A';
-            })
-            ->addColumn('order_status', function ($orderRefund) {
-                return optional($orderRefund->order)->order_status ?? 'N/A';
-            })
-            ->addColumn('order_item', function ($orderRefund) {
-                return $orderRefund->order_item;
-            })
-            ->make(true);
-    }
+{
+    return Datatables::of($query)
+        ->addColumn('client_contact_name', function ($orderRefund) {
+            return optional($orderRefund->client->contact)->name ?? 'N/A';
+        })
+        ->addColumn('order_number', function ($orderRefund) {
+            return optional($orderRefund->order)->number ?? 'N/A';
+        })
+        ->addColumn('order_status', function ($orderRefund) {
+            return optional($orderRefund->order)->order_status ?? 'N/A';
+        })
+        ->addColumn('order_item', function ($orderRefund) {
+            return $orderRefund->order_item;
+        })
+
+        // Filter by client contact name
+        ->filterColumn('client_contact_name', function ($query, $keyword) {
+            $query->whereHas('client.contact', function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%");
+            });
+        })
+
+        // Filter by order number
+        ->filterColumn('order_number', function ($query, $keyword) {
+            $query->whereHas('order', function ($q) use ($keyword) {
+                $q->where('number', 'like', "%{$keyword}%");
+            });
+        })
+
+        // Filter by product name
+        ->filterColumn('order_item', function ($query, $keyword) {
+            $query->whereHas('order_item.product', function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%");
+            });
+        })
+
+        ->make(true);
+}
 
     // public function changeOrderRefundStatus($orderRefundId)
     // {
@@ -243,7 +269,7 @@ class OrderRefundController extends Controller
             // Rollback the transaction in case of an error
             DB::rollBack();
 
-            \Log::info('change order refund status',[$e]);
+            \Log::info('change order refund status', [$e]);
 
             return response()->json(['success' => false, 'message' => 'Failed to update order refund status.', 'error' => $e->getMessage()], 500);
         }

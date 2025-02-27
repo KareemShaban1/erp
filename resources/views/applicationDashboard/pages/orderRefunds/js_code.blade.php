@@ -16,6 +16,7 @@ $(document).ready(function(){
     var order_refunds_table = $('#order_refunds_table').DataTable({
         processing: true,
         serverSide: true,
+        
         ajax: {
             url: '{{ action("ApplicationDashboard\OrderRefundController@index") }}',
             data: function (d) {
@@ -24,13 +25,6 @@ $(document).ready(function(){
                 d.end_date = $('#end_date').val();
             }
         },
-        columnDefs: [
-            {
-                targets: 2,
-                orderable: false,
-                searchable: false,
-            },
-        ],
         columns: [
             { data: 'id', name: 'id' },
             { data: 'order_number', name: 'order.number' },
@@ -51,11 +45,12 @@ $(document).ready(function(){
                     }
                     
                     return 'N/A'; // If parsing fails or the required data is missing, return 'N/A'
-                }
+                },
+                searchable:true,
             },
 
 
-            { data: 'client_contact_name', name: 'client_contact_name' }, // Ensure this matches the added column name
+            { data: 'client_contact_name', name: 'client_contact_name',searchable:true, }, // Ensure this matches the added column name
             {
     data: 'status', 
     name: 'status', 

@@ -24,7 +24,8 @@ class SuggestionProductController extends Controller
                     'contacts.name as client_name',
                     'contacts.mobile as client_phone',
                     'business_locations.name as client_location'
-                );
+                )
+                ->latest();
     
             // Handle date filtering
             $startDate = request()->get('start_date');

@@ -86,7 +86,7 @@ class ApplicationSettingsController extends Controller
 
         $request->validate([
             'key' => 'required|string|unique:application_settings,key,' . $applicationSetting->id,
-            'type' => 'required|in:string,boolean,text,integer,float,json',
+            'type' => 'sometimes|in:string,boolean,text,integer,float,json',
             'value' => 'nullable',
             'group' => 'nullable|string',
         ]);

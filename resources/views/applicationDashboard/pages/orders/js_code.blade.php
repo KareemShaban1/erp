@@ -77,6 +77,7 @@
                             return `<span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>`;
                         }
 
+
                         // Otherwise, display both the badge and the select dropdown
                         if (data !== 'shipped' || data !== 'completed' || data !== 'cancelled') {
                             return `
@@ -84,6 +85,7 @@
                         <select class="form-control change-order-status" data-order-id="${row.id}">
                             <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>`;
                         }
 
@@ -576,7 +578,7 @@
         });
 
 
-        
+
         // handle 'View Order Info' button
         $(document).on('click', '.view-order-info-btn', function () {
             var orderId = $(this).data('order-id'); // Get the order ID

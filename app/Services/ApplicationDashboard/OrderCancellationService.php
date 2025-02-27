@@ -165,8 +165,14 @@ class OrderCancellationService extends BaseService
                               return new OrderCancellationResource($orderCancellation);
 
                     } catch (\Exception $e) {
-                              // Handle any unexpected exceptions
+                              \Log::error('Error in makeOrderCancellation', [
+                                        'error' => $e->getMessage(),
+                                        'stack_trace' => $e->getTraceAsString(),
+                                        'data' => $data
+                              ]);
+
                               return $this->handleException($e, __('message.Error occurred while storing OrderCancellation'));
                     }
+
           }
 }

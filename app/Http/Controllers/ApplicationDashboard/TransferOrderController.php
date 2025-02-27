@@ -11,8 +11,10 @@ use App\Models\Order;
 use App\Models\OrderRefund;
 use App\Models\OrderTransfer;
 use App\Models\OrderTracking;
+use App\Models\Transaction;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
+use App\Utils\TransactionUtil;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,15 +31,19 @@ class TransferOrderController extends Controller
      */
     protected $moduleUtil;
 
+    protected $transactionUtil;
+
+
     /**
      * Constructor
      *
      * @param ProductUtils $product
      * @return void
      */
-    public function __construct(ModuleUtil $moduleUtil)
+    public function __construct(ModuleUtil $moduleUtil, TransactionUtil $transactionUtil)
     {
         $this->moduleUtil = $moduleUtil;
+        $this->transactionUtil = $transactionUtil;
     }
 
     public function index()
@@ -74,10 +80,9 @@ class TransferOrderController extends Controller
      */
     private function fetchOrders($status, $startDate = null, $endDate = null, $search = null, $businessLocation = null, $deliveryName = null, $paymentStatus = null)
     {
-        $business_id = request()->session()->get('user.business_id');
         $user_locations = Auth::user()->permitted_locations();
 
-        $query = Order::with(['client.contact', 'businessLocation','parentOrder'])
+        $query = Order::with(['client.contact', 'businessLocation', 'parentOrder'])
             ->select([
                 'orders.id',
                 'orders.parent_order_id',
@@ -91,10 +96,20 @@ class TransferOrderController extends Controller
                 'orders.shipping_cost',
                 'orders.sub_total',
                 'orders.total',
+                'orders.user_id',
                 'orders.created_at'
             ])
-            ->where('orders.order_type', 'order_transfer')
-            ->latest();
+            ->where('orders.order_type', 'order_transfer');
+        // ->latest();
+
+        if (Auth::check()) {
+            $query->where(function ($subQuery) {
+                $subQuery->whereNull('orders.user_id') // Allow orders where user_id is null
+                    ->orWhere('orders.user_id', Auth::user()->id); // Also include orders assigned to the user
+            });
+        }
+
+        $query = $query->latest();
 
         // Apply status filter
         if ($status !== 'all') {
@@ -241,6 +256,7 @@ class TransferOrderController extends Controller
                 );
                 break;
             case 'processing':
+                $order->user_id = Auth::user()->id;
                 $orderTracking->processing_at = now();
                 // Send and store push notification
                 app(FirebaseClientService::class)->sendAndStoreNotification(
@@ -346,6 +362,37 @@ class TransferOrderController extends Controller
                 );
                 break;
             case 'paid':
+
+                $sell_transfer = Transaction::
+                    where('transfer_type', 'application_transfer')
+                    ->where('type', 'sell_transfer')
+                    ->where('order_id', $order->id)
+                    ->with(['sell_lines', 'sell_lines.product'])
+                    ->first();
+
+                $purchase_transfer = Transaction::
+                    where('transfer_type', 'application_transfer')
+                    ->where('type', 'purchase_transfer')
+                    ->where('order_id', $order->id)
+                    ->with(['purchase_lines'])
+                    ->first();
+
+                if ($sell_transfer && $purchase_transfer) {
+                    $business = [
+                        'id' => $order->client->contact->business_id,
+                        'accounting_method' => 'fifo',
+                        'location_id' => $sell_transfer->location_id
+                    ];
+
+                    $this->transactionUtil->mapPurchaseSell($business, $sell_transfer->sell_lines, 'purchase');
+
+                    $purchase_transfer->status = 'received';
+                    $purchase_transfer->save();
+                    $sell_transfer->status = 'final';
+                    $sell_transfer->save();
+                }
+
+
                 if ($deliveryOrder) {
                     $deliveryOrder->payment_status = 'paid';
                     $deliveryOrder->save();

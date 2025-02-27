@@ -10,14 +10,14 @@
 
 <!-- Main content -->
 <section class="content">
-    @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.application_settings')])
+    @component('components.widget', ['class' => 'box-primary'])
     @slot('tool')
     <div class="box-tools">
         <button class="btn btn-primary" id="createSettingButton" data-toggle="modal"
-            data-target="#createSettingModal">{{ __('lang_v1.add_new_settings')}}</button>
+            data-target="#createSettingModal">{{ __('lang_v1.add_new_settings')}}
+        </button>
     </div>
     @endslot
-    <div class="container">
         <div class="table-responsive">
             <table class="table mt-4" id="settings_table">
                 <thead>
@@ -54,7 +54,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
     @endcomponent
 </section>
 
@@ -328,10 +327,10 @@
                 'transfer_order_shipping_cost','customer_service_phone','customer_service_whatsapp'];
                 if (readonlyKeys.includes(setting.key)) {
                     $('#editKey').prop('readonly', true);
-                    $('#editType').prop('disabled', true);
+                    // $('#editType').prop('disabled', true);
                 } else {
                     $('#editKey').prop('readonly', false);
-                    $('#editType').prop('disabled', false);
+                    // $('#editType').prop('disabled', false);
                 }
 
                 if (setting.type === 'boolean') {

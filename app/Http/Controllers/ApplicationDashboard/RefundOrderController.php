@@ -112,10 +112,20 @@ class RefundOrderController extends Controller
                 'orders.shipping_cost',
                 'orders.sub_total',
                 'orders.total',
+                'orders.users',
                 'orders.created_at'
             ])
-            ->where('orders.order_type', 'order_refund')
-            ->latest();
+            ->where('orders.order_type', 'order_refund');
+        // ->latest();
+
+        if (Auth::check()) {
+            $query->where(function ($subQuery) {
+                $subQuery->whereNull('orders.user_id') // Allow orders where user_id is null
+                    ->orWhere('orders.user_id', Auth::user()->id); // Also include orders assigned to the user
+            });
+        }
+
+        $query = $query->latest();
 
         // Apply status filter
         if ($status !== 'all') {
@@ -271,6 +281,7 @@ class RefundOrderController extends Controller
                 );
                 break;
             case 'processing':
+                $order->user_id = Auth::user()->id;
                 $orderTracking->processing_at = now();
                 // Send and store push notification
                 app(FirebaseClientService::class)->sendAndStoreNotification(
@@ -415,7 +426,7 @@ class RefundOrderController extends Controller
 
         // If transaction is null, do not change status
         if (!$transaction) {
-            \Log::info('transaction_error',[$transaction]);
+            \Log::info('transaction_error', [$transaction]);
             return response()->json([
                 'success' => false,
                 'message' => 'Transaction not found. Payment status was not updated.'
