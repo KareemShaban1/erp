@@ -33,7 +33,7 @@ class ApplicationNotificationsController extends Controller
                 ->addColumn(
                     'action',
                     '
-                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\ApplicationNotificationsController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_notification_button">
+                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\ApplicationNotificationsController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_notifications_button">
                     <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
                 '
                 )
