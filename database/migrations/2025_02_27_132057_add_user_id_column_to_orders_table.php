@@ -13,18 +13,14 @@ class AddUserIdColumnToOrdersTable extends Migration
     public function up()
     {
         Schema::table('orders', function (Blueprint $table) {
-            // Ensure the users table exists before adding a foreign key
             if (!Schema::hasColumn('orders', 'user_id')) {
-                // Add user_id column first
-                $table->unsignedBigInteger('user_id')->nullable()->after('number');
-
-                // Then define the foreign key
+                $table->unsignedInteger('user_id')->nullable()->after('number');
                 $table->foreign('user_id')
-                    ->references('id')
-                    ->on('users')
-                    ->onDelete('SET NULL'); // Fix syntax issue
+                    ->references('id')->on('users')
+                    ->onDelete('set null'); // Fixed case sensitivity issue
             }
         });
+
     }
 
     /**
