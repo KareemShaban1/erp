@@ -405,6 +405,12 @@ class DataController extends Controller
                 'label' => __('essentials::lang.view_message'),
                 'default' => false
             ],
+            [
+                'value' => 'essentials.view_all_orders',
+                'label' => __('essentials::lang.view_all_orders'),
+                'default' => false
+            ],
+
 
         ];
     }

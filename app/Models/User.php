@@ -6,7 +6,7 @@ use DB;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Passport\HasApiTokens;
@@ -270,6 +270,15 @@ class User extends Authenticatable
 
         return (boolean)$user->selected_contacts;
     }
+
+    public function isSuperAdmin(){
+        $user = Auth::user();
+        $administrator_list = config('constants.administrator_usernames');
+        return in_array($user->username, explode(',', $administrator_list));
+
+    }
+
+
 
     public function getRoleNameAttribute()
     {

@@ -100,7 +100,6 @@ class TransferOrderController extends Controller
                 'orders.created_at'
             ])
             ->where('orders.order_type', 'order_transfer');
-        // ->latest();
 
         if (Auth::check()) {
             $query->where(function ($subQuery) {
