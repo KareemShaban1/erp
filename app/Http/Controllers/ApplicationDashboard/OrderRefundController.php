@@ -120,44 +120,44 @@ class OrderRefundController extends Controller
      * Format the response for DataTables.
      */
     private function formatDatatableResponse($query)
-{
-    return Datatables::of($query)
-        ->addColumn('client_contact_name', function ($orderRefund) {
-            return optional($orderRefund->client->contact)->name ?? 'N/A';
-        })
-        ->addColumn('order_number', function ($orderRefund) {
-            return optional($orderRefund->order)->number ?? 'N/A';
-        })
-        ->addColumn('order_status', function ($orderRefund) {
-            return optional($orderRefund->order)->order_status ?? 'N/A';
-        })
-        ->addColumn('order_item', function ($orderRefund) {
-            return $orderRefund->order_item;
-        })
+    {
+        return Datatables::of($query)
+            ->addColumn('client_contact_name', function ($orderRefund) {
+                return optional($orderRefund->client->contact)->name ?? 'N/A';
+            })
+            ->addColumn('order_number', function ($orderRefund) {
+                return optional($orderRefund->order)->number ?? 'N/A';
+            })
+            ->addColumn('order_status', function ($orderRefund) {
+                return optional($orderRefund->order)->order_status ?? 'N/A';
+            })
+            ->addColumn('order_item', function ($orderRefund) {
+                return $orderRefund->order_item;
+            })
 
-        // Filter by client contact name
-        ->filterColumn('client_contact_name', function ($query, $keyword) {
-            $query->whereHas('client.contact', function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%");
-            });
-        })
+            // Filter by client contact name
+            ->filterColumn('client_contact_name', function ($query, $keyword) {
+                $query->whereHas('client.contact', function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%");
+                });
+            })
 
-        // Filter by order number
-        ->filterColumn('order_number', function ($query, $keyword) {
-            $query->whereHas('order', function ($q) use ($keyword) {
-                $q->where('number', 'like', "%{$keyword}%");
-            });
-        })
+            // Filter by order number
+            ->filterColumn('order_number', function ($query, $keyword) {
+                $query->whereHas('order', function ($q) use ($keyword) {
+                    $q->where('number', 'like', "%{$keyword}%");
+                });
+            })
 
-        // Filter by product name
-        ->filterColumn('order_item', function ($query, $keyword) {
-            $query->whereHas('order_item.product', function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%");
-            });
-        })
+            // Filter by product name
+            ->filterColumn('order_item', function ($query, $keyword) {
+                $query->whereHas('order_item.product', function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%");
+                });
+            })
 
-        ->make(true);
-}
+            ->make(true);
+    }
 
     // public function changeOrderRefundStatus($orderRefundId)
     // {
@@ -296,6 +296,24 @@ class OrderRefundController extends Controller
         ]);
 
         $parentOrder = Order::findOrFail($data['order_id']);
+        if ($parentOrder) {
+            foreach ($parentOrder->orderItems as $item) {
+                // Check if there are any records in the order_refund table for this order item
+                $refunds = OrderRefund::where('order_item_id', $item->id)->get();
+
+                $refund_amount = $refunds->sum('amount') ?? 0;
+                // Calculate the remaining quantity
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+
+                // If remaining quantity is 0 or less, return an error response
+                if ($item->remaining_quantity <= 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => __('Refund not possible: Item ID ') . $item->id . __(' has no remaining refundable quantity.'),
+                    ], 400);
+                }
+            }
+        }
 
         // Use a transaction to ensure atomicity
         DB::beginTransaction();
@@ -306,8 +324,10 @@ class OrderRefundController extends Controller
 
             // Handle status-specific logic for each refund
             foreach ($orderRefunds as $orderRefund) {
-                $this->handleRefundStatus($orderRefund, $parentOrder, $data['items']);
+                $this->handleRefundStatus($orderRefund, $parentOrder);
             }
+            $this->orderService->storeRefundOrder($parentOrder, $data['items']);
+
 
             DB::commit();
 
@@ -346,7 +366,7 @@ class OrderRefundController extends Controller
         return $refunds;
     }
 
-    private function handleRefundStatus($orderRefund, $parentOrder, $items)
+    private function handleRefundStatus($orderRefund, $parentOrder)
     {
         switch ($orderRefund->status) {
             case 'requested':
@@ -362,7 +382,6 @@ class OrderRefundController extends Controller
             case 'approved':
                 $orderRefund->update(['processed_at' => now()]);
                 $this->logAndNotify($orderRefund, $parentOrder, 'approved');
-                $this->orderService->storeRefundOrder($parentOrder, $items);
                 break;
 
             case 'rejected':

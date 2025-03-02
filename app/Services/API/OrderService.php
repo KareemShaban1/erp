@@ -341,7 +341,7 @@ class OrderService extends BaseService
 
             $refundAmount = $itemsWithRefund[$orderItem->id]['refund_amount'];
 
-            OrderItem::create([
+            $newOrderItem = OrderItem::create([
                 'order_id' => $orderId,
                 'product_id' => $orderItem->product_id,
                 'variation_id' => $orderItem->variation_id,
@@ -350,6 +350,7 @@ class OrderService extends BaseService
                 'discount' => $orderItem->discount ?? 0,
                 'sub_total' => $refundAmount * $orderItem->price,
             ]);
+            \Log::info('newOrderItem',[$newOrderItem]);
         }
     }
 
@@ -472,6 +473,7 @@ class OrderService extends BaseService
                 ->value('value') ?? 0;
 
             if ($existRefundOrder) {
+                \Log::info('existRefundOrder',[$existRefundOrder]);
                 $this->createRefundOrderItems($existRefundOrder->id, $orderItems, $itemsWithRefund);
 
                 $existRefundOrder->sub_total += $subTotal;
@@ -495,6 +497,9 @@ class OrderService extends BaseService
                     $orderItems->whereIn('id', $itemsWithRefund->keys()), // Filter to only refund items
                     $itemsWithRefund
                 );
+                \Log::info('newRefundOrder',[$newRefundOrder]);
+
+
 
                 $admins = $this->moduleUtil->get_admins($client->contact->business_id);
                 $users = $this->moduleUtil->getBusinessUsers($client->contact->business_id, $newRefundOrder);
