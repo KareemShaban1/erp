@@ -307,7 +307,7 @@ class OrderRefundController extends Controller
             }
         
             // Sum previous refunds for this item
-            $totalRefundedQuantity = OrderRefund::where('order_item_id', $item->id)->sum('quantity') ?? 0;
+            $totalRefundedQuantity = OrderRefund::where('order_item_id', $item->id)->sum('amount') ?? 0;
         
             // Calculate remaining refundable quantity
             $remainingQuantity = $item->quantity - $totalRefundedQuantity;
