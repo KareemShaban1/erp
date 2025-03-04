@@ -296,22 +296,28 @@ class OrderRefundController extends Controller
         ]);
 
         $parentOrder = Order::findOrFail($data['order_id']);
-        if ($parentOrder) {
-            foreach ($parentOrder->orderItems as $item) {
-                // Check if there are any records in the order_refund table for this order item
-                $refunds = OrderRefund::where('order_item_id', $item->id)->get();
-
-                $refund_amount = $refunds->sum('amount') ?? 0;
-                // Calculate the remaining quantity
-                $item->remaining_quantity = $item->quantity - $refund_amount;
-
-                // If remaining quantity is 0 or less, return an error response
-                if ($item->remaining_quantity <= 0) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => __('Refund not possible: Item ID ') . $item->id . __(' has no remaining refundable quantity.'),
-                    ], 400);
-                }
+        foreach ($data['items'] as $refund) {
+            $item = $parentOrder->orderItems->where('id', $refund['id'])->first();
+        
+            if (!$item) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Order item ID ') . $refund['id'] . __(' not found in the order.'),
+                ], 400);
+            }
+        
+            // Sum previous refunds for this item
+            $totalRefundedQuantity = OrderRefund::where('order_item_id', $item->id)->sum('quantity') ?? 0;
+        
+            // Calculate remaining refundable quantity
+            $remainingQuantity = $item->quantity - $totalRefundedQuantity;
+        
+            // Validate if the requested refund amount exceeds remaining quantity
+            if ($refund['refund_amount'] > $remainingQuantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Refund not possible: Item ID ') . $item->id . __(' has only ') . $remainingQuantity . __(' refundable quantity left.'),
+                ], 400);
             }
         }
 
