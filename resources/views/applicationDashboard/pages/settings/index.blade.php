@@ -276,7 +276,7 @@
                 $('#editType').val(setting.type);
                  // Check if the key is in the predefined array
                  const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'
-                        , 'order_message_today', 'order_message_tomorrow',
+                        , 'order_message_today', 'order_message_tomorrow','shipping_cost_status',
                         'order_shipping_cost', 'refund_order_shipping_cost',
                         'transfer_order_shipping_cost', 'customer_service_phone', 'customer_service_whatsapp'];
                     if (readonlyKeys.includes(setting.key)) {
