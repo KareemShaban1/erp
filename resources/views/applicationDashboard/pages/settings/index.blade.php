@@ -185,7 +185,7 @@
                 e.preventDefault();
                 let id = $('#editSettingId').val();
                 $.ajax({
-                    url: `/application_settings/${id}`,
+                    url: `/applicationDashboard/settings/update/${id}`,
                     method: "PUT",
                     data: $(this).serialize(),
                     success: function (response) {
