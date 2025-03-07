@@ -185,7 +185,7 @@ Route::get('applicationDashboard/settings/show/{id}', 'ApplicationDashboard\Appl
     ->name('application_settings.show');
 Route::post('applicationDashboard/settings/store', 'ApplicationDashboard\ApplicationSettingsController@store')
     ->name('application_settings.store');
-Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
+Route::post('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
     ->name('application_settings.update');
 Route::post('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
