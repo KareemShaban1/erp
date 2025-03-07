@@ -251,7 +251,7 @@ class QuantityTransferService extends BaseService
           private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
           {
 
-                    $shippingCostStatus = ApplicationSettings::where('key', 'shipping_cost_status')->value('value');
+                    $shippingCostStatus = ApplicationSettings::where('key', 'transfer_order_shipping_cost_status')->value('value');
 
                     if (!isset($shippingCostStatus) || $shippingCostStatus) {
                               $clientShippingCost = $order->client->shipping_cost;

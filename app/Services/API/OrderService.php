@@ -127,7 +127,7 @@ class OrderService extends BaseService
             $subTotal = $carts->sum('total');
             $orderTotal = $carts->sum('total');
 
-            $shippingCostStatus = ApplicationSettings::where('key', 'shipping_cost_status')->value('value');
+            $shippingCostStatus = ApplicationSettings::where('key', 'order_shipping_cost_status')->value('value');
 
             if (!isset($shippingCostStatus) || $shippingCostStatus) {
                 $clientShippingCost = $client->shipping_cost;
@@ -389,7 +389,7 @@ class OrderService extends BaseService
                 ->whereNotIn('order_status', ['shipped', 'completed', 'cancelled'])
                 ->first();
 
-            $shippingCostStatus = ApplicationSettings::where('key', 'shipping_cost_status')->value('value');
+            $shippingCostStatus = ApplicationSettings::where('key', 'refund_order_shipping_cost_status')->value('value');
 
             if (!isset($shippingCostStatus) || $shippingCostStatus) {
                 $clientShippingCost = $client->shipping_cost;
@@ -507,7 +507,7 @@ class OrderService extends BaseService
                 // Create new refund order
                 $client = Client::findOrFail($parentOrder->client_id);
 
-                $shippingCostStatus = ApplicationSettings::where('key', 'shipping_cost_status')->value('value');
+                $shippingCostStatus = ApplicationSettings::where('key', 'refund_order_shipping_cost_status')->value('value');
 
                 if (!isset($shippingCostStatus) || $shippingCostStatus) {
                     $clientShippingCost = $client->shipping_cost;
