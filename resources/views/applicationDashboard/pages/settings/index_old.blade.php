@@ -328,10 +328,8 @@
                         'transfer_order_shipping_cost', 'customer_service_phone', 'customer_service_whatsapp'];
                     if (readonlyKeys.includes(setting.key)) {
                         $('#editKey').prop('readonly', true);
-                        // $('#editType').prop('disabled', true);
                     } else {
                         $('#editKey').prop('readonly', false);
-                        // $('#editType').prop('disabled', false);
                     }
 
                     if (setting.type === 'boolean') {

@@ -274,6 +274,16 @@
                 $('#editSettingId').val(setting.id);
                 $('#editKey').val(setting.key);
                 $('#editType').val(setting.type);
+                 // Check if the key is in the predefined array
+                 const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'
+                        , 'order_message_today', 'order_message_tomorrow',
+                        'order_shipping_cost', 'refund_order_shipping_cost',
+                        'transfer_order_shipping_cost', 'customer_service_phone', 'customer_service_whatsapp'];
+                    if (readonlyKeys.includes(setting.key)) {
+                        $('#editKey').prop('readonly', true);
+                    } else {
+                        $('#editKey').prop('readonly', false);
+                    }
                 handleInputChange(setting.type, '#editValue');
                 // Wait for the input field to be updated before setting the value
                 setTimeout(() => {
