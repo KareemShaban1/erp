@@ -1168,6 +1168,7 @@ class ContactController extends Controller
                         'client_location' => 'required|string',
                         'latitude' => 'nullable|numeric',
                         'longitude' => 'nullable|numeric',
+                        'shipping_cost'=>'nullable|numeric',
                         'client_account_status' => 'required|in:active,deleted'
                     ],
                     [
@@ -1181,6 +1182,7 @@ class ContactController extends Controller
                     ]
                 );
 
+
                 // Prepare client data and create record
                 $clientData = $request->only([
                     'client_email_address',
@@ -1189,7 +1191,8 @@ class ContactController extends Controller
                     'client_location',
                     'client_business_location_id',
                     'latitude',
-                    'longitude'
+                    'longitude',
+                    'shipping_cost'
                 ]);
                 Client::create([
                     'email_address' => $clientData['client_email_address'],
@@ -1200,6 +1203,7 @@ class ContactController extends Controller
                     'location' => $clientData['client_location'] ?? null,
                     'latitude' => $clientData['latitude'] ?? null,
                     'longitude' => $clientData['longitude'] ?? null,
+                    'shipping_cost'=>$clientData['shipping_cost'] ?? 0,
                     'account_status' => $clientData['client_account_status'] ?? null,
                 ]);
             }
@@ -1505,6 +1509,8 @@ class ContactController extends Controller
 
                 if ($request->client_customer_group_id) {
                     $input['customer_group_id'] = $request->client_customer_group_id;
+                }else {
+                    $input['customer_group_id'] = null;
                 }
                 // Update contact details
                 $output = $this->contactUtil->updateContact($input, $id, $business_id);
@@ -1519,7 +1525,8 @@ class ContactController extends Controller
                             'client_business_location_id' => 'required|integer',
                             'client_location' => 'nullable|string',
                             'client_latitude' => 'nullable|numeric',
-                            'client_longitude' => 'nullable|numeric'
+                            'client_longitude' => 'nullable|numeric',
+                            'client_shipping_cost'=> 'nullable|numeric',
                         ],
                         [
                             'client_email_address.required' => 'البريد الإلكتروني مطلوب.',
@@ -1540,11 +1547,14 @@ class ContactController extends Controller
                             'client_business_location_id',
                             'client_latitude',
                             'client_longitude',
-                            'client_account_status'
+                            'client_account_status',
+                            'client_shipping_cost',
+                            'client_shipping_cost'
                         ]
                     );
 
                     $client = Client::findOrFail($clientData['client_id']);
+
 
                     // Prepare data for client update
                     $updateData = [
@@ -1555,6 +1565,7 @@ class ContactController extends Controller
                         'location' => $clientData['client_location'] ?? null,
                         'latitude' => $clientData['client_latitude'] ?? null,
                         'longitude' => $clientData['client_longitude'] ?? null,
+                        'shipping_cost'=>$clientData['client_shipping_cost'] ?? 0,
                         'account_status' => $clientData['client_account_status'] ?? null,
                     ];
 

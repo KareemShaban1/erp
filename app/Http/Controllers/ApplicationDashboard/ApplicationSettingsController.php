@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ApplicationDashboard;
 use App\Http\Controllers\Controller;
 use App\Models\ApplicationSettings;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class ApplicationSettingsController extends Controller
 {
@@ -15,13 +16,27 @@ class ApplicationSettingsController extends Controller
     {
         if ($request->ajax()) {
             $settings = ApplicationSettings::all();
-            return response()->json($settings);
+            return DataTables::of($settings)
+            ->addColumn('actions', function ($setting) {
+                return '<button class="btn btn-info" onclick="viewSetting(' . $setting->id . ')">
+                            ' . __('lang_v1.view') . '
+                        </button>
+                        <button class="btn btn-warning" data-toggle="modal" data-target="#editSettingModal"
+                            onclick="editSetting(' . $setting->id . ')">
+                            ' . __('lang_v1.edit') . '
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteSetting(' . $setting->id . ')">
+                            ' . __('lang_v1.delete') . '
+                        </button>';
+            })
+            ->rawColumns(['actions']) // Allow rendering HTML for buttons
+                ->make(true);
         }
-    
+
         $settings = ApplicationSettings::all();
         return view('applicationDashboard.pages.settings.index', compact('settings'));
     }
-    
+
     /**
      * Show the form for creating a new setting.
      */
@@ -58,10 +73,10 @@ class ApplicationSettingsController extends Controller
 
     public function show($id)
     {
-    // Fetch the setting by ID
-    $setting = ApplicationSettings::findOrFail($id);
+        // Fetch the setting by ID
+        $setting = ApplicationSettings::findOrFail($id);
 
-    // Return the setting details as a JSON response
+        // Return the setting details as a JSON response
         return response()->json([
             'data' => $setting
         ]);
@@ -80,7 +95,7 @@ class ApplicationSettingsController extends Controller
     /**
      * Update the specified setting in storage.
      */
-    public function update(Request $request,  $id)
+    public function update(Request $request, $id)
     {
         $applicationSetting = ApplicationSettings::findOrFail($id);
 
@@ -105,7 +120,7 @@ class ApplicationSettingsController extends Controller
     /**
      * Remove the specified setting from storage.
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
         $applicationSetting = ApplicationSettings::findOrFail($id);
         $applicationSetting->delete();
@@ -130,5 +145,5 @@ class ApplicationSettingsController extends Controller
                 return $value;
         }
     }
-    
+
 }

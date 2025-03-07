@@ -1578,5 +1578,7 @@ return [
 "order_refund"=>"طلب استرجاع",
 "title"=>"title",
 "message"=>"message",
-"normal"=>"العادية"
+"normal"=>"العادية",
+"shipping_cost"=>"مصاريف الشحن",
+"Type"=>"النوع"
 ];

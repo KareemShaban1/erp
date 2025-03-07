@@ -250,12 +250,20 @@ class QuantityTransferService extends BaseService
 
           private function createTransferOrder($order, $subTotal, $fromLocationId, $toLocationId)
           {
+
+                    $shippingCostStatus = ApplicationSettings::where('key', 'shipping_cost_status')->value('value');
+
+                    if (!isset($shippingCostStatus) || $shippingCostStatus) {
+                              $clientShippingCost = $order->client->shipping_cost;
+                    } else {
+                              $clientShippingCost = 0;
+                    }
                     // Fetch transfer order shipping cost from settings
-                    $transferOrderShippingCost = ApplicationSettings::where('key', 'transfer_order_shipping_cost')
-                              ->value('value');
+                    // $transferOrderShippingCost = ApplicationSettings::where('key', 'transfer_order_shipping_cost')
+                    //           ->value('value');
 
                     // Ensure shipping cost is only added to total, not sub_total
-                    $total = $subTotal + ($transferOrderShippingCost ?? 0);
+                    $total = $subTotal + ($clientShippingCost ?? 0);
 
                     // Fetch client details
                     $client = Client::findOrFail($order->client_id);
@@ -268,7 +276,7 @@ class QuantityTransferService extends BaseService
                               'total' => $total, // Includes shipping cost
                               'payment_method' => 'Cash on delivery', // Modify as needed
                               'order_type' => 'order_transfer', // Adjust order type to reflect the transfer
-                              'shipping_cost' => $transferOrderShippingCost ?? 0,
+                              'shipping_cost' => $clientShippingCost ?? 0,
                               'business_location_id' => $client->business_location_id,
                               'from_business_location_id' => $fromLocationId,
                               'to_business_location_id' => $toLocationId

@@ -176,6 +176,7 @@ Route::resource('tags', 'ApplicationDashboard\TagController');
 
 
 // settings
+
 Route::get('applicationDashboard/settings', 'ApplicationDashboard\ApplicationSettingsController@index')
     ->name('application_settings.index');
 Route::get('applicationDashboard/settings/create', 'ApplicationDashboard\ApplicationSettingsController@create')
@@ -186,7 +187,7 @@ Route::post('applicationDashboard/settings/store', 'ApplicationDashboard\Applica
     ->name('application_settings.store');
 Route::put('applicationDashboard/settings/update/{id}', 'ApplicationDashboard\ApplicationSettingsController@update')
     ->name('application_settings.update');
-Route::delete('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
+Route::post('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\ApplicationSettingsController@destroy')
     ->name('application_settings.destroy');
 // ----------------------------------------------
 

@@ -22,7 +22,7 @@ class Client  extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = ['contact_id','business_location_id','email_address',
+    protected $fillable = ['contact_id','business_location_id','email_address','shipping_cost',
     'password','location','client_type','latitude','longitude','fcm_token','account_status'];
 
     public function business_location(){

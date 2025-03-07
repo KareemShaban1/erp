@@ -197,14 +197,14 @@
            </div>
 
            <div class="row">
-           <div class="col-md-4">
+           <div class="col-md-3">
                 <div class="form-group">
                     {!! Form::label('client_location', __( 'business.location' ) . ':') !!}
                     {!! Form::text('client_location', null, ['class' => 'form-control', 'placeholder' => __( 'business.location_placeholder' ) ]); !!}
                 </div>
             </div>
 
-            <div class="col-md-4" >
+            <div class="col-md-3" >
             <div class="form-group">
                     {!! Form::label('client_business_location_id', __('business.business_location') . ':*' ) !!}
                     <div class="input-group">
@@ -215,7 +215,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <div class="form-group">
+                    {!! Form::label('shipping_cost', __( 'lang_1.shipping_cost' ) . ':') !!}
+                    {!! Form::text('shipping_cost', null, ['class' => 'form-control', 'placeholder' => __( 'lang_1.shipping_cost' ) ]); !!}
+                </div>
+            </div>
+            <div class="col-md-3">
             <div class="form-group">
                   {!! Form::label('customer_group_id', __('lang_v1.customer_group') . ':') !!}
                   <div class="input-group">
