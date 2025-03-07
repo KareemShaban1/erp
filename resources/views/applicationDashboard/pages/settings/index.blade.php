@@ -79,7 +79,6 @@
             <div class="modal-content">
                 <form id="editSettingForm">
                     @csrf
-                    @method('PUT')
                     <input type="hidden" id="editSettingId">
                     <div class="modal-header">
                         <h5 class="modal-title">{{ __('lang_v1.edit_setting') }}</h5>
