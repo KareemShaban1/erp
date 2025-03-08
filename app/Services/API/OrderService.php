@@ -207,6 +207,7 @@ class OrderService extends BaseService
                 "tax_amount" => "0.0000",
                 "created_by" => 1,
                 'discount_amount' => 0,
+                'shipping_charges' => $order->shipping_cost,
 
             ];
             $cartsArray = $carts->map(function ($cart) {

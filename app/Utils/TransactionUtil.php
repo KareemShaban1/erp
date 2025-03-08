@@ -5651,7 +5651,8 @@ class TransactionUtil extends Util
                 'tax_amount' => $invoice_total['tax'] ?? '0.0000',
                 'total_before_tax' => $invoice_total['total_before_tax'],
                 'final_total' => $invoice_total['final_total'],
-                'transaction_date' => $input['transaction_date']
+                'transaction_date' => $input['transaction_date'],
+                'shipping_charges'=>$input['shipping_charges'],
             ];
 
             // if (!empty($input['transaction_date'])) {

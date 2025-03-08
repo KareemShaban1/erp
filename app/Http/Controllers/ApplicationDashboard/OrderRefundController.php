@@ -298,20 +298,20 @@ class OrderRefundController extends Controller
         $parentOrder = Order::findOrFail($data['order_id']);
         foreach ($data['items'] as $refund) {
             $item = $parentOrder->orderItems->where('id', $refund['id'])->first();
-        
+
             if (!$item) {
                 return response()->json([
                     'success' => false,
                     'message' => __('Order item ID ') . $refund['id'] . __(' not found in the order.'),
                 ], 400);
             }
-        
+
             // Sum previous refunds for this item
             $totalRefundedQuantity = OrderRefund::where('order_item_id', $item->id)->sum('amount') ?? 0;
-        
+
             // Calculate remaining refundable quantity
             $remainingQuantity = $item->quantity - $totalRefundedQuantity;
-        
+
             // Validate if the requested refund amount exceeds remaining quantity
             if ($refund['refund_amount'] > $remainingQuantity) {
                 return response()->json([
