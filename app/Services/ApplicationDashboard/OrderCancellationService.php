@@ -67,7 +67,7 @@ class OrderCancellationService extends BaseService
                                         ->get();
 
                               // Check if the order status allows cancellation
-                              if (in_array($order->order_status, ['pending'])) {
+                              if (in_array($order->order_status, ['pending' , 'processing'])) {
                                         // Set order status to 'cancelled' and save
                                         $order->order_status = 'cancelled';
                                         $order->payment_status = 'failed';
