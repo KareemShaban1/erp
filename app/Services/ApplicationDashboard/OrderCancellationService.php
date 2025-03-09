@@ -51,6 +51,8 @@ class OrderCancellationService extends BaseService
                     $data['status'] = 'approved';
                     $data['requested_at'] = now();
 
+                    \Log::info('data',[$data]);
+
                     try {
                               // Find the order by ID and ensure it exists
                               $order = Order::find($data['order_id']);
