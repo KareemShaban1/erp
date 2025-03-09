@@ -471,12 +471,11 @@ class OrderController extends Controller
                         'order_id' => $order->id,
                         'reason' => 'erp cancellation'
                     ];
-                    \Log::info('cancellation_data',[$cancellationData]);
-                    $this->orderCancellationService->makeOrderCancellation($cancellationData);
+                    // $this->orderCancellationService->makeOrderCancellation($cancellationData);
 
-                    // if ($order->order_status === 'pending' || $order->order_status === 'processing') {
-                    //     $this->orderCancellationService->makeOrderCancellation($cancellationData);
-                    // }
+                    if ($order->order_status === 'pending' || $order->order_status === 'processing') {
+                        $this->orderCancellationService->makeOrderCancellation($cancellationData);
+                    }
                     break;
 
                 case 'completed':
