@@ -156,6 +156,11 @@
                 selector: 'textarea#createValue',
                 height: 250
             });
+
+            function updateTinyMCE() {
+    tinymce.triggerSave();
+}
+
             settingsTable = $('#settings_table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -168,6 +173,7 @@
             });
             $('#createSettingForm').submit(function (e) {
                 e.preventDefault();
+                updateTinyMCE(); // Ensure TinyMCE content is saved
                 $.ajax({
                     url: "{{ route('application_settings.store') }}",
                     method: "POST",
@@ -187,6 +193,7 @@
 
             $('#editSettingForm').submit(function (e) {
                 e.preventDefault();
+                updateTinyMCE(); // Ensure TinyMCE content is saved
                 let id = $('#editSettingId').val();
                 $.ajax({
                     url: `/applicationDashboard/settings/update/${id}`,
@@ -234,85 +241,85 @@
         }
 
         // Function to handle input change based on type
-       // Function to handle input change based on type
-function handleInputChange(type, inputSelector, value = '') {
-    let inputField = $(inputSelector);
-    let inputId = inputField.attr('id');
+        // Function to handle input change based on type
+        function handleInputChange(type, inputSelector, value = '') {
+            let inputField = $(inputSelector);
+            let inputId = inputField.attr('id');
 
-    // Remove TinyMCE instance if it exists
-    if (tinymce.get(inputId)) {
-        tinymce.get(inputId).remove();
-    }
+            // Remove TinyMCE instance if it exists
+            if (tinymce.get(inputId)) {
+                tinymce.get(inputId).remove();
+            }
 
-    let newElement = '';
+            let newElement = '';
 
-    if (type === 'boolean') {
-        newElement = `
-            <select name="value" id="${inputId}" class="form-control">
-                <option value="true" ${value == 'true' ? 'selected' : ''}>True</option>
-                <option value="false" ${value == 'false' ? 'selected' : ''}>False</option>
-            </select>
-        `;
-    } else if (type === 'text' || type === 'json') {
-        newElement = `
-            <textarea name="value" id="${inputId}" class="form-control" rows="4">${value}</textarea>
-        `;
-    } else if (type === 'integer' || type === 'float') {
-        newElement = `
-            <input type="number" step="${type === 'float' ? '0.01' : '1'}" 
-                name="value" id="${inputId}" class="form-control" value="${value}">
-        `;
-    } else {
-        newElement = `
-            <input type="text" name="value" id="${inputId}" class="form-control" value="${value}">
-        `;
-    }
+            if (type === 'boolean') {
+                newElement = `
+                <select name="value" id="${inputId}" class="form-control">
+                    <option value="true" ${value == 'true' ? 'selected' : ''}>True</option>
+                    <option value="false" ${value == 'false' ? 'selected' : ''}>False</option>
+                </select>
+            `;
+            } else if (type === 'text' || type === 'json') {
+                newElement = `
+                <textarea name="value" id="${inputId}" class="form-control" rows="4">${value}</textarea>
+            `;
+            } else if (type === 'integer' || type === 'float') {
+                newElement = `
+                <input type="number" step="${type === 'float' ? '0.01' : '1'}" 
+                    name="value" id="${inputId}" class="form-control" value="${value}">
+            `;
+            } else {
+                newElement = `
+                <input type="text" name="value" id="${inputId}" class="form-control" value="${value}">
+            `;
+            }
 
-    // Replace existing element and set the new one
-    inputField.replaceWith(newElement);
+            // Replace existing element and set the new one
+            inputField.replaceWith(newElement);
 
-    // If it's a textarea, reinitialize TinyMCE
-    if (type === 'text' || type === 'json') {
-        setTimeout(() => {
-            tinymce.init({
-                selector: `#${inputId}`,
-                height: 250
+            // If it's a textarea, reinitialize TinyMCE
+            if (type === 'text' || type === 'json') {
+                setTimeout(() => {
+                    tinymce.init({
+                        selector: `#${inputId}`,
+                        height: 250
+                    });
+                }, 100);
+            }
+        }
+
+        // Handle input change in Create Modal
+        $('#createType').change(function () {
+            handleInputChange($(this).val(), '#createValue');
+        });
+
+        // Handle input change in Edit Modal
+        $('#editType').change(function () {
+            handleInputChange($(this).val(), '#editValue');
+        });
+
+        // Pre-fill edit modal dynamically
+        function editSetting(id) {
+            $.get(`/applicationDashboard/settings/show/${id}`, function (response) {
+                const setting = response.data;
+
+                $('#editSettingId').val(setting.id);
+                $('#editKey').val(setting.key);
+                $('#editType').val(setting.type);
+
+                // Readonly keys logic
+                const readonlyKeys = [
+                    'policy', 'terms', 'contact', 'order_message_today', 'order_message_tomorrow',
+                    'order_shipping_cost_status', 'refund_order_shipping_cost_status',
+                    'transfer_order_shipping_cost_status', 'customer_service_phone', 'customer_service_whatsapp'
+                ];
+                $('#editKey').prop('readonly', readonlyKeys.includes(setting.key));
+
+                // Call handleInputChange with the correct value
+                handleInputChange(setting.type, '#editValue', setting.value);
             });
-        }, 100);
-    }
-}
-
-// Handle input change in Create Modal
-$('#createType').change(function () {
-    handleInputChange($(this).val(), '#createValue');
-});
-
-// Handle input change in Edit Modal
-$('#editType').change(function () {
-    handleInputChange($(this).val(), '#editValue');
-});
-
-// Pre-fill edit modal dynamically
-function editSetting(id) {
-    $.get(`/applicationDashboard/settings/show/${id}`, function (response) {
-        const setting = response.data;
-
-        $('#editSettingId').val(setting.id);
-        $('#editKey').val(setting.key);
-        $('#editType').val(setting.type);
-
-        // Readonly keys logic
-        const readonlyKeys = [
-            'policy', 'terms', 'contact', 'order_message_today', 'order_message_tomorrow', 
-            'order_shipping_cost_status', 'refund_order_shipping_cost_status', 
-            'transfer_order_shipping_cost_status', 'customer_service_phone', 'customer_service_whatsapp'
-        ];
-        $('#editKey').prop('readonly', readonlyKeys.includes(setting.key));
-
-        // Call handleInputChange with the correct value
-        handleInputChange(setting.type, '#editValue', setting.value);
-    });
-}
+        }
 
         function viewSetting(id) {
             $.ajax({
