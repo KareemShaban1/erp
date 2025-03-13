@@ -34,7 +34,15 @@ class CaptureClientData
             ]
         ]);
 
-        \Log::info('client_data',[$request]);
+        $clientData = [
+            'client_data' => [
+                'ip' => $ip,
+                'user_agent' => $userAgent,
+                'location' => $location
+            ]
+        ];
+
+        \Log::info('client_data',[$clientData]);
 
         return $next($request);
     
