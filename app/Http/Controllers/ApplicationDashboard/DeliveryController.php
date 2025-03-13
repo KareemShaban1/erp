@@ -30,6 +30,9 @@ class DeliveryController extends Controller
             ->where('business_location_id', $order->business_location_id)
             // Uncomment the where clause if you want to filter by availability status
             ->where('status', 'available')
+            ->whereHas('contact',function($query){
+                $query->where('contact_status','active');
+            })
             ->get();
 
         // Format the data to include contact name

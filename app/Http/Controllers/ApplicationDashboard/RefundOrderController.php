@@ -258,8 +258,7 @@ class RefundOrderController extends Controller
 
         $order = Order::findOrFail($orderId);
 
-        $order->order_status = $status;
-        $order->save();
+
 
         // Check if an OrderTracking already exists for the order
         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
@@ -383,7 +382,7 @@ class RefundOrderController extends Controller
                     "tax_id" => null,
                     "tax_amount" => "0",
                     "tax_percent" => "0",
-                    'shipping_charges'=>$order->shipping_cost,
+                    // 'shipping_charges'=>$order->shipping_cost,
                 ];
 
                 \Log::info('sale_refund_data', [$input]);
@@ -399,6 +398,8 @@ class RefundOrderController extends Controller
                 throw new \InvalidArgumentException("Invalid status: $status");
         }
 
+        $order->order_status = $status;
+        $order->save();
         // Save the order tracking record (it will either update or create)
         $orderTracking->save();
 
@@ -495,10 +496,8 @@ class RefundOrderController extends Controller
 
     public function getOrderRefundDetails($orderId)
     {
-
         // Fetch activity logs related to the order
         $activityLogs = Activity::with(['subject'])
-            // ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
             ->leftJoin('users as u', function ($join) {
                 $join->on('u.id', '=', 'activity_log.causer_id')
                     ->where('activity_log.causer_type', '=', 'App\Models\User');
@@ -520,13 +519,13 @@ class RefundOrderController extends Controller
             ->select(
                 'activity_log.*',
                 DB::raw("
-            CASE 
-                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
-                WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
-                WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
-                ELSE 'Unknown'
-            END as created_by
-        ")
+                CASE 
+                    WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                    WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                    WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
+                    ELSE 'Unknown'
+                END as created_by
+            ")
             )
             ->get();
 
@@ -539,31 +538,45 @@ class RefundOrderController extends Controller
             'transaction'
         ])->find($orderId);
 
-        if ($order) {
-            // Iterate through each order item and check for refund details
-            foreach ($order->orderItems as $item) {
-                // Check if there are any records in the order_refund table for this order item
-                $refund = OrderRefund::where('order_item_id', $item->id)->get();
-
-                $refund_amount = $refund->sum('amount') ?? 0;
-                // Calculate the difference between the order item quantity and the refunded amount
-                $item->remaining_quantity = $item->quantity - $refund_amount;
-            }
-
-            // Return the order details and activity logs
+        if (!$order) {
             return response()->json([
-                'success' => true,
-                'order' => $order,
-                'activityLogs' => $activityLogs,
+                'success' => false,
+                'message' => 'Order not found'
             ]);
         }
+        $parentOrder = Order::find($order->parent_order_id);
 
-        // If the order is not found
+
+        $refunds = []; // Array to store all refund details
+
+        // Iterate through each order item and check for refund details
+        foreach ($parentOrder->orderItems as $item) {
+            // Get refunds for this order item
+            $itemRefunds = OrderRefund::
+            with('order_item')->
+            where('order_item_id', $item->id)->get();
+
+            // Sum up the refund amounts
+            $refundAmount = $itemRefunds->sum('amount') ?? 0;
+
+            // Calculate the remaining quantity
+            $item->remaining_quantity = $item->quantity - $refundAmount;
+
+
+            // Store refund details in the array
+            if ($itemRefunds->isNotEmpty()) {
+                $refunds = array_merge($refunds, $itemRefunds->toArray());
+            }
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'Order not found'
+            'success' => true,
+            'order' => $order,
+            'refunds' => $refunds,
+            'activityLogs' => $activityLogs,
         ]);
     }
+
 
 
 

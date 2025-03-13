@@ -1427,22 +1427,22 @@ return [
 "order_added_successfully"=>"تم اضافة الطلب بنجاح",
 
 "new_order_notification"=>"أشعار طلب جديد",
-"new_order_notification" => ":client تم طلب أوردر بواسطة. رقم الطلب - <i>:order_number </i>",
+"new_order_notification" => " تم طلب أوردر بواسطة.  :client <br> <i> رقم الطلب :order_number </i>",
 
 "new_cancellation_order_notification"=>"أشعار ألغاء طلب جديد",
-"new_cancellation_order_notification" => ":client تم ألغاء أوردر بواسطة. رقم الطلب - <i>:order_number </i>",
+"new_cancellation_order_notification" => " تم ألغاء أوردر بواسطة  :client <br> <i> رقم الطلب :order_number </i>",
 
 "new_refund_order_notification"=>"أشعار طلب استرجاع جديد",
-"new_refund_order_notification" => ":client تم طلب أوردر أسترجاع بواسطة. رقم طلب الأسترجاع - <i>:order_number </i>",
+"new_refund_order_notification" => " تم طلب أوردر أسترجاع بواسطة :client <br> <i> رقم طلب الأسترجاع :order_number </i>",
 
 "new_transfer_order_notification"=>"أشعار طلب تحويل جديد",
-"new_transfer_order_notification" => ":client تم طلب أوردر تحويل بواسطة. رقم طلب التحويل - <i>:order_number </i>",
+"new_transfer_order_notification" => " تم طلب أوردر تحويل بواسطة :client <br> <i> رقم طلب التحويل :order_number </i>",
 
 // new_order_refund_notification
 
 
 "new_order_refund_notification"=>"أشعار طلب تحويل جديد",
-"new_order_refund_notification" => ":client تم طلب أوردر تحويل بواسطة. رقم طلب الأسترجاع - <i>:order_number - حالة الاسترجاع :refund_status</i>",
+"new_order_refund_notification" => "تم طلب أوردر تحويل بواسطة :client <i> رقم طلب الأسترجاع :order_number - حالة الاسترجاع :refund_status</i>",
 
 
 "delivery_name"=>"أسم الدليفرى",
@@ -1559,6 +1559,7 @@ return [
 "net_total"=>"صافي الإجمالي (بعد خصم طلبات الأسترجاع)",
 "view_orders_statistics"=>"عرض احصائيات الطلبات",
 "refund_reasons"=>"أسباب و حالات الاسترجاع",
+"cancellation_reason"=>"سبب الألغاء",
 "paid_orders"=>"الطلبات المدفوعه",
 "pending_paid_orders"=>"الطلبات معلقة الدفع",
 "failed_paid_orders"=>"الطلبات غير المدفوعة",

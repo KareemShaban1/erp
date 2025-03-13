@@ -118,6 +118,17 @@
 
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>@lang('lang_v1.cancellation_reason'):</label>
+                                        <p id="cancellation_reason">
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
 

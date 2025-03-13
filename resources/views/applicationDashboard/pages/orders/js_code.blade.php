@@ -1,6 +1,8 @@
 <script>
     $(document).ready(function () {
 
+        var userPermissions = @json(auth()->user()->getAllPermissions()->pluck('name'));
+            var isSuperAdmin = @json(auth()->user()->isSuperAdmin());
         $('#filter_date').click(function () {
             orders_table.ajax.reload(); // Reload DataTable with the new date filters
         });
@@ -55,6 +57,13 @@
                     data: 'client_contact_name', name: 'client_contact_name', orderable: true,
                     searchable: true
                 }, // Ensure this matches the added column name
+                {
+                    data: 'client_address',
+                    name: 'client_address',
+                    orderable: false,
+                    searchable: false
+                    
+                },
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
 
@@ -85,14 +94,13 @@
                         <select class="form-control change-order-status" data-order-id="${row.id}">
                             <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                            <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                        </select>`;
+                            `;
+                            if (userPermissions.includes('order_cancellation.view') || isSuperAdmin) {
+                            `<option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>`
+                            }
+                            `</select>`;
                         }
-
-
-                        // <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
-                        //     <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                        //     <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        
                     }
                 },
 
@@ -606,6 +614,8 @@
                         $('#order_type').text(response.order.order_type);
                         $('#order_date').text(orderDate);
                         $('#invoice_no').text(response.order.transaction?.invoice_no);
+                        $('#cancellation_reason').text(response.order.order_cancellation?.reason);
+                        console.log(response.order , response.order.order_cancellation)
 
 
 

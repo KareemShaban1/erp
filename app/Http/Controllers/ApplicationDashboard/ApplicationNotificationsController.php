@@ -30,13 +30,19 @@ class ApplicationNotificationsController extends Controller
                     return $item->client->contact->name ?? '';
 
                 })
-                ->addColumn(
-                    'action',
-                    '
-                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\ApplicationNotificationsController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_notifications_button">
-                    <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                '
-                )
+                ->addColumn('action', function ($row) {
+                    $user = auth()->user();
+                    $buttons = '';
+
+                    // Check if the user has permission to delete
+                    if ($user->can('notifications.delete')) {
+                        $buttons .= '<button data-href="' . action('\App\Http\Controllers\ApplicationDashboard\ApplicationNotificationsController@destroy', [$row->id]) . '" 
+                                     class="btn btn-xs btn-danger delete_notifications_button">
+                                     <i class="glyphicon glyphicon-trash"></i> ' . __("messages.delete") . '</button>';
+                    }
+            
+                    return $buttons;
+                })
                 ->rawColumns(['action'])
                 ->make(true);
         }

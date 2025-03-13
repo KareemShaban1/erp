@@ -162,9 +162,6 @@ class ApplicationSidebarMenu
                 $menu->dropdown(
                     __('lang_v1.tags'),
                     function ($sub) {
-
-
-
                         $sub->url(
                             action('ApplicationDashboard\TagController@index'),
                             __('lang_v1.tags'),
@@ -174,8 +171,8 @@ class ApplicationSidebarMenu
                     ['icon' => 'fa fa-flag']
                 )->order(21);
             }
-            if (auth()->user()->can('orders.view') || auth()->user()->can('orders_refund.view') || auth()->user()->can('orders_transfer.view')) {
 
+            if (auth()->user()->can('orders.view') || auth()->user()->can('orders_refund.view') || auth()->user()->can('orders_transfer.view')) {
                 $menu->dropdown(
                     __('lang_v1.orders'),
                     function ($sub) {
@@ -228,8 +225,7 @@ class ApplicationSidebarMenu
             //     )->order(23);
             // }
 
-            if (auth()->user()->can('orders_refund.view')) {
-
+            if (auth()->user()->can('refund_reasons.view')) {
                 $menu->url(
                     route('order-refunds.index'),
                     __('lang_v1.refund_reasons'),
@@ -274,8 +270,8 @@ class ApplicationSidebarMenu
 
             }
 
-            // <i class="fa-solid fa-magnifying-glass"></i>
 
+            if (auth()->user()->can('product_suggestions.view')) {
             $menu->url(
                 action('ApplicationDashboard\SuggestionProductController@index'),
                 __('lang_v1.suggestion_products'),
@@ -284,7 +280,7 @@ class ApplicationSidebarMenu
                     'active' => request()->segment(1)
                 ]
             )->order(80);
-
+            }
 
             if (auth()->user()->can('applicationSettings.view')) {
 

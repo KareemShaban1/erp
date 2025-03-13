@@ -201,6 +201,18 @@ class OrderController extends Controller
                     return 'Error';
                 }
             })
+            ->addColumn('client_address', function ($order) {
+                try {
+                    if ($order->client) {
+                        return $order->client->location ?? 'N/A';
+                    }
+                    return 'N/A';
+                } catch (\Exception $e) {
+                    \Log::error('Error getting client contact name: ' . $e->getMessage());
+                    return 'Error';
+                }
+            })
+            
             ->addColumn('client_contact_mobile', function ($order) {
                 try {
                     if ($order->client && $order->client->contact) {
@@ -626,6 +638,7 @@ class OrderController extends Controller
         $order = Order::with([
             'client.contact',
             'businessLocation',
+            'orderCancellation',
             'orderItems',
             'delivery',
             'transaction' => function ($query) {

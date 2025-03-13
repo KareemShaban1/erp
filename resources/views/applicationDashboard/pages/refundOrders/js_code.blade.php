@@ -326,6 +326,24 @@
                         });
 
 
+                          // Populate the order items
+                          const refundsTable = $('#order_refunds_table tbody');
+                          refundsTable.empty(); // Clear existing rows
+
+                        response.refunds.forEach(item => {
+                            const row = `
+                        <tr>
+                            <td><img src="${item.order_item.product.image_url}" alt="${item.order_item.product.name}" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                            <td>${item.order_item.product.name}  - [${item.order_item.variation.name} ]</td>
+                            <td>${item.reason}</td>
+                            <td>${item.admin_response}</td>
+                            <td>${item.refund_status}</td>
+                        </tr>
+                    `;
+                    refundsTable.append(row);
+                        });
+
+
                         // Populate the order items
                         const activityLogsTable = $('#activity_logs_table tbody');
                         activityLogsTable.empty(); // Clear existing rows

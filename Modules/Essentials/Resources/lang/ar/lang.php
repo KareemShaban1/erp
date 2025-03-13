@@ -313,7 +313,7 @@ return[
 "delete_leave"=>"حذف الأجازة",
 
 "new_client_notification" => ":client_name تم تسجيل عميل جديد بأسم <br> البرد الألكترونى - :client_email",
-
+"new_product_suggestion_notification" => "تم أضافة مقترح منتجات بواسطة :client",
 "expense"=>"مصروف",
 "view_all_orders"=>"عرض كل الطلبات",
 ""=>"",

@@ -1100,6 +1100,40 @@ class Util
     }
 
 
+    public function getBusinessUsersFromClient($business_id, $client)
+    {
+        // Extract the business location ID from the order
+        $business_location_id = $client->business_location_id;
+
+        // Fetch all roles
+        $roles = Role::pluck('name')->toArray();
+
+        $users = User::where('business_id', $business_id)
+            ->whereHas('roles', function ($query) use ($roles, $business_id) {
+                // Exclude Admin roles specific to this business
+                $query->where('name', '!=', 'Admin#' . $business_id)
+                    ->orWhere(function ($roleQuery) use ($roles, $business_id) {
+                    foreach ($roles as $role) {
+                        $roleQuery->orWhere('name', $business_id . '#' . $role);
+                    }
+                });
+            })
+            ->where(function ($query) use ($business_location_id) {
+                $query->whereHas('permissions', function ($permissionQuery) use ($business_location_id) {
+                    // Ensure the user's permissions match the specific location
+                    $permissionQuery->where('name', 'location.' . $business_location_id);
+                })
+                ->orWhere(function ($query) {
+                    // Include users with access to all locations
+                    $query->whereHas('permissions', function ($permissionQuery) {
+                        $permissionQuery->where('name', 'access_all_locations');
+                    });
+                });
+            })
+            ->get();
+
+        return $users;
+    }
 
 
 

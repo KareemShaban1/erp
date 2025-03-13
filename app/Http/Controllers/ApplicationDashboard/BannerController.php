@@ -44,17 +44,26 @@ class BannerController extends Controller
                 select(['id', 'name','image', 'business_id', 'active']);
 
             return Datatables::of($banners)
-            ->addColumn(
-                'action',
-                '
-                <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\BannerController@edit\', [$id]) }}" class="btn btn-xs btn-primary edit_banner_button">
-                <i class="glyphicon glyphicon-edit"></i>  @lang("messages.edit")</button>
-                    &nbsp;
-                
-                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\BannerController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_banner_button">
-                    <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                '
-            )
+            ->addColumn('action', function ($row) {
+                $user = auth()->user();
+                $buttons = '';
+        
+                // Check if the user has permission to edit
+                if ($user->can('banners.update')) {
+                    $buttons .= '<button data-href="' . action('\App\Http\Controllers\ApplicationDashboard\BannerController@edit', [$row->id]) . '" 
+                                 class="btn btn-xs btn-primary edit_banner_button">
+                                 <i class="glyphicon glyphicon-edit"></i> ' . __("messages.edit") . '</button> &nbsp;';
+                }
+        
+                // Check if the user has permission to delete
+                if ($user->can('banners.delete')) {
+                    $buttons .= '<button data-href="' . action('\App\Http\Controllers\ApplicationDashboard\BannerController@destroy', [$row->id]) . '" 
+                                 class="btn btn-xs btn-danger delete_banner_button">
+                                 <i class="glyphicon glyphicon-trash"></i> ' . __("messages.delete") . '</button>';
+                }
+        
+                return $buttons;
+            })
             ->editColumn('image', function ($row) {
                 return '<div style="display: flex;"><img src="' . $row->image_url . '" alt="Product image" class="product-thumbnail-small"></div>';
             })

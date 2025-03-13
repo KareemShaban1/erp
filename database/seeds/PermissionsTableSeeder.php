@@ -304,6 +304,20 @@ class PermissionsTableSeeder extends Seeder
             ['name' => 'tags.update'],
             ['name' => 'tags.delete'],
 
+            ['name' => 'notifications.view'],
+            ['name' => 'notifications.create'],
+            ['name' => 'notifications.delete'],
+
+            ['name' => 'refund_reasons.view'],
+            ['name' => 'refund_reasons.create'],
+            ['name' => 'refund_reasons.update'],
+            ['name' => 'refund_reasons.delete'],
+
+            ['name' => 'order_reports.view'],
+            ['name' => 'product_suggestions.view'],
+            ['name' => 'order_cancellation.view'],
+
+
         ];
 
         foreach ($data as $d) {

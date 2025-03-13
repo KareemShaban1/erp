@@ -25,7 +25,8 @@ class OrderRefund extends Model
     }
 
     public function order_item(){
-        return $this->belongsTo(OrderItem::class,'order_item_id');
+        return $this->belongsTo(OrderItem::class,'order_item_id')
+        ->with('product','variation');
     }
 
 }

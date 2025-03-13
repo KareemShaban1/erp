@@ -43,17 +43,27 @@ class TagController extends Controller
                 select(['id', 'name', 'active']);
 
             return Datatables::of($tags)
-                ->addColumn(
-                    'action',
-                    '
-                <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\TagController@edit\', [$id]) }}" class="btn btn-xs btn-primary edit_tag_button">
-                <i class="glyphicon glyphicon-edit"></i>  @lang("messages.edit")</button>
-                    &nbsp;
-                
-                    <button data-href="{{ action(\'\\App\\Http\\Controllers\\ApplicationDashboard\\TagController@destroy\', [$id]) }}" class="btn btn-xs btn-danger delete_tag_button">
-                    <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                '
-                )
+
+                ->addColumn('action', function ($row) {
+                    $user = auth()->user();
+                    $buttons = '';
+
+                    // Check if the user has permission to edit
+                    if ($user->can('tags.update')) {
+                        $buttons .= '<button data-href="' . action('\App\Http\Controllers\ApplicationDashboard\TagController@edit', [$row->id]) . '" 
+                                     class="btn btn-xs btn-primary edit_tag_button">
+                                     <i class="glyphicon glyphicon-edit"></i> ' . __("messages.edit") . '</button> &nbsp;';
+                    }
+
+                    // Check if the user has permission to delete
+                    if ($user->can('tags.delete')) {
+                        $buttons .= '<button data-href="' . action('\App\Http\Controllers\ApplicationDashboard\TagController@destroy', [$row->id]) . '" 
+                                     class="btn btn-xs btn-danger delete_tag_button">
+                                     <i class="glyphicon glyphicon-trash"></i> ' . __("messages.delete") . '</button>';
+                    }
+
+                    return $buttons;
+                })
                 ->rawColumns(['action'])
                 ->make(true);
         }
@@ -168,7 +178,7 @@ class TagController extends Controller
 
         try {
             $tag = Tag::findOrFail($id); // Find the tag by ID
-            
+
             $input = $request->only(['name', 'active']);
 
             $input['active'] = $input['active'] ?? 0;
@@ -229,5 +239,5 @@ class TagController extends Controller
     }
 
 
- 
+
 }

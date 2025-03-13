@@ -146,6 +146,28 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <label>@lang('lang_v1.refund_reasons'):</label>
+                                    <table class="table table-bordered" id="order_refunds_table">
+                                        <thead>
+                                            <tr>
+                                                <th>@lang('lang_v1.image')</th>
+                                                <th>@lang('lang_v1.item_name')</th>
+                                                <th>@lang('lang_v1.reason')</th>
+                                                <th>@lang('lang_v1.admin_response')</th>
+                                                <th>@lang('lang_v1.status')</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Items will be dynamically inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label>@lang('lang_v1.activity_logs'):</label>
                                     <table class="table table-bordered" id="activity_logs_table">
                                         <thead>
