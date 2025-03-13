@@ -242,7 +242,7 @@ class DeliveryController extends Controller
                     $client->id,
                     $client->fcm_token,
                     'Order Status Updated',
-                    'Your order has been shipped successfully.',
+                    'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
                     ['order_id' => $order->id, 'status' => $status]
                 );
 
@@ -267,7 +267,7 @@ class DeliveryController extends Controller
                     $client->id,
                     $client->fcm_token,
                     'Order Status Updated',
-                    'Your order has been completed successfully.',
+                    'Your order has been completed successfully (Order ID: #' . $order->id . ').',
                     ['order_id' => $order->id, 'status' => $status]
                 );
 

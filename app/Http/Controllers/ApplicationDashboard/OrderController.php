@@ -438,7 +438,7 @@ class OrderController extends Controller
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Status Changed',
-                        'Your order has been processed successfully.',
+                        'Your order has been processed successfully (Order ID: #' . $order->id . ').',
                         [
                             'order_id' => $order->id,
                             'status' => $status
@@ -460,7 +460,7 @@ class OrderController extends Controller
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Status Changed',
-                        'Your order has been shipped successfully.',
+                        'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
                         [
                             'order_id' => $order->id,
                             'status' => $status
@@ -497,7 +497,7 @@ class OrderController extends Controller
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Status Changed',
-                        'Your order has been completed successfully.',
+                        'Your order has been completed successfully (Order ID: #' . $order->id . ').',
                         [
                             'order_id' => $order->id,
                             'status' => $status

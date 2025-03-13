@@ -88,7 +88,7 @@ class DeliveryController extends Controller
             $delivery_order->delivery->id,
             $delivery_order->delivery->fcm_token,
             'Order Assigned to you',
-            'There is an order assigned to you.',
+            'There is an order assigned to you (Order ID: #' . $order->id . ').',
             [
                 'order_id' => $order->id
             ]

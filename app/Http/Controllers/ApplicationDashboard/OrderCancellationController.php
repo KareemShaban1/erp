@@ -255,7 +255,7 @@ class OrderCancellationController extends Controller
                         $order->client->id,
                         $order->client->fcm_token,
                         'Order Cancellation Admin Response',
-                        'Your order has been shipped successfully.',
+                        'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
                         [
                             'order_id' => $order->id,
                             'order_cancellation_id' => $orderCancellation->id,
