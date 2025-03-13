@@ -234,85 +234,86 @@
         }
 
         // Function to handle input change based on type
-        // Function to handle input change based on type
-        function handleInputChange(type, inputSelector) {
-            let inputField = $(inputSelector);
-            let inputId = inputField.attr('id');
+       // Function to handle input change based on type
+function handleInputChange(type, inputSelector, value = '') {
+    let inputField = $(inputSelector);
+    let inputId = inputField.attr('id');
 
-            // Remove TinyMCE instance if it exists
-            if (tinymce.get(inputId)) {
-                tinymce.get(inputId).remove();
-            }
+    // Remove TinyMCE instance if it exists
+    if (tinymce.get(inputId)) {
+        tinymce.get(inputId).remove();
+    }
 
-            if (type === 'boolean') {
-                inputField.replaceWith(`
-                <select name="value" id="${inputId}" class="form-control">
-                    <option value="true">True</option>
-                    <option value="false">False</option>
-                </select>
-            `);
-            } else if (type === 'text' || type === 'json') {
-                inputField.replaceWith(`
-                <textarea name="value" id="${inputId}" class="form-control" rows="4"></textarea>
-            `);
-                // Reinitialize TinyMCE after replacing textarea
-                setTimeout(() => {
-                    tinymce.init({
-                        selector: `textarea#${inputId}`,
-                        height: 250
-                    });
-                }, 100);
-            } else if (type === 'integer' || type === 'float') {
-                inputField.replaceWith(`
-                <input type="number" step="${type === 'float' ? '0.01' : '1'}"
-                    name="value" id="${inputId}" class="form-control">
-            `);
-            } else {
-                inputField.replaceWith(`
-                <input type="text" name="value" id="${inputId}" class="form-control">
-            `);
-            }
-        }
+    let newElement = '';
 
+    if (type === 'boolean') {
+        newElement = `
+            <select name="value" id="${inputId}" class="form-control">
+                <option value="true" ${value == 'true' ? 'selected' : ''}>True</option>
+                <option value="false" ${value == 'false' ? 'selected' : ''}>False</option>
+            </select>
+        `;
+    } else if (type === 'text' || type === 'json') {
+        newElement = `
+            <textarea name="value" id="${inputId}" class="form-control" rows="4">${value}</textarea>
+        `;
+    } else if (type === 'integer' || type === 'float') {
+        newElement = `
+            <input type="number" step="${type === 'float' ? '0.01' : '1'}" 
+                name="value" id="${inputId}" class="form-control" value="${value}">
+        `;
+    } else {
+        newElement = `
+            <input type="text" name="value" id="${inputId}" class="form-control" value="${value}">
+        `;
+    }
 
-        // Handle input change in Create Modal
-        $('#createType').change(function () {
-            handleInputChange($(this).val(), '#createValue');
-        });
+    // Replace existing element and set the new one
+    inputField.replaceWith(newElement);
 
-        // Handle input change in Edit Modal
-        $('#editType').change(function () {
-            handleInputChange($(this).val(), '#editValue');
-        });
-
-        // Pre-fill edit modal dynamically
-        function editSetting(id) {
-            $.get(`/applicationDashboard/settings/show/${id}`, function (response) {
-                const setting = response.data;
-
-                $('#editSettingId').val(setting.id);
-                $('#editKey').val(setting.key);
-                $('#editType').val(setting.type);
-                // Check if the key is in the predefined array
-                const readonlyKeys = ['policy', 'terms', 'contact'
-                    , 'order_message_today', 'order_message_tomorrow', 'order_shipping_cost_status',
-                    'refund_order_shipping_cost_status', 'transfer_order_shipping_cost_status', 'customer_service_phone', 'customer_service_whatsapp'];
-                if (readonlyKeys.includes(setting.key)) {
-                    $('#editKey').prop('readonly', true);
-                } else {
-                    $('#editKey').prop('readonly', false);
-                }
-                handleInputChange(setting.type, '#editValue');
-                // Wait for the input field to be updated before setting the value
-                setTimeout(() => {
-                    if (setting.type === 'boolean') {
-                        $('#editValue').val(setting.value == 1 ? 'true' : 'false');
-                    } else {
-                        $('#editValue').val(setting.value);
-                    }
-                }, 100);
+    // If it's a textarea, reinitialize TinyMCE
+    if (type === 'text' || type === 'json') {
+        setTimeout(() => {
+            tinymce.init({
+                selector: `#${inputId}`,
+                height: 250
             });
-        }
+        }, 100);
+    }
+}
+
+// Handle input change in Create Modal
+$('#createType').change(function () {
+    handleInputChange($(this).val(), '#createValue');
+});
+
+// Handle input change in Edit Modal
+$('#editType').change(function () {
+    handleInputChange($(this).val(), '#editValue');
+});
+
+// Pre-fill edit modal dynamically
+function editSetting(id) {
+    $.get(`/applicationDashboard/settings/show/${id}`, function (response) {
+        const setting = response.data;
+
+        $('#editSettingId').val(setting.id);
+        $('#editKey').val(setting.key);
+        $('#editType').val(setting.type);
+
+        // Readonly keys logic
+        const readonlyKeys = [
+            'policy', 'terms', 'contact', 'order_message_today', 'order_message_tomorrow', 
+            'order_shipping_cost_status', 'refund_order_shipping_cost_status', 
+            'transfer_order_shipping_cost_status', 'customer_service_phone', 'customer_service_whatsapp'
+        ];
+        $('#editKey').prop('readonly', readonlyKeys.includes(setting.key));
+
+        // Call handleInputChange with the correct value
+        handleInputChange(setting.type, '#editValue', setting.value);
+    });
+}
+
         function viewSetting(id) {
             $.ajax({
                 url: '/applicationDashboard/settings/show/' + id,
