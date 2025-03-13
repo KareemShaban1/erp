@@ -159,7 +159,8 @@ Route::get('banners', [BannerController::class, 'index']);
 Route::get('applicationSettings', [ApplicationSettingsController::class, 'index']);
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);
-Route::post('client/login', [AuthController::class, 'clientLogin']);
+Route::post('client/login', [AuthController::class, 'clientLogin'])
+->middleware(['CaptureClientData']);
 
 Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
 // sendNotification
