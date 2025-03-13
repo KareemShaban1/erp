@@ -486,12 +486,8 @@ $(document).ready(function() {
     };
     $('#upload_image').fileinput(img_fileinput_setting);
 
-    if ($('textarea#product_description').length > 0) {
-        tinymce.init({
-            selector: 'textarea#product_description',
-            height:250
-        });
-    }
+   
+
 });
 
 function toggle_dsp_input() {

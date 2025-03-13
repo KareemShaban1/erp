@@ -26,7 +26,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                   
+
                 </tbody>
             </table>
         </div>
@@ -114,8 +114,8 @@
         </div>
     </div>
 
-     <!-- View Setting Modal -->
-     <div class="modal fade" id="viewSettingModal" tabindex="-1" role="dialog" aria-labelledby="viewSettingModalLabel"
+    <!-- View Setting Modal -->
+    <div class="modal fade" id="viewSettingModal" tabindex="-1" role="dialog" aria-labelledby="viewSettingModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -127,11 +127,11 @@
                 </div>
                 <div class="modal-body">
                     <p>
-                        <strong>{{ __('lang_v1.key') }}:</strong> 
+                        <strong>{{ __('lang_v1.key') }}:</strong>
                         <span id="viewKey"></span>
                     </p>
-                    <p><strong>{{ __('lang_v1.type') }}:</strong> 
-                    <span id="viewType"></span>
+                    <p><strong>{{ __('lang_v1.type') }}:</strong>
+                        <span id="viewType"></span>
                     </p>
                     <p><strong>{{ __('lang_v1.value') }}:</strong></p>
                     <div id="viewValue" class="border p-3"></div> <!-- Display HTML content -->
@@ -151,6 +151,11 @@
         var settingsTable; // Declare it globally
 
         $(document).ready(function () {
+
+            tinymce.init({
+                selector: 'textarea#createValue',
+                height: 250
+            });
             settingsTable = $('#settings_table').DataTable({
                 processing: true,
                 serverSide: true,
@@ -229,31 +234,46 @@
         }
 
         // Function to handle input change based on type
+        // Function to handle input change based on type
         function handleInputChange(type, inputSelector) {
             let inputField = $(inputSelector);
+            let inputId = inputField.attr('id');
+
+            // Remove TinyMCE instance if it exists
+            if (tinymce.get(inputId)) {
+                tinymce.get(inputId).remove();
+            }
 
             if (type === 'boolean') {
                 inputField.replaceWith(`
-                        <select name="value" id="${inputField.attr('id')}" class="form-control">
-                            <option value="true">True</option>
-                            <option value="false">False</option>
-                        </select>
-                    `);
+                <select name="value" id="${inputId}" class="form-control">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            `);
             } else if (type === 'text' || type === 'json') {
                 inputField.replaceWith(`
-                        <textarea name="value" id="${inputField.attr('id')}" class="form-control" rows="4"></textarea>
-                    `);
+                <textarea name="value" id="${inputId}" class="form-control" rows="4"></textarea>
+            `);
+                // Reinitialize TinyMCE after replacing textarea
+                setTimeout(() => {
+                    tinymce.init({
+                        selector: `textarea#${inputId}`,
+                        height: 250
+                    });
+                }, 100);
             } else if (type === 'integer' || type === 'float') {
                 inputField.replaceWith(`
-                        <input type="number" step="${type === 'float' ? '0.01' : '1'}"
-                            name="value" id="${inputField.attr('id')}" class="form-control">
-                    `);
+                <input type="number" step="${type === 'float' ? '0.01' : '1'}"
+                    name="value" id="${inputId}" class="form-control">
+            `);
             } else {
                 inputField.replaceWith(`
-                        <input type="text" name="value" id="${inputField.attr('id')}" class="form-control">
-                    `);
+                <input type="text" name="value" id="${inputId}" class="form-control">
+            `);
             }
         }
+
 
         // Handle input change in Create Modal
         $('#createType').change(function () {
@@ -273,17 +293,15 @@
                 $('#editSettingId').val(setting.id);
                 $('#editKey').val(setting.key);
                 $('#editType').val(setting.type);
-                 // Check if the key is in the predefined array
-                 const readonlyKeys = ['privacy_policy', 'terms_conditions', 'contact_us'
-                        , 'order_message_today', 'order_message_tomorrow','order_shipping_cost_status',
-                        'refund_order_shipping_cost_status','transfer_order_shipping_cost_status',
-                        'order_shipping_cost', 'refund_order_shipping_cost',
-                        'transfer_order_shipping_cost', 'customer_service_phone', 'customer_service_whatsapp'];
-                    if (readonlyKeys.includes(setting.key)) {
-                        $('#editKey').prop('readonly', true);
-                    } else {
-                        $('#editKey').prop('readonly', false);
-                    }
+                // Check if the key is in the predefined array
+                const readonlyKeys = ['policy', 'terms', 'contact'
+                    , 'order_message_today', 'order_message_tomorrow', 'order_shipping_cost_status',
+                    'refund_order_shipping_cost_status', 'transfer_order_shipping_cost_status', 'customer_service_phone', 'customer_service_whatsapp'];
+                if (readonlyKeys.includes(setting.key)) {
+                    $('#editKey').prop('readonly', true);
+                } else {
+                    $('#editKey').prop('readonly', false);
+                }
                 handleInputChange(setting.type, '#editValue');
                 // Wait for the input field to be updated before setting the value
                 setTimeout(() => {
@@ -313,5 +331,7 @@
                 }
             });
         }
+
+
     </script>
 @endsection

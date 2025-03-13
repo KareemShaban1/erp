@@ -2778,6 +2778,9 @@ $(document).on('hidden.bs.modal', '.view_modal', function (e) {
         $('body').addClass('modal-open');
     }
 });
+
+ 
+
 $(document).on('shown.bs.modal', '.quick_add_product_modal', function (e) {
     tinymce.init({
         selector: 'textarea#product_description',
