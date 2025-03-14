@@ -23,22 +23,28 @@ class CaptureClientData
         // Get User Agent
         $userAgent = $request->header('User-Agent');
 
-        // Get Approximate Location using Google Geolocation API
         $locationResponse = Http::withHeaders([
             'Content-Type' => 'application/json'
-            ])->post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", [])->json();
+        ])->post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", [
+            'considerIp' => true,
+        ])->json();
         
+        \Log::info('locationResponse', [$locationResponse]);
         
-        \Log::info('locationResponse',[$locationResponse]);
+        if (isset($locationResponse['error'])) {
+            \Log::error('Google Geolocation API Error:', $locationResponse['error']);
+            return response()->json(['error' => 'Failed to retrieve location'], 500);
+        }
+        
         if (isset($locationResponse['location'])) {
             $lat = $locationResponse['location']['lat'];
             $lng = $locationResponse['location']['lng'];
-
+        
             // Convert Lat/Lon to Address using Google Geocoding API
             $addressResponse = Http::get("https://maps.googleapis.com/maps/api/geocode/json?latlng={$lat},{$lng}&key={$googleApiKey}")->json();
-
+        
             $formattedAddress = $addressResponse['results'][0]['formatted_address'] ?? 'Address not found';
-
+        
             // Attach user data to the request
             $request->merge([
                 'user_data' => [
@@ -49,13 +55,14 @@ class CaptureClientData
                     'address' => $formattedAddress
                 ]
             ]);
-
+        
             // Log client data
             \Log::info('Client Data:', $request->user_data);
         } else {
             \Log::error('Failed to retrieve location');
+            return response()->json(['error' => 'Failed to retrieve location'], 500);
         }
-
+        
         return $next($request);
     }
 }
