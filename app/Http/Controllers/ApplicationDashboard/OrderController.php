@@ -111,7 +111,6 @@ class OrderController extends Controller
 
         $user = Auth::user();
 
-
         if (!$user->isSuperAdmin()) {
             // If the user does not have permission to view all orders, filter by user_id
             if (!$user->hasPermissionTo('essentials.view_all_orders')) {
