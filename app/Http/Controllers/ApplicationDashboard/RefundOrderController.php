@@ -383,6 +383,8 @@ class RefundOrderController extends Controller
                     "tax_amount" => "0",
                     "tax_percent" => "0",
                     // 'shipping_charges'=>$order->shipping_cost,
+                    'shipping_charges'=>'0.00',
+
                 ];
 
                 \Log::info('sale_refund_data', [$input]);
