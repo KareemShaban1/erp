@@ -26,7 +26,7 @@ class CaptureClientData
         // Get Approximate Location using Google Geolocation API
         $locationResponse = Http::withHeaders([
             'Content-Type' => 'application/json'
-        ])->post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", []);
+        ])->post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", '{}')->json();
         
         
         \Log::info('locationResponse',[$locationResponse]);
