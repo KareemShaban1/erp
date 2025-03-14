@@ -17,16 +17,24 @@ class CaptureClientData
         // $googleApiKey = env('GOOGLE_MAP_API_KEY');
         $googleApiKey = 'AIzaSyBUK88jmlcZv3IdJlhp944cJmzkWKelqq4';
 
-        // Get User IP
-        $ip = $request->ip();
+       // Get user IP
+$ip = $request->ip();
 
-        // Get User Agent
-        $userAgent = $request->header('User-Agent');
+// Fetch location based on IP (Alternative to Google Geolocation API)
+$ipLocation = Http::get("http://ipinfo.io/{$ip}/json")->json();
 
-        // Get Approximate Location using Google Geolocation API
-        $locationResponse = Http::post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", [])->json();
+if (isset($ipLocation['loc'])) {
+    [$lat, $lng] = explode(',', $ipLocation['loc']);
+
+    // Convert lat/lon to address using Google Geocoding API
+    $addressResponse = Http::get("https://maps.googleapis.com/maps/api/geocode/json?latlng={$lat},{$lng}&key={$googleApiKey}")->json();
+    
+    $formattedAddress = $addressResponse['results'][0]['formatted_address'] ?? 'Address not found';
+
 
         \Log::info('locationResponse',[$locationResponse]);
+        \Log::info('formattedAddress',[$formattedAddress]);
+
         if (isset($locationResponse['location'])) {
             $lat = $locationResponse['location']['lat'];
             $lng = $locationResponse['location']['lng'];
