@@ -30,10 +30,7 @@ class CaptureClientData
         
         \Log::info('locationResponse', [$locationResponse]);
         
-        if (isset($locationResponse['error'])) {
-            \Log::error('Google Geolocation API Error:', $locationResponse['error']);
-            return response()->json(['error' => 'Failed to retrieve location'], 500);
-        }
+        
         
         if (isset($locationResponse['location'])) {
             $lat = $locationResponse['location']['lat'];
