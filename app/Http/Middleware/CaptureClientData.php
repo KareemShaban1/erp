@@ -16,40 +16,43 @@ class CaptureClientData
         // Get Google API Key from .env
         // $googleApiKey = env('GOOGLE_MAP_API_KEY');
         $googleApiKey = 'AIzaSyBUK88jmlcZv3IdJlhp944cJmzkWKelqq4';
-        // Get user IP
+
+        // Get User IP
         $ip = $request->ip();
 
-        // Fetch location based on IP (Alternative to Google Geolocation API)
-        $ipLocation = Http::get("http://ipinfo.io/{$ip}/json")->json();
+        // Get User Agent
+        $userAgent = $request->header('User-Agent');
 
-        if (isset($ipLocation['loc'])) {
-            // Extract lat/lng
-            [$lat, $lng] = explode(',', $ipLocation['loc']);
+        // Get Approximate Location using Google Geolocation API
+        $locationResponse = Http::post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBUK88jmlcZv3IdJlhp944cJmzkWKelqq4", [])->json();
 
-            // Convert lat/lon to address using Google Geocoding API
+        \Log::info('locationResponse',[$locationResponse]);
+        if (isset($locationResponse['location'])) {
+            $lat = $locationResponse['location']['lat'];
+            $lng = $locationResponse['location']['lng'];
+
+            // Convert Lat/Lon to Address using Google Geocoding API
             $addressResponse = Http::get("https://maps.googleapis.com/maps/api/geocode/json?latlng={$lat},{$lng}&key={$googleApiKey}")->json();
 
-            // Get formatted address or fallback to 'Address not found'
             $formattedAddress = $addressResponse['results'][0]['formatted_address'] ?? 'Address not found';
 
             // Attach user data to the request
             $request->merge([
                 'user_data' => [
                     'ip' => $ip,
-                    'user_agent' => $request->header('User-Agent'),
+                    'user_agent' => $userAgent,
                     'latitude' => $lat,
                     'longitude' => $lng,
                     'address' => $formattedAddress
                 ]
             ]);
 
-            // Log client data for debugging
+            // Log client data
             \Log::info('Client Data:', $request->user_data);
         } else {
-            \Log::error('Failed to retrieve location for IP: ' . $ip);
+            \Log::error('Failed to retrieve location');
         }
 
-        // Continue to the next middleware
         return $next($request);
     }
 }
