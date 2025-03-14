@@ -26,7 +26,7 @@ class CaptureClientData
         $locationResponse = Http::withHeaders([
             'Content-Type' => 'application/json'
         ])->post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", [
-            'considerIp' => true, // This tells the API to use the IP address for geolocation
+            'considerIp' => false, // This tells the API to use the IP address for geolocation
         ])->json();
         
         \Log::info('locationResponse', [$locationResponse]);
