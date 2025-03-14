@@ -55,15 +55,14 @@
                 { data: 'number', name: 'number' },
                 { data: 'invoice_no', name: 'invoice_no' },
                 {
-                    data: 'client_contact_name', name: 'client_contact_name', orderable: true,
+                    data: 'client_contact_name', 
+                    name: 'client_contact_name', 
+                    orderable: true,
                     searchable: true
                 }, // Ensure this matches the added column name
                 {
                     data: 'client_address',
                     name: 'client_address',
-                    orderable: false,
-                    searchable: false
-
                 },
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 

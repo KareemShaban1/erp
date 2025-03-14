@@ -167,6 +167,9 @@ class OrderController extends Controller
             $query->where(function ($query) use ($search) {
                 $query->where('orders.id', 'like', "%{$search}%")
                     ->orWhere('orders.number', 'like', "%{$search}%")
+                    ->orWhereHas('client' , function ($query) use ($search) {
+                        $query->where('clients.location', 'like', "%{$search}%");
+                    })
                     ->orWhereHas('client.contact', function ($query) use ($search) {
                         $query->where('contacts.name', 'like', "%{$search}%")
                             ->orWhere('contacts.mobile', 'like', "%{$search}%");
@@ -229,6 +232,11 @@ class OrderController extends Controller
                     $query->whereHas('contact', function ($query) use ($keyword) {
                         $query->where('contacts.name', 'like', "%{$keyword}%");
                     });
+                });
+            })
+            ->filterColumn('client_address', function ($query, $keyword) {
+                $query->whereHas('client', function ($q) use ($keyword) {
+                    $q->where('location', 'like', "%{$keyword}%");
                 });
             })
             ->filterColumn('client_contact_mobile', function ($query, $keyword) {
