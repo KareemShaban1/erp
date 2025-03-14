@@ -26,6 +26,7 @@ class CaptureClientData
         // Get Approximate Location using Google Geolocation API
         $locationResponse = Http::post("https://www.googleapis.com/geolocation/v1/geolocate?key={$googleApiKey}", [])->json();
 
+        \Log::info('locationResponse',[$locationResponse]);
         if (isset($locationResponse['location'])) {
             $lat = $locationResponse['location']['lat'];
             $lng = $locationResponse['location']['lng'];
