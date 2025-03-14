@@ -2,7 +2,8 @@
     $(document).ready(function () {
 
         var userPermissions = @json(auth()->user()->getAllPermissions()->pluck('name'));
-            var isSuperAdmin = @json(auth()->user()->isSuperAdmin());
+        var isSuperAdmin = @json(auth()->user()->isSuperAdmin());
+
         $('#filter_date').click(function () {
             orders_table.ajax.reload(); // Reload DataTable with the new date filters
         });
@@ -62,7 +63,7 @@
                     name: 'client_address',
                     orderable: false,
                     searchable: false
-                    
+
                 },
                 { data: 'client_contact_mobile', name: 'client_contact_mobile' }, // Ensure this matches the added column name
 
@@ -87,20 +88,21 @@
                         }
 
 
-                        // Otherwise, display both the badge and the select dropdown
-                        if (data !== 'shipped' || data !== 'completed' || data !== 'cancelled') {
-                            return `
-                        <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
-                        <select class="form-control change-order-status" data-order-id="${row.id}">
-                            <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
-                            <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
-                            `;
+                        if (data !== 'shipped' && data !== 'completed' && data !== 'cancelled') {
+                            let selectHtml = `
+                            <span class="${badgeClass}">${data.charAt(0).toUpperCase() + data.slice(1)}</span>
+                            <select class="form-control change-order-status" data-order-id="${row.id}">
+                                <option value="pending" ${data === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>`;
                             if (userPermissions.includes('order_cancellation.view') || isSuperAdmin) {
-                            `<option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>`
+                                selectHtml += `<option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>`;
                             }
-                            `</select>`;
+                            selectHtml += `</select>`;
+
+                            return selectHtml;
                         }
-                        
+
+
                     }
                 },
 
@@ -615,7 +617,7 @@
                         $('#order_date').text(orderDate);
                         $('#invoice_no').text(response.order.transaction?.invoice_no);
                         $('#cancellation_reason').text(response.order.order_cancellation?.reason);
-                        console.log(response.order , response.order.order_cancellation)
+                        console.log(response.order, response.order.order_cancellation)
 
 
 
