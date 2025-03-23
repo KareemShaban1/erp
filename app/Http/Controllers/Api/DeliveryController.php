@@ -97,44 +97,19 @@ class DeliveryController extends Controller
 
 
         // Apply the order type filter if necessary
-        // if ($orderType !== 'all') {
-        //     $query->where('order_type', $orderType);
-        // }
-
-        // Execute the query
-        $assignedOrders = $query->latest()->get();
-
-        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
-
-    }
-
-
-    public function DeliveryAssignedOrders($orderType){
-        $delivery = Delivery::where('id', Auth::user()->id)->first();
-
-        if (!$delivery) {
-            return response()->json(['message' => 'Delivery user not found'], 404);
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
         }
 
-        // Retrieve assigned orders based on the delivery ID in DeliveryOrder
-        $query = Order::
-            where('order_status', 'processing')->
-            whereHas('deliveries', function ($query) use ($delivery) {
-                $query->where('delivery_id', $delivery->id);
-            });
-
-
-        // Apply the order type filter if necessary
-        // if ($orderType !== 'all') {
-        //     $query->where('order_type', $orderType);
-        // }
-
         // Execute the query
         $assignedOrders = $query->latest()->get();
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
     }
+
+
+
 
     public function getDeliveryOrders($status)
     {
