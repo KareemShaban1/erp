@@ -14,11 +14,9 @@ use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Services\API\DeliveryService;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,41 +26,86 @@ use Modules\Essentials\Utils\EssentialsUtil;
 class DeliveryController extends Controller
 {
 
-    protected $service;
 
-    public function __construct(DeliveryService $service)
-    {
-        $this->service = $service;
+
+    protected $essentialsUtil;
+    protected $commonUtil;
+    protected $FirebaseClientService;
+    protected $moduleUtil;
+
+
+    public function __construct(
+        FirebaseClientService $FirebaseClientService,
+        ModuleUtil $moduleUtil,
+        EssentialsUtil $essentialsUtil,
+        Util $commonUtil
+    ) {
+        $this->FirebaseClientService = $FirebaseClientService;
+        $this->moduleUtil = $moduleUtil;
+        $this->essentialsUtil = $essentialsUtil;
+        $this->commonUtil = $commonUtil;
+
     }
 
-    public function getNotAssignedOrders(Request $request)
+    public function getNotAssignedOrders($orderType)
     {
-        $notAssignedOrders = $this->service->getNotAssignedOrders($request);
+        // Retrieve the authenticated delivery user
+        $delivery = Delivery::find(Auth::user()->id);
 
-        if ($notAssignedOrders instanceof JsonResponse) {
-            return $notAssignedOrders;
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
         }
 
-        return $notAssignedOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
-        ]);
+        // Retrieve all order IDs already assigned to the delivery user in DeliveryOrder
+        $assignedOrderIds = DeliveryOrder::where('delivery_id', $delivery->id)
+            ->pluck('order_id');
+
+        // Start building the query for unassigned orders
+        $query = Order::where('order_status', 'processing')
+            ->where('business_location_id', $delivery->business_location_id)
+            ->whereNotIn('id', $assignedOrderIds);
+
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
+        }
+
+        // Execute the query
+        $orders = $query->latest()->get();
+
+        if ($orders->isEmpty()) {
+            return $this->returnJSON([], 'No unassigned orders found for your location');
+        }
+
+        return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
     }
 
-    public function getAssignedOrders(Request $request)
+    public function getAssignedOrders($orderType)
     {
-        $assignedOrders = $this->service->getAssignedOrders($request);
+        $delivery = Delivery::where('id', Auth::user()->id)->first();
 
-        if ($assignedOrders instanceof JsonResponse) {
-            return $assignedOrders;
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
         }
 
-        return $assignedOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' =>  __('message.Assigned Orders have been retrieved successfully'),
-        ]);
+        // Retrieve assigned orders based on the delivery ID in DeliveryOrder
+        $query = Order::
+            where('order_status', 'processing')->
+            whereHas('deliveries', function ($query) use ($delivery) {
+                $query->where('delivery_id', $delivery->id);
+            });
+
+
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
+        }
+
+        // Execute the query
+        $assignedOrders = $query->latest()->get();
+
+        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+
     }
 
 
