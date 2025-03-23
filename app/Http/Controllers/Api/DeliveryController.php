@@ -82,7 +82,6 @@ class DeliveryController extends Controller
 
     public function getAssignedOrders($orderType)
     {
-        dd("test");
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
         if (!$delivery) {
