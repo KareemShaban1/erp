@@ -128,27 +128,30 @@ class DeliveryService extends BaseService
                               return response()->json(['message' => 'Delivery user not found'], 404);
                     }
 
-                    // Retrieve the status from the request, defaulting to 'all' if not provided
-                    //   $status = $request->input('status', 'all');
-
                     // Retrieve assigned orders based on the delivery ID and status
-                    $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
+                    $query = Order::whereHas('deliveries', function ($query) use ($delivery) {
                               $query->where('delivery_id', $delivery->id);
-                    });
+                    })->latest();
 
                     // Apply status filter if specified and not 'all'
                     if ($request->status !== 'all') {
-                              $assignedOrders->where('order_status', $request->status);
+                              $query->where('order_status', $request->status);
                     }
 
-                    $assignedOrders = $assignedOrders->latest()->get();
+                    // $assignedOrders = $assignedOrders->latest()->get();
 
 
                     if ($assignedOrders->isEmpty()) {
                               return $this->returnJSON([], 'No assigned orders found for you');
                     }
 
-                    return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
+                    $query = $this->withTrashed($query, $request);
+
+                    $orders = $this->withPagination($query, $request);
+
+                    return (new OrderCollection($orders))
+                              ->withFullData(!($request->full_data == 'false'));
+
 
           }
 
