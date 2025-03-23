@@ -106,7 +106,7 @@ class DeliveryController extends Controller
 
         \Log::info('delivery',[$delivery]);
         \Log::info('orderType',[$orderType]);
-        \Log::info('orders',[$orders]);
+        \Log::info('orders',[$assignedOrders]);
 
 
         if ($assignedOrders->isEmpty()) {
