@@ -104,17 +104,37 @@ class DeliveryController extends Controller
         // Execute the query
         $assignedOrders = $query->latest()->get();
 
-        // dd($assignedOrders);
-        // \Log::info('delivery',[$delivery]);
-        // \Log::info('orderType',[$orderType]);
-        // \Log::info('orders',[$assignedOrders]);
-        \Log::info('count',[$assignedOrders->count()]);
-
-
         return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
     }
 
+
+    public function DeliveryAssignedOrders($orderType){
+        $delivery = Delivery::where('id', Auth::user()->id)->first();
+
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
+        }
+
+        // Retrieve assigned orders based on the delivery ID in DeliveryOrder
+        $query = Order::
+            where('order_status', 'processing')->
+            whereHas('deliveries', function ($query) use ($delivery) {
+                $query->where('delivery_id', $delivery->id);
+            });
+
+
+        // Apply the order type filter if necessary
+        // if ($orderType !== 'all') {
+        //     $query->where('order_type', $orderType);
+        // }
+
+        // Execute the query
+        $assignedOrders = $query->latest()->get();
+
+        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+
+    }
 
     public function getDeliveryOrders($status)
     {
@@ -145,8 +165,9 @@ class DeliveryController extends Controller
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
 
-        //   return ;
     }
+
+   
 
 
     public function assignDelivery(Request $request)
