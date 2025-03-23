@@ -68,7 +68,7 @@ class ProductResource extends JsonResource
             });
 
             if ($current_stock < 0) {
-                return [];
+                return ["message"=>"current stock is < 0"];
             }
 
             $data = array_merge($data, [
