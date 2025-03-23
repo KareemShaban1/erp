@@ -140,11 +140,6 @@ class DeliveryService extends BaseService
 
                     // $assignedOrders = $assignedOrders->latest()->get();
 
-
-                    if ($assignedOrders->isEmpty()) {
-                              return $this->returnJSON([], 'No assigned orders found for you');
-                    }
-
                     $query = $this->withTrashed($query, $request);
 
                     $orders = $this->withPagination($query, $request);
