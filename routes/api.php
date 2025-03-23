@@ -119,7 +119,7 @@ Route::middleware('auth:sanctum-delivery')->group(function () {
     // getDeliveryOrders
     Route::get('getDeliveryOrders/{status}', [DeliveryController::class, 'getDeliveryOrders']);
 
-    Route::get('getAssignedOrders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
+    // Route::get('getAssignedOrders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
     
     Route::get('delivery-assigned-orders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
 
