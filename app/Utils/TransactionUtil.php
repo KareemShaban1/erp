@@ -5764,7 +5764,6 @@ class TransactionUtil extends Util
             ->where('return_parent_id', $sell->id)
             ->first();
 
-        \Log::info($invoice_total);
         $sell_return_data = [
             'invoice_no' => $input['invoice_no'] ?? null,
             'order_id' => $input['order_id'] ?? null,

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderCancellation\StoreOrderCancellationRequest;
 use App\Http\Requests\OrderCancellation\UpdateOrderCancellationRequest;
 use App\Models\OrderCancellation;
-use App\Services\API\OrderCancellationService;
+use App\Services\ApplicationDashboard\OrderCancellationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -16,10 +16,14 @@ class OrderCancellationController extends Controller
 
 
     protected $service;
+    protected $orderCancellationService;
 
-    public function __construct(OrderCancellationService $service)
+    public function __construct(OrderCancellationService $service,
+    OrderCancellationService $orderCancellationService
+    )
     {
         $this->service = $service;
+        $this->orderCancellationService = $orderCancellationService;
     }
 
     /**
@@ -76,7 +80,10 @@ class OrderCancellationController extends Controller
         $validatedData = $validator->validated();
 
         // Pass only validated data to the service
-        $OrderCancellation = $this->service->store($validatedData);
+        // $OrderCancellation = $this->service->store($validatedData);
+
+        $OrderCancellation = $this->orderCancellationService->makeOrderCancellation($validatedData);
+
 
         if ($OrderCancellation instanceof JsonResponse) {
             return $OrderCancellation;
