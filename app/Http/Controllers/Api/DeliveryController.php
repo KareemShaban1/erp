@@ -134,6 +134,7 @@ class DeliveryController extends Controller
 
         $assignedOrders = $assignedOrders->latest()->get();
 
+
         if ($assignedOrders->isEmpty()) {
             return $this->returnJSON([], 'No assigned orders found for you');
         }
