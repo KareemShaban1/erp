@@ -97,13 +97,14 @@ class DeliveryController extends Controller
 
 
         // Apply the order type filter if necessary
-        if ($orderType !== 'all') {
-            $query->where('order_type', $orderType);
-        }
+        // if ($orderType !== 'all') {
+        //     $query->where('order_type', $orderType);
+        // }
 
         // Execute the query
         $assignedOrders = $query->latest()->get();
 
+        // dd($assignedOrders);
         // \Log::info('delivery',[$delivery]);
         // \Log::info('orderType',[$orderType]);
         // \Log::info('orders',[$assignedOrders]);
@@ -112,13 +113,11 @@ class DeliveryController extends Controller
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
-
     }
 
 
     public function getDeliveryOrders($status)
     {
-        dd("test");
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
         if (!$delivery) {
@@ -141,11 +140,12 @@ class DeliveryController extends Controller
         $assignedOrders = $assignedOrders->latest()->get();
 
         if ($assignedOrders->isEmpty()) {
-            return $this->returnJSON(new OrderCollection($assignedOrders), 'No assigned orders found for you');
+            return $this->returnJSON([], 'No assigned orders found for you');
         }
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
 
+        //   return ;
     }
 
 
