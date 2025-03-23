@@ -14,11 +14,9 @@ use App\Models\Order;
 use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\User;
-use App\Services\API\DeliveryService;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,91 +26,270 @@ use Modules\Essentials\Utils\EssentialsUtil;
 class DeliveryController extends Controller
 {
 
-    protected $service;
 
-    public function __construct(DeliveryService $service)
-    {
-        $this->service = $service;
+
+    protected $essentialsUtil;
+    protected $commonUtil;
+    protected $FirebaseClientService;
+    protected $moduleUtil;
+
+
+    public function __construct(
+        FirebaseClientService $FirebaseClientService,
+        ModuleUtil $moduleUtil,
+        EssentialsUtil $essentialsUtil,
+        Util $commonUtil
+    ) {
+        $this->FirebaseClientService = $FirebaseClientService;
+        $this->moduleUtil = $moduleUtil;
+        $this->essentialsUtil = $essentialsUtil;
+        $this->commonUtil = $commonUtil;
+
     }
 
-    public function getNotAssignedOrders(Request $request)
+    public function getNotAssignedOrders($orderType)
     {
-        $notAssignedOrders = $this->service->getNotAssignedOrders($request);
+        // Retrieve the authenticated delivery user
+        $delivery = Delivery::find(Auth::user()->id);
 
-        if ($notAssignedOrders instanceof JsonResponse) {
-            return $notAssignedOrders;
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
         }
 
-        return $notAssignedOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' => __('message.Categories have been retrieved successfully'),
-        ]);
-    }
+        // Retrieve all order IDs already assigned to the delivery user in DeliveryOrder
+        $assignedOrderIds = DeliveryOrder::where('delivery_id', $delivery->id)
+            ->pluck('order_id');
 
-    public function getAssignedOrders(Request $request)
-    {
-        $assignedOrders = $this->service->getAssignedOrders($request);
+        // Start building the query for unassigned orders
+        $query = Order::where('order_status', 'processing')
+            ->where('business_location_id', $delivery->business_location_id)
+            ->whereNotIn('id', $assignedOrderIds);
 
-        if ($assignedOrders instanceof JsonResponse) {
-            return $assignedOrders;
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
         }
 
-        return $assignedOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' => __('message.Assigned Orders have been retrieved successfully'),
-        ]);
-    }
+        // Execute the query
+        $orders = $query->latest()->get();
 
-
-
-
-    public function getDeliveryOrders(Request $request)
-    {
-        $deliveryOrders = $this->service->getDeliveryOrders($request);
-
-        if ($deliveryOrders instanceof JsonResponse) {
-            return $deliveryOrders;
+        if ($orders->isEmpty()) {
+            return $this->returnJSON([], 'No unassigned orders found for your location');
         }
 
-        return $deliveryOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' => __('message.Orders have been retrieved successfully'),
-        ]);
+        return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
+    }
+
+    public function getAssignedOrders($orderType)
+    {
+        $delivery = Delivery::where('id', Auth::user()->id)->first();
+
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
+        }
+
+        // Retrieve assigned orders based on the delivery ID in DeliveryOrder
+        $query = Order::
+            where('order_status', 'processing')->
+            whereHas('deliveries', function ($query) use ($delivery) {
+                $query->where('delivery_id', $delivery->id);
+            });
+
+
+        // Apply the order type filter if necessary
+        if ($orderType !== 'all') {
+            $query->where('order_type', $orderType);
+        }
+
+        // Execute the query
+        $assignedOrders = $query->latest()->get();
+
+        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+
     }
 
 
+
+
+    public function getDeliveryOrders($status)
+    {
+        $delivery = Delivery::where('id', Auth::user()->id)->first();
+
+        if (!$delivery) {
+            return response()->json(['message' => 'Delivery user not found'], 404);
+        }
+
+        // Retrieve the status from the request, defaulting to 'all' if not provided
+        //   $status = $request->input('status', 'all');
+
+        // Retrieve assigned orders based on the delivery ID and status
+        $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
+            $query->where('delivery_id', $delivery->id);
+        });
+
+        // Apply status filter if specified and not 'all'
+        if ($status !== 'all') {
+            $assignedOrders->where('order_status', $status);
+        }
+
+        $assignedOrders = $assignedOrders->latest()->get();
+
+
+        if ($assignedOrders->isEmpty()) {
+            return $this->returnJSON([], 'No assigned orders found for you');
+        }
+
+        return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
+
+    }
+
+   
 
 
     public function assignDelivery(Request $request)
     {
-        $deliveryOrders = $this->service->assignDelivery($request);
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+        ]);
 
-        if ($deliveryOrders instanceof JsonResponse) {
-            return $deliveryOrders;
+        $deliveryId = Auth::user()->id;
+        $orderId = $request->order_id;
+
+        $order = Order::find($orderId);
+
+        // Validate the delivery ID to ensure it exists and is available
+        $delivery = Delivery::where('id', $deliveryId)
+            ->where('status', 'available')  // You can uncomment this if you need to check for an available status
+            ->first();
+
+        if (!$delivery) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or unavailable delivery selected.',
+            ], 400);
         }
 
-        return $deliveryOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' => __('message.Delivery assigned successfully to the order.'),
+        // Update the delivery status to 'assigned'
+        $delivery->status = 'not_available';
+        $delivery->save();
+
+        // Insert a record into the delivery_orders table to log this assignment
+        DeliveryOrder::create([
+            'delivery_id' => $deliveryId,
+            'order_id' => $orderId,
+            'status' => 'assigned', // The status could be 'assigned' initially
+            'assigned_at' => now(), // Timestamp of assignment
+        ]);
+
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name' => $delivery->contact->name]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Delivery assigned successfully to the order.',
         ]);
     }
 
     public function changeOrderStatus($orderId)
     {
-        $deliveryOrders = $this->service->changeOrderStatus($orderId);
+        // Define allowed statuses
+        $validStatuses = ['shipped', 'completed'];
 
-        if ($deliveryOrders instanceof JsonResponse) {
-            return $deliveryOrders;
+        // Retrieve and validate the input status
+        $status = request()->input('order_status');
+        if (!in_array($status, $validStatuses)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid status provided.',
+            ], 400);
         }
 
-        return $deliveryOrders->additional([
-            'code' => 200,
-            'status' => 'success',
-            'message' => __('message.Delivery change order status successfully.'),
+        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+
+        // Find the order or return 404 if not found
+        $order = Order::findOrFail($orderId);
+
+        $delivery = Delivery::find($deliveryOrder->delivery_id);
+
+        // Find the client
+        $client = Client::find($order->client_id);
+        if (!$client) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Client not found.',
+            ], 404);
+        }
+
+
+        // Get or create the OrderTracking record for this order
+        $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
+
+
+
+        // Update timestamps and handle specific status actions
+        switch ($status) {
+            case 'shipped':
+                if ($order->status === 'shipped') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status is already shipped',
+                    ], 404);
+                }
+                $orderTracking->shipped_at = now();
+
+                // Update delivery contact balance
+                $this->updateDeliveryBalance($order, $delivery);
+
+                // Send and store push notification
+                app(FirebaseClientService::class)->sendAndStoreNotification(
+                    $client->id,
+                    $client->fcm_token,
+                    'Order Status Updated',
+                    'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
+                    ['order_id' => $order->id, 'status' => $status]
+                );
+
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
+
+                break;
+
+            case 'completed':
+                if ($order->status === 'completed') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Status is already completed',
+                    ], 404);
+                }
+                $orderTracking->completed_at = now();
+
+                $delivery->status = 'available';
+                $delivery->save();
+
+                // Send and store push notification
+                app(FirebaseClientService::class)->sendAndStoreNotification(
+                    $client->id,
+                    $client->fcm_token,
+                    'Order Status Updated',
+                    'Your order has been completed successfully (Order ID: #' . $order->id . ').',
+                    ['order_id' => $order->id, 'status' => $status]
+                );
+
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
+
+                break;
+        }
+
+        // Update the order status
+        $order->order_status = $status;
+
+        // Save the tracking record
+        $orderTracking->save();
+
+        $order->save();
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully.',
         ]);
     }
 
