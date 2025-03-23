@@ -68,36 +68,19 @@ class DeliveryController extends Controller
 
 
 
-    public function getDeliveryOrders($status)
+    public function getDeliveryOrders(Request $request)
     {
-        $delivery = Delivery::where('id', Auth::user()->id)->first();
+        $deliveryOrders = $this->service->getDeliveryOrders($request);
 
-        if (!$delivery) {
-            return response()->json(['message' => 'Delivery user not found'], 404);
+        if ($deliveryOrders instanceof JsonResponse) {
+            return $deliveryOrders;
         }
 
-        // Retrieve the status from the request, defaulting to 'all' if not provided
-        //   $status = $request->input('status', 'all');
-
-        // Retrieve assigned orders based on the delivery ID and status
-        $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
-            $query->where('delivery_id', $delivery->id);
-        });
-
-        // Apply status filter if specified and not 'all'
-        if ($status !== 'all') {
-            $assignedOrders->where('order_status', $status);
-        }
-
-        $assignedOrders = $assignedOrders->latest()->get();
-
-
-        if ($assignedOrders->isEmpty()) {
-            return $this->returnJSON([], 'No assigned orders found for you');
-        }
-
-        return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
-
+        return $deliveryOrders->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' =>  __('message.Orders have been retrieved successfully'),
+        ]);
     }
 
    

@@ -120,7 +120,7 @@ class DeliveryService extends BaseService
 
 
 
-          public function getDeliveryOrders($status)
+          public function getDeliveryOrders($request)
           {
                     $delivery = Delivery::where('id', Auth::user()->id)->first();
 
@@ -137,8 +137,8 @@ class DeliveryService extends BaseService
                     });
 
                     // Apply status filter if specified and not 'all'
-                    if ($status !== 'all') {
-                              $assignedOrders->where('order_status', $status);
+                    if ($request->status !== 'all') {
+                              $assignedOrders->where('order_status', $request->status);
                     }
 
                     $assignedOrders = $assignedOrders->latest()->get();
