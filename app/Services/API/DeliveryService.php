@@ -4,6 +4,7 @@ namespace App\Services\API;
 
 use App\Services\BaseService;
 use App\Http\Resources\Order\OrderCollection;
+use App\Http\Resources\Order\OrderResource;
 use App\Models\Category;
 use App\Models\Client;
 use App\Models\Delivery;
@@ -181,7 +182,7 @@ class DeliveryService extends BaseService
                     $delivery->save();
 
                     // Insert a record into the delivery_orders table to log this assignment
-                    DeliveryOrder::create([
+                    $deliveryOrder = DeliveryOrder::create([
                               'delivery_id' => $deliveryId,
                               'order_id' => $orderId,
                               'status' => 'assigned', // The status could be 'assigned' initially
@@ -190,10 +191,7 @@ class DeliveryService extends BaseService
 
                     $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name' => $delivery->contact->name]);
 
-                    return response()->json([
-                              'success' => true,
-                              'message' => 'Delivery assigned successfully to the order.',
-                    ]);
+                    return $deliveryOrder;
           }
 
           public function changeOrderStatus($orderId)
@@ -294,10 +292,8 @@ class DeliveryService extends BaseService
                     $order->save();
 
 
-                    return response()->json([
-                              'success' => true,
-                              'message' => 'Order status updated successfully.',
-                    ]);
+                    return new OrderResource($order);
+
           }
 
           public function getDeliveryData()

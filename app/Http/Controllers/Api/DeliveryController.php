@@ -46,7 +46,7 @@ class DeliveryController extends Controller
         return $notAssignedOrders->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
+            'message' => __('message.Categories have been retrieved successfully'),
         ]);
     }
 
@@ -61,7 +61,7 @@ class DeliveryController extends Controller
         return $assignedOrders->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Assigned Orders have been retrieved successfully'),
+            'message' => __('message.Assigned Orders have been retrieved successfully'),
         ]);
     }
 
@@ -79,157 +79,40 @@ class DeliveryController extends Controller
         return $deliveryOrders->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Orders have been retrieved successfully'),
+            'message' => __('message.Orders have been retrieved successfully'),
         ]);
     }
 
-   
+
 
 
     public function assignDelivery(Request $request)
     {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-        ]);
+        $deliveryOrders = $this->service->assignDelivery($request);
 
-        $deliveryId = Auth::user()->id;
-        $orderId = $request->order_id;
-
-        $order = Order::find($orderId);
-
-        // Validate the delivery ID to ensure it exists and is available
-        $delivery = Delivery::where('id', $deliveryId)
-            ->where('status', 'available')  // You can uncomment this if you need to check for an available status
-            ->first();
-
-        if (!$delivery) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid or unavailable delivery selected.',
-            ], 400);
+        if ($deliveryOrders instanceof JsonResponse) {
+            return $deliveryOrders;
         }
 
-        // Update the delivery status to 'assigned'
-        $delivery->status = 'not_available';
-        $delivery->save();
-
-        // Insert a record into the delivery_orders table to log this assignment
-        DeliveryOrder::create([
-            'delivery_id' => $deliveryId,
-            'order_id' => $orderId,
-            'status' => 'assigned', // The status could be 'assigned' initially
-            'assigned_at' => now(), // Timestamp of assignment
-        ]);
-
-        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name' => $delivery->contact->name]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Delivery assigned successfully to the order.',
+        return $deliveryOrders->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => __('message.Delivery assigned successfully to the order.'),
         ]);
     }
 
     public function changeOrderStatus($orderId)
     {
-        // Define allowed statuses
-        $validStatuses = ['shipped', 'completed'];
+        $deliveryOrders = $this->service->changeOrderStatus($orderId);
 
-        // Retrieve and validate the input status
-        $status = request()->input('order_status');
-        if (!in_array($status, $validStatuses)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid status provided.',
-            ], 400);
+        if ($deliveryOrders instanceof JsonResponse) {
+            return $deliveryOrders;
         }
 
-        $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
-
-        // Find the order or return 404 if not found
-        $order = Order::findOrFail($orderId);
-
-        $delivery = Delivery::find($deliveryOrder->delivery_id);
-
-        // Find the client
-        $client = Client::find($order->client_id);
-        if (!$client) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Client not found.',
-            ], 404);
-        }
-
-
-        // Get or create the OrderTracking record for this order
-        $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
-
-
-
-        // Update timestamps and handle specific status actions
-        switch ($status) {
-            case 'shipped':
-                if ($order->status === 'shipped') {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Status is already shipped',
-                    ], 404);
-                }
-                $orderTracking->shipped_at = now();
-
-                // Update delivery contact balance
-                $this->updateDeliveryBalance($order, $delivery);
-
-                // Send and store push notification
-                app(FirebaseClientService::class)->sendAndStoreNotification(
-                    $client->id,
-                    $client->fcm_token,
-                    'Order Status Updated',
-                    'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
-                    ['order_id' => $order->id, 'status' => $status]
-                );
-
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
-
-                break;
-
-            case 'completed':
-                if ($order->status === 'completed') {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Status is already completed',
-                    ], 404);
-                }
-                $orderTracking->completed_at = now();
-
-                $delivery->status = 'available';
-                $delivery->save();
-
-                // Send and store push notification
-                app(FirebaseClientService::class)->sendAndStoreNotification(
-                    $client->id,
-                    $client->fcm_token,
-                    'Order Status Updated',
-                    'Your order has been completed successfully (Order ID: #' . $order->id . ').',
-                    ['order_id' => $order->id, 'status' => $status]
-                );
-
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
-
-                break;
-        }
-
-        // Update the order status
-        $order->order_status = $status;
-
-        // Save the tracking record
-        $orderTracking->save();
-
-        $order->save();
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Order status updated successfully.',
+        return $deliveryOrders->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => __('message.Delivery change order status successfully.'),
         ]);
     }
 

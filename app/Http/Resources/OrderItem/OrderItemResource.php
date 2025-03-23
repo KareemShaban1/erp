@@ -29,7 +29,7 @@ class OrderItemResource extends JsonResource
             $this->mergeWhen($this->withFullData, function () {
                 return [
                     'product_id'=>$this->product_id,
-                    'product'=>$this->product,
+                    'product_data'=>$this->product,
                     'product' => (new ProductResource($this->product))->withFullData(true),
                     'variation' => (new VariationResource($this->variation))->withFullData(true),
                     'quantity'=>$this->quantity,
