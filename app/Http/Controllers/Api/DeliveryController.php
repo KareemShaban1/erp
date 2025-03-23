@@ -104,19 +104,18 @@ class DeliveryController extends Controller
         // Execute the query
         $assignedOrders = $query->latest()->get();
 
-        \Log::info('delivery',[$delivery]);
-        \Log::info('orderType',[$orderType]);
-        \Log::info('orders',[$assignedOrders]);
-        \Log::info('is_empty',[$assignedOrders->isEmpty()]);
+        // \Log::info('delivery',[$delivery]);
+        // \Log::info('orderType',[$orderType]);
+        // \Log::info('orders',[$assignedOrders]);
+        \Log::info('is_empty',[$assignedOrders->count()]);
 
 
-        if ($assignedOrders->isEmpty()) {
+        if ($assignedOrders->count() === 0) {
             return $this->returnJSON([], 'No assigned orders found for you');
         }
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
-        // return ;
 
     }
 
