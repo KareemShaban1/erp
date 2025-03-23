@@ -110,9 +110,9 @@ class DeliveryController extends Controller
         \Log::info('is_empty',[$assignedOrders->count()]);
 
 
-        if ($assignedOrders->count() === 0) {
-            return $this->returnJSON([], 'No assigned orders found for you');
-        }
+        // if ($assignedOrders->count() === 0) {
+        //     return $this->returnJSON([], 'No assigned orders found for you');
+        // }
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
