@@ -82,7 +82,6 @@ class DeliveryController extends Controller
 
     public function getAssignedOrders($orderType)
     {
-        dd(Auth::user() , Auth::user()->id);
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
         if (!$delivery) {
@@ -108,11 +107,10 @@ class DeliveryController extends Controller
         // \Log::info('delivery',[$delivery]);
         // \Log::info('orderType',[$orderType]);
         // \Log::info('orders',[$assignedOrders]);
-        \Log::info('No assigned orders found for you',[$assignedOrders->count()]);
+        \Log::info('count',[$assignedOrders->count()]);
 
-        return $assignedOrders;
 
-        // return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
 
     }
@@ -141,13 +139,12 @@ class DeliveryController extends Controller
 
         $assignedOrders = $assignedOrders->latest()->get();
 
-        // if ($assignedOrders->isEmpty()) {
-        //     return $this->returnJSON([], 'No assigned orders found for you');
-        // }
+        if ($assignedOrders->isEmpty()) {
+            return $this->returnJSON(new OrderCollection($assignedOrders), 'No assigned orders found for you');
+        }
 
         return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
 
-        //   return ;
     }
 
 
