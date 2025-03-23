@@ -80,7 +80,7 @@ class DeliveryController extends Controller
         return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
     }
 
-    public function getAssignedOrders($orderType)
+    public function getAssignedOrders()
     {
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
@@ -97,9 +97,9 @@ class DeliveryController extends Controller
 
 
         // Apply the order type filter if necessary
-        if ($orderType !== 'all') {
-            $query->where('order_type', $orderType);
-        }
+        // if ($orderType !== 'all') {
+        //     $query->where('order_type', $orderType);
+        // }
 
         // Execute the query
         $assignedOrders = $query->latest()->get();
