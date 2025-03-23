@@ -34,9 +34,12 @@ class DeliveryController extends Controller
     protected $moduleUtil;
 
 
-    public function __construct(FirebaseClientService $FirebaseClientService, ModuleUtil $moduleUtil,
-    EssentialsUtil $essentialsUtil, Util $commonUtil)
-    {
+    public function __construct(
+        FirebaseClientService $FirebaseClientService,
+        ModuleUtil $moduleUtil,
+        EssentialsUtil $essentialsUtil,
+        Util $commonUtil
+    ) {
         $this->FirebaseClientService = $FirebaseClientService;
         $this->moduleUtil = $moduleUtil;
         $this->essentialsUtil = $essentialsUtil;
@@ -92,6 +95,7 @@ class DeliveryController extends Controller
                 $query->where('delivery_id', $delivery->id);
             });
 
+
         // Apply the order type filter if necessary
         if ($orderType !== 'all') {
             $query->where('order_type', $orderType);
@@ -99,6 +103,11 @@ class DeliveryController extends Controller
 
         // Execute the query
         $assignedOrders = $query->latest()->get();
+
+        \Log::info('delivery',[$delivery]);
+        \Log::info('orderType',[$orderType]);
+        \Log::info('orders',[$orders]);
+
 
         if ($assignedOrders->isEmpty()) {
             return $this->returnJSON([], 'No assigned orders found for you');
@@ -179,7 +188,7 @@ class DeliveryController extends Controller
             'assigned_at' => now(), // Timestamp of assignment
         ]);
 
-        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name'=> $delivery->contact->name]);
+        $this->moduleUtil->activityLog($order, 'assign_delivery', null, ['order_number' => $order->number, 'delivery_name' => $delivery->contact->name]);
 
         return response()->json([
             'success' => true,
@@ -246,7 +255,7 @@ class DeliveryController extends Controller
                     ['order_id' => $order->id, 'status' => $status]
                 );
 
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=> 'shipped']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
 
                 break;
 
@@ -271,7 +280,7 @@ class DeliveryController extends Controller
                     ['order_id' => $order->id, 'status' => $status]
                 );
 
-                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status'=> 'completed']);
+                $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
 
                 break;
         }
@@ -291,12 +300,13 @@ class DeliveryController extends Controller
         ]);
     }
 
-    public function getDeliveryData(){
+    public function getDeliveryData()
+    {
         $id = Auth::user()->id;
 
         $delivery = Delivery::businessId()->find($id);
 
-        if(!$delivery) {
+        if (!$delivery) {
             return response()->json([
                 'success' => false,
                 'message' => 'Delivery not found',
@@ -304,9 +314,9 @@ class DeliveryController extends Controller
         }
         return response()->json([
             'success' => true,
-            'data'=>$delivery,
+            'data' => $delivery,
             'message' => 'Delivery Data retrieved successfully.',
-            ], 200);
+        ], 200);
     }
 
     public function changeDeliveryStatus(Request $request)
@@ -344,9 +354,9 @@ class DeliveryController extends Controller
         $delivery->save();
         return response()->json([
             'success' => true,
-            'data'=>$delivery,
+            'data' => $delivery,
             'message' => 'Delivery status updated successfully.',
-            ], 200);
+        ], 200);
     }
 
     /**
@@ -367,7 +377,7 @@ class DeliveryController extends Controller
         Log::info("balance updated");
 
     }
-    
+
 
     public function showData()
     {
@@ -386,18 +396,18 @@ class DeliveryController extends Controller
 
 
         $payroll = Transaction::where('business_id', $business_id)
-        ->with(['transaction_for', 'payment_lines'])
-        ->where('expense_for', $user->id)
-        ->orderBy('transaction_date', 'desc') // Order by transaction_date in descending order
-        ->first(); // Fetch the latest transaction
-            // ->findOrFail($id);
+            ->with(['transaction_for', 'payment_lines'])
+            ->where('expense_for', $user->id)
+            ->orderBy('transaction_date', 'desc') // Order by transaction_date in descending order
+            ->first(); // Fetch the latest transaction
+        // ->findOrFail($id);
 
-            if (!$payroll) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'لا يوجد كشف مرتبات لهذا الشهر',
-                ], 400);
-            }
+        if (!$payroll) {
+            return response()->json([
+                'success' => false,
+                'message' => 'لا يوجد كشف مرتبات لهذا الشهر',
+            ], 400);
+        }
 
         $transaction_date = \Carbon::parse($payroll->transaction_date);
 

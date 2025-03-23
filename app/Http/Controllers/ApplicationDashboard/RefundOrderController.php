@@ -269,8 +269,6 @@ class RefundOrderController extends Controller
 
         $order = Order::findOrFail($orderId);
 
-
-
         // Check if an OrderTracking already exists for the order
         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
