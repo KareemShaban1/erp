@@ -119,7 +119,7 @@ Route::middleware('auth:sanctum-delivery')->group(function () {
     // getDeliveryOrders
     Route::get('getDeliveryOrders/{status}', [DeliveryController::class, 'getDeliveryOrders']);
 
-    Route::get('getAssignedOrders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
+    Route::get('get-assigned-orders/{orderType}', [DeliveryController::class, 'getAssignedOrders']);
     Route::post('assignDelivery', [DeliveryController::class, 'assignDelivery']);
 
     Route::post('changeOrderStatus/{orderId}', [DeliveryController::class, 'changeOrderStatus']);
@@ -160,7 +160,7 @@ Route::get('applicationSettings', [ApplicationSettingsController::class, 'index'
 
 Route::post('client/register', [AuthController::class, 'clientRegister']);
 Route::post('client/login', [AuthController::class, 'clientLogin'])
-->middleware(['CaptureClientData']);
+    ->middleware(['CaptureClientData']);
 
 Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
 // sendNotification
