@@ -109,8 +109,9 @@ class DeliveryController extends Controller
         // \Log::info('orders',[$assignedOrders]);
         \Log::info('count',[$assignedOrders->count()]);
 
+        return $assignedOrders;
 
-        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+        // return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
 
 
     }
