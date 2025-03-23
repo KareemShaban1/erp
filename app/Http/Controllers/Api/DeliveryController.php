@@ -118,6 +118,7 @@ class DeliveryController extends Controller
 
     public function getDeliveryOrders($status)
     {
+        dd("test");
         $delivery = Delivery::where('id', Auth::user()->id)->first();
 
         if (!$delivery) {
