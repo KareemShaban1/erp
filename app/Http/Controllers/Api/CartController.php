@@ -23,14 +23,14 @@ class CartController extends Controller
     {
         $cartItems = $this->cartService->getCartItems();
         if ($cartItems instanceof JsonResponse) {
-          return $cartItems;
-      }
+            return $cartItems;
+        }
 
-      return $cartItems->additional([
-          'code' => 200,
-          'status' => 'success',
-          'message' =>  __('message.Cart Items have been retrieved successfully'),
-      ]);
+        return $cartItems->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => __('message.Cart Items have been retrieved successfully'),
+        ]);
     }
 
     /**
@@ -54,7 +54,7 @@ class CartController extends Controller
             return $cartItem;
         }
 
-       
+
         return $this->returnJSON($cartItem, __('message.Cart Item has been created successfully'));
 
     }
@@ -65,7 +65,7 @@ class CartController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1', 
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $cartItem = $this->cartService->updateCartItem($id, $request->quantity);
@@ -77,10 +77,9 @@ class CartController extends Controller
         return $cartItem->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Cart Items have been retrieved successfully'),
+            'message' => __('message.Cart Items have been retrieved successfully'),
         ]);
-        
-        // return $this->returnJSON($cartItem, __('message.Cart Item has been updated successfully'));
+
     }
 
     /**
@@ -97,9 +96,8 @@ class CartController extends Controller
         return $cartItem->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Cart Items have been deleted successfully'),
+            'message' => __('message.Cart Items have been deleted successfully'),
         ]);
-        // return $this->returnJSON($cartItem, __('message.Cart Item has been deleted successfully'));
     }
 
     /**

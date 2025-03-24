@@ -332,6 +332,7 @@ class RefundOrderController extends Controller
                 );
                 break;
             case 'cancelled':
+                if ($order->order_status !== 'completed') {
                 $orderTracking->cancelled_at = now();
                 $this->moduleUtil->activityLog(
                     $order,
@@ -340,70 +341,73 @@ class RefundOrderController extends Controller
                     ['order_number' => $order->number, 'status' => 'cancelled', 'order_type', $order->order_type]
                 );
                 break;
+            }
             case 'completed':
-                $orderTracking->completed_at = now();
-                // Send and store push notification
-                app(FirebaseClientService::class)->sendAndStoreNotification(
-                    $order->client->id,
-                    $order->client->fcm_token,
-                    'Order Status Changed',
-                    'Your order has been completed successfully (Order ID: #' . $order->id . ').',
-                    [
-                        'order_id' => $order->id,
-                        'status' => $order->status
-                    ]
-                );
-                $this->moduleUtil->activityLog(
-                    $order,
-                    'change_status',
-                    null,
-                    ['order_number' => $order->number, 'status' => 'completed', 'order_type', $order->order_type]
-                );
-                // Handle product details from order->order_items
+                if ($order->order_status !== 'completed') {
+                    $orderTracking->completed_at = now();
+                    // Send and store push notification
+                    app(FirebaseClientService::class)->sendAndStoreNotification(
+                        $order->client->id,
+                        $order->client->fcm_token,
+                        'Order Status Changed',
+                        'Your order has been completed successfully (Order ID: #' . $order->id . ').',
+                        [
+                            'order_id' => $order->id,
+                            'status' => $order->status
+                        ]
+                    );
+                    $this->moduleUtil->activityLog(
+                        $order,
+                        'change_status',
+                        null,
+                        ['order_number' => $order->number, 'status' => 'completed', 'order_type', $order->order_type]
+                    );
+                    // Handle product details from order->order_items
 
-                $business_id = $order->client->contact->business->id;
-                $parent_sell_transaction = Transaction::
-                    where('order_id', $order->parent_order_id)
-                    ->where('type', 'sell')
-                    ->first();
-                $products = [];
-                foreach ($order->orderItems as $item) {
-
-                    $transaction_sell_line = TransactionSellLine::
-                        where('product_id', $item->product_id)
-                        ->where('transaction_id', $parent_sell_transaction->id)
+                    $business_id = $order->client->contact->business->id;
+                    $parent_sell_transaction = Transaction::
+                        where('order_id', $order->parent_order_id)
+                        ->where('type', 'sell')
                         ->first();
-                    $products[] = [
-                        'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
-                        'quantity' => $item->quantity,
-                        'unit_price_inc_tax' => $item->price, // Include price if applicable
+                    $products = [];
+                    foreach ($order->orderItems as $item) {
+
+                        $transaction_sell_line = TransactionSellLine::
+                            where('product_id', $item->product_id)
+                            ->where('transaction_id', $parent_sell_transaction->id)
+                            ->first();
+                        $products[] = [
+                            'sell_line_id' => $transaction_sell_line->id, // Adjust this field name to match your schema
+                            'quantity' => $item->quantity,
+                            'unit_price_inc_tax' => $item->price, // Include price if applicable
+                        ];
+                    }
+
+                    $input = [
+                        'transaction_id' => $parent_sell_transaction->id,
+                        'invoice_no' => null,
+                        'order_id' => $order->id,
+                        'transaction_date' => Carbon::now(),
+                        'products' => $products,
+                        "discount_type" => null,
+                        "discount_amount" => "0.00",
+                        "tax_id" => null,
+                        "tax_amount" => "0",
+                        "tax_percent" => "0",
+                        // 'shipping_charges'=>$order->shipping_cost,
+                        'shipping_charges' => '0.00',
+
                     ];
+
+                    \Log::info('sale_refund_data', [$input]);
+
+                    $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
+                    foreach ($order->orderItems as $item) {
+                        $this->quantityTransferService->transferQuantity($order, $item, $order->client, $order->business_location_id, 1, $item->quantity);
+                    }
+                    //     public function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
+
                 }
-
-                $input = [
-                    'transaction_id' => $parent_sell_transaction->id,
-                    'invoice_no' => null,
-                    'order_id' => $order->id,
-                    'transaction_date' => Carbon::now(),
-                    'products' => $products,
-                    "discount_type" => null,
-                    "discount_amount" => "0.00",
-                    "tax_id" => null,
-                    "tax_amount" => "0",
-                    "tax_percent" => "0",
-                    // 'shipping_charges'=>$order->shipping_cost,
-                    'shipping_charges'=>'0.00',
-
-                ];
-
-                \Log::info('sale_refund_data', [$input]);
-
-                $this->transactionUtil->addSellReturnForRefund($input, $business_id, 1, true);
-                foreach ($order->orderItems as $item) {
-                    $this->quantityTransferService->transferQuantity($order, $item, $order->client, $order->business_location_id, 1, $item->quantity);
-                }
-                //     public function transferQuantity($order, $orderItem, $client, $fromLocationId, $toLocationId, $quantity)
-
                 break;
             default:
                 throw new \InvalidArgumentException("Invalid status: $status");
@@ -564,8 +568,8 @@ class RefundOrderController extends Controller
         foreach ($parentOrder->orderItems as $item) {
             // Get refunds for this order item
             $itemRefunds = OrderRefund::
-            with('order_item')->
-            where('order_item_id', $item->id)->get();
+                with('order_item')->
+                where('order_item_id', $item->id)->get();
 
             // Sum up the refund amounts
             $refundAmount = $itemRefunds->sum('amount') ?? 0;

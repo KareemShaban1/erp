@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ClientNotificationController extends Controller
 {
+
+   // get client latest notifications
    public function getClientNotifications()
    {
       $notifications = Notification::
@@ -19,52 +21,55 @@ class ClientNotificationController extends Controller
          where('notifiable_id', Auth::id())
          ->latest()
          ->get();
-      // return $notifications;
       $response = new NotificationCollection($notifications);
       return $this->returnJSON($response, __('message.Notifications has been retrieved  successfully'));
 
    }
 
+   // get client unread latest notifications
    public function getUnreadNotificationsCount()
    {
-      $notifications =  Notification::where('notifiable_type', 'App\Models\Client')
+      $notifications = Notification::where('notifiable_type', 'App\Models\Client')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at') // Only unread notifications
          ->latest()
          ->get();
 
-         $response = new NotificationCollection($notifications);
+      $response = new NotificationCollection($notifications);
 
-         return $this->returnJSON($response, __('message.Un Read Notifications has been retrieved  successfully'));
+      return $this->returnJSON($response, __('message.Un Read Notifications has been retrieved  successfully'));
 
    }
 
+   // mark client notifications as read
    public function markNotificationAsRead($id)
    {
-      $notification =  Notification::
+      $notification = Notification::
          where('id', $id)
          ->where('notifiable_type', 'App\Models\Client')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at')->first(); // Only unread notifications
-         if ($notification) {
+      if ($notification) {
          $notification->read_at = now(); // Mark as read
          $notification->save();
-         }
-         $response = new NotificationResource($notification);
+      }
+      $response = new NotificationResource($notification);
 
       return $this->returnJSON($response, __('message.Notification marked as read successfully'));
 
    }
+
+   // mark all client notifications as read
    public function markAllNotificationsAsRead()
    {
-      $notifications =  Notification::where('notifiable_type', 'App\Models\Client')
+      $notifications = Notification::where('notifiable_type', 'App\Models\Client')
          ->where('notifiable_id', Auth::id())
          ->whereNull('read_at') // Only unread notifications
-         ->get(); 
+         ->get();
 
-         $notifications->each->update(['read_at' => now()]);
+      $notifications->each->update(['read_at' => now()]);
 
-         $response = new NotificationCollection($notifications);
+      $response = new NotificationCollection($notifications);
 
       return $this->returnJSON($response, __('message.All Notifications marked as read successfully'));
 

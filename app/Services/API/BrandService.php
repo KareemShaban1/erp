@@ -140,24 +140,4 @@ class BrandService extends BaseService
     }
 
 
-    public function bulkDelete(mixed $ids)
-    {
-        try {
-            $trashedRecords = Brand::onlyTrashed()->whereIn('id', $ids)->get();
-
-            if ($trashedRecords->isNotEmpty()) {
-                Brand::whereIn('id', $trashedRecords->pluck('id'))->forceDelete();
-            }
-
-            $nonTrashedIds = Brand::whereIn('id', $ids)->get()->pluck('id');
-
-            if ($nonTrashedIds->isNotEmpty()) {
-                Brand::whereIn('id', $nonTrashedIds)->delete();
-            }
-
-            return $ids;
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting brands'));
-        }
-    }
 }

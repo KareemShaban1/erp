@@ -140,24 +140,5 @@ class BusinessLocationService extends BaseService
     }
 
 
-    public function bulkDelete(mixed $ids)
-    {
-        try {
-            $trashedRecords = BusinessLocation::onlyTrashed()->whereIn('id', $ids)->get();
-
-            if ($trashedRecords->isNotEmpty()) {
-                BusinessLocation::whereIn('id', $trashedRecords->pluck('id'))->forceDelete();
-            }
-
-            $nonTrashedIds = BusinessLocation::whereIn('id', $ids)->get()->pluck('id');
-
-            if ($nonTrashedIds->isNotEmpty()) {
-                BusinessLocation::whereIn('id', $nonTrashedIds)->delete();
-            }
-
-            return $ids;
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting BusinessLocations'));
-        }
-    }
+   
 }

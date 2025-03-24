@@ -158,24 +158,5 @@ class ClientService extends BaseService
     }
 
 
-    public function bulkDelete(mixed $ids)
-    {
-        try {
-            $trashedRecords = Client::onlyTrashed()->whereIn('id', $ids)->get();
-
-            if ($trashedRecords->isNotEmpty()) {
-                Client::whereIn('id', $trashedRecords->pluck('id'))->forceDelete();
-            }
-
-            $nonTrashedIds = Client::whereIn('id', $ids)->get()->pluck('id');
-
-            if ($nonTrashedIds->isNotEmpty()) {
-                Client::whereIn('id', $nonTrashedIds)->delete();
-            }
-
-            return $ids;
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting clients'));
-        }
-    }
+   
 }

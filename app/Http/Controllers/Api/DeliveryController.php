@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Delivery\DeliveryCollection;
-use App\Http\Resources\Delivery\DeliveryResource;
 use App\Http\Resources\Order\OrderCollection;
 use App\Models\Category;
 use App\Models\Client;
@@ -47,6 +45,9 @@ class DeliveryController extends Controller
 
     }
 
+
+    // get not assigned orders
+    // orderType => order , order_refund , order_transfer
     public function getNotAssignedOrders($orderType)
     {
         // Retrieve the authenticated delivery user
@@ -60,7 +61,7 @@ class DeliveryController extends Controller
         $assignedOrderIds = DeliveryOrder::where('delivery_id', $delivery->id)
             ->pluck('order_id');
 
-        // Start building the query for unassigned orders
+        // get orders with status 'processing'
         $query = Order::where('order_status', 'processing')
             ->where('business_location_id', $delivery->business_location_id)
             ->whereNotIn('id', $assignedOrderIds);
@@ -80,6 +81,8 @@ class DeliveryController extends Controller
         return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
     }
 
+    // get assigned orders 
+    // orderType => order , order_refund , order_transfer
     public function getAssignedOrders($orderType)
     {
         $delivery = Delivery::where('id', Auth::user()->id)->first();
@@ -110,7 +113,8 @@ class DeliveryController extends Controller
 
 
 
-
+    // get delivery orders
+    // status => 'pending' , 'processing' , 'shipped' , 'completed' , 'cancelled'
     public function getDeliveryOrders($status)
     {
         $delivery = Delivery::where('id', Auth::user()->id)->first();
@@ -118,10 +122,6 @@ class DeliveryController extends Controller
         if (!$delivery) {
             return response()->json(['message' => 'Delivery user not found'], 404);
         }
-
-        // Retrieve the status from the request, defaulting to 'all' if not provided
-        //   $status = $request->input('status', 'all');
-
         // Retrieve assigned orders based on the delivery ID and status
         $assignedOrders = Order::whereHas('deliveries', function ($query) use ($delivery) {
             $query->where('delivery_id', $delivery->id);
@@ -143,9 +143,10 @@ class DeliveryController extends Controller
 
     }
 
-   
 
 
+
+    // assign delivery to order
     public function assignDelivery(Request $request)
     {
         $request->validate([
@@ -189,6 +190,8 @@ class DeliveryController extends Controller
         ]);
     }
 
+
+    // change delivery order status
     public function changeOrderStatus($orderId)
     {
         // Define allowed statuses
@@ -222,8 +225,6 @@ class DeliveryController extends Controller
 
         // Get or create the OrderTracking record for this order
         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
-
-
 
         // Update timestamps and handle specific status actions
         switch ($status) {
@@ -293,6 +294,8 @@ class DeliveryController extends Controller
         ]);
     }
 
+
+    // get delivery data
     public function getDeliveryData()
     {
         $id = Auth::user()->id;

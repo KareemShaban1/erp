@@ -135,24 +135,5 @@ class BannerService extends BaseService
     }
 
 
-    public function bulkDelete(mixed $ids)
-    {
-        try {
-            $trashedRecords = Banner::onlyTrashed()->whereIn('id', $ids)->get();
-
-            if ($trashedRecords->isNotEmpty()) {
-                Banner::whereIn('id', $trashedRecords->pluck('id'))->forceDelete();
-            }
-
-            $nonTrashedIds = Banner::whereIn('id', $ids)->get()->pluck('id');
-
-            if ($nonTrashedIds->isNotEmpty()) {
-                Banner::whereIn('id', $nonTrashedIds)->delete();
-            }
-
-            return $ids;
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting Banners'));
-        }
-    }
+   
 }

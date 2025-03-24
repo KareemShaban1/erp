@@ -169,24 +169,5 @@ class CategoryService extends BaseService
     }
 
 
-    public function bulkDelete(mixed $ids)
-    {
-        try {
-            $trashedRecords = category::onlyTrashed()->whereIn('id', $ids)->get();
-
-            if ($trashedRecords->isNotEmpty()) {
-                category::whereIn('id', $trashedRecords->pluck('id'))->forceDelete();
-            }
-
-            $nonTrashedIds = category::whereIn('id', $ids)->get()->pluck('id');
-
-            if ($nonTrashedIds->isNotEmpty()) {
-                category::whereIn('id', $nonTrashedIds)->delete();
-            }
-
-            return $ids;
-        } catch (\Exception $e) {
-            return $this->handleException($e, __('message.Error happened while deleting categories'));
-        }
-    }
+   
 }

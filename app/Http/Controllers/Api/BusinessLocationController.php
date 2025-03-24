@@ -121,21 +121,5 @@ class BusinessLocationController extends Controller
         return $this->returnJSON($BusinessLocation, __('message.BusinessLocation has been force deleted successfully'));
     }
 
-    public function bulkDelete(Request $request)
-    {
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:businessLocations,id',
-        ]);
-
-
-        $BusinessLocation = $this->service->bulkDelete($request->ids);
-
-        if ($BusinessLocation instanceof JsonResponse) {
-            return $BusinessLocation;
-        }
-
-        return $this->returnJSON($BusinessLocation, __('message.BusinessLocation has been deleted successfully.'));
-    }
+   
 }

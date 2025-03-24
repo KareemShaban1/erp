@@ -22,7 +22,7 @@ class ClientController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
+     * Display a listing of the Clients.
      */
     public function index(Request $request)
     {
@@ -35,7 +35,7 @@ class ClientController extends Controller
         return $clients->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
+            'message' =>  __('message.Clients have been retrieved successfully'),
         ]);
     }
 
@@ -134,21 +134,5 @@ class ClientController extends Controller
         return $this->returnJSON($client, __('message.Client has been force deleted successfully'));
     }
 
-    public function bulkDelete(Request $request)
-    {
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:categories,id',
-        ]);
-
-
-        $client = $this->service->bulkDelete($request->ids);
-
-        if ($client instanceof JsonResponse) {
-            return $client;
-        }
-
-        return $this->returnJSON($client, __('message.Client has been deleted successfully.'));
-    }
+    
 }

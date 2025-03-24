@@ -77,9 +77,11 @@
                 <option value="processing" ${data === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="shipped" ${data === 'shipped' ? 'selected' : ''}>Shipped</option>
                 <option value="completed" ${data === 'completed' ? 'selected' : ''}>Completed</option>
-                <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
             </select>`;
                     }
+
+                    // <option value="cancelled" ${data === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+
                 },
                 {
                     data: 'payment_status', name: 'payment_status', render: function (data, type, row) {
@@ -326,9 +328,9 @@
                         });
 
 
-                          // Populate the order items
-                          const refundsTable = $('#order_refunds_table tbody');
-                          refundsTable.empty(); // Clear existing rows
+                        // Populate the order items
+                        const refundsTable = $('#order_refunds_table tbody');
+                        refundsTable.empty(); // Clear existing rows
 
                         response.refunds.forEach(item => {
                             const row = `
@@ -340,7 +342,7 @@
                             <td>${item.refund_status}</td>
                         </tr>
                     `;
-                    refundsTable.append(row);
+                            refundsTable.append(row);
                         });
 
 

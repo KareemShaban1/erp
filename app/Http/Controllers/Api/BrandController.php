@@ -23,7 +23,7 @@ class BrandController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
+     * Display a listing of the Brands.
      */
     public function index(Request $request)
     {
@@ -38,7 +38,7 @@ class BrandController extends Controller
         return $brands->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
+            'message' =>  __('message.Brands have been retrieved successfully'),
         ]);
     }
 
@@ -124,21 +124,5 @@ class BrandController extends Controller
         return $this->returnJSON($brand, __('message.Brand has been force deleted successfully'));
     }
 
-    public function bulkDelete(Request $request)
-    {
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:categories,id',
-        ]);
-
-
-        $brand = $this->service->bulkDelete($request->ids);
-
-        if ($brand instanceof JsonResponse) {
-            return $brand;
-        }
-
-        return $this->returnJSON($brand, __('message.Brand has been deleted successfully.'));
-    }
+   
 }

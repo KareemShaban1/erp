@@ -22,7 +22,7 @@ class BannerController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
+     * Display a listing of the banners.
      */
     public function index(Request $request)
     {
@@ -35,7 +35,7 @@ class BannerController extends Controller
         return $banners->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
+            'message' => __('message.Banners have been retrieved successfully'),
         ]);
     }
 
@@ -44,14 +44,14 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
-            $data = $request->validated();
-            $banner = $this->service->store( $data);
+        $data = $request->validated();
+        $banner = $this->service->store($data);
 
-            if ($banner instanceof JsonResponse) {
-                return $banner;
-            }
+        if ($banner instanceof JsonResponse) {
+            return $banner;
+        }
 
-            return $this->returnJSON($banner, __('message.Banner has been created successfully'));
+        return $this->returnJSON($banner, __('message.Banner has been created successfully'));
     }
 
     /**
@@ -75,13 +75,13 @@ class BannerController extends Controller
      */
     public function update(Request $request, Banner $banner)
     {
-            $banner = $this->service->update($request,$banner);
+        $banner = $this->service->update($request, $banner);
 
-            if ($banner instanceof JsonResponse) {
-                return $banner;
-            }
+        if ($banner instanceof JsonResponse) {
+            return $banner;
+        }
 
-            return $this->returnJSON($banner, __('message.Banner has been updated successfully'));
+        return $this->returnJSON($banner, __('message.Banner has been updated successfully'));
 
     }
 
@@ -121,21 +121,5 @@ class BannerController extends Controller
         return $this->returnJSON($banner, __('message.Banner has been force deleted successfully'));
     }
 
-    public function bulkDelete(Request $request)
-    {
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:categories,id',
-        ]);
-
-
-        $banner = $this->service->bulkDelete($request->ids);
-
-        if ($banner instanceof JsonResponse) {
-            return $banner;
-        }
-
-        return $this->returnJSON($banner, __('message.Banner has been deleted successfully.'));
-    }
+    
 }

@@ -137,21 +137,5 @@ class CategoryController extends Controller
         return $this->returnJSON($category, __('message.Category has been force deleted successfully'));
     }
 
-    public function bulkDelete(Request $request)
-    {
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:categories,id',
-        ]);
-
-
-        $category = $this->service->bulkDelete($request->ids);
-
-        if ($category instanceof JsonResponse) {
-            return $category;
-        }
-
-        return $this->returnJSON($category, __('message.Category has been deleted successfully.'));
-    }
+    
 }
