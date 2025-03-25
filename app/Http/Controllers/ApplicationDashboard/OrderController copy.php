@@ -15,7 +15,7 @@ use App\Models\OrderTracking;
 use App\Models\Transaction;
 use App\Models\TransactionPayment;
 use App\Services\ApplicationDashboard\OrderCancellationService;
-
+use App\Services\ApplicationDashboard\OrderService;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\TransactionUtil;
@@ -34,17 +34,17 @@ class OrderController extends Controller
     protected $transactionUtil;
     protected $orderCancellationService;
 
-
+    protected $orderService;
     public function __construct(
         ModuleUtil $moduleUtil,
         TransactionUtil $transactionUtil,
-        OrderCancellationService $orderCancellationService
-
+        OrderCancellationService $orderCancellationService,
+        OrderService $orderService
     ) {
         $this->moduleUtil = $moduleUtil;
         $this->transactionUtil = $transactionUtil;
         $this->orderCancellationService = $orderCancellationService;
-
+        $this->orderService = $orderService;
     }
 
     public function index()
@@ -170,7 +170,7 @@ class OrderController extends Controller
             $query->where(function ($query) use ($search) {
                 $query->where('orders.id', 'like', "%{$search}%")
                     ->orWhere('orders.number', 'like', "%{$search}%")
-                    ->orWhereHas('client' , function ($query) use ($search) {
+                    ->orWhereHas('client', function ($query) use ($search) {
                         $query->where('clients.location', 'like', "%{$search}%");
                     })
                     ->orWhereHas('client.contact', function ($query) use ($search) {
@@ -218,7 +218,7 @@ class OrderController extends Controller
                     return 'Error';
                 }
             })
-            
+
             ->addColumn('client_contact_mobile', function ($order) {
                 try {
                     if ($order->client && $order->client->contact) {
@@ -318,94 +318,83 @@ class OrderController extends Controller
         abort(404, 'Invalid Request.');
     }
 
-    // public function changeOrderStatus($orderId)
-    // {
-    //     if (!auth()->user()->can('orders.changeStatus')) {
-    //         abort(403, 'Unauthorized action.');
-    //     }
-    //     $status = request()->input('order_status');
+    public function getOrderDetails($orderId)
+    {
+        // Fetch activity logs related to the order
+        $activityLogs = Activity::with(['subject'])
+            // ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
+            ->leftJoin('users as u', function ($join) {
+                $join->on('u.id', '=', 'activity_log.causer_id')
+                    ->where('activity_log.causer_type', '=', 'App\Models\User');
+            })
+            ->leftJoin('clients as c', function ($join) {
+                $join->on('c.id', '=', 'activity_log.causer_id')
+                    ->where('activity_log.causer_type', '=', 'App\Models\Client');
+            })
+            ->leftJoin('deliveries as d', function ($join) {
+                $join->on('d.id', '=', 'activity_log.causer_id')
+                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
+            })
+            ->leftJoin('contacts as contact', function ($join) {
+                $join->on('contact.id', '=', 'c.contact_id')
+                    ->orOn('contact.id', '=', 'd.contact_id');
+            })
+            ->where('subject_type', 'App\Models\Order')
+            ->where('subject_id', $orderId)
+            ->select(
+                'activity_log.*',
+                DB::raw("
+            CASE 
+                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
+                WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
+                WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
+                ELSE 'Unknown'
+            END as created_by
+        ")
+            )
+            ->get();
 
-    //     $order = Order::findOrFail($orderId);
-    //     $order->order_status = $status;
-    //     $order->save();
+        // Fetch the order along with related data
+        $order = Order::with([
+            'client.contact',
+            'businessLocation',
+            'orderCancellation',
+            'orderItems',
+            'delivery',
+            'transaction' => function ($query) {
+                $query->where('type', 'sell'); // Filter transactions with type 'sell'
+            }
+        ])->find($orderId);
 
-    //     // Check if an OrderTracking already exists for the order
-    //     $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
+        if ($order) {
+            // Iterate through each order item and check for refund details
+            foreach ($order->orderItems as $item) {
+                // Check if there are any records in the order_refund table for this order item
+                $refund = OrderRefund::where('order_item_id', $item->id)->get();
 
-    //     $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+                $refund_amount = $refund->sum('amount') ?? 0;
+                // Calculate the difference between the order item quantity and the refunded amount
+                $item->remaining_quantity = $item->quantity - $refund_amount;
+            }
 
-    //     $delivery = Delivery::find($deliveryOrder->delivery_id);
+            // Return the order details and activity logs
+            return response()->json([
+                'success' => true,
+                'order' => $order,
+                'activityLogs' => $activityLogs,
+            ]);
+        }
 
-    //     // Set the tracking status timestamp based on the status provided
-    //     switch ($status) {
-    //         case 'pending':
-    //             $orderTracking->pending_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'pending']);
-    //             break;
-    //         case 'processing':
-    //             $orderTracking->processing_at = now();
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been processed successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'processing']);
-    //             break;
-    //         case 'shipped':
-    //             $this->updateDeliveryBalance($order, $delivery);
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been shipped successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $orderTracking->shipped_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
-    //             break;
-    //         case 'cancelled':
-    //             $orderTracking->cancelled_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'cancelled']);
-    //             $cancellationData = [
-    //                 'order_id' => $order->id,
-    //                 'reason' => 'erp cancellation'
-    //             ];
-    //             $this->orderCancellationService->makeOrderCancellation($cancellationData);
-    //             break;
-    //         case 'completed':
-    //             $orderTracking->completed_at = now();
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been completed successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
-    //             break;
-    //         default:
-    //             throw new \InvalidArgumentException("Invalid status: $status");
-    //     }
+        // If the order is not found
+        return response()->json([
+            'success' => false,
+            'message' => 'Order not found'
+        ]);
+    }
 
-    //     // Save the order tracking record (it will either update or create)
-    //     $orderTracking->save();
 
-    //     return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
-    // }
+
+
 
 
     public function changeOrderStatus($orderId)
@@ -591,7 +580,7 @@ class OrderController extends Controller
                         $delivery->contact->save();
                     }
                 }
-                $this->makeSalePayment($salePaymentData);
+                $this->orderService->makeSalePayment($salePaymentData);
                 $this->moduleUtil->activityLog(
                     $order,
                     'change_payment_status',
@@ -612,79 +601,6 @@ class OrderController extends Controller
     }
 
 
-    public function getOrderDetails($orderId)
-    {
-        // Fetch activity logs related to the order
-        $activityLogs = Activity::with(['subject'])
-            // ->leftJoin('users as u', 'u.id', '=', 'activity_log.causer_id')
-            ->leftJoin('users as u', function ($join) {
-                $join->on('u.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', '=', 'App\Models\User');
-            })
-            ->leftJoin('clients as c', function ($join) {
-                $join->on('c.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', '=', 'App\Models\Client');
-            })
-            ->leftJoin('deliveries as d', function ($join) {
-                $join->on('d.id', '=', 'activity_log.causer_id')
-                    ->where('activity_log.causer_type', '=', 'App\Models\Delivery');
-            })
-            ->leftJoin('contacts as contact', function ($join) {
-                $join->on('contact.id', '=', 'c.contact_id')
-                    ->orOn('contact.id', '=', 'd.contact_id');
-            })
-            ->where('subject_type', 'App\Models\Order')
-            ->where('subject_id', $orderId)
-            ->select(
-                'activity_log.*',
-                DB::raw("
-            CASE 
-                WHEN u.id IS NOT NULL THEN CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''), ' (user)')
-                WHEN c.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (client)')
-                WHEN d.id IS NOT NULL THEN CONCAT(COALESCE(contact.name, ''), ' (delivery)')
-                ELSE 'Unknown'
-            END as created_by
-        ")
-            )
-            ->get();
-
-        // Fetch the order along with related data
-        $order = Order::with([
-            'client.contact',
-            'businessLocation',
-            'orderCancellation',
-            'orderItems',
-            'delivery',
-            'transaction' => function ($query) {
-                $query->where('type', 'sell'); // Filter transactions with type 'sell'
-            }
-        ])->find($orderId);
-
-        if ($order) {
-            // Iterate through each order item and check for refund details
-            foreach ($order->orderItems as $item) {
-                // Check if there are any records in the order_refund table for this order item
-                $refund = OrderRefund::where('order_item_id', $item->id)->get();
-
-                $refund_amount = $refund->sum('amount') ?? 0;
-                // Calculate the difference between the order item quantity and the refunded amount
-                $item->remaining_quantity = $item->quantity - $refund_amount;
-            }
-
-            // Return the order details and activity logs
-            return response()->json([
-                'success' => true,
-                'order' => $order,
-                'activityLogs' => $activityLogs,
-            ]);
-        }
-
-        // If the order is not found
-        return response()->json([
-            'success' => false,
-            'message' => 'Order not found'
-        ]);
-    }
 
     /**
      * Update the delivery contact balance based on the order total.
@@ -706,94 +622,94 @@ class OrderController extends Controller
     }
 
 
-    protected function makeSalePayment($salePaymentData)
-    {
-        try {
-            $business_id = $salePaymentData['business_id'];
-            $transaction_id = $salePaymentData['transaction_id'];
-            $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
+    // protected function makeSalePayment($salePaymentData)
+    // {
+    //     try {
+    //         $business_id = $salePaymentData['business_id'];
+    //         $transaction_id = $salePaymentData['transaction_id'];
+    //         $transaction = Transaction::where('business_id', $business_id)->with(['contact'])->findOrFail($transaction_id);
 
-            $location = BusinessLocation::find($salePaymentData['business_location_id']);
-            $transaction_before = $transaction->replicate();
+    //         $location = BusinessLocation::find($salePaymentData['business_location_id']);
+    //         $transaction_before = $transaction->replicate();
 
-            if ($transaction->payment_status != 'paid') {
-                // $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
-                // 'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
-                // 'cheque_number', 'bank_account_number']);
-                $salePaymentData['paid_on'] = Carbon::now();
-                $salePaymentData['transaction_id'] = $transaction->id;
-                $salePaymentData['amount'] = $this->transactionUtil->num_uf($salePaymentData['amount']);
-                // $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
-                $salePaymentData['created_by'] = 1;
-                $salePaymentData['payment_for'] = $transaction->contact_id;
+    //         if ($transaction->payment_status != 'paid') {
+    //             // $inputs = $request->only(['amount', 'method', 'note', 'card_number', 'card_holder_name',
+    //             // 'card_transaction_number', 'card_type', 'card_month', 'card_year', 'card_security',
+    //             // 'cheque_number', 'bank_account_number']);
+    //             $salePaymentData['paid_on'] = Carbon::now();
+    //             $salePaymentData['transaction_id'] = $transaction->id;
+    //             $salePaymentData['amount'] = $this->transactionUtil->num_uf($salePaymentData['amount']);
+    //             // $inputs['amount'] = $this->transactionUtil->num_uf($inputs['amount']);
+    //             $salePaymentData['created_by'] = 1;
+    //             $salePaymentData['payment_for'] = $transaction->contact_id;
 
-                // $salePaymentData['account_id'] =2;
-                if (!empty($location->default_payment_accounts)) {
-                    $default_payment_accounts = json_decode(
-                        $location->default_payment_accounts,
-                        true
-                    );
-                    // Check for cash account and set account_id
-                    if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {
-                        $salePaymentData['account_id'] = $default_payment_accounts['cash']['account'] ?? 1;
-                    }
-                }
-
-
-                $prefix_type = 'purchase_payment';
-                if (in_array($transaction->type, ['sell', 'sell_return'])) {
-                    $prefix_type = 'sell_payment';
-                } elseif (in_array($transaction->type, ['expense', 'expense_refund'])) {
-                    $prefix_type = 'expense_payment';
-                }
-
-                DB::beginTransaction();
-
-                $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
-                //Generate reference number
-                $salePaymentData['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
-
-                //Pay from advance balance
-                $payment_amount = $salePaymentData['amount'];
-                // $contact_balance = !empty($transaction->contact) ? $transaction->contact->balance : 0;
-                // if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
-                //     throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
-                // }
-
-                \Log::info('salePaymentData', [$salePaymentData]);
-
-                if (!empty($salePaymentData['amount'])) {
-                    $tp = TransactionPayment::create($salePaymentData);
-                    $salePaymentData['transaction_type'] = $transaction->type;
-                    event(new TransactionPaymentAdded($tp, $salePaymentData));
-                }
-
-                //update payment status
-                $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
-                $transaction->payment_status = $payment_status;
-
-                $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
-
-                DB::commit();
-            }
-
-            $output = [
-                'success' => true,
-                'msg' => __('purchase.payment_added_success')
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $msg = __('messages.something_went_wrong');
+    //             // $salePaymentData['account_id'] =2;
+    //             if (!empty($location->default_payment_accounts)) {
+    //                 $default_payment_accounts = json_decode(
+    //                     $location->default_payment_accounts,
+    //                     true
+    //                 );
+    //                 // Check for cash account and set account_id
+    //                 if (!empty($default_payment_accounts['cash']['is_enabled']) && !empty($default_payment_accounts['cash']['account'])) {
+    //                     $salePaymentData['account_id'] = $default_payment_accounts['cash']['account'] ?? 1;
+    //                 }
+    //             }
 
 
-            $output = [
-                'success' => false,
-                'msg' => $msg
-            ];
-        }
+    //             $prefix_type = 'purchase_payment';
+    //             if (in_array($transaction->type, ['sell', 'sell_return'])) {
+    //                 $prefix_type = 'sell_payment';
+    //             } elseif (in_array($transaction->type, ['expense', 'expense_refund'])) {
+    //                 $prefix_type = 'expense_payment';
+    //             }
 
-        return redirect()->back()->with(['status' => $output]);
-    }
+    //             DB::beginTransaction();
+
+    //             $ref_count = $this->transactionUtil->setAndGetReferenceCount($prefix_type);
+    //             //Generate reference number
+    //             $salePaymentData['payment_ref_no'] = $this->transactionUtil->generateReferenceNumber($prefix_type, $ref_count);
+
+    //             //Pay from advance balance
+    //             $payment_amount = $salePaymentData['amount'];
+    //             // $contact_balance = !empty($transaction->contact) ? $transaction->contact->balance : 0;
+    //             // if ($inputs['method'] == 'advance' && $inputs['amount'] > $contact_balance) {
+    //             //     throw new AdvanceBalanceNotAvailable(__('lang_v1.required_advance_balance_not_available'));
+    //             // }
+
+    //             \Log::info('salePaymentData', [$salePaymentData]);
+
+    //             if (!empty($salePaymentData['amount'])) {
+    //                 $tp = TransactionPayment::create($salePaymentData);
+    //                 $salePaymentData['transaction_type'] = $transaction->type;
+    //                 event(new TransactionPaymentAdded($tp, $salePaymentData));
+    //             }
+
+    //             //update payment status
+    //             $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
+    //             $transaction->payment_status = $payment_status;
+
+    //             $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
+
+    //             DB::commit();
+    //         }
+
+    //         $output = [
+    //             'success' => true,
+    //             'msg' => __('purchase.payment_added_success')
+    //         ];
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         $msg = __('messages.something_went_wrong');
+
+
+    //         $output = [
+    //             'success' => false,
+    //             'msg' => $msg
+    //         ];
+    //     }
+
+    //     return redirect()->back()->with(['status' => $output]);
+    // }
 
 
     public function getOrderStatistics(Request $request)
