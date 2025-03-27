@@ -1535,22 +1535,6 @@
           <div class="col-md-12">
             <div class="checkbox">
               <label>
-                {!! Form::checkbox('permissions[]', 'orders.create', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_create' ) }}
-              </label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
-                {!! Form::checkbox('permissions[]', 'orders.update', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_update' ) }}
-              </label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
                 {!! Form::checkbox('permissions[]', 'orders.delete', false, 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_delete' ) }}
               </label>
@@ -1586,6 +1570,7 @@
 
         <hr>
 
+        <!-- order refunds -->
         <div class="row check_group">
         <div class="col-md-1">
           <h4>@lang( 'role.orders_refund' )</h4>
@@ -1606,22 +1591,7 @@
               </label>
             </div>
           </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
-                {!! Form::checkbox('permissions[]', 'orders_refund.create', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_create' ) }}
-              </label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
-                {!! Form::checkbox('permissions[]', 'orders_refund.update', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_update' ) }}
-              </label>
-            </div>
-          </div>
+        
           <div class="col-md-12">
             <div class="checkbox">
               <label>
@@ -1652,6 +1622,7 @@
 
         <hr>
 
+        <!-- order transfer -->
         <div class="row check_group">
         <div class="col-md-1">
           <h4>@lang( 'role.orders_transfer' )</h4>
@@ -1669,22 +1640,6 @@
               <label>
                 {!! Form::checkbox('permissions[]', 'orders_transfer.view', false, 
                 [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_view' ) }}
-              </label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
-                {!! Form::checkbox('permissions[]', 'orders_transfer.create', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_create' ) }}
-              </label>
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div class="checkbox">
-              <label>
-                {!! Form::checkbox('permissions[]', 'orders_transfer.update', false, 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_transfer_update' ) }}
               </label>
             </div>
           </div>
@@ -1907,46 +1862,46 @@
 
         <hr>
 
-              <!-- refund_reasons -->
-              <div class="row check_group">
-              <div class="col-md-1">
-              <h4>@lang( 'role.refund_reasons' )</h4>
-              </div>
-              <div class="col-md-2">
-                <div class="checkbox">
-                  <label>
-                    <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
-                  </label>
-                </div>
-              </div>
-              <div class="col-md-9">
-              <div class="col-md-12">
-                <div class="checkbox">
-                  <label>
-                    {!! Form::checkbox('permissions[]', 'refund_reasons.view', false, 
-                    [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_view' ) }}
-                  </label>
-                </div>
-              </div>
+          <!-- refund_reasons -->
+          <div class="row check_group">
+          <div class="col-md-1">
+          <h4>@lang( 'role.refund_reasons' )</h4>
+          </div>
+          <div class="col-md-2">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="check_all input-icheck" > {{ __( 'role.select_all' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-9">
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'refund_reasons.view', false, 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_view' ) }}
+              </label>
+            </div>
+          </div>
 
-              <div class="col-md-12">
-                <div class="checkbox">
-                  <label>
-                    {!! Form::checkbox('permissions[]', 'refund_reasons.update', false, 
-                    [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_update' ) }}
-                  </label>
-                </div>
-              </div>
-              <div class="col-md-12">
-                <div class="checkbox">
-                  <label>
-                    {!! Form::checkbox('permissions[]', 'refund_reasons.delete', false, 
-                    [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_delete' ) }}
-                  </label>
-                </div>
-              </div>
-              </div>
-              </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'refund_reasons.update', false, 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_update' ) }}
+              </label>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'refund_reasons.delete', false, 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.refund_reasons_delete' ) }}
+              </label>
+            </div>
+          </div>
+          </div>
+          </div>
 
 
 
