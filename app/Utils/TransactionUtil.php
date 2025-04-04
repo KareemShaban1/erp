@@ -2040,66 +2040,130 @@ class TransactionUtil extends Util
      *
      * @return string
      */
+    // public function getInvoiceNumber($business_id, $status, $location_id, $invoice_scheme_id = null, $sale_type = null)
+    // {
+    //     if ($status == 'final') {
+    //         if (empty($invoice_scheme_id)) {
+    //             $scheme = $this->getInvoiceScheme($business_id, $location_id);
+    //         } else {
+    //             $scheme = InvoiceScheme::where('business_id', $business_id)
+    //                 ->find($invoice_scheme_id);
+    //         }
+
+    //         if ($scheme->scheme_type == 'blank') {
+    //             $prefix = $scheme->prefix;
+    //         } else {
+    //             $prefix = $scheme->prefix . date('Y') . config('constants.invoice_scheme_separator');
+    //         }
+
+    //         //Count
+    //         $count = $scheme->start_number + $scheme->invoice_count;
+    //         $count = str_pad($count, $scheme->total_digits, '0', STR_PAD_LEFT);
+
+    //         //Prefix + count
+    //         $invoice_no = $prefix . $count;
+
+    //         //Increment the invoice count
+    //         $scheme->invoice_count = $scheme->invoice_count + 1;
+    //         $scheme->save();
+
+    //         return $invoice_no;
+    //     } else if ($status == 'draft') {
+    //         $ref_count = $this->setAndGetReferenceCount('draft', $business_id);
+    //         $invoice_no = $this->generateReferenceNumber('draft', $ref_count, $business_id);
+    //         return $invoice_no;
+    //     } else if ($sale_type == 'sales_order') {
+    //         $ref_count = $this->setAndGetReferenceCount('sales_order', $business_id);
+    //         $invoice_no = $this->generateReferenceNumber('sales_order', $ref_count, $business_id);
+    //         return $invoice_no;
+    //     } else {
+    //         return Str::random(5);
+    //     }
+    // }
+
+    // private function getInvoiceScheme($business_id, $location_id)
+    // {
+    //     $scheme_id = BusinessLocation::where('business_id', $business_id)
+    //         ->where('id', $location_id)
+    //         ->first()
+    //         ->invoice_scheme_id;
+    //     if (!empty($scheme_id) && $scheme_id != 0) {
+    //         $scheme = InvoiceScheme::find($scheme_id);
+    //     }
+
+    //     //Check if scheme is not found then return default scheme
+    //     if (empty($scheme)) {
+    //         $scheme = InvoiceScheme::where('business_id', $business_id)
+    //             ->where('is_default', 1)
+    //             ->first();
+    //     }
+
+    //     return $scheme;
+    // }
+
+
     public function getInvoiceNumber($business_id, $status, $location_id, $invoice_scheme_id = null, $sale_type = null)
     {
         if ($status == 'final') {
-            if (empty($invoice_scheme_id)) {
-                $scheme = $this->getInvoiceScheme($business_id, $location_id);
-            } else {
-                $scheme = InvoiceScheme::where('business_id', $business_id)
-                    ->find($invoice_scheme_id);
-            }
+            return DB::transaction(function () use ($business_id, $location_id, $invoice_scheme_id) {
+                if (empty($invoice_scheme_id)) {
+                    $scheme = $this->getInvoiceSchemeWithLock($business_id, $location_id);
+                } else {
+                    $scheme = InvoiceScheme::where('business_id', $business_id)
+                        ->where('id', $invoice_scheme_id)
+                        ->lockForUpdate()
+                        ->first();
+                }
 
-            if ($scheme->scheme_type == 'blank') {
-                $prefix = $scheme->prefix;
-            } else {
-                $prefix = $scheme->prefix . date('Y') . config('constants.invoice_scheme_separator');
-            }
+                if ($scheme->scheme_type == 'blank') {
+                    $prefix = $scheme->prefix;
+                } else {
+                    $prefix = $scheme->prefix . date('Y') . config('constants.invoice_scheme_separator');
+                }
 
-            //Count
-            $count = $scheme->start_number + $scheme->invoice_count;
-            $count = str_pad($count, $scheme->total_digits, '0', STR_PAD_LEFT);
+                // Generate invoice number
+                $count = $scheme->start_number + $scheme->invoice_count;
+                $count = str_pad($count, $scheme->total_digits, '0', STR_PAD_LEFT);
+                $invoice_no = $prefix . $count;
 
-            //Prefix + count
-            $invoice_no = $prefix . $count;
+                // Increment and save
+                $scheme->invoice_count += 1;
+                $scheme->save();
 
-            //Increment the invoice count
-            $scheme->invoice_count = $scheme->invoice_count + 1;
-            $scheme->save();
-
-            return $invoice_no;
-        } else if ($status == 'draft') {
+                return $invoice_no;
+            });
+        } elseif ($status == 'draft') {
             $ref_count = $this->setAndGetReferenceCount('draft', $business_id);
-            $invoice_no = $this->generateReferenceNumber('draft', $ref_count, $business_id);
-            return $invoice_no;
-        } else if ($sale_type == 'sales_order') {
+            return $this->generateReferenceNumber('draft', $ref_count, $business_id);
+        } elseif ($sale_type == 'sales_order') {
             $ref_count = $this->setAndGetReferenceCount('sales_order', $business_id);
-            $invoice_no = $this->generateReferenceNumber('sales_order', $ref_count, $business_id);
-            return $invoice_no;
+            return $this->generateReferenceNumber('sales_order', $ref_count, $business_id);
         } else {
             return Str::random(5);
         }
     }
 
-    private function getInvoiceScheme($business_id, $location_id)
+    private function getInvoiceSchemeWithLock($business_id, $location_id)
     {
         $scheme_id = BusinessLocation::where('business_id', $business_id)
             ->where('id', $location_id)
             ->first()
             ->invoice_scheme_id;
+
         if (!empty($scheme_id) && $scheme_id != 0) {
-            $scheme = InvoiceScheme::find($scheme_id);
+            $scheme = InvoiceScheme::where('id', $scheme_id)->lockForUpdate()->first();
         }
 
-        //Check if scheme is not found then return default scheme
         if (empty($scheme)) {
             $scheme = InvoiceScheme::where('business_id', $business_id)
                 ->where('is_default', 1)
+                ->lockForUpdate()
                 ->first();
         }
 
         return $scheme;
     }
+
 
     /**
      * Gives the list of products for a purchase transaction
@@ -2908,10 +2972,15 @@ class TransactionUtil extends Util
                 ->where('PL.product_id', $line->product_id)
                 ->where('PL.variation_id', $line->variation_id);
 
-            Log::info('transaction data',[$business['id'],
-            $business['location_id'],$qty_sum_query,$line->product_id,$line->variation_id]);
+            Log::info('transaction data', [
+                $business['id'],
+                $business['location_id'],
+                $qty_sum_query,
+                $line->product_id,
+                $line->variation_id
+            ]);
 
-            Log::info('transaction',[$query->get()]);
+            Log::info('transaction', [$query->get()]);
             //If product expiry is enabled then check for on expiry conditions
             if ($stop_selling_expired && empty($purchase_line_id)) {
                 $stop_before = request()->session()->get('business')['stop_selling_before'];
@@ -2949,8 +3018,8 @@ class TransactionUtil extends Util
                 'transactions.invoice_no'
             )->get();
 
-            Log::info('rows',[$rows]);
-            Log::info('line',[$line]);
+            Log::info('rows', [$rows]);
+            Log::info('line', [$line]);
 
 
 
@@ -2972,8 +3041,8 @@ class TransactionUtil extends Util
                 }
 
 
-                Log::info('qty_selling',[$qty_selling]);
-                Log::info('qty_allocated',[$qty_allocated]);
+                Log::info('qty_selling', [$qty_selling]);
+                Log::info('qty_allocated', [$qty_allocated]);
 
 
                 //Check for sell mapping or stock adjsutment mapping
@@ -5652,7 +5721,7 @@ class TransactionUtil extends Util
                 'total_before_tax' => $invoice_total['total_before_tax'],
                 'final_total' => $invoice_total['final_total'],
                 'transaction_date' => $input['transaction_date'],
-                'shipping_charges'=>$input['shipping_charges'],
+                'shipping_charges' => $input['shipping_charges'],
             ];
 
             // if (!empty($input['transaction_date'])) {
@@ -5787,19 +5856,19 @@ class TransactionUtil extends Util
         }
 
         // if (empty($sell_return)) {
-            $sell_return_data['transaction_date'] = \Carbon::now();
-            $sell_return_data['business_id'] = $business_id;
-            $sell_return_data['location_id'] = $sell->location_id;
-            $sell_return_data['contact_id'] = $sell->contact_id;
-            $sell_return_data['customer_group_id'] = $sell->customer_group_id;
-            $sell_return_data['type'] = 'sell_return';
-            $sell_return_data['status'] = 'final';
-            $sell_return_data['created_by'] = $user_id;
-            $sell_return_data['return_parent_id'] = $sell->id;
-            Log::info('sell_return_data', [$sell_return_data]);
-            $sell_return = Transaction::create($sell_return_data);
+        $sell_return_data['transaction_date'] = \Carbon::now();
+        $sell_return_data['business_id'] = $business_id;
+        $sell_return_data['location_id'] = $sell->location_id;
+        $sell_return_data['contact_id'] = $sell->contact_id;
+        $sell_return_data['customer_group_id'] = $sell->customer_group_id;
+        $sell_return_data['type'] = 'sell_return';
+        $sell_return_data['status'] = 'final';
+        $sell_return_data['created_by'] = $user_id;
+        $sell_return_data['return_parent_id'] = $sell->id;
+        Log::info('sell_return_data', [$sell_return_data]);
+        $sell_return = Transaction::create($sell_return_data);
 
-            $this->activityLog($sell_return, 'added');
+        $this->activityLog($sell_return, 'added');
         // } else {
         //     $sell_return_data['invoice_no'] = $sell_return_data['invoice_no'] ?? $sell_return->invoice_no;
         //     $sell_return_before = $sell_return->replicate();

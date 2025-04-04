@@ -170,7 +170,7 @@ class OrderController extends Controller
             $query->where(function ($query) use ($search) {
                 $query->where('orders.id', 'like', "%{$search}%")
                     ->orWhere('orders.number', 'like', "%{$search}%")
-                    ->orWhereHas('client' , function ($query) use ($search) {
+                    ->orWhereHas('client', function ($query) use ($search) {
                         $query->where('clients.location', 'like', "%{$search}%");
                     })
                     ->orWhereHas('client.contact', function ($query) use ($search) {
@@ -218,7 +218,7 @@ class OrderController extends Controller
                     return 'Error';
                 }
             })
-            
+
             ->addColumn('client_contact_mobile', function ($order) {
                 try {
                     if ($order->client && $order->client->contact) {
@@ -318,93 +318,160 @@ class OrderController extends Controller
         abort(404, 'Invalid Request.');
     }
 
+
+
     // public function changeOrderStatus($orderId)
     // {
     //     if (!auth()->user()->can('orders.changeStatus')) {
     //         abort(403, 'Unauthorized action.');
     //     }
+
     //     $status = request()->input('order_status');
 
-    //     $order = Order::findOrFail($orderId);
-    //     $order->order_status = $status;
-    //     $order->save();
+    //     // Begin a database transaction
+    //     DB::beginTransaction();
 
-    //     // Check if an OrderTracking already exists for the order
-    //     $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
+    //     try {
+    //         $order = Order::findOrFail($orderId);
 
-    //     $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+    //         // Check if an OrderTracking already exists for the order
+    //         $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
 
-    //     $delivery = Delivery::find($deliveryOrder->delivery_id);
+    //         $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
+    //         $delivery = $deliveryOrder ? Delivery::find($deliveryOrder->delivery_id) : null;
 
-    //     // Set the tracking status timestamp based on the status provided
-    //     switch ($status) {
-    //         case 'pending':
-    //             $orderTracking->pending_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'pending']);
-    //             break;
-    //         case 'processing':
-    //             $orderTracking->processing_at = now();
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been processed successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'processing']);
-    //             break;
-    //         case 'shipped':
-    //             $this->updateDeliveryBalance($order, $delivery);
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been shipped successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $orderTracking->shipped_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
-    //             break;
-    //         case 'cancelled':
-    //             $orderTracking->cancelled_at = now();
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'cancelled']);
-    //             $cancellationData = [
-    //                 'order_id' => $order->id,
-    //                 'reason' => 'erp cancellation'
-    //             ];
-    //             $this->orderCancellationService->makeOrderCancellation($cancellationData);
-    //             break;
-    //         case 'completed':
-    //             $orderTracking->completed_at = now();
-    //             // Send and store push notification
-    //             app(FirebaseClientService::class)->sendAndStoreNotification(
-    //                 $order->client->id,
-    //                 $order->client->fcm_token,
-    //                 'Order Status Changed',
-    //                 'Your order has been completed successfully.',
-    //                 [
-    //                     'order_id' => $order->id,
-    //                     'status' => $order->status
-    //                 ]
-    //             );
-    //             $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
-    //             break;
-    //         default:
-    //             throw new \InvalidArgumentException("Invalid status: $status");
+    //         // Set the tracking status timestamp based on the status provided
+    //         switch ($status) {
+
+    //             case 'pending':
+    //                 if ($order->status !== 'cancelled' || $order->status !== 'completed'
+    //                 || $order->status !== 'pending') {
+
+    //                     $orderTracking->pending_at = now();
+    //                     $this->moduleUtil->activityLog($order, 'change_status', null, [
+    //                         'order_number' => $order->number,
+    //                         'status' => 'pending'
+    //                     ]);
+    //                     break;
+    //                 }
+
+    //             case 'processing':
+    //                 if (
+    //                     $order->status !== 'cancelled' || $order->status !== 'completed'
+    //                     || $order->status !== 'processing'
+    //                 ) {
+
+    //                     $order->user_id = Auth::user()->id;
+    //                     $orderTracking->processing_at = now();
+    //                     // Send and store push notification
+    //                     app(FirebaseClientService::class)->sendAndStoreNotification(
+    //                         $order->client->id,
+    //                         $order->client->fcm_token,
+    //                         'Order Status Changed',
+    //                         'Your order has been processed successfully (Order ID: #' . $order->id . ').',
+    //                         [
+    //                             'order_id' => $order->id,
+    //                             'status' => $status
+    //                         ]
+    //                     );
+    //                     $this->moduleUtil->activityLog($order, 'change_status', null, [
+    //                         'order_number' => $order->number,
+    //                         'status' => 'processing'
+    //                     ]);
+    //                     break;
+    //                 }
+
+    //             case 'shipped':
+    //                 if (
+    //                     $order->status !== 'cancelled' || $order->status !== 'completed' ||
+    //                     $order->status !== 'shipped'
+    //                 ) {
+
+    //                     $order->user_id = Auth::user()->id;
+    //                     if ($delivery) {
+    //                         $this->updateDeliveryBalance($order, $delivery);
+    //                     }
+    //                     // Send and store push notification
+    //                     app(FirebaseClientService::class)->sendAndStoreNotification(
+    //                         $order->client->id,
+    //                         $order->client->fcm_token,
+    //                         'Order Status Changed',
+    //                         'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
+    //                         [
+    //                             'order_id' => $order->id,
+    //                             'status' => $status
+    //                         ]
+    //                     );
+    //                     $orderTracking->shipped_at = now();
+    //                     $this->moduleUtil->activityLog($order, 'change_status', null, [
+    //                         'order_number' => $order->number,
+    //                         'status' => 'shipped'
+    //                     ]);
+    //                     break;
+
+    //                 }
+    //             case 'cancelled':
+    //                 if ($order->status !== 'cancelled' || $order->status !== 'completed') {
+
+    //                     $orderTracking->cancelled_at = now();
+    //                     $this->moduleUtil->activityLog($order, 'change_status', null, [
+    //                         'order_number' => $order->number,
+    //                         'status' => 'cancelled'
+    //                     ]);
+    //                     $cancellationData = [
+    //                         'order_id' => $order->id,
+    //                         'reason' => 'erp cancellation'
+    //                     ];
+
+    //                     if ($order->order_status === 'pending' || $order->order_status === 'processing') {
+    //                         $this->orderCancellationService->makeOrderCancellation($cancellationData);
+    //                     }
+    //                     break;
+    //                 }
+
+    //             case 'completed':
+    //                 if ($order->status !== 'completed' || $order->status !== 'cancelled') {
+    //                     $orderTracking->completed_at = now();
+
+    //                     // Send and store push notification
+    //                     app(FirebaseClientService::class)->sendAndStoreNotification(
+    //                         $order->client->id,
+    //                         $order->client->fcm_token,
+    //                         'Order Status Changed',
+    //                         'Your order has been completed successfully (Order ID: #' . $order->id . ').',
+    //                         [
+    //                             'order_id' => $order->id,
+    //                             'status' => $status
+    //                         ]
+    //                     );
+    //                     $this->moduleUtil->activityLog($order, 'change_status', null, [
+    //                         'order_number' => $order->number,
+    //                         'status' => 'completed'
+    //                     ]);
+    //                     break;
+
+    //                 }
+
+    //             default:
+    //                 throw new \InvalidArgumentException("Invalid status: $status");
+    //         }
+
+    //         // Save the order and tracking record (it will either update or create)
+    //         $order->order_status = $status;
+    //         $order->save();
+    //         $orderTracking->save();
+
+    //         // Commit the transaction
+    //         DB::commit();
+
+    //         return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
+    //     } catch (\Exception $e) {
+    //         // Rollback the transaction if anything fails
+    //         DB::rollBack();
+
+    //         \Log::info('change order status', [$e]);
+    //         return response()->json(['success' => false, 'message' => 'Failed to update order status.', 'error' => $e->getMessage()], 500);
     //     }
-
-    //     // Save the order tracking record (it will either update or create)
-    //     $orderTracking->save();
-
-    //     return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
     // }
 
 
@@ -416,134 +483,98 @@ class OrderController extends Controller
 
         $status = request()->input('order_status');
 
-        // Begin a database transaction
         DB::beginTransaction();
 
         try {
             $order = Order::findOrFail($orderId);
+            $previousStatus = $order->status;
 
-            // Check if an OrderTracking already exists for the order
             $orderTracking = OrderTracking::firstOrNew(['order_id' => $order->id]);
-
             $deliveryOrder = DeliveryOrder::where('order_id', $orderId)->first();
             $delivery = $deliveryOrder ? Delivery::find($deliveryOrder->delivery_id) : null;
 
-            // Set the tracking status timestamp based on the status provided
+            if (!in_array($status, ['pending', 'processing', 'shipped', 'cancelled', 'completed'])) {
+                throw new \InvalidArgumentException("Invalid status: $status");
+            }
+
+            if (in_array($previousStatus, ['cancelled', 'completed']) || $previousStatus === $status) {
+                return response()->json(['success' => false, 'message' => 'Order status cannot be changed from current state.'], 400);
+            }
+
+            // Handle each status
             switch ($status) {
                 case 'pending':
                     $orderTracking->pending_at = now();
-                    $this->moduleUtil->activityLog($order, 'change_status', null, [
-                        'order_number' => $order->number,
-                        'status' => 'pending'
-                    ]);
                     break;
 
                 case 'processing':
-                    $order->user_id = Auth::user()->id;
                     $orderTracking->processing_at = now();
-                    // Send and store push notification
-                    app(FirebaseClientService::class)->sendAndStoreNotification(
-                        $order->client->id,
-                        $order->client->fcm_token,
-                        'Order Status Changed',
-                        'Your order has been processed successfully (Order ID: #' . $order->id . ').',
-                        [
-                            'order_id' => $order->id,
-                            'status' => $status
-                        ]
-                    );
-                    $this->moduleUtil->activityLog($order, 'change_status', null, [
-                        'order_number' => $order->number,
-                        'status' => 'processing'
-                    ]);
+                    $order->user_id = auth()->id();
+                    $this->sendNotification($order, 'processed');
                     break;
 
                 case 'shipped':
-                    $order->user_id = Auth::user()->id;
+                    $orderTracking->shipped_at = now();
+                    $order->user_id = auth()->id();
                     if ($delivery) {
                         $this->updateDeliveryBalance($order, $delivery);
                     }
-                    // Send and store push notification
-                    app(FirebaseClientService::class)->sendAndStoreNotification(
-                        $order->client->id,
-                        $order->client->fcm_token,
-                        'Order Status Changed',
-                        'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
-                        [
-                            'order_id' => $order->id,
-                            'status' => $status
-                        ]
-                    );
-                    $orderTracking->shipped_at = now();
-                    $this->moduleUtil->activityLog($order, 'change_status', null, [
-                        'order_number' => $order->number,
-                        'status' => 'shipped'
-                    ]);
+                    $this->sendNotification($order, 'shipped');
                     break;
 
                 case 'cancelled':
-                    if ($order->status !== 'cancelled') {
-
-                        $orderTracking->cancelled_at = now();
-                        $this->moduleUtil->activityLog($order, 'change_status', null, [
-                            'order_number' => $order->number,
-                            'status' => 'cancelled'
-                        ]);
-                        $cancellationData = [
+                    $orderTracking->cancelled_at = now();
+                    if (in_array($order->order_status, ['pending', 'processing'])) {
+                        $this->orderCancellationService->makeOrderCancellation([
                             'order_id' => $order->id,
                             'reason' => 'erp cancellation'
-                        ];
-
-                        if ($order->order_status === 'pending' || $order->order_status === 'processing') {
-                            $this->orderCancellationService->makeOrderCancellation($cancellationData);
-                        }
-                        break;
+                        ]);
                     }
+                    break;
 
                 case 'completed':
-                    if ($order->status !== 'completed') {
-                        $orderTracking->completed_at = now();
-
-                        // Send and store push notification
-                        app(FirebaseClientService::class)->sendAndStoreNotification(
-                            $order->client->id,
-                            $order->client->fcm_token,
-                            'Order Status Changed',
-                            'Your order has been completed successfully (Order ID: #' . $order->id . ').',
-                            [
-                                'order_id' => $order->id,
-                                'status' => $status
-                            ]
-                        );
-                        $this->moduleUtil->activityLog($order, 'change_status', null, [
-                            'order_number' => $order->number,
-                            'status' => 'completed'
-                        ]);
-                        break;
-
-                    }
-
-                default:
-                    throw new \InvalidArgumentException("Invalid status: $status");
+                    $orderTracking->completed_at = now();
+                    $this->sendNotification($order, 'completed');
+                    break;
             }
 
-            // Save the order and tracking record (it will either update or create)
+            // Save and log
             $order->order_status = $status;
             $order->save();
             $orderTracking->save();
 
-            // Commit the transaction
+            $this->moduleUtil->activityLog($order, 'change_status', null, [
+                'order_number' => $order->number,
+                'status' => $status
+            ]);
+
             DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Order status updated successfully.']);
-        } catch (\Exception $e) {
-            // Rollback the transaction if anything fails
-            DB::rollBack();
 
-            \Log::info('change order status', [$e]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to change order status', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['success' => false, 'message' => 'Failed to update order status.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
+    private function sendNotification(Order $order, string $status)
+    {
+        $statusText = ucfirst($status);
+        app(FirebaseClientService::class)->sendAndStoreNotification(
+            $order->client->id,
+            $order->client->fcm_token,
+            'Order Status Changed',
+            "Your order has been {$statusText} successfully (Order ID: #{$order->id}).",
+            [
+                'order_id' => $order->id,
+                'status' => $status
+            ]
+        );
+    }
+
 
 
     public function changePaymentStatus($orderId)
