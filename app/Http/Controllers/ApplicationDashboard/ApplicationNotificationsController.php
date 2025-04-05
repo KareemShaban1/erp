@@ -105,7 +105,7 @@ class ApplicationNotificationsController extends Controller
                 foreach ($clients as $client) {
                     app(FirebaseClientService::class)->sendAndStoreNotification(
                         $client->id,
-                        $client->fcm_token,
+                        $client->fcm_token ?? "test123",
                         $request->title,
                         $request->body,
                         [
