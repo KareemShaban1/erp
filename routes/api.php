@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\BusinessLocationController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ClientActivityLogController;
 use App\Http\Controllers\Api\ClientController;
 use App\Http\Controllers\Api\DiscountController;
 use App\Http\Controllers\Api\OrderCancellationController;
@@ -110,6 +111,7 @@ Route::middleware('auth:sanctum-client')->group(function () {
 
     Route::get('orders/{id}', [OrderController::class, 'show']);
 
+    Route::post('client_activity_log',[ClientActivityLogController::class, 'logActivity']);
 
     //   getClientNotifications
 });
@@ -168,3 +170,4 @@ Route::post('delivery/login', [AuthController::class, 'deliveryLogin']);
 // sendNotification
 
 Route::post('user/login', [AuthController::class, 'userLogin']);
+

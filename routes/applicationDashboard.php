@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApplicationDashboard\ClientActivityLogController;
 use App\Http\Controllers\ApplicationDashboard\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -191,5 +192,8 @@ Route::post('applicationDashboard/settings/destroy/{id}', 'ApplicationDashboard\
     ->name('application_settings.destroy');
 // ----------------------------------------------
 
+
+Route::get('client_logs',[ClientActivityLogController::class,'activityLog']);
+Route::delete('client_logs/{id}/delete',[ClientActivityLogController::class,'deleteActivity'])->name('client_logs.delete');
 
 });

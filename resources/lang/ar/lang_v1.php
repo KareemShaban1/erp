@@ -1581,5 +1581,6 @@ return [
 "message"=>"message",
 "normal"=>"العادية",
 "shipping_cost"=>"مصاريف الشحن",
-"Type"=>"النوع"
+"Type"=>"النوع",
+"log_client_activity"=>"تسجيل نشاط العميل"
 ];

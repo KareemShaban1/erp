@@ -272,14 +272,14 @@ class ApplicationSidebarMenu
 
 
             if (auth()->user()->can('product_suggestions.view')) {
-            $menu->url(
-                action('ApplicationDashboard\SuggestionProductController@index'),
-                __('lang_v1.suggestion_products'),
-                [
-                    'icon' => 'fa fa-search',
-                    'active' => request()->segment(1)
-                ]
-            )->order(80);
+                $menu->url(
+                    action('ApplicationDashboard\SuggestionProductController@index'),
+                    __('lang_v1.suggestion_products'),
+                    [
+                        'icon' => 'fa fa-search',
+                        'active' => request()->segment(1)
+                    ]
+                )->order(80);
             }
 
             if (auth()->user()->can('applicationSettings.view')) {
@@ -304,6 +304,16 @@ class ApplicationSidebarMenu
                     ['icon' => 'fa fas fa-chart-bar']
                 )->order(26);
             }
+
+            $menu->url(
+                action('ApplicationDashboard\ClientActivityLogController@activityLog'),
+                __('lang_v1.client_logs'),
+                [
+                    'icon' => 'fa a-list',
+                    'active' => request()->segment(1)
+                ]
+            )->order(80);
+
 
             // ApplicationDashboard\OrderReportsController@index
         });
