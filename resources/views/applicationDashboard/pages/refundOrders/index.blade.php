@@ -17,7 +17,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('orders_refund.create')
+    @can('orders_refund.view')
         @slot('tool')
         <div class="box-tools">
         </div>
