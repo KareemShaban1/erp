@@ -121,9 +121,10 @@ class RefundOrderController extends Controller
         $user = Auth::user();
 
         if (!$user->isSuperAdmin()) {
-            dd($user->hasPermissionTo('essentials.view_all_orders'));
             // If the user does not have permission to view all orders, filter by user_id
             if (!$user->hasPermissionTo('essentials.view_all_orders')) {
+                dd($query->get());
+
                 $query->where(function ($subQuery) use ($user) {
                     $subQuery->whereNull('orders.user_id') // Include orders where user_id is null
                         ->orWhere('orders.user_id', $user->id); // Include only orders assigned to the user
