@@ -18,7 +18,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('orders.create')
+    @can('orders.view')
         @slot('tool')
         <div class="box-tools">
             
