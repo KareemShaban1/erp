@@ -101,12 +101,23 @@ class TransferOrderController extends Controller
             ])
             ->where('orders.order_type', 'order_transfer');
 
-        if (Auth::check()) {
-            $query->where(function ($subQuery) {
-                $subQuery->whereNull('orders.user_id') // Allow orders where user_id is null
-                    ->orWhere('orders.user_id', Auth::user()->id); // Also include orders assigned to the user
-            });
+        $user = Auth::user();
+
+        if (!$user->isSuperAdmin()) {
+            // If the user does not have permission to view all orders, filter by user_id
+            if (!$user->hasPermissionTo('essentials.view_all_orders')) {
+                $query->where(function ($subQuery) use ($user) {
+                    $subQuery->whereNull('orders.user_id') // Include orders where user_id is null
+                        ->orWhere('orders.user_id', $user->id); // Include only orders assigned to the user
+                });
+            }
         }
+        // if (Auth::check()) {
+        //     $query->where(function ($subQuery) {
+        //         $subQuery->whereNull('orders.user_id') // Allow orders where user_id is null
+        //             ->orWhere('orders.user_id', Auth::user()->id); // Also include orders assigned to the user
+        //     });
+        // }
 
         $query = $query->latest();
 

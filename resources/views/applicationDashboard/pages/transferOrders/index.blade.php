@@ -17,7 +17,7 @@
 <!-- Main content -->
 <section class="content">
     @component('components.widget', ['class' => 'box-primary'])
-    @can('orders_refund.create')
+    @can('orders_transfer.view')
         @slot('tool')
         <div class="box-tools">
         </div>
@@ -28,7 +28,7 @@
 
         @endslot
     @endcan
-    @can('orders_refund.view')
+    @can('orders_transfer.view')
         <div class="table-responsive">
             <table class="table table-bordered table-striped" id="order_transfer_table">
                 <thead>
