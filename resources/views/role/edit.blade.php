@@ -1581,8 +1581,8 @@
           <div class="col-md-12">
             <div class="checkbox">
               <label>
-                {!! Form::checkbox('permissions[]', 'orders_refund.view', in_array('orders_refund.view', $role_permissions), 
-                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_view' ) }}
+                {!! Form::checkbox('permissions[]', 'orders_refund.create', in_array('orders_refund.create', $role_permissions), 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_create' ) }}
               </label>
             </div>
           </div>
