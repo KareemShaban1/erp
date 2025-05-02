@@ -4,6 +4,7 @@ namespace App\Services\API;
 
 use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\ProductWithoutAuthCollection;
 use App\Models\Product;
 use App\Models\Variation;
 use App\Services\BaseService;
@@ -87,6 +88,84 @@ class ProductService extends BaseService
 
             // Wrap the data in ProductCollection and apply withFullData() here
             return (new ProductCollection($products))
+                ->withFullData(!($request->full_data == 'false'));
+
+        } catch (\Exception $e) {
+            // Handle any exception that might occur
+            return $this->handleException($e, __('message.Error happened while listing products'));
+        }
+    }
+
+
+    public function listWithoutAuth(Request $request)
+    {
+        try {
+
+            // Initialize the query with necessary relationships
+            $query = Product::with([
+                'media',
+                'unit:id,actual_name,short_name',
+                'brand:id,name',
+                'category:id,name',
+                'sub_category:id,name',
+                'warranty:id,name,duration,duration_type'
+            ])
+                ->where('products.type', '!=', 'modifier')
+                // ->appBusinessId()
+                ->productForSales()
+                ->activeInApp()
+                ->latest();
+
+            // Exclude products with negative stock
+            // $query->whereHas('variations.variation_location_details', function ($q) {
+            //     $q->havingRaw('SUM(qty_available) >= 0');
+            // });
+
+
+            // Check if a category_id is passed and apply the filter
+            if (!empty($request->category_id)) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            if (!empty($request->category_id) && !empty($request->sub_category_id)) {
+                $query->where('category_id', $request->category_id)->
+                    where('sub_category_id', $request->sub_category_id);
+            }
+
+
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+
+                // Split the search term into tokens (words)
+                $tokens = explode(' ', strtolower($searchTerm));
+
+                $query->where(function ($q) use ($tokens) {
+                    foreach ($tokens as $token) {
+                        $q->where(function ($innerQuery) use ($token) {
+                            $innerQuery->where('name', 'like', '%' . $token . '%')
+                                ->orWhere('sku', 'like', '%' . $token . '%')
+                                //    ->orWhere('description', 'like', '%' . $token . '%')
+                                ->orWhereHas('tags', function ($tagQuery) use ($token) {
+                                    $tagQuery->where('name', 'like', '%' . $token . '%');
+                                });
+                        });
+                    }
+                });
+            }
+
+            // if ($product->product_type == 'combo') {
+            //     if ($check_qty) {
+            //         $product->qty_available = $this->calculateComboQuantity($location_id, $product->combo_variations);
+            //     }
+
+            // Apply withTrashed logic if needed
+            $query = $this->withTrashed($query, $request);
+
+            // Apply pagination or fetch the data
+            $products = $this->withPagination($query, $request);
+
+            // Wrap the data in ProductCollection and apply withFullData() here
+            return (new ProductWithoutAuthCollection($products))
                 ->withFullData(!($request->full_data == 'false'));
 
         } catch (\Exception $e) {

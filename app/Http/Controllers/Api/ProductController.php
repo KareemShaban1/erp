@@ -22,20 +22,36 @@ class ProductController extends Controller
     }
 
     /**
-     * Display a listing of the categories.
+     * Display a listing of the products.
      */
     public function index(Request $request)
     {
-        $categories = $this->service->list($request);
+        $products = $this->service->list($request);
 
-        if ($categories instanceof JsonResponse) {
-            return $categories;
+        if ($products instanceof JsonResponse) {
+            return $products;
         }
 
-        return $categories->additional([
+        return $products->additional([
             'code' => 200,
             'status' => 'success',
-            'message' =>  __('message.Categories have been retrieved successfully'),
+            'message' =>  __('message.Products have been retrieved successfully'),
+        ]);
+    }
+
+    public function indexWithoutAuth(Request $request)
+    {
+
+        $products = $this->service->listWithoutAuth($request);
+
+        if ($products instanceof JsonResponse) {
+            return $products;
+        }
+
+        return $products->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' =>  __('message.Products have been retrieved successfully'),
         ]);
     }
 
@@ -142,7 +158,7 @@ class ProductController extends Controller
 
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:categories,id',
+            'ids.*' => 'integer|exists:products,id',
         ]);
 
 
