@@ -5,6 +5,7 @@ namespace App\Services\API;
 use App\Http\Resources\Product\ProductCollection;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductWithoutAuthCollection;
+use App\Http\Resources\Product\ProductWithoutAuthResource;
 use App\Models\Product;
 use App\Models\Variation;
 use App\Services\BaseService;
@@ -205,6 +206,55 @@ class ProductService extends BaseService
             // return new ProductResource($product);
 
             return (new ProductResource($product))->setVariationId($request->variationId);
+
+
+            // // Return the product
+            // return response()->json([
+            //     'success' => true,
+            //     'data' => $product,
+            // ], 200);
+
+        } catch (\Exception $e) {
+            // Handle the exception
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.Error happened while showing Product'),
+                'error' => $e->getMessage(), // Optional: Include error details for debugging
+            ], 500);
+        }
+    }
+
+
+    public function showWithoutAuth(Request $request , $id)
+    {
+        try {
+            // Fetch product with relationships and filters
+            $product = Product::with([
+                'media',
+                'unit:id,actual_name,short_name',
+                'brand:id,name',
+                'category:id,name',
+                'sub_category:id,name',
+                'warranty:id,name,duration,duration_type',
+                'variations.variation_location_details.location' // Load variations and their stock locations
+            ])
+                ->where('type', '!=', 'modifier') // Simplified column reference
+                // ->appBusinessId() // Assuming this is a global scope or local query scope
+                ->productForSales() // Assuming this is a local query scope
+                ->activeInApp() // Assuming this is a local query scope
+                ->find($id);
+
+            // Check if product exists
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.Product not found'),
+                ], 404);
+            }
+
+            // return new ProductResource($product);
+
+            return (new ProductWithoutAuthResource($product))->setVariationId($request->variationId);
 
 
             // // Return the product

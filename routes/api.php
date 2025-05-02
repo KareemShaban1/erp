@@ -173,3 +173,4 @@ Route::post('user/login', [AuthController::class, 'userLogin']);
 
 
 Route::get('not_auth_products', [ProductController::class, 'indexWithoutAuth']);
+Route::get('not_auth_product_details/{product_id}', [ProductController::class, 'showWithoutAuth']);

@@ -86,6 +86,20 @@ class ProductController extends Controller
 
     }
 
+
+    public function showWithoutAuth(Request $request, $id)
+    {
+
+        $product = $this->service->showWithoutAuth( $request,$id);
+
+        if ($product instanceof JsonResponse) {
+            return $product;
+        }
+
+        return $this->returnJSON($product, __('message.Product has been showed successfully'));
+
+    }
+
      /**
      * Display the specified Product.
      */
