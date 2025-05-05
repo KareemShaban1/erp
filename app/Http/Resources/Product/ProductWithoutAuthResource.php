@@ -48,6 +48,7 @@ class ProductWithoutAuthResource extends JsonResource
 
         if ($this->withFullData) {
             $variations = $this->variations->map(function ($variation) {
+                $variation->makeHidden(['total_qty_available','client_selling_group', 'client_selling_price']);
                 $variation->variation_location_details = $variation->variation_location_details->filter(function ($details) {
                     return $details->location->is_active == 1;
                 });
