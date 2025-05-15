@@ -53,7 +53,7 @@ class Variation extends Model
         'combo_variations' => 'array',
     ];
 
-    protected $appends = ['code', 'total_qty_available','client_selling_group', 'client_selling_price'];
+    protected $appends = ['code', 'total_qty_available', 'client_selling_group', 'client_selling_price'];
 
 
     public function product_variation()
@@ -86,9 +86,9 @@ class Variation extends Model
     {
         // return $this->hasMany(\App\Models\VariationLocationDetails::class);
         return $this->hasMany(\App\Models\VariationLocationDetails::class)
-                ->whereHas('location', function ($query) {
-                    $query->where('active_in_app', 1);
-                });
+            ->whereHas('location', function ($query) {
+                $query->where('active_in_app', 1);
+            });
     }
 
     /**
@@ -148,21 +148,21 @@ class Variation extends Model
         // // Check if the variation has combo variations
         // if (!empty($this->combo_variations) && is_array($this->combo_variations)) {
         //     $total_qty = 0;
-    
+
         //     // Iterate through each combo variation
         //     foreach ($this->combo_variations as $combo_variation) {
         //         // Find the corresponding variation by its ID
         //         $variation = self::find($combo_variation['variation_id']);
-    
+
         //         if ($variation) {
         //             // Multiply the quantity available by the required quantity
         //             $total_qty += $variation->variation_location_details()->sum('qty_available') * $combo_variation['quantity'];
         //         }
         //     }
-    
+
         //     return $total_qty;
         // }
-    
+
         // If no combo variations, return the normal sum of qty_available
         return $this->variation_location_details()->sum('qty_available');
     }
@@ -195,46 +195,46 @@ class Variation extends Model
     // }
 
     public function getClientSellingGroupAttribute()
-{
-    if (Auth::check()) {
-        $client = Client::find(Auth::id());
-        if ($client && isset($client->contact->customer_group->selling_price_group)) {
-            return $client->contact->customer_group->selling_price_group->name;
+    {
+        if (Auth::check()) {
+            $client = Client::find(Auth::id());
+            if ($client && isset($client->contact->customer_group->selling_price_group)) {
+                return $client->contact->customer_group->selling_price_group->name;
+            }
         }
-    }
 
-    // Guest fallback
-    $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
-
-    return $guestGroup ? $guestGroup->name : 'Guest'; // Default name if not found
-}
-
-public function getClientSellingPriceAttribute()
-{
-    $sellingGroupId = null;
-
-    if (Auth::check()) {
-        $client = Client::find(Auth::id());
-        if ($client && isset($client->contact->customer_group->selling_price_group)) {
-            $sellingGroupId = $client->contact->customer_group->selling_price_group->id;
-        }
-    } else {
-        // Fallback to 'guest' group
+        // Guest fallback
         $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
-        if ($guestGroup) {
-            $sellingGroupId = $guestGroup->id;
+
+        return $guestGroup ? $guestGroup->name : 'Guest'; // Default name if not found
+    }
+
+    public function getClientSellingPriceAttribute()
+    {
+        $sellingGroupId = null;
+
+        if (Auth::check()) {
+            $client = Client::find(Auth::id());
+            if ($client && isset($client->contact->customer_group->selling_price_group)) {
+                $sellingGroupId = $client->contact->customer_group->selling_price_group->id;
+            }
+        } else {
+            // Fallback to 'guest' group
+            $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
+            if ($guestGroup) {
+                $sellingGroupId = $guestGroup->id;
+            }
         }
+
+        if (!$sellingGroupId) {
+            return 100.0; // or a default price like 0
+        }
+
+        return DB::table('variation_group_prices')
+            ->where('price_group_id', $sellingGroupId)
+            ->where('variation_id', $this->id)
+            ->value('price_inc_tax') ?? 100.0; // or a default price
     }
 
-    if (!$sellingGroupId) {
-        return null; // or a default price like 0
-    }
 
-    return DB::table('variation_group_prices')
-        ->where('price_group_id', $sellingGroupId)
-        ->where('variation_id', $this->id)
-        ->value('price_inc_tax') ?? 100.0; // or a default price
-}
-
-    
 }
