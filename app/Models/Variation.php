@@ -168,30 +168,73 @@ class Variation extends Model
     }
 
 
+    // public function getClientSellingGroupAttribute()
+    // {
+    //     $client_id = Auth::user()->id;
+    //     $client = Client::findOrFail($client_id);        
+    //     return $client && isset($client->contact->customer_group->selling_price_group)
+    //         ? $client->contact->customer_group->selling_price_group->name
+    //         : null;
+    // }
+
+    // public function getClientSellingPriceAttribute()
+    // {
+    //     $client_id = Auth::user()->id;
+    //     $client = Client::findOrFail($client_id);
+
+    //     if (!$client || !isset($client->contact->customer_group->selling_price_group)) {
+    //         return null;
+    //     }
+
+    //     $selling_group_id = $client->contact->customer_group->selling_price_group->id;
+
+    //     return DB::table('variation_group_prices')
+    //         ->where('price_group_id', $selling_group_id)
+    //         ->where('variation_id', $this->id)
+    //         ->value('price_inc_tax'); // Use `value()` to get only the price field
+    // }
+
     public function getClientSellingGroupAttribute()
-    {
-        $client_id = Auth::user()->id;
-        $client = Client::findOrFail($client_id);        
-        return $client && isset($client->contact->customer_group->selling_price_group)
-            ? $client->contact->customer_group->selling_price_group->name
-            : null;
-    }
-
-    public function getClientSellingPriceAttribute()
-    {
-        $client_id = Auth::user()->id;
-        $client = Client::findOrFail($client_id);
-
-        if (!$client || !isset($client->contact->customer_group->selling_price_group)) {
-            return null;
+{
+    if (Auth::check()) {
+        $client = Client::find(Auth::id());
+        if ($client && isset($client->contact->customer_group->selling_price_group)) {
+            return $client->contact->customer_group->selling_price_group->name;
         }
-
-        $selling_group_id = $client->contact->customer_group->selling_price_group->id;
-
-        return DB::table('variation_group_prices')
-            ->where('price_group_id', $selling_group_id)
-            ->where('variation_id', $this->id)
-            ->value('price_inc_tax'); // Use `value()` to get only the price field
     }
+
+    // Guest fallback
+    $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
+
+    return $guestGroup ? $guestGroup->name : 'Guest'; // Default name if not found
+}
+
+public function getClientSellingPriceAttribute()
+{
+    $sellingGroupId = null;
+
+    if (Auth::check()) {
+        $client = Client::find(Auth::id());
+        if ($client && isset($client->contact->customer_group->selling_price_group)) {
+            $sellingGroupId = $client->contact->customer_group->selling_price_group->id;
+        }
+    } else {
+        // Fallback to 'guest' group
+        $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
+        if ($guestGroup) {
+            $sellingGroupId = $guestGroup->id;
+        }
+    }
+
+    if (!$sellingGroupId) {
+        return null; // or a default price like 0
+    }
+
+    return DB::table('variation_group_prices')
+        ->where('price_group_id', $sellingGroupId)
+        ->where('variation_id', $this->id)
+        ->value('price_inc_tax') ?? 100.0; // or a default price
+}
+
     
 }
