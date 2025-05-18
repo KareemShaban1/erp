@@ -48,7 +48,7 @@ class VariationResource extends JsonResource
                         'default_sell_price' => $this->default_sell_price,
                         'sell_price_inc_tax' => $this->sell_price_inc_tax,
                         'client_selling_group' => $this->client_selling_group, // Now using the model accessor
-                        'client_selling_price' => (string) $this->client_selling_price, // Now using the model accessor
+                        'client_selling_price' => $this->client_selling_price, // Now using the model accessor
                         'variation_template' => (new ProductVariationResource($this->product_variation))->withFullData(false),
                         'variation_template_value' => (new VariationValueResource($this->variation_value))->withFullData(false),
                         'media' => (new MediaCollection($this->media))->withFullData(false),
