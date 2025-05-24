@@ -194,47 +194,41 @@ class Variation extends Model
             ->value('price_inc_tax'); // Use `value()` to get only the price field
     }
 
-    // public function getClientSellingGroupAttribute()
-    // {
-    //     if (Auth::check()) {
-    //         $client = Client::find(Auth::id());
-    //         if ($client && isset($client->contact->customer_group->selling_price_group)) {
-    //             return $client->contact->customer_group->selling_price_group->name;
-    //         }
-    //     }
+    public function getGuestSellingGroupAttribute()
+    {
 
-    //     // Guest fallback
-    //     $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
+        // Guest fallback
+        $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
 
-    //     return $guestGroup ? $guestGroup->name : 'Guest'; // Default name if not found
-    // }
+        return $guestGroup ? $guestGroup->name : 'Guest'; // Default name if not found
+    }
 
-    // public function getClientSellingPriceAttribute()
-    // {
-    //     $sellingGroupId = null;
+    public function getGuestSellingPriceAttribute()
+    {
+        $sellingGroupId = null;
 
-    //     if (Auth::check()) {
-    //         $client = Client::find(Auth::id());
-    //         if ($client && isset($client->contact->customer_group->selling_price_group)) {
-    //             $sellingGroupId = $client->contact->customer_group->selling_price_group->id;
-    //         }
-    //     } else {
-    //         // Fallback to 'guest' group
-    //         $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
-    //         if ($guestGroup) {
-    //             $sellingGroupId = $guestGroup->id;
-    //         }
-    //     }
+        // if (Auth::check()) {
+        //     $client = Client::find(Auth::id());
+        //     if ($client && isset($client->contact->customer_group->selling_price_group)) {
+        //         $sellingGroupId = $client->contact->customer_group->selling_price_group->id;
+        //     }
+        // } else {
+            // Fallback to 'guest' group
+            $guestGroup = DB::table('selling_price_groups')->where('name', 'guest')->first();
+            if ($guestGroup) {
+                $sellingGroupId = $guestGroup->id;
+            }
+        // }
 
-    //     if (!$sellingGroupId) {
-    //         return 100.0; // or a default price like 0
-    //     }
+        if (!$sellingGroupId) {
+            return "100.0"; // or a default price like 0
+        }
 
-    //     return DB::table('variation_group_prices')
-    //         ->where('price_group_id', $sellingGroupId)
-    //         ->where('variation_id', $this->id)
-    //         ->value('price_inc_tax') ?? 100.0; // or a default price
-    // }
+        return DB::table('variation_group_prices')
+            ->where('price_group_id', $sellingGroupId)
+            ->where('variation_id', $this->id)
+            ->value('price_inc_tax') ?? "100.0"; // or a default price
+    }
 
 
 }
