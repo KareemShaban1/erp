@@ -1577,7 +1577,16 @@
               </label>
             </div>
         </div>
+        
         <div class="col-md-9">
+        <div class="col-md-12">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('permissions[]', 'orders_refund.view', false, 
+                [ 'class' => 'input-icheck']); !!} {{ __( 'role.orders_refund_view' ) }}
+              </label>
+            </div>
+          </div>
           <div class="col-md-12">
             <div class="checkbox">
               <label>
