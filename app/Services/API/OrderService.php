@@ -304,8 +304,14 @@ class OrderService extends BaseService
                     'location_id' => $client->business_location_id,
                     'pos_settings' => $pos_settings,
                 ];
-                $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
+                // $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
 
+                try {
+                    $this->transactionUtil->mapPurchaseSell($business, $transaction->sell_lines, 'purchase');
+                } catch (\Throwable $e) {
+                    \Log::warning('Failed to map purchase-sell lines: ' . $e->getMessage() . ' Line: ' . $e->getLine());
+                    // Optionally alert or handle the mapping error gracefully
+                }
             }
 
             // Media::uploadMedia($business_id, $transaction, request(), 'documents');
