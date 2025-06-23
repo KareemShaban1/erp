@@ -58,8 +58,8 @@ class ProductResource extends JsonResource
                 $variations = $variations->where('id', $this->variationId)->values();
             }
 
-             // Sort variations by total stock in descending order
-             $variations = $variations->sortByDesc(function ($variation) {
+            // Sort variations by total stock in descending order
+            $variations = $variations->sortByDesc(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
 
@@ -67,10 +67,10 @@ class ProductResource extends JsonResource
                 return $variation->variation_location_details->sum('qty_available');
             });
 
-            if ($current_stock < 0) {
-                // If current stock is negative, return an empty array
+            if ($current_stock <= 0) {
                 return [];
             }
+
 
             $data = array_merge($data, [
                 'description' => $this->product_description,
