@@ -67,14 +67,14 @@ class ProductResource extends JsonResource
                 return $variation->variation_location_details->sum('qty_available');
             });
 
-            // if ($current_stock < -1) {
+            if ($current_stock < -1) {
                 
-            //     return [];
-            // }
-
-            if ($current_stock <= 0) {
                 return [];
             }
+
+            // if ($current_stock <= 0) {
+            //     return [];
+            // }
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'active_in_app' => $this->active_in_app,
