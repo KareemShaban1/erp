@@ -1,21 +1,60 @@
+@php
+    $is_cat_code_enabled = isset($module_category_data['enable_taxonomy_code']) && !$module_category_data['enable_taxonomy_code'] ? false : true;
+@endphp
+@can('category.create')
+    <button type="button" class="btn btn-sm pull-right btn-primary btn-modal"
+        data-href="{{action('TaxonomyController@create')}}?type={{$category_type}}" data-container=".category_modal">
+        <i class="fa fa-plus"></i>
+        @lang('messages.add')
+    </button>
+    <br><br>
+@endcan
+
 @can('category.view')
     <div class="table-responsive">
         <table class="table table-bordered table-striped" id="category_table" style="width: 100%;">
             <thead>
                 <tr>
-                    <th>@if(!empty($module_category_data['taxonomy_label']))
-                        {{$module_category_data['taxonomy_label']}}
-                        @else
-                        @lang( 'category.category' )
-                        @endif
-                    </th>
+                    <th>@if(!empty($module_category_data['taxonomy_label'])) {{$module_category_data['taxonomy_label']}}
+                    @else @lang('category.category') @endif</th>
                     @if($is_cat_code_enabled)
-                        <th>{{ $module_category_data['taxonomy_code_label'] ?? __( 'category.code' )}}</th>
+                        <th>{{ $module_category_data['taxonomy_code_label'] ?? __('category.code')}}</th>
                     @endif
-                    <th>@lang( 'lang_v1.description' )</th>
-                    <th>@lang( 'messages.action' )</th>
+                    <th>@lang('lang_v1.description')</th>
+                    <th>@lang('messages.action')</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach ($categories as $category)
+                    <tr>
+                        <td>{{ $category->name }}</td>
+                        @if($is_cat_code_enabled)
+                            <td>{{ $category->short_code }}</td>
+                        @endif
+                        <td>{{ $category->description }}</td>
+                        <td>
+                            @can('category.update')
+                                <button type="button" class="btn btn-xs btn-primary edit_category_button"
+                                    data-href="{{ action('TaxonomyController@edit', [$category->id, 'type' => 'device']) }}"
+                                    data-container=".category_modal">
+                                    <i class="glyphicon glyphicon-edit"></i> @lang('messages.edit')
+                                </button>
+
+                            @endcan
+                            @can('category.delete')
+                             <button type="button" class="btn btn-xs btn-danger delete_category_button"
+                                    data-href="{{ action('TaxonomyController@destroy', [$category->id]) }}"
+                                    data-container=".category_modal">
+                                    <i class="glyphicon glyphicon-trash"></i> @lang('messages.delete')
+                                </button>
+                            @endcan
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
         </table>
     </div>
 @endcan
+
+<div class="modal fade category_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+</div>

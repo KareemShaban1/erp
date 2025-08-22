@@ -168,7 +168,7 @@ class JobSheetController extends Controller
 
                     if (auth()->user()->can("job_sheet.view_assigned") || auth()->user()->can("job_sheet.view_all") || auth()->user()->can("job_sheet.create")) {
                             $html .= '<li>
-                                <a href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@show', ['id' => $row->id]) . '" class="cursor-pointer"><i class="fa fa-eye"></i> '.__("messages.view").'
+                                <a href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@show', ['job_sheet' => $row->id]) . '" class="cursor-pointer"><i class="fa fa-eye"></i> '.__("messages.view").'
                                 </a>
                                 </li>';
                     }
@@ -182,7 +182,7 @@ class JobSheetController extends Controller
 
                     if (auth()->user()->can("job_sheet.edit")) {
                         $html .= '<li>
-                                    <a href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['id' => $row->id]) . '" class="cursor-pointer edit_job_sheet"><i class="fa fa-edit"></i> '.__("messages.edit").'
+                                    <a href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['job_sheet' => $row->id]) . '" class="cursor-pointer edit_job_sheet"><i class="fa fa-edit"></i> '.__("messages.edit").'
                                     </a>
                                 </li>';
 
@@ -217,7 +217,7 @@ class JobSheetController extends Controller
 
                     if (auth()->user()->can("job_sheet.delete")) {
                         $html .= '<li>
-                                    <a data-href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@destroy', ['id' => $row->id]) . '"  id="delete_job_sheet" class="cursor-pointer">
+                                    <a data-href="' . action('\Modules\Repair\Http\Controllers\JobSheetController@destroy', ['job_sheet' => $row->id]) . '"  id="delete_job_sheet" class="cursor-pointer">
                                         <i class="fas fa-trash"></i>
                                         '.__("messages.delete").'
                                     </a>
@@ -413,7 +413,7 @@ class JobSheetController extends Controller
             }
 
             return redirect()
-                ->action('\Modules\Repair\Http\Controllers\JobSheetController@show', [$job_sheet->id])
+                ->action('\Modules\Repair\Http\Controllers\JobSheetController@show', ['job_sheet'=>$job_sheet->id])
                 ->with('status', ['success' => true,
                     'msg' => __("lang_v1.success")]);
 

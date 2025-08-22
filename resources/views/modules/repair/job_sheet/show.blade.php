@@ -19,7 +19,7 @@
 				<div class="box-header no-print">
 					<div class="box-tools">
 						@if(auth()->user()->can("job_sheet.edit"))
-							<a href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['id' => $job_sheet->id])}}" class="btn btn-info cursor-pointer">
+							<a href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['job_sheet' => $job_sheet->id])}}" class="btn btn-info cursor-pointer">
 			                    <i class="fa fa-edit"></i>
 			                    @lang("messages.edit")
 			                </a>

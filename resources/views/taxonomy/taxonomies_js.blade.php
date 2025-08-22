@@ -7,19 +7,49 @@
             placeholder: "Select subcategories",
             allowClear: true
         });
-        function getTaxonomiesIndexPage () {
-            var data = {category_type : $('#category_type').val()};
-            $.ajax({
-                method: "GET",
-                dataType: "html",
-                url: '/taxonomies-ajax-index-page',
-                data: data,
-                async: false,
-                success: function(result){
-                    $('.taxonomy_body').html(result);
-                }
+        // function getTaxonomiesIndexPage () {
+        //     var data = {category_type : $('#category_type').val()};
+        //     $.ajax({
+        //         method: "GET",
+        //         dataType: "html",
+        //         url: '/taxonomies-ajax-index-page',
+        //         data: data,
+        //         async: false,
+        //         success: function(result){
+        //             console.log(result);
+        //             $('.taxonomy_body').html(result);
+        //         }
+        //     });
+        // }
+
+        function getTaxonomiesIndexPage() {
+    var data = {category_type : $('#category_type').val()};
+    $.ajax({
+        method: "GET",
+        dataType: "html",
+        url: '/taxonomies-ajax-index-page',
+        data: data,
+        success: function(result){
+            // Destroy previous DataTable instance if exists
+            if ($.fn.DataTable.isDataTable('#category_table')) {
+                $('#category_table').DataTable().clear().destroy();
+            }
+
+            // Inject new HTML
+            $('.taxonomy_body').html(result);
+
+            // Re-init DataTable
+            $('#category_table').DataTable({
+                processing: true,
+                serverSide: false, // or true if you plan to load via ajax
+                searching: true,
+                paging: true,
+                
             });
         }
+    });
+}
+
 
         function initializeTaxonomyDataTable() {
             //Category table
@@ -68,7 +98,8 @@
             if (result.success === true) {
                 $('div.category_modal').modal('hide');
                 toastr.success(result.msg);
-                category_table.ajax.reload();
+                // category_table.ajax.reload();
+                window.location.reload();
             } else {
                 toastr.error(result.msg);
             }
@@ -100,7 +131,8 @@
                         if (result.success === true) {
                             $('div.category_modal').modal('hide');
                             toastr.success(result.msg);
-                            category_table.ajax.reload();
+                            // reload page
+                            window.location.reload();
                         } else {
                             toastr.error(result.msg);
                         }
@@ -129,7 +161,9 @@
                     success: function(result) {
                         if (result.success === true) {
                             toastr.success(result.msg);
-                            category_table.ajax.reload();
+                            // category_table.ajax.reload();
+                            window.location.reload();
+
                         } else {
                             toastr.error(result.msg);
                         }

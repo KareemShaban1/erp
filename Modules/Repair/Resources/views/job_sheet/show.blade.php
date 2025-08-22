@@ -6,10 +6,10 @@
 @include('repair::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-    <h1>
-    	@lang('repair::lang.job_sheet')
-    	(<code>{{$job_sheet->job_sheet_no}}</code>)
-    </h1>
+	<h1>
+		@lang('repair::lang.job_sheet')
+		(<code>{{$job_sheet->job_sheet_no}}</code>)
+	</h1>
 </section>
 <!-- Main content -->
 <section class="content">
@@ -19,32 +19,39 @@
 				<div class="box-header no-print">
 					<div class="box-tools">
 						@if(auth()->user()->can("job_sheet.edit"))
-							<a href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['id' => $job_sheet->id])}}" class="btn btn-info cursor-pointer">
-			                    <i class="fa fa-edit"></i>
-			                    @lang("messages.edit")
-			                </a>
-			            @endif
-						<button type="button" class="btn btn-primary" aria-label="Print" id="print_jobsheet">
+							<a href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@edit', ['job_sheet' => $job_sheet->id])}}"
+								class="btn btn-info cursor-pointer">
+								<i class="fa fa-edit"></i>
+								@lang("messages.edit")
+							</a>
+						@endif
+						<button type="button" class="btn btn-primary"
+							aria-label="Print" id="print_jobsheet">
 							<i class="fa fa-print"></i>
-							@lang( 'repair::lang.print_format_1' )
-				      	</button>
+							@lang('repair::lang.print_format_1')
+						</button>
 
-				      	<a class="btn btn-success" href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@print', ['id' => $job_sheet->id])}}" target="_blank">
+						<a class="btn btn-success"
+							href="{{action('\Modules\Repair\Http\Controllers\JobSheetController@print', ['id' => $job_sheet->id])}}"
+							target="_blank">
 							<i class="fas fa-file-pdf"></i>
-							@lang( 'repair::lang.print_format_2' )
-				      	</a>
-			      </div>
-			    </div>
+							@lang('repair::lang.print_format_2')
+						</a>
+					</div>
+				</div>
 				<div class="box-body" id="job_sheet">
 					{{-- business address --}}
 					<div class="width-100">
 						<div class="width-50 f-left" style="padding-top: 40px;">
 							@if(!empty(Session::get('business.logo')))
-			                  <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
-			                @endif
+								<img src="{{ asset('uploads/business_logos/' . Session::get('business.logo')) }}"
+									alt="Logo"
+									style="width: auto; max-height: 90px; margin: auto;">
+							@endif
 						</div>
-						<div class="width-50 f-left" >
-							<p style="text-align: center;padding-top: 40px;padding-left: 110px;">
+						<div class="width-50 f-left">
+							<p
+								style="text-align: center;padding-top: 40px;padding-left: 110px;">
 								<strong class="font-23">
 									{{$job_sheet->customer->business->name}}
 								</strong>
@@ -56,7 +63,7 @@
 									{!!$job_sheet->businessLocation->location_address!!}
 								</span>
 							</p>
-						</div>	
+						</div>
 					</div>
 					{{-- Job sheet details --}}
 					<table class="table table-bordered" style="margin-top: 15px;">
@@ -71,7 +78,7 @@
 						<tr>
 							<td>
 								<b>@lang('repair::lang.service_type'):</b>
-								@lang('repair::lang.'.$job_sheet->service_type)
+								@lang('repair::lang.' . $job_sheet->service_type)
 							</td>
 							<th rowspan="2">
 								<b>
@@ -94,7 +101,8 @@
 							<td colspan="2">
 								<strong>@lang('role.customer'):</strong><br>
 								<p>
-									{{$job_sheet->customer->name}} <br>
+									{{$job_sheet->customer->name}}
+									<br>
 									{!! $job_sheet->customer->contact_address !!}
 									@if(!empty($contact->email))
 										<br>@lang('business.email'):
@@ -141,8 +149,8 @@
 									@foreach($job_sheet->invoices as $invoice)
 										{{$invoice->invoice_no}}
 										@if (!$loop->last)
-									        {{', '}}
-									    @endif
+											{{', '}}
+										@endif
 									@endforeach
 								@endif
 							</td>
@@ -154,7 +162,8 @@
 								</b>
 							</td>
 							<td>
-								<span class="display_currency" data-currency_symbol="true">
+								<span class="display_currency"
+									data-currency_symbol="true">
 									{{$job_sheet->estimated_cost}}
 								</span>
 							</td>
@@ -204,19 +213,22 @@
 								@endphp
 								@if(!empty($job_sheet->checklist))
 									@foreach($checklists as $check)
-			                            <div class="col-xs-4">
-			                                @if($job_sheet->checklist[$check] == 'yes')
-			                                    <i class="fas fa-check-square text-success fa-lg"></i>
-			                                @elseif($job_sheet->checklist[$check] == 'no')
-			                                  <i class="fas fa-window-close text-danger fa-lg"></i>
-			                                @elseif($job_sheet->checklist[$check] == 'not_applicable')
-			                                  <i class="fas fa-square fa-lg"></i>
-			                                @endif
-			                                {{$check}}
-			                                <br>
-			                            </div>
-			                        @endforeach
-			                    @endif
+										<div class="col-xs-4">
+											@if($job_sheet->checklist[$check] == 'yes')
+												<i
+													class="fas fa-check-square text-success fa-lg"></i>
+											@elseif($job_sheet->checklist[$check] == 'no')
+												<i
+													class="fas fa-window-close text-danger fa-lg"></i>
+											@elseif($job_sheet->checklist[$check] == 'not_applicable')
+												<i
+													class="fas fa-square fa-lg"></i>
+											@endif
+											{{$check}}
+											<br>
+										</div>
+									@endforeach
+								@endif
 							</td>
 						</tr>
 						@if($job_sheet->service_type == 'pick_up' || $job_sheet->service_type == 'on_site')
@@ -277,72 +289,77 @@
 								</td>
 							</tr>
 						@endif
-					</td>
-				</tr>
-				<tr>
-					<th colspan="2">@lang('repair::lang.parts_used'):</th>
-					<td>
-						@if(!empty($parts))
-						<table>
-							@foreach($parts as $part)
-								<tr>
-									<td>{{$part['variation_name']}}: &nbsp;</td>
-									<td>{{$part['quantity']}} {{$part['unit']}}</td>
-								</tr>
-							@endforeach
-						</table>
+						</td>
+						</tr>
+						<tr>
+							<th colspan="2">@lang('repair::lang.parts_used'):
+							</th>
+							<td>
+								@if(!empty($parts))
+									<table>
+										@foreach($parts as $part)
+											<tr>
+												<td>{{$part['variation_name']}}:
+													&nbsp;
+												</td>
+												<td>{{$part['quantity']}}
+													{{$part['unit']}}
+												</td>
+											</tr>
+										@endforeach
+									</table>
+								@endif
+							</td>
+						</tr>
+						@if(!empty($job_sheet->custom_field_2))
+							<tr>
+								<td colspan="2">
+									<b>
+										{{$repair_settings['job_sheet_custom_field_2'] ?? __('lang_v1.custom_field', ['number' => 2])}}:
+									</b>
+								</td>
+								<td>
+									{{$job_sheet->custom_field_2}}
+								</td>
+							</tr>
 						@endif
-					</td>
-				</tr>
-				@if(!empty($job_sheet->custom_field_2))
-					<tr>
-						<td colspan="2">
-							<b>
-								{{$repair_settings['job_sheet_custom_field_2'] ?? __('lang_v1.custom_field', ['number' => 2])}}:
-							</b>
-						</td>
-						<td>
-							{{$job_sheet->custom_field_2}}
-						</td>
-					</tr>
-				@endif
-				@if(!empty($job_sheet->custom_field_3))
-					<tr>
-						<td colspan="2">
-							<b>
-								{{$repair_settings['job_sheet_custom_field_3'] ?? __('lang_v1.custom_field', ['number' => 3])}}:
-							</b>
-						</td>
-						<td>
-							{{$job_sheet->custom_field_3}}
-						</td>
-					</tr>
-				@endif
-				@if(!empty($job_sheet->custom_field_4))
-					<tr>
-						<td colspan="2">
-							<b>
-								{{$repair_settings['job_sheet_custom_field_4'] ?? __('lang_v1.custom_field', ['number' => 4])}}:
-							</b>
-						</td>
-						<td>
-							{{$job_sheet->custom_field_4}}
-						</td>
-					</tr>
-				@endif
-				@if(!empty($job_sheet->custom_field_5))
-					<tr>
-						<td colspan="2">
-							<b>
-								{{$repair_settings['job_sheet_custom_field_5'] ?? __('lang_v1.custom_field', ['number' => 5])}}:
-							</b>
-						</td>
-						<td>
-							{{$job_sheet->custom_field_5}}
-						</td>
-					</tr>
-				@endif
-				<tr>
+						@if(!empty($job_sheet->custom_field_3))
+							<tr>
+								<td colspan="2">
+									<b>
+										{{$repair_settings['job_sheet_custom_field_3'] ?? __('lang_v1.custom_field', ['number' => 3])}}:
+									</b>
+								</td>
+								<td>
+									{{$job_sheet->custom_field_3}}
+								</td>
+							</tr>
+						@endif
+						@if(!empty($job_sheet->custom_field_4))
+							<tr>
+								<td colspan="2">
+									<b>
+										{{$repair_settings['job_sheet_custom_field_4'] ?? __('lang_v1.custom_field', ['number' => 4])}}:
+									</b>
+								</td>
+								<td>
+									{{$job_sheet->custom_field_4}}
+								</td>
+							</tr>
+						@endif
+						@if(!empty($job_sheet->custom_field_5))
+							<tr>
+								<td colspan="2">
+									<b>
+										{{$repair_settings['job_sheet_custom_field_5'] ?? __('lang_v1.custom_field', ['number' => 5])}}:
+									</b>
+								</td>
+								<td>
+									{{$job_sheet->custom_field_5}}
+								</td>
+							</tr>
+						@endif
+						<tr>
 							<td colspan="3">
 								<b>
 									@lang('repair::lang.problem_reported_by_customer'):
@@ -395,7 +412,7 @@
 						<h4 class="box-title">
 							@lang('repair::lang.uploaded_image_for', ['job_sheet_no' => $job_sheet->job_sheet_no])
 						</h4>
-				    </div>
+					</div>
 					<div class="box-body">
 						@includeIf('repair::job_sheet.partials.document_table_view', ['medias' => $job_sheet->media])
 					</div>
@@ -404,12 +421,12 @@
 		@endif
 		<div class="col-md-6">
 			<div class="box box-solid box-solid no-print">
-		        <div class="box-header with-border">
-		            <h3 class="box-title">{{ __('repair::lang.activities') }}:</h3>
-		        </div>
-		        <!-- /.box-header -->
-		        @include('repair::repair.partials.activities')
-		    </div>
+				<div class="box-header with-border">
+					<h3 class="box-title">{{ __('repair::lang.activities') }}:</h3>
+				</div>
+				<!-- /.box-header -->
+				@include('repair::repair.partials.activities')
+			</div>
 		</div>
 	</div>
 </section>
@@ -417,9 +434,12 @@
 @stop
 @section('css')
 <style type="text/css">
-	.table-bordered>thead>tr>th, .table-bordered>tbody>tr>th,
-	.table-bordered>tfoot>tr>th, .table-bordered>thead>tr>td,
-	.table-bordered>tbody>tr>td, .table-bordered>tfoot>tr>td {
+	.table-bordered>thead>tr>th,
+	.table-bordered>tbody>tr>th,
+	.table-bordered>tfoot>tr>th,
+	.table-bordered>thead>tr>td,
+	.table-bordered>tbody>tr>td,
+	.table-bordered>tfoot>tr>td {
 		border: 1px solid #1d1a1a;
 	}
 </style>
@@ -427,36 +447,36 @@
 @section('javascript')
 <script type="text/javascript">
 	$(document).ready(function () {
-		$('#print_jobsheet').click( function(){
+		$('#print_jobsheet').click(function () {
 			$('#job_sheet').printThis();
 		});
 		$(document).on('click', '.delete_media', function (e) {
-            e.preventDefault();
-            var url = $(this).data('href');
-            var this_btn = $(this);
-            swal({
-                title: LANG.sure,
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            }).then((confirmed) => {
-                if (confirmed) {
-                    $.ajax({
-                        method: 'GET',
-                        url: url,
-                        dataType: 'json',
-                        success: function(result) {
-                            if(result.success == true){
-			                    this_btn.closest('tr').remove();
-			                    toastr.success(result.msg);
-			                } else {
-			                    toastr.error(result.msg);
-			                }
-                        }
-                    });
-                }
-            });
-        });
+			e.preventDefault();
+			var url = $(this).data('href');
+			var this_btn = $(this);
+			swal({
+				title: LANG.sure,
+				icon: "warning",
+				buttons: true,
+				dangerMode: true,
+			}).then((confirmed) => {
+				if (confirmed) {
+					$.ajax({
+						method: 'GET',
+						url: url,
+						dataType: 'json',
+						success: function (result) {
+							if (result.success == true) {
+								this_btn.closest('tr').remove();
+								toastr.success(result.msg);
+							} else {
+								toastr.error(result.msg);
+							}
+						}
+					});
+				}
+			});
+		});
 	});
 </script>
 @stop
