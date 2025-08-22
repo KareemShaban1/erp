@@ -54,6 +54,7 @@
                     <!-- Device (Taxonomy)-->
                     <input type="hidden" name="category_type" id="category_type" value="device">
                     <div class="tab-pane taxonomy_body" id="repair_device_tab">
+                        
                     </div>
                     <!-- /Device (Taxonomy)-->
                     <div class="tab-pane" id="repair_device_models_tab">

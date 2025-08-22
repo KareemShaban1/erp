@@ -436,19 +436,17 @@ class TaxonomyController extends Controller
         return $this->respond($categories);
     }
 
-    /**
-     * get taxonomy index page
-     * through ajax
-     * @return \Illuminate\Http\Response
-     */
-    public function getTaxonomyIndexPage(Request $request)
-    {
-        if (request()->ajax()) {
-            $category_type = $request->get('category_type');
-            $module_category_data = $this->moduleUtil->getTaxonomyData($category_type);
 
-            return view('taxonomy.ajax_index')
-                ->with(compact('module_category_data', 'category_type'));
-        }
+public function getTaxonomyIndexPage(Request $request)
+{
+    $category_type = $request->get('category_type');
+    $module_category_data = $this->moduleUtil->getTaxonomyData($category_type);
+
+    if ($request->ajax()) {
+        return view('taxonomy.ajax_index', compact('module_category_data', 'category_type'));
     }
+
+    return view('taxonomy.index', compact('module_category_data', 'category_type'));
+}
+
 }
