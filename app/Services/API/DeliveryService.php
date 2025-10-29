@@ -94,10 +94,15 @@ class DeliveryService extends BaseService
                     }
 
                     // Retrieve assigned orders based on the delivery ID in DeliveryOrder
+                    // 
                     $query = Order::
                               where('order_status', 'processing')->
                               whereHas('deliveries', function ($query) use ($delivery) {
                                         $query->where('delivery_id', $delivery->id);
+                              })
+                              // ✅ Exclude orders where any order_item has no valid product
+                              ->whereHas('orderItems', function ($q) {
+                                        $q->whereHas('product'); // only include if product exists
                               })->latest();
 
 
