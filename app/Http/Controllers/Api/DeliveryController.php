@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\FirebaseClientService;
 use App\Utils\ModuleUtil;
 use App\Utils\Util;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -72,13 +73,19 @@ class DeliveryController extends Controller
         }
 
         // Execute the query
-        $orders = $query->latest()->get();
+        $perPage = (int) request()->query('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
+        $orders = $query->latest()->paginate($perPage);
 
-        if ($orders->isEmpty()) {
-            return $this->returnJSON([], 'No unassigned orders found for your location');
-        }
+        $message = count($orders->items()) === 0
+            ? 'No unassigned orders found for your location'
+            : 'Unassigned orders for your location';
 
-        return $this->returnJSON(new OrderCollection($orders), 'Unassigned orders for your location');
+        return (new OrderCollection($orders))->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => $message,
+        ]);
     }
 
     // get assigned orders 
@@ -105,9 +112,19 @@ class DeliveryController extends Controller
         }
 
         // Execute the query
-        $assignedOrders = $query->latest()->get();
+        $perPage = (int) request()->query('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
+        $assignedOrders = $query->latest()->paginate($perPage);
 
-        return $this->returnJSON(new OrderCollection($assignedOrders), 'Assigned orders found for you');
+        $message = count($assignedOrders->items()) === 0
+            ? 'No assigned orders found for you'
+            : 'Assigned orders found for you';
+
+        return (new OrderCollection($assignedOrders))->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => $message,
+        ]);
 
     }
 
@@ -132,14 +149,19 @@ class DeliveryController extends Controller
             $assignedOrders->where('order_status', $status);
         }
 
-        $assignedOrders = $assignedOrders->latest()->get();
+        $perPage = (int) request()->query('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
+        $assignedOrders = $assignedOrders->latest()->paginate($perPage);
 
+        $message = count($assignedOrders->items()) === 0
+            ? 'No assigned orders found for you'
+            : 'All orders found for you';
 
-        if ($assignedOrders->isEmpty()) {
-            return $this->returnJSON([], 'No assigned orders found for you');
-        }
-
-        return $this->returnJSON(new OrderCollection($assignedOrders), 'All orders found for you');
+        return (new OrderCollection($assignedOrders))->additional([
+            'code' => 200,
+            'status' => 'success',
+            'message' => $message,
+        ]);
 
     }
 
@@ -405,7 +427,7 @@ class DeliveryController extends Controller
             ], 400);
         }
 
-        $transaction_date = \Carbon::parse($payroll->transaction_date);
+        $transaction_date = Carbon::parse($payroll->transaction_date);
 
         $department = Category::where('category_type', 'hrm_department')
             ->find($payroll->transaction_for->essentials_department_id);
@@ -421,8 +443,8 @@ class DeliveryController extends Controller
         $payment_types = $this->moduleUtil->payment_types();
         $final_total_in_words = $this->commonUtil->numToIndianFormat($payroll->final_total);
 
-        $start_of_month = \Carbon::parse($payroll->transaction_date);
-        $end_of_month = \Carbon::parse($payroll->transaction_date)->endOfMonth();
+        $start_of_month = Carbon::parse($payroll->transaction_date);
+        $end_of_month = Carbon::parse($payroll->transaction_date)->endOfMonth();
 
         $leaves = EssentialsLeave::where('business_id', $business_id)
             ->where('user_id', $payroll->transaction_for->id)
@@ -433,8 +455,8 @@ class DeliveryController extends Controller
         $total_leaves = 0;
         $days_in_a_month = $start_of_month->daysInMonth;
         foreach ($leaves as $leave) {
-            $start_date = \Carbon::parse($leave->start_date);
-            $end_date = \Carbon::parse($leave->end_date);
+            $start_date = Carbon::parse($leave->start_date);
+            $end_date = Carbon::parse($leave->end_date);
             $total_leaves += $start_date->diffInDays($end_date) + 1;
         }
 
