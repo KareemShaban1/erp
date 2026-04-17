@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 class ForgotPasswordController extends Controller
@@ -58,16 +59,38 @@ class ForgotPasswordController extends Controller
 
         ]);
 
+        try {
+            Mail::send('auth.email.forget-password', ['token' => $token], function ($message) use ($request) {
 
-        Mail::send('auth.email.forget-password', ['token' => $token], function ($message) use ($request) {
+                $message->to($request->email);
 
-            $message->to($request->email);
+                $message->subject('Reset Password');
 
-            $message->subject('Reset Password');
+            });
+        } catch (\Throwable $e) {
+            Log::error('Client password reset: mail send failed', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'mail_driver' => config('mail.driver'),
+                'mail_host' => config('mail.host'),
+                'mail_port' => config('mail.port'),
+                'mail_encryption' => config('mail.encryption'),
+                'mail_from_address' => config('mail.from.address'),
+                'recipient_email' => $request->email,
+            ]);
 
-        });
+            DB::table('password_resets')
+                ->where('email', $request->email)
+                ->where('token', $token)
+                ->delete();
 
-
+            return back()
+                ->withInput()
+                ->with('error', 'Unable to send the reset email. Please try again later or contact support.');
+        }
 
         return back()->with('message', 'We have e-mailed your password reset link!');
 

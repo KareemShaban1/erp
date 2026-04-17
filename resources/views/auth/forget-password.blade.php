@@ -80,6 +80,12 @@
             border: 1px solid #c3e6cb;
         }
 
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
         .reset-password-form {
             width: 100%;
             max-width: 400px;
@@ -144,6 +150,12 @@
                             @if (Session::has('message'))
                                 <div class="alert alert-success" role="alert">
                                     {{ Session::get('message') }}
+                                </div>
+                            @endif
+
+                            @if (Session::has('error'))
+                                <div class="alert alert-danger" role="alert">
+                                    {{ Session::get('error') }}
                                 </div>
                             @endif
 
