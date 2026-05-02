@@ -54,4 +54,10 @@ class Banner extends Model
         return $query->where('active', 1);
     }
 
+	// get the category associated with the banner
+	public function category()
+	{
+		return $this->belongsTo(Category::class, 'module_id');
+	}
+
 }
