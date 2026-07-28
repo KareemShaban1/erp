@@ -483,17 +483,17 @@ class OrderRefundController extends Controller
 
                 if ($input['admin_response']) {
                     // Send and store push notification
-                    app(FirebaseClientService::class)->sendAndStoreNotification(
-                        $order->client->id,
-                        $order->client->fcm_token,
-                        'Order Cancellation Admin Response',
-                        'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
-                        [
-                            'order_id' => $order->id,
-                            'order_refund_id' => $orderRefund->id,
-                            'admin_response' => $input['admin_response']
-                        ]
-                    );
+                    // app(FirebaseClientService::class)->sendAndStoreNotification(
+                    //     $order->client->id,
+                    //     $order->client->fcm_token,
+                    //     'Order Cancellation Admin Response',
+                    //     'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
+                    //     [
+                    //         'order_id' => $order->id,
+                    //         'order_refund_id' => $orderRefund->id,
+                    //         'admin_response' => $input['admin_response']
+                    //     ]
+                    // );
                 }
 
 
