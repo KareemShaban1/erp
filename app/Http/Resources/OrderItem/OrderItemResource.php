@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\OrderItem;
 
-use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\OrderItemProductResource;
 use App\Http\Resources\Variation\VariationResource;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class OrderItemResource extends JsonResource
                 return [
                     'product_id'=>$this->product_id,
                     // 'product'=>$this->product,
-                    'product' => (new ProductResource($this->product))->withFullData(true),
+                    'product' => (new OrderItemProductResource($this->product))->withFullData(true),
                     'variation' => (new VariationResource($this->variation))->withFullData(true),
                     'quantity'=>$this->quantity,
                     'price'=>$this->price,

@@ -3,41 +3,20 @@
 namespace App\Http\Resources\Product;
 
 use App\Http\Resources\Brand\BrandResource;
-use App\Http\Resources\Category\CategoryResource;
 use App\Http\Resources\Media\MediaCollection;
-use App\Http\Resources\Unit\UnitResource;
 use App\Http\Resources\Variation\VariationCollection;
-use App\Http\Resources\Variation\VariationResource;
-use App\Http\Resources\VariationLocationDetails\VariationLocationDetailsCollection;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductResource extends JsonResource
+class OrderItemProductResource extends JsonResource
 {
     protected bool $withFullData = true;
-    protected ?int $variationId = null;
 
-    /**
-     * Set whether to return full data or not.
-     */
     public function withFullData(bool $withFullData): self
     {
         $this->withFullData = $withFullData;
         return $this;
     }
 
-    /**
-     * Set variation ID to filter variations.
-     */
-    public function setVariationId(?int $variationId): self
-    {
-        $this->variationId = $variationId;
-        return $this;
-    }
-
-    /**
-     * Transform the resource into an array.
-     */
     public function toArray($request): array
     {
         $data = [
@@ -53,13 +32,7 @@ class ProductResource extends JsonResource
                 return $variation;
             });
 
-            // Filter only the requested variation if `$variationId` is provided
-            if ($this->variationId) {
-                $variations = $variations->where('id', $this->variationId)->values();
-            }
-
-             // Sort variations by total stock in descending order
-             $variations = $variations->sortByDesc(function ($variation) {
+            $variations = $variations->sortByDesc(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
 
@@ -67,14 +40,6 @@ class ProductResource extends JsonResource
                 return $variation->variation_location_details->sum('qty_available');
             });
 
-          //   if ($current_stock < -1) {
-                
-          //       return [];
-          //   }
-
-            if ($current_stock <= 0) {
-                return [];
-            }
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'active_in_app' => $this->active_in_app,
