@@ -269,16 +269,16 @@ class TransferOrderController extends Controller
                 $order->user_id = Auth::user()->id;
                 $orderTracking->processing_at = now();
                 // Send and store push notification
-          //       app(FirebaseClientService::class)->sendAndStoreNotification(
-          //           $order->client->id,
-          //           $order->client->fcm_token,
-          //           'Order Status Changed',
-          //           'Your order has been processed successfully (Order ID: #' . $order->id . ').',
-          //           [
-          //               'order_id' => $order->id,
-          //               'status' => $order->status
-          //           ]
-          //       );
+                app(FirebaseClientService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been processed successfully (Order ID: #' . $order->id . ').',
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
+                );
                 $this->moduleUtil->activityLog(
                     $order,
                     'change_status',
@@ -289,16 +289,16 @@ class TransferOrderController extends Controller
             case 'shipped':
                 $this->updateDeliveryBalance($order, $delivery);
                 // Send and store push notification
-          //       app(FirebaseClientService::class)->sendAndStoreNotification(
-          //           $order->client->id,
-          //           $order->client->fcm_token,
-          //           'Order Status Changed',
-          //           'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
-          //           [
-          //               'order_id' => $order->id,
-          //               'status' => $order->status
-          //           ]
-          //       );
+                app(FirebaseClientService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
+                );
                 $orderTracking->shipped_at = now();
                 $this->moduleUtil->activityLog(
                     $order,
@@ -319,16 +319,16 @@ class TransferOrderController extends Controller
             case 'completed':
                 $orderTracking->completed_at = now();
                 // Send and store push notification
-          //       app(FirebaseClientService::class)->sendAndStoreNotification(
-          //           $order->client->id,
-          //           $order->client->fcm_token,
-          //           'Order Status Changed',
-          //           'Your order has been completed successfully (Order ID: #' . $order->id . ').',
-          //           [
-          //               'order_id' => $order->id,
-          //               'status' => $order->status
-          //           ]
-          //       );
+                app(FirebaseClientService::class)->sendAndStoreNotification(
+                    $order->client->id,
+                    $order->client->fcm_token,
+                    'Order Status Changed',
+                    'Your order has been completed successfully (Order ID: #' . $order->id . ').',
+                    [
+                        'order_id' => $order->id,
+                        'status' => $order->status
+                    ]
+                );
                 $this->moduleUtil->activityLog(
                     $order,
                     'change_status',

@@ -250,13 +250,13 @@ class DeliveryService extends BaseService
                                         $this->updateDeliveryBalance($order, $delivery);
 
                                         // Send and store push notification
-                                        // app(FirebaseClientService::class)->sendAndStoreNotification(
-                                        //           $client->id,
-                                        //           $client->fcm_token,
-                                        //           'Order Status Updated',
-                                        //           'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
-                                        //           ['order_id' => $order->id, 'status' => $status]
-                                        // );
+                                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                                                  $client->id,
+                                                  $client->fcm_token,
+                                                  'Order Status Updated',
+                                                  'Your order has been shipped successfully (Order ID: #' . $order->id . ').',
+                                                  ['order_id' => $order->id, 'status' => $status]
+                                        );
 
                                         $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'shipped']);
 
@@ -275,13 +275,13 @@ class DeliveryService extends BaseService
                                         $delivery->save();
 
                                         // Send and store push notification
-                                        // app(FirebaseClientService::class)->sendAndStoreNotification(
-                                        //           $client->id,
-                                        //           $client->fcm_token,
-                                        //           'Order Status Updated',
-                                        //           'Your order has been completed successfully (Order ID: #' . $order->id . ').',
-                                        //           ['order_id' => $order->id, 'status' => $status]
-                                        // );
+                                        app(FirebaseClientService::class)->sendAndStoreNotification(
+                                                  $client->id,
+                                                  $client->fcm_token,
+                                                  'Order Status Updated',
+                                                  'Your order has been completed successfully (Order ID: #' . $order->id . ').',
+                                                  ['order_id' => $order->id, 'status' => $status]
+                                        );
 
                                         $this->moduleUtil->activityLog($order, 'change_status', null, ['order_number' => $order->number, 'status' => 'completed']);
 
