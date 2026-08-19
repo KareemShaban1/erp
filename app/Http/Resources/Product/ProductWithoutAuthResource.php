@@ -50,7 +50,9 @@ class ProductWithoutAuthResource extends JsonResource
             $variations = $this->variations->map(function ($variation) {
                 $variation->makeHidden(['total_qty_available','client_selling_group', 'client_selling_price']);
                 $variation->variation_location_details = $variation->variation_location_details->filter(function ($details) {
-                    return $details->location->is_active == 1;
+                    return $details->location
+                        && $details->location->is_active == 1
+                        && $details->location->active_in_app == 1;
                 });
                 return $variation;
             });
@@ -68,10 +70,6 @@ class ProductWithoutAuthResource extends JsonResource
             $current_stock = $variations->sum(function ($variation) {
                 return $variation->variation_location_details->sum('qty_available');
             });
-
-            if ($current_stock < -1) {
-                return [];
-            }
 
             $data = array_merge($data, [
                 'description' => $this->product_description,

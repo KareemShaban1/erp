@@ -32,6 +32,7 @@ class ProductService extends BaseService
             // Initialize the query with necessary relationships
             $query = Product::with([
                 'media',
+                'variations.variation_location_details.location',
                 'unit:id,actual_name,short_name',
                 'brand:id,name',
                 'category:id,name',
@@ -43,7 +44,7 @@ class ProductService extends BaseService
                 ->productForSales()
                 ->activeInApp();
 
-            $this->applyProductListFilters($query, $request);
+            $this->applyProductListFilters($query, $request, $request->full_data !== 'false');
 
             $searchCategories = null;
             if ($request->filled('search')) {
@@ -108,7 +109,7 @@ class ProductService extends BaseService
     /**
      * Apply shared list filters: category, search, in_stock, sorting.
      */
-    private function applyProductListFilters(Builder $query, Request $request): void
+    private function applyProductListFilters(Builder $query, Request $request, bool $defaultInStock = false): void
     {
         if (!empty($request->category_id)) {
             $query->where('category_id', $request->category_id);
@@ -127,6 +128,8 @@ class ProductService extends BaseService
             } elseif ($inStock === false) {
                 $this->applyInStockFilter($query, false);
             }
+        } elseif ($defaultInStock) {
+            $this->applyInStockFilter($query, true);
         }
 
         if ($request->filled('search')) {
@@ -265,6 +268,7 @@ class ProductService extends BaseService
         try {
             $query = Product::with([
                 'media',
+                'variations.variation_location_details.location',
                 'unit:id,actual_name,short_name',
                 'brand:id,name',
                 'category:id,name',
@@ -275,7 +279,7 @@ class ProductService extends BaseService
                 ->productForSales()
                 ->activeInApp();
 
-            $this->applyProductListFilters($query, $request);
+            $this->applyProductListFilters($query, $request, $request->full_data !== 'false');
 
             $searchCategories = null;
             if ($request->filled('search')) {

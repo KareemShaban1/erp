@@ -48,7 +48,9 @@ class ProductResource extends JsonResource
         if ($this->withFullData) {
             $variations = $this->variations->map(function ($variation) {
                 $variation->variation_location_details = $variation->variation_location_details->filter(function ($details) {
-                    return $details->location->is_active == 1;
+                    return $details->location
+                        && $details->location->is_active == 1
+                        && $details->location->active_in_app == 1;
                 });
                 return $variation;
             });
@@ -67,14 +69,6 @@ class ProductResource extends JsonResource
                 return $variation->variation_location_details->sum('qty_available');
             });
 
-          //   if ($current_stock < -1) {
-                
-          //       return [];
-          //   }
-
-            if ($current_stock <= 0) {
-                return [];
-            }
             $data = array_merge($data, [
                 'description' => $this->product_description,
                 'active_in_app' => $this->active_in_app,
