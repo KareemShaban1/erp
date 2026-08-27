@@ -59,7 +59,8 @@
     },
     "autoload": {
         "files": [
-            "app/Http/helpers.php"
+            "app/Http/helpers.php",
+            "app/Support/guzzle_psr7_polyfill.php"
         ],
         "classmap": [
             "database"
