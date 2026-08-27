@@ -83,8 +83,8 @@ class CancellationTransferQuantityService extends BaseService {
 
             $variation = Variation::
             where('id', $orderItem->variation_id)
-            ->where('product_id', $orderItem->product_id);
-
+            ->where('product_id', $orderItem->product_id)
+            ->first();
 
             $products = [
                 [
