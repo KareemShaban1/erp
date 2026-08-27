@@ -1,5 +1,9 @@
 <?php
 
+// Polyfill for guzzlehttp/psr7 2.x (needed by older kreait/firebase-php).
+// Loaded via helpers so it works even if composer dump-autoload --no-scripts was used.
+require_once __DIR__ . '/../Support/guzzle_psr7_polyfill.php';
+
 /**
  * boots pos.
  */
