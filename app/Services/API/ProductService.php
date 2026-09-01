@@ -44,7 +44,7 @@ class ProductService extends BaseService
                 ->productForSales()
                 ->activeInApp();
 
-            $this->applyProductListFilters($query, $request, $request->full_data !== 'false');
+            $this->applyProductListFilters($query, $request);
 
             $searchCategories = null;
             if ($request->filled('search')) {
@@ -109,7 +109,7 @@ class ProductService extends BaseService
     /**
      * Apply shared list filters: category, search, in_stock, sorting.
      */
-    private function applyProductListFilters(Builder $query, Request $request, bool $defaultInStock = false): void
+    private function applyProductListFilters(Builder $query, Request $request): void
     {
         if (!empty($request->category_id)) {
             $query->where('category_id', $request->category_id);
@@ -128,8 +128,6 @@ class ProductService extends BaseService
             } elseif ($inStock === false) {
                 $this->applyInStockFilter($query, false);
             }
-        } elseif ($defaultInStock) {
-            $this->applyInStockFilter($query, true);
         }
 
         if ($request->filled('search')) {
@@ -279,7 +277,7 @@ class ProductService extends BaseService
                 ->productForSales()
                 ->activeInApp();
 
-            $this->applyProductListFilters($query, $request, $request->full_data !== 'false');
+            $this->applyProductListFilters($query, $request);
 
             $searchCategories = null;
             if ($request->filled('search')) {
